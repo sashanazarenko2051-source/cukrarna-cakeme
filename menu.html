@@ -101,6 +101,32 @@ footer{background:#070707;border-top:1px solid var(--bdr);padding:52px 0 28px}
 .ig-link{display:flex;align-items:center;gap:8px;color:var(--tx2);text-decoration:none;font-size:.8rem;transition:.25s}
 .ig-link:hover{color:var(--gold)}
 
+/* ── CART ── */
+.cart-btn{position:relative;background:none;border:1px solid var(--bdr);color:var(--tx2);width:42px;height:42px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:.25s;flex-shrink:0}
+.cart-btn:hover{border-color:var(--gold);color:var(--gold)}
+.cart-badge{position:absolute;top:-7px;right:-7px;background:var(--gold);color:var(--bg0);font:.58rem 'Raleway',sans-serif;font-weight:700;min-width:18px;height:18px;border-radius:9px;display:none;align-items:center;justify-content:center;padding:0 4px}
+.cart-panel{position:fixed;bottom:0;right:0;width:360px;max-width:100vw;background:var(--bg2);border-top:1px solid var(--bdr);border-left:1px solid var(--bdr);z-index:2000;transform:translateY(100%);transition:transform .3s;max-height:80vh;display:flex;flex-direction:column}
+.cart-panel.open{transform:translateY(0)}
+.cart-ph{padding:18px 22px;border-bottom:1px solid var(--bdr);display:flex;justify-content:space-between;align-items:center}
+.cart-ph h3{font-family:'Playfair Display',serif;font-size:1.05rem;color:var(--tx0)}
+.cart-close{background:none;border:none;color:var(--tx2);cursor:pointer;font-size:1.3rem;line-height:1;padding:4px}
+.cart-items{overflow-y:auto;flex:1;padding:10px 22px}
+.cart-empty{text-align:center;color:var(--tx2);font-size:.83rem;padding:22px 0}
+.cart-item{display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--bdr)}
+.cart-item:last-child{border-bottom:none}
+.ci-name{flex:1;font-size:.82rem;color:var(--tx0);line-height:1.3}
+.ci-qty{display:flex;align-items:center;gap:5px}
+.ci-qty button{width:24px;height:24px;border:1px solid var(--bdr);background:var(--bg3);color:var(--tx0);cursor:pointer;font-size:.95rem;display:flex;align-items:center;justify-content:center;transition:.2s}
+.ci-qty button:hover{border-color:var(--gold);color:var(--gold)}
+.ci-qty span{font-size:.82rem;min-width:18px;text-align:center}
+.ci-price{font-size:.82rem;color:var(--gold);min-width:54px;text-align:right}
+.cart-footer{padding:14px 22px;border-top:1px solid var(--bdr)}
+.cart-total-row{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}
+.cart-total-row span{font-size:.82rem;color:var(--tx2)}
+.cart-total-row strong{font-family:'Playfair Display',serif;font-size:1.1rem;color:var(--gold)}
+.cart-order-btn{display:block;width:100%;padding:13px;background:var(--gold);color:var(--bg0);border:none;cursor:pointer;font:.76rem 'Raleway',sans-serif;letter-spacing:2px;text-transform:uppercase;font-weight:700;text-align:center;text-decoration:none;transition:.3s}
+.cart-order-btn:hover{background:var(--gold-l)}
+
 /* ── RESPONSIVE ── */
 @media(max-width:1024px){
   .ft-grid{grid-template-columns:1fr 1fr}
@@ -143,6 +169,10 @@ footer{background:#070707;border-top:1px solid var(--bdr);padding:52px 0 28px}
         <button class="lang-btn" data-l="uk" translate="no"><span class="flag">🇺🇦</span><span class="lname">Укр</span></button>
         <button class="lang-btn" data-l="en" translate="no"><span class="flag">🇬🇧</span><span class="lname">EN</span></button>
       </div>
+      <button class="cart-btn" id="cartBtn" title="Košík">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 01-8 0"/></svg>
+        <span class="cart-badge" id="cartBadge">0</span>
+      </button>
       <button class="burger" id="burgerBtn" aria-label="Menu">
         <span></span><span></span><span></span>
       </button>
@@ -182,6 +212,22 @@ footer{background:#070707;border-top:1px solid var(--bdr);padding:52px 0 28px}
     <div class="m-grid" id="mGrid"></div>
   </div>
 </section>
+
+<!-- CART PANEL -->
+<div class="cart-panel" id="cartPanel">
+  <div class="cart-ph">
+    <h3 data-k="cart_ttl">Košík</h3>
+    <button class="cart-close" id="cartClose">✕</button>
+  </div>
+  <div class="cart-items" id="cartItems"></div>
+  <div class="cart-footer" id="cartFooter" style="display:none">
+    <div class="cart-total-row">
+      <span data-k="cart_total">Celkem</span>
+      <strong id="cartTotalVal">0 Kč</strong>
+    </div>
+    <a href="delivery.html" class="cart-order-btn" data-k="cart_go">Objednat s doručením</a>
+  </div>
+</div>
 
 <!-- FOOTER -->
 <footer>
@@ -245,9 +291,9 @@ footer{background:#070707;border-top:1px solid var(--bdr);padding:52px 0 28px}
 
 <script>
 const T={
-cs:{nav_home:'Domů',nav_menu:'Menu',nav_about:'O nás',nav_del:'Doručení',nav_con:'Kontakt',tagline:'Oslavte každý den',menu_lbl:'Naše nabídka',menu_ttl:'Menu',t_all:'Vše',t_cakes:'Dorty',t_des:'Dezerty',t_drk:'Nápoje',ord:'Objednat',ft_nav:'Navigace',ft_con:'Kontakt',rights:'Všechna práva vyhrazena.'},
-uk:{nav_home:'Головна',nav_menu:'Меню',nav_about:'Про нас',nav_del:'Доставка',nav_con:'Контакт',tagline:'Святкуйте кожен день',menu_lbl:'Наша пропозиція',menu_ttl:'Меню',t_all:'Все',t_cakes:'Торти',t_des:'Десерти',t_drk:'Напої',ord:'Замовити',ft_nav:'Навігація',ft_con:'Контакт',rights:'Всі права захищені.'},
-en:{nav_home:'Home',nav_menu:'Menu',nav_about:'About',nav_del:'Delivery',nav_con:'Contact',tagline:'Celebrate Every Day',menu_lbl:'Our Offerings',menu_ttl:'Menu',t_all:'All',t_cakes:'Cakes',t_des:'Desserts',t_drk:'Drinks',ord:'Order',ft_nav:'Navigation',ft_con:'Contact',rights:'All rights reserved.'}
+cs:{nav_home:'Domů',nav_menu:'Menu',nav_about:'O nás',nav_del:'Doručení',nav_con:'Kontakt',tagline:'Oslavte každý den',menu_lbl:'Naše nabídka',menu_ttl:'Menu',t_all:'Vše',t_cakes:'Dorty',t_des:'Dezerty',t_drk:'Nápoje',cart_add:'Do košíku',cart_ttl:'Košík',cart_empty:'Košík je prázdný',cart_total:'Celkem',cart_go:'Objednat s doručením',ft_nav:'Navigace',ft_con:'Kontakt',rights:'Všechna práva vyhrazena.'},
+uk:{nav_home:'Головна',nav_menu:'Меню',nav_about:'Про нас',nav_del:'Доставка',nav_con:'Контакт',tagline:'Святкуйте кожен день',menu_lbl:'Наша пропозиція',menu_ttl:'Меню',t_all:'Все',t_cakes:'Торти',t_des:'Десерти',t_drk:'Напої',cart_add:'До кошика',cart_ttl:'Кошик',cart_empty:'Кошик порожній',cart_total:'Разом',cart_go:'Замовити з доставкою',ft_nav:'Навігація',ft_con:'Контакт',rights:'Всі права захищені.'},
+en:{nav_home:'Home',nav_menu:'Menu',nav_about:'About',nav_del:'Delivery',nav_con:'Contact',tagline:'Celebrate Every Day',menu_lbl:'Our Offerings',menu_ttl:'Menu',t_all:'All',t_cakes:'Cakes',t_des:'Desserts',t_drk:'Drinks',cart_add:'Add to Cart',cart_ttl:'Cart',cart_empty:'Your cart is empty',cart_total:'Total',cart_go:'Order with Delivery',ft_nav:'Navigation',ft_con:'Contact',rights:'All rights reserved.'}
 };
 
 const ITEMS=[
@@ -372,6 +418,7 @@ function applyLang(){
     const val=t(el.dataset.k); if(val) el.textContent=val;
   });
   renderMenu();
+  updateCartUI();
   setTimeout(()=>{
     document.querySelectorAll('[data-k]').forEach(el=>{
       const val=t(el.dataset.k); if(val) el.textContent=val;
@@ -379,9 +426,67 @@ function applyLang(){
   },100);
 }
 
+function getCart(){return JSON.parse(localStorage.getItem('cakeme_cart')||'[]');}
+function saveCart(c){localStorage.setItem('cakeme_cart',JSON.stringify(c));}
+
+function addToCart(gi){
+  const item=ITEMS[gi];
+  const price=parseInt(item.price);
+  let cart=getCart();
+  const found=cart.find(c=>c.id===gi);
+  if(found) found.qty++;
+  else cart.push({id:gi,names:item.name,price,qty:1});
+  saveCart(cart);
+  updateCartUI();
+  document.getElementById('cartPanel').classList.add('open');
+}
+
+function changeQty(id,delta){
+  let cart=getCart();
+  const it=cart.find(c=>c.id===id);
+  if(!it) return;
+  it.qty+=delta;
+  if(it.qty<=0) cart=cart.filter(c=>c.id!==id);
+  saveCart(cart);
+  updateCartUI();
+}
+
+function renderCartPanel(){
+  const cart=getCart();
+  const itemsEl=document.getElementById('cartItems');
+  const footer=document.getElementById('cartFooter');
+  if(!itemsEl) return;
+  if(cart.length===0){
+    itemsEl.innerHTML=`<p class="cart-empty">${t('cart_empty')}</p>`;
+    if(footer) footer.style.display='none';
+    return;
+  }
+  const total=cart.reduce((s,c)=>s+c.price*c.qty,0);
+  itemsEl.innerHTML=cart.map(c=>`<div class="cart-item">
+    <span class="ci-name">${c.names[lang]||c.names.cs}</span>
+    <div class="ci-qty">
+      <button onclick="changeQty(${c.id},-1)">−</button>
+      <span>${c.qty}</span>
+      <button onclick="changeQty(${c.id},1)">+</button>
+    </div>
+    <span class="ci-price">${c.price*c.qty} Kč</span>
+  </div>`).join('');
+  document.getElementById('cartTotalVal').textContent=total+' Kč';
+  if(footer) footer.style.display='block';
+}
+
+function updateCartUI(){
+  const cart=getCart();
+  const count=cart.reduce((s,c)=>s+c.qty,0);
+  const badge=document.getElementById('cartBadge');
+  if(badge){badge.textContent=count;badge.style.display=count?'flex':'none';}
+  renderCartPanel();
+}
+
 function renderMenu(){
   const list=tab==='all'?ITEMS:ITEMS.filter(i=>i.cat===tab);
-  document.getElementById('mGrid').innerHTML=list.map((item,idx)=>{
+  document.getElementById('mGrid').innerHTML=list.map((item)=>{
+    const gi=ITEMS.indexOf(item);
     const name=item.name[lang]||item.name.cs;
     const desc=item.desc[lang]||item.desc.cs;
     return `<div class="m-card fi">
@@ -394,7 +499,7 @@ function renderMenu(){
         <p class="m-desc">${desc}</p>
         <div class="m-ft">
           <span class="m-price">${item.price}</span>
-          <button class="btn-ord" onclick="doOrder(${idx})">${t('ord')}</button>
+          <button class="btn-ord" onclick="addToCart(${gi})">${t('cart_add')}</button>
         </div>
       </div>
     </div>`;
@@ -403,13 +508,6 @@ function renderMenu(){
     document.querySelectorAll('.m-card').forEach(c=>c.classList.add('show'));
     initFI();
   },80);
-}
-
-function doOrder(idx){
-  const list=tab==='all'?ITEMS:ITEMS.filter(i=>i.cat===tab);
-  const name=list[idx].name[lang]||list[idx].name.cs;
-  const m={cs:`Zájem o: ${name}. Zavolejte +420 776 308 352`,uk:`Зацікавлені: ${name}. Тел. +420 776 308 352`,en:`Interested in: ${name}. Call +420 776 308 352`};
-  alert(m[lang]);
 }
 
 function initLangBtns(){
@@ -460,6 +558,8 @@ function initFI(){
   });
 })();
 
+document.getElementById('cartBtn').addEventListener('click',()=>{document.getElementById('cartPanel').classList.toggle('open');});
+document.getElementById('cartClose').addEventListener('click',()=>{document.getElementById('cartPanel').classList.remove('open');});
 initLangBtns();
 applyLang();
 initFI();
