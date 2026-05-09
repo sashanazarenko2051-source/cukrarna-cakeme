@@ -5,9 +5,9 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="google" content="notranslate">
 <meta http-equiv="Content-Language" content="cs">
-<title>Cukrárna CakeMe | Oslavte každý den</title>
+<title>Kontakt | Cukrárna CakeMe</title>
 <link rel="icon" type="image/svg+xml" href="favicon.svg">
-<meta name="description" content="CakeMe — prémiová cukrárna a kavárna v Praze 10. Dorty, dezerty, káva. Rozvoz domů.">
+<meta name="description" content="Kontakt Cukrárny CakeMe — adresa, telefon, mapa. Kodanská 649/20, Praha 10.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&family=Raleway:wght@300;400;500;600;700&display=swap" rel="stylesheet">
@@ -23,8 +23,8 @@ html{scroll-behavior:smooth}
 body{font-family:'Raleway',sans-serif;background:var(--bg0);color:var(--tx0);line-height:1.6;overflow-x:hidden}
 
 /* ── NAV ── */
-.nav{position:fixed;top:0;width:100%;z-index:1000;padding:18px 0;transition:.3s}
-.nav.solid{background:rgba(10,10,10,.97);backdrop-filter:blur(12px);border-bottom:1px solid var(--bdr);padding:12px 0}
+.nav{position:fixed;top:0;width:100%;z-index:1000;padding:18px 0;transition:.3s;background:rgba(10,10,10,.97);backdrop-filter:blur(12px);border-bottom:1px solid var(--bdr)}
+.nav.solid{padding:12px 0}
 .nav-in{max-width:1240px;margin:0 auto;padding:0 32px;display:flex;align-items:center;justify-content:space-between}
 .nav-logo{display:flex;align-items:center;gap:12px;text-decoration:none}
 .nav-logo svg{width:36px;height:36px}
@@ -52,38 +52,6 @@ body{font-family:'Raleway',sans-serif;background:var(--bg0);color:var(--tx0);lin
 .mob-menu a:hover,.mob-menu a.active{color:var(--gold)}
 .mob-close{position:absolute;top:22px;right:28px;font-size:2rem;color:var(--gold);background:none;border:none;cursor:pointer;line-height:1}
 
-/* ── HERO ── */
-#hero{height:100vh;display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden;background:var(--bg0)}
-.hero-glow{position:absolute;inset:0;background:radial-gradient(ellipse 80% 60% at 50% 50%,rgba(201,169,110,.06) 0%,transparent 70%)}
-.hero-grid{position:absolute;inset:0;background-image:linear-gradient(rgba(201,169,110,.025) 1px,transparent 1px),linear-gradient(90deg,rgba(201,169,110,.025) 1px,transparent 1px);background-size:55px 55px}
-.hero-body{position:relative;z-index:1;text-align:center;padding:0 20px}
-
-/* Logo block */
-.logo-block{display:inline-block;padding:36px 52px;border:1px solid rgba(201,169,110,.25);position:relative;margin-bottom:32px}
-.logo-block::before,.logo-block::after{content:'';position:absolute;width:10px;height:10px;border-color:var(--gold);border-style:solid}
-.logo-block::before{top:-1px;left:-1px;border-width:2px 0 0 2px}
-.logo-block::after{bottom:-1px;right:-1px;border-width:0 2px 2px 0}
-.logo-crown-row{display:flex;align-items:center;justify-content:center;gap:14px;margin-bottom:6px}
-.logo-crown-row::before,.logo-crown-row::after{content:'';flex:1;height:1px;background:linear-gradient(to right,transparent,rgba(201,169,110,.6),transparent)}
-.logo-crown-svg{flex-shrink:0}
-.logo-name{font-family:'Playfair Display',serif;font-size:clamp(1.8rem,4.5vw,3.6rem);font-weight:400;letter-spacing:clamp(2px,1vw,6px);color:var(--tx0);line-height:1.15;text-transform:none}
-.logo-pre{font-family:'Raleway',sans-serif;font-size:.75rem;letter-spacing:5px;color:var(--gold);text-transform:uppercase;margin-bottom:8px;font-weight:400;opacity:.85}
-.logo-tagline{font-size:.78rem;letter-spacing:6px;color:var(--gold);text-transform:uppercase;margin-top:12px;font-weight:400}
-
-.hero-sub{font-size:.9rem;color:var(--tx1);letter-spacing:2px;margin-bottom:36px;font-weight:300;text-align:center;width:100%}
-.hero-btns{display:flex;gap:16px;justify-content:center;flex-wrap:wrap}
-.btn-g{background:var(--gold);color:var(--bg0);padding:14px 36px;border:none;font:.8rem 'Raleway',sans-serif;letter-spacing:2px;text-transform:uppercase;font-weight:700;cursor:pointer;text-decoration:none;transition:.3s;display:inline-block}
-.btn-g:hover{background:var(--gold-l);transform:translateY(-2px)}
-.btn-o{background:transparent;color:var(--gold);padding:14px 36px;border:1px solid var(--gold);font:.8rem 'Raleway',sans-serif;letter-spacing:2px;text-transform:uppercase;font-weight:600;cursor:pointer;text-decoration:none;transition:.3s;display:inline-block}
-.btn-o:hover{background:rgba(201,169,110,.1);transform:translateY(-2px)}
-.scroll-hint{position:absolute;bottom:28px;left:50%;transform:translateX(-50%);display:flex;flex-direction:column;align-items:center;gap:8px;color:var(--tx2);font-size:.65rem;letter-spacing:2px;text-transform:uppercase}
-.scroll-line{width:1px;height:38px;background:linear-gradient(to bottom,var(--gold),transparent);animation:pulse 2s infinite}
-@keyframes pulse{0%,100%{opacity:1}50%{opacity:.25}}
-
-/* ── HOURS BAND ── */
-.hours-band{background:var(--gold);padding:18px;text-align:center}
-.hours-band p{color:var(--bg0);font-size:.82rem;letter-spacing:2px;text-transform:uppercase;font-weight:700}
-
 /* ── SHARED ── */
 section{padding:96px 0}
 .wrap{max-width:1240px;margin:0 auto;padding:0 32px}
@@ -93,6 +61,21 @@ section{padding:96px 0}
 .sec-div{width:56px;height:1px;background:var(--gold);margin:0 auto}
 .fi{opacity:0;transform:translateY(28px);transition:opacity .65s,transform .65s}
 .fi.show{opacity:1;transform:translateY(0)}
+
+/* ── CONTACT ── */
+#contact{background:var(--bg0)}
+.ct-grid{display:grid;grid-template-columns:1fr 1.6fr;gap:56px}
+.ct-info h3{font-family:'Playfair Display',serif;font-size:1.45rem;color:var(--tx0);margin-bottom:28px}
+.ct-item{display:flex;gap:18px;margin-bottom:28px;align-items:flex-start}
+.ct-ic{width:44px;height:44px;border:1px solid var(--gold-d);display:flex;align-items:center;justify-content:center;color:var(--gold);font-size:1.1rem;flex-shrink:0}
+.ct-txt h4{font-family:'Playfair Display',serif;font-size:.82rem;color:var(--gold);letter-spacing:1px;margin-bottom:4px;text-transform:uppercase}
+.ct-txt p,.ct-txt a{color:var(--tx1);font-size:.9rem;text-decoration:none;line-height:1.7;transition:.25s}
+.ct-txt a:hover{color:var(--gold)}
+.hrs{list-style:none}
+.hrs li{display:flex;justify-content:space-between;padding:5px 0;border-bottom:1px solid var(--bdr);color:var(--tx1);font-size:.88rem}
+.hrs li span:last-child{color:var(--gold)}
+.map-box{border:1px solid var(--bdr);overflow:hidden;min-height:440px}
+.map-box iframe{width:100%;height:100%;min-height:440px;border:none;filter:brightness(.8) contrast(1.1) saturate(.8)}
 
 /* ── FOOTER ── */
 footer{background:#070707;border-top:1px solid var(--bdr);padding:52px 0 28px}
@@ -115,6 +98,7 @@ footer{background:#070707;border-top:1px solid var(--bdr);padding:52px 0 28px}
 
 /* ── RESPONSIVE ── */
 @media(max-width:1024px){
+  .ct-grid{grid-template-columns:1fr}
   .ft-grid{grid-template-columns:1fr 1fr}
 }
 @media(max-width:768px){
@@ -123,8 +107,6 @@ footer{background:#070707;border-top:1px solid var(--bdr);padding:52px 0 28px}
   section{padding:68px 0}
   .ft-grid{grid-template-columns:1fr;gap:28px}
   .ft-btm{flex-direction:column;text-align:center}
-  .hero-btns{flex-direction:column;align-items:center}
-  .logo-block{padding:26px 32px}
 }
 </style>
 </head>
@@ -178,39 +160,69 @@ footer{background:#070707;border-top:1px solid var(--bdr);padding:52px 0 28px}
   </div>
 </div>
 
-<!-- HERO -->
-<section id="hero">
-  <div class="hero-glow"></div>
-  <div class="hero-grid"></div>
-  <div class="hero-body">
-    <div class="logo-block">
-      <div class="logo-crown-row">
-        <svg class="logo-crown-svg" width="32" height="22" viewBox="0 0 32 22" fill="none">
-          <path d="M3 18 L8.5 6 L16 13 L23.5 6 L29 18 Z" stroke="#c9a96e" stroke-width="1.2" fill="none"/>
-          <circle cx="8.5" cy="5.5" r="2" fill="#c9a96e"/>
-          <circle cx="16"  cy="12.5" r="2" fill="#c9a96e"/>
-          <circle cx="23.5" cy="5.5" r="2" fill="#c9a96e"/>
-        </svg>
+<!-- CONTACT -->
+<section id="contact">
+  <div class="wrap">
+    <div class="sec-hd fi">
+      <span class="sec-lbl" data-k="ct_lbl">Jak nás najít</span>
+      <h2 class="sec-ttl" data-k="ct_ttl">Kontakt</h2>
+      <div class="sec-div"></div>
+    </div>
+    <div class="ct-grid">
+      <div class="ct-info fi">
+        <h3 data-k="ct_h">Informace</h3>
+        <div class="ct-item">
+          <div class="ct-ic">📍</div>
+          <div class="ct-txt">
+            <h4 data-k="addr_l">Adresa</h4>
+            <p>Kodanská 649/20<br>Praha 10, 101 00</p>
+          </div>
+        </div>
+        <div class="ct-item">
+          <div class="ct-ic">📞</div>
+          <div class="ct-txt">
+            <h4 data-k="phone_l">Telefon</h4>
+            <a href="tel:+420776308352">+420 776 308 352</a>
+          </div>
+        </div>
+        <div class="ct-item">
+          <div class="ct-ic">✉</div>
+          <div class="ct-txt">
+            <h4 data-k="email_l">E-mail</h4>
+            <a href="mailto:cakeme.cukrarna@seznam.cz">cakeme.cukrarna@seznam.cz</a>
+          </div>
+        </div>
+        <div class="ct-item">
+          <div class="ct-ic">🕐</div>
+          <div class="ct-txt">
+            <h4 data-k="hrs_l">Otevírací doba</h4>
+            <ul class="hrs">
+              <li><span data-k="mon_sun">Pondělí — Neděle</span><span>09:00 — 20:00</span></li>
+            </ul>
+          </div>
+        </div>
+        <div class="ct-item">
+          <div class="ct-ic">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/>
+            </svg>
+          </div>
+          <div class="ct-txt">
+            <h4>Instagram</h4>
+            <a href="https://instagram.com/cukrarna_cakeme" target="_blank">@cukrarna_cakeme</a>
+          </div>
+        </div>
       </div>
-      <h1 class="logo-name">Cukrárna CakeMe</h1>
-      <p class="logo-tagline">Oslavte každý den</p>
+      <div class="map-box fi">
+        <iframe
+          src="https://maps.google.com/maps?q=Kodan%C5%A1k%C3%A1+649%2F20%2C+Praha+10&t=&z=15&ie=UTF8&iwloc=&output=embed"
+          allowfullscreen loading="lazy"
+          title="CakeMe mapa">
+        </iframe>
+      </div>
     </div>
-    <p class="hero-sub fi" data-k="hero_sub">Prémiová cukrárna</p>
-    <div class="hero-btns fi">
-      <a href="menu.html"     class="btn-g" data-k="btn_menu">Prohlédnout menu</a>
-      <a href="delivery.html" class="btn-o" data-k="btn_del">Objednat doručení</a>
-    </div>
-  </div>
-  <div class="scroll-hint">
-    <span data-k="scroll">Scroll</span>
-    <div class="scroll-line"></div>
   </div>
 </section>
-
-<!-- HOURS BAND -->
-<div class="hours-band">
-  <p><span data-k="open">Otevřeno</span>: <span data-k="days">Po — Ne</span> · 09:00 — 20:00</p>
-</div>
 
 <!-- FOOTER -->
 <footer>
@@ -263,73 +275,46 @@ footer{background:#070707;border-top:1px solid var(--bdr);padding:52px 0 28px}
 
 <script>
 const T={
-cs:{nav_home:'Domů',nav_menu:'Menu',nav_about:'O nás',nav_del:'Doručení',nav_con:'Kontakt',tagline:'Oslavte každý den',hero_sub:'Prémiová cukrárna',btn_menu:'Prohlédnout menu',btn_del:'Objednat doručení',btn_call:'Zavolat',scroll:'Scroll',open:'Otevřeno',days:'Po — Ne',ft_nav:'Navigace',ft_con:'Kontakt',rights:'Všechna práva vyhrazena.'},
-uk:{nav_home:'Головна',nav_menu:'Меню',nav_about:'Про нас',nav_del:'Доставка',nav_con:'Контакт',tagline:'Святкуйте кожен день',hero_sub:'Преміальна кондитерська',btn_menu:'Переглянути меню',btn_del:'Замовити доставку',btn_call:'Зателефонувати',scroll:'Гортати',open:'Відкрито',days:'Пн — Нд',ft_nav:'Навігація',ft_con:'Контакт',rights:'Всі права захищені.'},
-en:{nav_home:'Home',nav_menu:'Menu',nav_about:'About',nav_del:'Delivery',nav_con:'Contact',tagline:'Celebrate Every Day',hero_sub:'Premium Patisserie',btn_menu:'View Menu',btn_del:'Order Delivery',btn_call:'Call Us',scroll:'Scroll',open:'Open',days:'Mon — Sun',ft_nav:'Navigation',ft_con:'Contact',rights:'All rights reserved.'}
+cs:{nav_home:'Domů',nav_menu:'Menu',nav_about:'O nás',nav_del:'Doručení',nav_con:'Kontakt',tagline:'Oslavte každý den',
+  ct_lbl:'Jak nás najít',ct_ttl:'Kontakt',ct_h:'Informace',
+  addr_l:'Adresa',phone_l:'Telefon',email_l:'E-mail',hrs_l:'Otevírací doba',mon_sun:'Pondělí — Neděle',
+  ft_nav:'Navigace',ft_con:'Kontakt',rights:'Všechna práva vyhrazena.'},
+uk:{nav_home:'Головна',nav_menu:'Меню',nav_about:'Про нас',nav_del:'Доставка',nav_con:'Контакт',tagline:'Святкуйте кожен день',
+  ct_lbl:'Як нас знайти',ct_ttl:'Контакт',ct_h:'Інформація',
+  addr_l:'Адреса',phone_l:'Телефон',email_l:'E-mail',hrs_l:'Години роботи',mon_sun:'Понеділок — Неділя',
+  ft_nav:'Навігація',ft_con:'Контакт',rights:'Всі права захищені.'},
+en:{nav_home:'Home',nav_menu:'Menu',nav_about:'About',nav_del:'Delivery',nav_con:'Contact',tagline:'Celebrate Every Day',
+  ct_lbl:'How to Find Us',ct_ttl:'Contact',ct_h:'Information',
+  addr_l:'Address',phone_l:'Phone',email_l:'Email',hrs_l:'Opening Hours',mon_sun:'Monday — Sunday',
+  ft_nav:'Navigation',ft_con:'Contact',rights:'All rights reserved.'}
 };
 
-let lang = localStorage.getItem('cakeme_lang') || 'cs';
-
-function t(k){ return T[lang][k] || k; }
-
+let lang=localStorage.getItem('cakeme_lang')||'cs';
+function t(k){ return T[lang][k]||k; }
 function applyLang(){
-  document.documentElement.lang = lang==='uk'?'uk':lang==='en'?'en':'cs';
-  document.querySelectorAll('[data-k]').forEach(el=>{
-    const val=t(el.dataset.k); if(val) el.textContent=val;
-  });
-  setTimeout(()=>{
-    document.querySelectorAll('[data-k]').forEach(el=>{
-      const val=t(el.dataset.k); if(val) el.textContent=val;
-    });
-  },100);
+  document.documentElement.lang=lang==='uk'?'uk':lang==='en'?'en':'cs';
+  document.querySelectorAll('[data-k]').forEach(el=>{const val=t(el.dataset.k);if(val)el.textContent=val;});
+  setTimeout(()=>{document.querySelectorAll('[data-k]').forEach(el=>{const val=t(el.dataset.k);if(val)el.textContent=val;});},100);
 }
-
-function initLangBtns(){
-  document.querySelectorAll('[data-l]').forEach(b=>b.classList.toggle('on', b.dataset.l===lang));
-}
-
-window.addEventListener('scroll',()=>{
-  document.getElementById('nav').classList.toggle('solid', window.scrollY>60);
-});
-
-document.getElementById('burgerBtn').addEventListener('click',()=>{
-  document.getElementById('mobMenu').classList.add('open');
-  document.body.style.overflow='hidden';
-});
-document.getElementById('mobClose').addEventListener('click',()=>{
-  document.getElementById('mobMenu').classList.remove('open');
-  document.body.style.overflow='';
-});
-document.querySelectorAll('.mob-lnk').forEach(a=>a.addEventListener('click',()=>{
-  document.getElementById('mobMenu').classList.remove('open');
-  document.body.style.overflow='';
-}));
-
+function initLangBtns(){document.querySelectorAll('[data-l]').forEach(b=>b.classList.toggle('on',b.dataset.l===lang));}
+window.addEventListener('scroll',()=>{document.getElementById('nav').classList.toggle('solid',window.scrollY>60);});
+document.getElementById('burgerBtn').addEventListener('click',()=>{document.getElementById('mobMenu').classList.add('open');document.body.style.overflow='hidden';});
+document.getElementById('mobClose').addEventListener('click',()=>{document.getElementById('mobMenu').classList.remove('open');document.body.style.overflow='';});
+document.querySelectorAll('.mob-lnk').forEach(a=>a.addEventListener('click',()=>{document.getElementById('mobMenu').classList.remove('open');document.body.style.overflow='';}));
 document.querySelectorAll('[data-l]').forEach(btn=>btn.addEventListener('click',()=>{
-  lang=btn.dataset.l;
-  localStorage.setItem('cakeme_lang', lang);
-  document.querySelectorAll('[data-l]').forEach(b=>b.classList.toggle('on', b.dataset.l===lang));
+  lang=btn.dataset.l;localStorage.setItem('cakeme_lang',lang);
+  document.querySelectorAll('[data-l]').forEach(b=>b.classList.toggle('on',b.dataset.l===lang));
   applyLang();
 }));
-
 function initFI(){
-  const obs=new IntersectionObserver(entries=>{
-    entries.forEach(e=>{ if(e.isIntersecting) e.target.classList.add('show'); });
-  },{threshold:.12});
+  const obs=new IntersectionObserver(entries=>{entries.forEach(e=>{if(e.isIntersecting)e.target.classList.add('show');});},{threshold:.12});
   document.querySelectorAll('.fi:not(.show)').forEach(el=>obs.observe(el));
 }
-
-// Active nav link
 (function(){
   const p=location.pathname.split('/').pop()||'index.html';
-  document.querySelectorAll('.nav-links a, .mob-menu a[class="mob-lnk"]').forEach(a=>{
-    if(a.getAttribute('href')===p) a.classList.add('active');
-  });
+  document.querySelectorAll('.nav-links a,.mob-menu a[class="mob-lnk"]').forEach(a=>{if(a.getAttribute('href')===p)a.classList.add('active');});
 })();
-
-initLangBtns();
-applyLang();
-initFI();
+initLangBtns();applyLang();initFI();
 </script>
 </body>
 </html>

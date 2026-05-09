@@ -1,0 +1,456 @@
+<!DOCTYPE html>
+<html lang="cs" translate="no">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="google" content="notranslate">
+<meta http-equiv="Content-Language" content="cs">
+<title>Menu | Cukrárna CakeMe</title>
+<link rel="icon" type="image/svg+xml" href="favicon.svg">
+<meta name="description" content="Prohlédněte menu Cukrárny CakeMe — dorty, dezerty, nápoje. Objednejte s doručením.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&family=Raleway:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --gold:#c9a96e;--gold-l:#e8d5a3;--gold-d:#9a7a4a;
+  --bg0:#0a0a0a;--bg1:#111;--bg2:#161616;--bg3:#1c1c1c;
+  --tx0:#f5f0e8;--tx1:#c8b898;--tx2:#777;
+  --bdr:#242424;
+}
+html{scroll-behavior:smooth}
+body{font-family:'Raleway',sans-serif;background:var(--bg0);color:var(--tx0);line-height:1.6;overflow-x:hidden}
+
+/* ── NAV ── */
+.nav{position:fixed;top:0;width:100%;z-index:1000;padding:18px 0;transition:.3s}
+.nav.solid{background:rgba(10,10,10,.97);backdrop-filter:blur(12px);border-bottom:1px solid var(--bdr);padding:12px 0}
+.nav-in{max-width:1240px;margin:0 auto;padding:0 32px;display:flex;align-items:center;justify-content:space-between}
+.nav-logo{display:flex;align-items:center;gap:12px;text-decoration:none}
+.nav-logo svg{width:36px;height:36px}
+.nav-logo-txt{font-family:'Playfair Display',serif;font-size:1.05rem;color:var(--gold);letter-spacing:2px;line-height:1.3;display:flex;flex-direction:column}
+.nav-logo-sub{font-family:'Raleway',sans-serif;font-size:.6rem;letter-spacing:3px;color:var(--gold-d);text-transform:uppercase;font-weight:400}
+.nav-links{display:flex;list-style:none;gap:36px;align-items:center}
+.nav-links a{color:var(--tx0);text-decoration:none;font-size:.78rem;letter-spacing:1.8px;text-transform:uppercase;font-weight:500;transition:.25s;position:relative}
+.nav-links a::after{content:'';position:absolute;bottom:-4px;left:0;width:0;height:1px;background:var(--gold);transition:.3s}
+.nav-links a:hover{color:var(--gold)}
+.nav-links a:hover::after,.nav-links a.active::after{width:100%}
+.nav-links a.active{color:var(--gold)}
+.nav-right{display:flex;align-items:center;gap:20px}
+.langs{display:flex;gap:5px;align-items:center}
+.lang-btn{display:flex;align-items:center;gap:6px;background:transparent;border:1px solid var(--bdr);color:var(--tx2);padding:6px 12px;cursor:pointer;font:.73rem 'Raleway',sans-serif;letter-spacing:.5px;transition:.25s;border-radius:3px;white-space:nowrap;user-select:none}
+.lang-btn .flag{font-size:1rem;line-height:1}
+.lang-btn .lname{font-size:.7rem;font-weight:600}
+.lang-btn:hover,.lang-btn.on{border-color:var(--gold);color:var(--gold);background:rgba(201,169,110,.1)}
+.burger{display:none;flex-direction:column;gap:5px;cursor:pointer;padding:5px;background:none;border:none}
+.burger span{display:block;width:24px;height:2px;background:var(--gold);transition:.3s}
+
+/* ── MOBILE MENU ── */
+.mob-menu{display:none;position:fixed;inset:0;background:var(--bg0);z-index:999;flex-direction:column;align-items:center;justify-content:center;gap:28px}
+.mob-menu.open{display:flex}
+.mob-menu a{color:var(--tx0);text-decoration:none;font:1.4rem 'Playfair Display',serif;transition:.25s}
+.mob-menu a:hover,.mob-menu a.active{color:var(--gold)}
+.mob-close{position:absolute;top:22px;right:28px;font-size:2rem;color:var(--gold);background:none;border:none;cursor:pointer;line-height:1}
+
+/* ── SHARED ── */
+section{padding:96px 0}
+.wrap{max-width:1240px;margin:0 auto;padding:0 32px}
+.sec-hd{text-align:center;margin-bottom:60px}
+.sec-lbl{font-size:.72rem;letter-spacing:4px;color:var(--gold);text-transform:uppercase;margin-bottom:14px;display:block}
+.sec-ttl{font-family:'Playfair Display',serif;font-size:clamp(1.9rem,4vw,2.9rem);font-weight:400;color:var(--tx0);margin-bottom:20px}
+.sec-div{width:56px;height:1px;background:var(--gold);margin:0 auto}
+.fi{opacity:0;transform:translateY(28px);transition:opacity .65s,transform .65s}
+.fi.show{opacity:1;transform:translateY(0)}
+
+/* ── MENU ── */
+#menu{background:var(--bg1)}
+.m-tabs{display:flex;justify-content:center;gap:6px;margin-bottom:50px;flex-wrap:wrap}
+.m-tab{background:transparent;border:1px solid var(--bdr);color:var(--tx2);padding:10px 26px;cursor:pointer;font:.76rem 'Raleway',sans-serif;letter-spacing:2px;text-transform:uppercase;transition:.25s}
+.m-tab.on,.m-tab:hover{border-color:var(--gold);color:var(--gold);background:rgba(201,169,110,.07)}
+.m-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(272px,1fr));gap:24px}
+.m-card{background:var(--bg3);border:1px solid var(--bdr);overflow:hidden;transition:.3s;position:relative}
+.m-card:hover{border-color:var(--gold-d);transform:translateY(-5px);box-shadow:0 20px 44px rgba(0,0,0,.5)}
+.m-img{width:100%;height:210px;display:flex;align-items:center;justify-content:center;font-size:3.4rem;position:relative;overflow:hidden;background:#1a1a1a}
+.m-img img{width:100%;height:100%;object-fit:cover;display:block;transition:transform .4s ease}
+.m-card:hover .m-img img{transform:scale(1.06)}
+.m-badge{position:absolute;top:14px;right:14px;background:var(--gold);color:var(--bg0);font:.62rem 'Raleway',sans-serif;letter-spacing:1.5px;text-transform:uppercase;padding:4px 10px;font-weight:700}
+.m-body{padding:20px}
+.m-name{font-family:'Playfair Display',serif;font-size:1.18rem;color:var(--tx0);margin-bottom:7px}
+.m-desc{font-size:.78rem;color:var(--tx2);line-height:1.65;margin-bottom:18px}
+.m-ft{display:flex;align-items:center;justify-content:space-between}
+.m-price{font-family:'Playfair Display',serif;font-size:1.25rem;color:var(--gold)}
+.btn-ord{background:transparent;border:1px solid var(--gold-d);color:var(--gold);padding:8px 18px;font:.72rem 'Raleway',sans-serif;letter-spacing:1.5px;text-transform:uppercase;cursor:pointer;transition:.25s}
+.btn-ord:hover{background:var(--gold);color:var(--bg0)}
+
+/* ── FOOTER ── */
+footer{background:#070707;border-top:1px solid var(--bdr);padding:52px 0 28px}
+.ft-grid{display:grid;grid-template-columns:2fr 1fr 1fr;gap:56px;margin-bottom:40px}
+.ft-logo{font-family:'Playfair Display',serif;font-size:1.75rem;color:var(--gold);letter-spacing:5px;margin-bottom:10px}
+.ft-sub{font-size:.72rem;color:var(--tx2);letter-spacing:3px;text-transform:uppercase;margin-bottom:24px}
+.socials{display:flex;gap:10px}
+.soc{width:40px;height:40px;border:1px solid var(--bdr);display:flex;align-items:center;justify-content:center;color:var(--tx2);text-decoration:none;transition:.25s}
+.soc:hover{border-color:var(--gold);color:var(--gold);background:rgba(201,169,110,.1)}
+.ft-col h4{font-family:'Playfair Display',serif;font-size:.95rem;color:var(--tx0);margin-bottom:18px;padding-bottom:10px;border-bottom:1px solid var(--bdr)}
+.ft-col ul{list-style:none}
+.ft-col li{margin-bottom:9px}
+.ft-col a{color:var(--tx2);text-decoration:none;font-size:.82rem;transition:.25s}
+.ft-col a:hover{color:var(--gold)}
+.ft-col p{color:var(--tx2);font-size:.82rem;line-height:1.7}
+.ft-btm{border-top:1px solid var(--bdr);padding-top:24px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:14px}
+.ft-btm p{color:var(--tx2);font-size:.75rem}
+.ig-link{display:flex;align-items:center;gap:8px;color:var(--tx2);text-decoration:none;font-size:.8rem;transition:.25s}
+.ig-link:hover{color:var(--gold)}
+
+/* ── RESPONSIVE ── */
+@media(max-width:1024px){
+  .ft-grid{grid-template-columns:1fr 1fr}
+}
+@media(max-width:768px){
+  .nav-links{display:none}
+  .burger{display:flex}
+  section{padding:68px 0}
+  .ft-grid{grid-template-columns:1fr;gap:28px}
+  .ft-btm{flex-direction:column;text-align:center}
+}
+</style>
+</head>
+<body translate="no">
+
+<!-- NAV -->
+<nav class="nav" id="nav">
+  <div class="nav-in">
+    <a href="index.html" class="nav-logo">
+      <svg viewBox="0 0 36 36" fill="none">
+        <path d="M4 26 L9 14 L18 21 L27 14 L32 26 Z" stroke="#c9a96e" stroke-width="1.4" fill="none"/>
+        <circle cx="9" cy="13" r="1.8" fill="#c9a96e"/>
+        <circle cx="18" cy="20" r="1.8" fill="#c9a96e"/>
+        <circle cx="27" cy="13" r="1.8" fill="#c9a96e"/>
+        <line x1="4" y1="28" x2="32" y2="28" stroke="#c9a96e" stroke-width="1.4"/>
+      </svg>
+      <span class="nav-logo-txt">Cukrárna CakeMe<br><span class="nav-logo-sub">Oslavte každý den</span></span>
+    </a>
+    <ul class="nav-links">
+      <li><a href="index.html"    data-k="nav_home">Domů</a></li>
+      <li><a href="menu.html"     data-k="nav_menu">Menu</a></li>
+      <li><a href="about.html"    data-k="nav_about">O nás</a></li>
+      <li><a href="delivery.html" data-k="nav_del">Doručení</a></li>
+      <li><a href="contact.html"  data-k="nav_con">Kontakt</a></li>
+    </ul>
+    <div class="nav-right">
+      <div class="langs" translate="no">
+        <button class="lang-btn" data-l="cs" translate="no"><span class="flag">🇨🇿</span><span class="lname">Česky</span></button>
+        <button class="lang-btn" data-l="uk" translate="no"><span class="flag">🇺🇦</span><span class="lname">Укр</span></button>
+        <button class="lang-btn" data-l="en" translate="no"><span class="flag">🇬🇧</span><span class="lname">EN</span></button>
+      </div>
+      <button class="burger" id="burgerBtn" aria-label="Menu">
+        <span></span><span></span><span></span>
+      </button>
+    </div>
+  </div>
+</nav>
+
+<!-- MOBILE MENU -->
+<div class="mob-menu" id="mobMenu">
+  <button class="mob-close" id="mobClose">✕</button>
+  <a href="index.html"    class="mob-lnk" data-k="nav_home">Domů</a>
+  <a href="menu.html"     class="mob-lnk" data-k="nav_menu">Menu</a>
+  <a href="about.html"    class="mob-lnk" data-k="nav_about">O nás</a>
+  <a href="delivery.html" class="mob-lnk" data-k="nav_del">Doručení</a>
+  <a href="contact.html"  class="mob-lnk" data-k="nav_con">Kontakt</a>
+  <div class="langs" style="margin-top:18px" translate="no">
+    <button class="lang-btn" data-l="cs" translate="no"><span class="flag">🇨🇿</span><span class="lname">Česky</span></button>
+    <button class="lang-btn" data-l="uk" translate="no"><span class="flag">🇺🇦</span><span class="lname">Українська</span></button>
+    <button class="lang-btn" data-l="en" translate="no"><span class="flag">🇬🇧</span><span class="lname">English</span></button>
+  </div>
+</div>
+
+<!-- MENU -->
+<section id="menu">
+  <div class="wrap">
+    <div class="sec-hd fi">
+      <span class="sec-lbl" data-k="menu_lbl">Naše nabídka</span>
+      <h2 class="sec-ttl" data-k="menu_ttl">Menu</h2>
+      <div class="sec-div"></div>
+    </div>
+    <div class="m-tabs fi">
+      <button class="m-tab on" data-tab="all"      data-k="t_all">Vše</button>
+      <button class="m-tab"    data-tab="cakes"    data-k="t_cakes">Dorty</button>
+      <button class="m-tab"    data-tab="desserts" data-k="t_des">Dezerty</button>
+      <button class="m-tab"    data-tab="drinks"   data-k="t_drk">Nápoje</button>
+    </div>
+    <div class="m-grid" id="mGrid"></div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="wrap">
+    <div class="ft-grid">
+      <div>
+        <div class="ft-logo">CAKEME</div>
+        <p class="ft-sub" data-k="tagline">Oslavte každý den</p>
+        <div class="socials">
+          <a href="https://instagram.com/cukrarna_cakeme" target="_blank" class="soc" title="Instagram">
+            <svg width="17" height="17" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/></svg>
+          </a>
+          <a href="tel:+420776308352" class="soc" title="Telefon">
+            <svg width="17" height="17" viewBox="0 0 24 24" fill="currentColor"><path d="M6.62 10.79c1.44 2.83 3.76 5.14 6.59 6.59l2.2-2.2c.27-.27.67-.36 1.02-.24 1.12.37 2.33.57 3.57.57.55 0 1 .45 1 1V20c0 .55-.45 1-1 1-9.39 0-17-7.61-17-17 0-.55.45-1 1-1h3.5c.55 0 1 .45 1 1 0 1.25.2 2.45.57 3.57.11.35.03.74-.25 1.02l-2.2 2.2z"/></svg>
+          </a>
+          <a href="mailto:cakeme.cukrarna@seznam.cz" class="soc" title="E-mail">
+            <svg width="17" height="17" viewBox="0 0 24 24" fill="currentColor"><path d="M20 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z"/></svg>
+          </a>
+        </div>
+      </div>
+      <div class="ft-col">
+        <h4 data-k="ft_nav">Navigace</h4>
+        <ul>
+          <li><a href="index.html"    data-k="nav_home">Domů</a></li>
+          <li><a href="menu.html"     data-k="nav_menu">Menu</a></li>
+          <li><a href="about.html"    data-k="nav_about">O nás</a></li>
+          <li><a href="delivery.html" data-k="nav_del">Doručení</a></li>
+          <li><a href="contact.html"  data-k="nav_con">Kontakt</a></li>
+        </ul>
+      </div>
+      <div class="ft-col">
+        <h4 data-k="ft_con">Kontakt</h4>
+        <ul>
+          <li><a href="tel:+420776308352">+420 776 308 352</a></li>
+          <li><a href="mailto:cakeme.cukrarna@seznam.cz">cakeme.cukrarna@seznam.cz</a></li>
+          <li><a href="https://instagram.com/cukrarna_cakeme" target="_blank">@cukrarna_cakeme</a></li>
+        </ul>
+        <p style="margin-top:14px;color:var(--tx2);font-size:.8rem">Kodanská 649/20<br>Praha 10, 101 00</p>
+      </div>
+    </div>
+    <div class="ft-btm">
+      <p>© 2024 CakeMe. <span data-k="rights">Všechna práva vyhrazena.</span></p>
+      <a href="https://instagram.com/cukrarna_cakeme" target="_blank" class="ig-link">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/></svg>
+        @cukrarna_cakeme
+      </a>
+    </div>
+  </div>
+</footer>
+
+<script>
+const T={
+cs:{nav_home:'Domů',nav_menu:'Menu',nav_about:'O nás',nav_del:'Doručení',nav_con:'Kontakt',tagline:'Oslavte každý den',menu_lbl:'Naše nabídka',menu_ttl:'Menu',t_all:'Vše',t_cakes:'Dorty',t_des:'Dezerty',t_drk:'Nápoje',ord:'Objednat',ft_nav:'Navigace',ft_con:'Kontakt',rights:'Všechna práva vyhrazena.'},
+uk:{nav_home:'Головна',nav_menu:'Меню',nav_about:'Про нас',nav_del:'Доставка',nav_con:'Контакт',tagline:'Святкуйте кожен день',menu_lbl:'Наша пропозиція',menu_ttl:'Меню',t_all:'Все',t_cakes:'Торти',t_des:'Десерти',t_drk:'Напої',ord:'Замовити',ft_nav:'Навігація',ft_con:'Контакт',rights:'Всі права захищені.'},
+en:{nav_home:'Home',nav_menu:'Menu',nav_about:'About',nav_del:'Delivery',nav_con:'Contact',tagline:'Celebrate Every Day',menu_lbl:'Our Offerings',menu_ttl:'Menu',t_all:'All',t_cakes:'Cakes',t_des:'Desserts',t_drk:'Drinks',ord:'Order',ft_nav:'Navigation',ft_con:'Contact',rights:'All rights reserved.'}
+};
+
+const ITEMS=[
+  // DORTY
+  {cat:'cakes',price:'133 Kč',badge:'Bestseller',img:'https://imageproxy.wolt.com/assets/697228caf1232b338e039779',
+   name:{cs:'Cheesecake',uk:'Чізкейк',en:'Cheesecake'},
+   desc:{cs:'1 ks – 160g. Tvaroh, zakysaná smetana, krémový sýr',uk:'1 шт – 160г. Сир, сметана, вершковий сир',en:'1 pc – 160g. Cottage cheese, sour cream, cream cheese'}},
+  {cat:'cakes',price:'126 Kč',badge:'',img:'https://imageproxy.wolt.com/assets/697228caf1232b338e039778',
+   name:{cs:'Ořechový koláč',uk:'Горіховий пиріг',en:'Walnut Cake'},
+   desc:{cs:'1 ks – 170g. Linecké těsto, med, smetana, vlašské ořechy',uk:'1 шт – 170г. Пісочне тісто, мед, вершки, волоські горіхи',en:'1 pc – 170g. Shortcrust pastry, honey, cream, walnuts'}},
+  {cat:'cakes',price:'133 Kč',badge:'',img:'https://imageproxy.wolt.com/assets/697228caf1232b338e039772',
+   name:{cs:'Ovocný světlý',uk:'Фруктовий торт',en:'Fruit Cake'},
+   desc:{cs:'1 ks – 160g. Tvaroh, mascarpone, smetana, jahody, maliny, borůvky',uk:'1 шт – 160г. Сир, маскарпоне, вершки, полуниця, малина, чорниця',en:'1 pc – 160g. Cottage cheese, mascarpone, cream, strawberries, raspberries, blueberries'}},
+  {cat:'cakes',price:'133 Kč',badge:'',img:'https://imageproxy.wolt.com/assets/697f1db5789a4f50f68328fd',
+   name:{cs:'Arašídový dort',uk:'Арахісовий торт',en:'Peanut Butter Cake'},
+   desc:{cs:'Čokoládový piškot s krémem ze smetanového sýra a arašídového másla',uk:'Шоколадний бісквіт з кремом зі вершкового сиру та арахісового масла',en:'Chocolate sponge with cream cheese and peanut butter frosting'}},
+  {cat:'cakes',price:'133 Kč',badge:'',img:'https://imageproxy.wolt.com/assets/698343bca2c5decc0bfdcb6d',
+   name:{cs:'Pavlova',uk:'Павлова',en:'Pavlova'},
+   desc:{cs:'Lehký nadýchaný dezert ze křupavého sněhového korpusu s marshmallow vnitřkem',uk:'Легкий повітряний десерт із хрусткого безе з серединкою як маршмелоу',en:'Light airy dessert with crispy meringue and marshmallow centre'}},
+  {cat:'cakes',price:'126 Kč',badge:'',img:'https://imageproxy.wolt.com/assets/69997daf3eb3341f036ea0ae',
+   name:{cs:'Citronový koláč',uk:'Лимонний пиріг',en:'Lemon Cake'},
+   desc:{cs:'Křehké máslové těsto, jemný citronový krém, sněhová vrstva zapečená dozlatova',uk:'Крихке вершкове тісто, ніжний лимонний крем, запечений білковий шар',en:'Crispy butter pastry, delicate lemon cream, golden meringue topping'}},
+  {cat:'cakes',price:'133 Kč',badge:'',img:'https://imageproxy.wolt.com/assets/69de33ac73316796ef90e4cb',
+   name:{cs:'Citronový s malinami',uk:'Лимонний з малиною',en:'Lemon Raspberry Cake'},
+   desc:{cs:'Citronový koláč s čerstvými malinami',uk:'Лимонний пиріг зі свіжою малиною',en:'Lemon cake with fresh raspberries'}},
+  {cat:'cakes',price:'133 Kč',badge:'Nové',img:'https://imageproxy.wolt.com/assets/69f04c2c463746eef18c5ffd',
+   name:{cs:'Mango-Maracuja',uk:'Манго-Маракуя',en:'Mango-Passionfruit'},
+   desc:{cs:'Vanilkový piškot, mascarpone, tvaroh, smetana, kousky manga a maracuji',uk:'Ванільний бісквіт, маскарпоне, сир, вершки, шматочки манго та маракуї',en:'Vanilla sponge, mascarpone, cottage cheese, cream, mango & passionfruit pieces'}},
+  // DEZERTY
+  {cat:'desserts',price:'97 Kč',badge:'',img:'https://imageproxy.wolt.com/assets/697992ef72674ce89f7a8f71',
+   name:{cs:'Nanuk jahodový',uk:'Нанук полуничний',en:'Strawberry Ice Bar'},
+   desc:{cs:'Čokoládový piškot, poleva z bílé čokolády s jahodovou příchutí',uk:'Шоколадний бісквіт, глазур із білого шоколаду з полуничним смаком',en:'Chocolate sponge, white chocolate glaze with strawberry flavour'}},
+  {cat:'desserts',price:'112 Kč',badge:'',img:'https://imageproxy.wolt.com/assets/697228caf1232b338e039783',
+   name:{cs:'Karamelový větrník',uk:'Карамельний вітряк',en:'Caramel Cream Puff'},
+   desc:{cs:'1 ks – 190g. Vanilkový a karamelový krém v odpalovaném těstě',uk:'1 шт – 190г. Ванільний та карамельний крем у заварному тісті',en:'1 pc – 190g. Vanilla and caramel cream in choux pastry'}},
+  {cat:'desserts',price:'112 Kč',badge:'',img:'https://imageproxy.wolt.com/assets/697228caf1232b338e03976f',
+   name:{cs:'Borůvková tartaletka',uk:'Чорничний тарталет',en:'Blueberry Tartlet'},
+   desc:{cs:'1 ks – 130g. Linecké těsto, tvarohová náplň a čerstvé borůvky',uk:'1 шт – 130г. Пісочне тісто, сирна начинка та свіжа чорниця',en:'1 pc – 130g. Shortcrust pastry, curd filling and fresh blueberries'}},
+  {cat:'desserts',price:'92 Kč',badge:'',img:'https://imageproxy.wolt.com/assets/697228caf1232b338e039773',
+   name:{cs:'Kremrole',uk:'Кремроле',en:'Cream Roll'},
+   desc:{cs:'Bílky, cukr, citronová šťáva',uk:'Білки, цукор, лимонний сік',en:'Egg whites, sugar, lemon juice'}},
+  {cat:'desserts',price:'66 Kč',badge:'',img:'https://imageproxy.wolt.com/assets/697998f6aded7a30ce7db068',
+   name:{cs:'Malinová makronka',uk:'Малиновий макарун',en:'Raspberry Macaron'},
+   desc:{cs:'Mandlová mouka, bílky, cukr, ganáž z bílé čokolády a malinová marmeláda',uk:'Мигдальне борошно, білки, цукор, ганаш із білого шоколаду та малинове варення',en:'Almond flour, egg whites, sugar, white chocolate ganache & raspberry jam'}},
+  {cat:'desserts',price:'112 Kč',badge:'',img:'https://imageproxy.wolt.com/assets/697228caf1232b338e039784',
+   name:{cs:'Malinová tartaletka',uk:'Малиновий тарталет',en:'Raspberry Tartlet'},
+   desc:{cs:'1 ks – 130g. Linecké těsto, tvarohová náplň a čerstvé maliny',uk:'1 шт – 130г. Пісочне тісто, сирна начинка та свіжа малина',en:'1 pc – 130g. Shortcrust pastry, curd filling and fresh raspberries'}},
+  {cat:'desserts',price:'102 Kč',badge:'',img:'https://imageproxy.wolt.com/assets/69a1815dea4a83292ef03b2c',
+   name:{cs:'Panna cotta',uk:'Панна котта',en:'Panna Cotta'},
+   desc:{cs:'Jemný smetanový dezert s vanilkovým extraktem a ovocným coulis',uk:'Ніжний вершковий десерт із ваніллю та фруктовим кулі',en:'Delicate cream dessert with vanilla extract and fruit coulis'}},
+  {cat:'desserts',price:'137 Kč',badge:'',img:'https://imageproxy.wolt.com/assets/697228caf1232b338e039771',
+   name:{cs:'Pistáciový mousse',uk:'Фісташковий мус',en:'Pistachio Mousse'},
+   desc:{cs:'1 ks – 120g. Pěna z pistáciové pasty, smetanového sýra a smetany',uk:'1 шт – 120г. Піна з фісташкової пасти, вершкового сиру та вершків',en:'1 pc – 120g. Pistachio paste, cream cheese and cream mousse'}},
+  {cat:'desserts',price:'247 Kč',badge:'',img:'https://imageproxy.wolt.com/assets/697228caf1232b338e039782',
+   name:{cs:'Slaný karamel',uk:'Солона карамель',en:'Salted Caramel'},
+   desc:{cs:'1 ks – 300g. Lahodná kombinace karamelu a slaného másla',uk:'1 шт – 300г. Вишукане поєднання карамелі та солоного масла',en:'1 pc – 300g. Delicious combination of caramel and salted butter'}},
+  {cat:'desserts',price:'92 Kč',badge:'',img:'https://imageproxy.wolt.com/assets/697228caf1232b338e039785',
+   name:{cs:'Vanilkový věneček',uk:'Ванільний венечок',en:'Vanilla Choux Ring'},
+   desc:{cs:'Odpalované těsto plněné vanilkovým crème pâtissière',uk:'Заварне тісто з ванільним кремом',en:'Choux pastry filled with vanilla crème pâtissière'}},
+  {cat:'desserts',price:'97 Kč',badge:'',img:'https://imageproxy.wolt.com/assets/697228caf1232b338e03977f',
+   name:{cs:'Věneček s jahodami',uk:'Венечок з полуницею',en:'Strawberry Choux Ring'},
+   desc:{cs:'Odpalované těsto plněné vanilkovým crème pâtissière a čerstvými jahodami',uk:'Заварне тісто з ванільним кремом та свіжою полуницею',en:'Choux pastry with vanilla crème pâtissière and fresh strawberries'}},
+  {cat:'desserts',price:'97 Kč',badge:'',img:'https://imageproxy.wolt.com/assets/69799345520d609a024a691a',
+   name:{cs:'Nanuk višňový',uk:'Нанук вишневий',en:'Cherry Ice Bar'},
+   desc:{cs:'Světlý piškot, poleva z bílé čokolády s višňovou příchutí',uk:'Світлий бісквіт, глазур із білого шоколаду з вишневим смаком',en:'Light sponge, white chocolate glaze with cherry flavour'}},
+  {cat:'desserts',price:'97 Kč',badge:'',img:'https://imageproxy.wolt.com/assets/6979924372674ce89f7a8f6d',
+   name:{cs:'Nanuk čokoládový',uk:'Нанук шоколадний',en:'Chocolate Ice Bar'},
+   desc:{cs:'Světlý piškot, čokoládová poleva z bílé čokolády',uk:'Світлий бісквіт, шоколадна глазур із білого шоколаду',en:'Light sponge with white chocolate coating'}},
+  {cat:'desserts',price:'97 Kč',badge:'',img:'https://imageproxy.wolt.com/assets/69799356a005afdf1964ffeb',
+   name:{cs:'Nanuk banánový',uk:'Нанук банановий',en:'Banana Ice Bar'},
+   desc:{cs:'Světlý piškot, poleva z bílé čokolády s banánovou příchutí',uk:'Світлий бісквіт, глазур із білого шоколаду з банановим смаком',en:'Light sponge, white chocolate glaze with banana flavour'}},
+  {cat:'desserts',price:'97 Kč',badge:'',img:'https://imageproxy.wolt.com/assets/6979935e520d609a024a691c',
+   name:{cs:'Nanuk pistáciový',uk:'Нанук фісташковий',en:'Pistachio Ice Bar'},
+   desc:{cs:'Světlý piškot, poleva z bílé čokolády s pistáciovou příchutí',uk:'Світлий бісквіт, глазур із білого шоколаду з фісташковим смаком',en:'Light sponge, white chocolate glaze with pistachio flavour'}},
+  {cat:'desserts',price:'67 Kč',badge:'',img:'https://imageproxy.wolt.com/assets/697992f6a005afdf1964ffe7',
+   name:{cs:'Makronka pistácie',uk:'Макарун фісташковий',en:'Pistachio Macaron'},
+   desc:{cs:'Mandlová mouka, bílky, cukr, ganáž z bílé čokolády a 100% pistáciové pasty',uk:'Мигдальне борошно, білки, цукор, ганаш із білого шоколаду та фісташкової пасти',en:'Almond flour, egg whites, sugar, white chocolate ganache & pistachio paste'}},
+  {cat:'desserts',price:'67 Kč',badge:'',img:'https://imageproxy.wolt.com/assets/6979934d520d609a024a691b',
+   name:{cs:'Makronka čokoláda',uk:'Макарун шоколадний',en:'Chocolate Macaron'},
+   desc:{cs:'Mandlová mouka, bílky, cukr, ganáž z hořké čokolády',uk:'Мигдальне борошно, білки, цукор, ганаш із гіркого шоколаду',en:'Almond flour, egg whites, sugar, dark chocolate ganache'}},
+  {cat:'desserts',price:'67 Kč',badge:'',img:'https://imageproxy.wolt.com/assets/6979980b8d71993ce32ff03a',
+   name:{cs:'Makronka borůvková',uk:'Макарун чорничний',en:'Blueberry Macaron'},
+   desc:{cs:'Mandlová mouka, bílky, cukr, ganáž z bílé čokolády a borůvkové pyré',uk:'Мигдальне борошно, білки, цукор, ганаш із білого шоколаду та чорничного пюре',en:'Almond flour, egg whites, sugar, white chocolate ganache & blueberry purée'}},
+  {cat:'desserts',price:'97 Kč',badge:'',img:'https://imageproxy.wolt.com/assets/69799917aded7a30ce7db06c',
+   name:{cs:'Rumová koule',uk:'Ромовий кульок',en:'Rum Ball'},
+   desc:{cs:'Čokoládový piškot s rumovou příchutí',uk:'Шоколадний бісквіт із ромовим смаком',en:'Chocolate sponge with rum flavour'}},
+  {cat:'desserts',price:'133 Kč',badge:'',img:'https://imageproxy.wolt.com/assets/69a18165ea4a83292ef03b36',
+   name:{cs:'Špička likérová',uk:'Лікерна шпичка',en:'Liqueur Špička'},
+   desc:{cs:'Čokoládová pěna s lahodným vaječňákem — moderní verze klasického dezertu',uk:'Шоколадна піна з яєчним лікером — сучасна версія класичного десерту',en:'Chocolate mousse with egg liqueur — a modern take on a classic Czech dessert'}},
+  {cat:'desserts',price:'66 Kč',badge:'',img:'https://imageproxy.wolt.com/assets/69c2630d6111b13a8d2d4870',
+   name:{cs:'Višňový Cake pop',uk:'Вишневий Cake pop',en:'Cherry Cake Pop'},
+   desc:{cs:'Vláčný piškot, jahodová marmeláda, čokoládová ganache',uk:'Пишний бісквіт, полунична мармелада, шоколадний ганаш',en:'Moist sponge, strawberry jam, chocolate ganache'}},
+  {cat:'desserts',price:'66 Kč',badge:'',img:'https://imageproxy.wolt.com/assets/69c26df049d0c19e440a34ba',
+   name:{cs:'Čokoládový Cake pop',uk:'Шоколадний Cake pop',en:'Chocolate Cake Pop'},
+   desc:{cs:'Vláčný piškot, jahodová marmeláda, čokoládová ganache',uk:'Пишний бісквіт, полунична мармелада, шоколадний ганаш',en:'Moist sponge, strawberry jam, chocolate ganache'}},
+  {cat:'desserts',price:'66 Kč',badge:'',img:'https://imageproxy.wolt.com/assets/69c26e1149d0c19e440a34c7',
+   name:{cs:'Banánový Cake pop',uk:'Банановий Cake pop',en:'Banana Cake Pop'},
+   desc:{cs:'Vláčný piškot, jahodová marmeláda, čokoládová ganache',uk:'Пишний бісквіт, полунична мармелада, шоколадний ганаш',en:'Moist sponge, strawberry jam, chocolate ganache'}},
+  {cat:'desserts',price:'66 Kč',badge:'',img:'https://imageproxy.wolt.com/assets/69c262b7e3a2b6d8564b038f',
+   name:{cs:'Jahodový Cake pop',uk:'Полуничний Cake pop',en:'Strawberry Cake Pop'},
+   desc:{cs:'Vláčný piškot, jahodová marmeláda, čokoládová ganache',uk:'Пишний бісквіт, полунична мармелада, шоколадний ганаш',en:'Moist sponge, strawberry jam, chocolate ganache'}},
+  {cat:'desserts',price:'66 Kč',badge:'',img:'https://imageproxy.wolt.com/assets/69c26e1749d0c19e440a34d3',
+   name:{cs:'Pistáciový Cake pop',uk:'Фісташковий Cake pop',en:'Pistachio Cake Pop'},
+   desc:{cs:'Vláčný piškot, jahodová marmeláda, čokoládová ganache',uk:'Пишний бісквіт, полунична мармелада, шоколадний ганаш',en:'Moist sponge, strawberry jam, chocolate ganache'}},
+  {cat:'desserts',price:'112 Kč',badge:'',img:'https://imageproxy.wolt.com/assets/69c3b0786111b13a8d2d5365',
+   name:{cs:'Tartaletka Slaný karamel',uk:'Тарталет Солона карамель',en:'Salted Caramel Tartlet'},
+   desc:{cs:'Křehká tartaletka plněná slaným karamelem a čokoládovou ganache',uk:'Крихка тарталетка з солоною карамеллю та шоколадним ганашем',en:'Crispy tartlet filled with salted caramel and chocolate ganache'}},
+  // NÁPOJE
+  {cat:'drinks',price:'40 Kč',badge:'',img:'https://imageproxy.wolt.com/assets/697228caf1232b338e03977e',
+   name:{cs:'Capri-Sun',uk:'Capri-Sun',en:'Capri-Sun'},
+   desc:{cs:'Ovocný nápoj',uk:'Фруктовий напій',en:'Fruit drink'}},
+];
+
+let lang=localStorage.getItem('cakeme_lang')||'cs';
+let tab='all';
+
+function t(k){ return T[lang][k]||k; }
+
+function applyLang(){
+  document.documentElement.lang=lang==='uk'?'uk':lang==='en'?'en':'cs';
+  document.querySelectorAll('[data-k]').forEach(el=>{
+    const val=t(el.dataset.k); if(val) el.textContent=val;
+  });
+  renderMenu();
+  setTimeout(()=>{
+    document.querySelectorAll('[data-k]').forEach(el=>{
+      const val=t(el.dataset.k); if(val) el.textContent=val;
+    });
+  },100);
+}
+
+function renderMenu(){
+  const list=tab==='all'?ITEMS:ITEMS.filter(i=>i.cat===tab);
+  document.getElementById('mGrid').innerHTML=list.map((item,idx)=>{
+    const name=item.name[lang]||item.name.cs;
+    const desc=item.desc[lang]||item.desc.cs;
+    return `<div class="m-card fi">
+      <div class="m-img">
+        <img src="${item.img}" alt="${name}" loading="lazy">
+        ${item.badge?`<span class="m-badge">${item.badge}</span>`:''}
+      </div>
+      <div class="m-body">
+        <h3 class="m-name">${name}</h3>
+        <p class="m-desc">${desc}</p>
+        <div class="m-ft">
+          <span class="m-price">${item.price}</span>
+          <button class="btn-ord" onclick="doOrder(${idx})">${t('ord')}</button>
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+  setTimeout(()=>{
+    document.querySelectorAll('.m-card').forEach(c=>c.classList.add('show'));
+    initFI();
+  },80);
+}
+
+function doOrder(idx){
+  const list=tab==='all'?ITEMS:ITEMS.filter(i=>i.cat===tab);
+  const name=list[idx].name[lang]||list[idx].name.cs;
+  const m={cs:`Zájem o: ${name}. Zavolejte +420 776 308 352`,uk:`Зацікавлені: ${name}. Тел. +420 776 308 352`,en:`Interested in: ${name}. Call +420 776 308 352`};
+  alert(m[lang]);
+}
+
+function initLangBtns(){
+  document.querySelectorAll('[data-l]').forEach(b=>b.classList.toggle('on',b.dataset.l===lang));
+}
+
+window.addEventListener('scroll',()=>{
+  document.getElementById('nav').classList.toggle('solid',window.scrollY>60);
+});
+
+document.getElementById('burgerBtn').addEventListener('click',()=>{
+  document.getElementById('mobMenu').classList.add('open');
+  document.body.style.overflow='hidden';
+});
+document.getElementById('mobClose').addEventListener('click',()=>{
+  document.getElementById('mobMenu').classList.remove('open');
+  document.body.style.overflow='';
+});
+document.querySelectorAll('.mob-lnk').forEach(a=>a.addEventListener('click',()=>{
+  document.getElementById('mobMenu').classList.remove('open');
+  document.body.style.overflow='';
+}));
+
+document.querySelectorAll('[data-l]').forEach(btn=>btn.addEventListener('click',()=>{
+  lang=btn.dataset.l;
+  localStorage.setItem('cakeme_lang',lang);
+  document.querySelectorAll('[data-l]').forEach(b=>b.classList.toggle('on',b.dataset.l===lang));
+  applyLang();
+}));
+
+document.querySelectorAll('.m-tab').forEach(tb=>tb.addEventListener('click',()=>{
+  tab=tb.dataset.tab;
+  document.querySelectorAll('.m-tab').forEach(x=>x.classList.toggle('on',x===tb));
+  renderMenu();
+}));
+
+function initFI(){
+  const obs=new IntersectionObserver(entries=>{
+    entries.forEach(e=>{ if(e.isIntersecting) e.target.classList.add('show'); });
+  },{threshold:.12});
+  document.querySelectorAll('.fi:not(.show)').forEach(el=>obs.observe(el));
+}
+
+(function(){
+  const p=location.pathname.split('/').pop()||'index.html';
+  document.querySelectorAll('.nav-links a, .mob-menu a[class="mob-lnk"]').forEach(a=>{
+    if(a.getAttribute('href')===p) a.classList.add('active');
+  });
+})();
+
+initLangBtns();
+applyLang();
+initFI();
+</script>
+</body>
+</html>
