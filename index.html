@@ -645,22 +645,116 @@ en:{
   m14n:'Capri-Sun',           m14d:'Fruit drink',
 }};
 
-// ── MENU DATA (фото з Wolt) ──
+// ── MENU DATA — повне меню з Wolt ──
 const ITEMS = [
-  {cat:'cakes',    img:'https://imageproxy.wolt.com/assets/69c26e1149d0c19e440a34c7', price:'133 Kč', badge:'Bestseller', nk:'m1n',  dk:'m1d'},
-  {cat:'cakes',    img:'https://imageproxy.wolt.com/assets/69c3b0786111b13a8d2d5365', price:'133 Kč', badge:'',           nk:'m2n',  dk:'m2d'},
-  {cat:'cakes',    img:'https://imageproxy.wolt.com/assets/697228caf1232b338e039772', price:'133 Kč', badge:'',           nk:'m3n',  dk:'m3d'},
-  {cat:'cakes',    img:'https://imageproxy.wolt.com/assets/69f04c2c463746eef18c5ffd', price:'133 Kč', badge:'Nové',       nk:'m4n',  dk:'m4d'},
-  {cat:'cakes',    img:'https://imageproxy.wolt.com/assets/697f1db5789a4f50f68328fd', price:'126 Kč', badge:'',           nk:'m5n',  dk:'m5d'},
-  {cat:'cakes',    img:'https://imageproxy.wolt.com/assets/69c26e1749d0c19e440a34d3', price:'133 Kč', badge:'',           nk:'m6n',  dk:'m6d'},
-  {cat:'desserts', img:'https://imageproxy.wolt.com/assets/697228caf1232b338e039783', price:'112 Kč', badge:'',           nk:'m7n',  dk:'m7d'},
-  {cat:'desserts', img:'https://imageproxy.wolt.com/assets/697228caf1232b338e039784', price:'137 Kč', badge:'',           nk:'m8n',  dk:'m8d'},
-  {cat:'desserts', img:'https://imageproxy.wolt.com/assets/69a1815dea4a83292ef03b2c', price:'247 Kč', badge:'',           nk:'m9n',  dk:'m9d'},
-  {cat:'desserts', img:'https://imageproxy.wolt.com/assets/697228caf1232b338e039773', price:'66 Kč',  badge:'',           nk:'m10n', dk:'m10d'},
-  {cat:'desserts', img:'https://imageproxy.wolt.com/assets/697228caf1232b338e03977f', price:'112 Kč', badge:'',           nk:'m11n', dk:'m11d'},
-  {cat:'desserts', img:'https://imageproxy.wolt.com/assets/697992f6a005afdf1964ffe7', price:'133 Kč', badge:'',           nk:'m12n', dk:'m12d'},
-  {cat:'desserts', img:'https://imageproxy.wolt.com/assets/6979934d520d609a024a691b', price:'66 Kč',  badge:'',           nk:'m13n', dk:'m13d'},
-  {cat:'drinks',   img:'https://imageproxy.wolt.com/assets/697228caf1232b338e03977e', price:'40 Kč',  badge:'',           nk:'m14n', dk:'m14d'},
+  // DORTY
+  {cat:'cakes', price:'133 Kč', badge:'Bestseller', img:'https://imageproxy.wolt.com/assets/697228caf1232b338e039779',
+   name:{cs:'Cheesecake',uk:'Чізкейк',en:'Cheesecake'},
+   desc:{cs:'1 ks – 160g. Tvaroh, zakysaná smetana, krémový sýr',uk:'1 шт – 160г. Сир, сметана, вершковий сир',en:'1 pc – 160g. Cottage cheese, sour cream, cream cheese'}},
+  {cat:'cakes', price:'126 Kč', badge:'', img:'https://imageproxy.wolt.com/assets/697228caf1232b338e039778',
+   name:{cs:'Ořechový koláč',uk:'Горіховий пиріг',en:'Walnut Cake'},
+   desc:{cs:'1 ks – 170g. Linecké těsto, med, smetana, vlašské ořechy',uk:'1 шт – 170г. Пісочне тісто, мед, вершки, волоські горіхи',en:'1 pc – 170g. Shortcrust pastry, honey, cream, walnuts'}},
+  {cat:'cakes', price:'133 Kč', badge:'', img:'https://imageproxy.wolt.com/assets/697228caf1232b338e039772',
+   name:{cs:'Ovocný světlý',uk:'Фруктовий торт',en:'Fruit Cake'},
+   desc:{cs:'1 ks – 160g. Tvaroh, mascarpone, smetana, jahody, maliny, borůvky',uk:'1 шт – 160г. Сир, маскарпоне, вершки, полуниця, малина, чорниця',en:'1 pc – 160g. Cottage cheese, mascarpone, cream, strawberries, raspberries, blueberries'}},
+  {cat:'cakes', price:'133 Kč', badge:'', img:'https://imageproxy.wolt.com/assets/697f1db5789a4f50f68328fd',
+   name:{cs:'Arašídový dort',uk:'Арахісовий торт',en:'Peanut Butter Cake'},
+   desc:{cs:'Čokoládový piškot s krémem ze smetanového sýra a arašídového másla',uk:'Шоколадний бісквіт з кремом зі вершкового сиру та арахісового масла',en:'Chocolate sponge with cream cheese and peanut butter frosting'}},
+  {cat:'cakes', price:'133 Kč', badge:'', img:'https://imageproxy.wolt.com/assets/698343bca2c5decc0bfdcb6d',
+   name:{cs:'Pavlova',uk:'Павлова',en:'Pavlova'},
+   desc:{cs:'Lehký nadýchaný dezert ze křupavého sněhového korpusu s marshmallow vnitřkem',uk:'Легкий повітряний десерт із хрусткого безе з серединкою як маршмелоу',en:'Light airy dessert with crispy meringue and marshmallow centre'}},
+  {cat:'cakes', price:'126 Kč', badge:'', img:'https://imageproxy.wolt.com/assets/69997daf3eb3341f036ea0ae',
+   name:{cs:'Citronový koláč',uk:'Лимонний пиріг',en:'Lemon Cake'},
+   desc:{cs:'Křehké máslové těsto, jemný citronový krém, sněhová vrstva zapečená dozlatova',uk:'Крихке вершкове тісто, ніжний лимонний крем, запечений білковий шар',en:'Crispy butter pastry, delicate lemon cream, golden meringue topping'}},
+  {cat:'cakes', price:'133 Kč', badge:'', img:'https://imageproxy.wolt.com/assets/69de33ac73316796ef90e4cb',
+   name:{cs:'Citronový s malinami',uk:'Лимонний з малиною',en:'Lemon Raspberry Cake'},
+   desc:{cs:'Citronový koláč s čerstvými malinami',uk:'Лимонний пиріг зі свіжою малиною',en:'Lemon cake with fresh raspberries'}},
+  {cat:'cakes', price:'133 Kč', badge:'Nové', img:'https://imageproxy.wolt.com/assets/69f04c2c463746eef18c5ffd',
+   name:{cs:'Mango-Maracuja',uk:'Манго-Маракуя',en:'Mango-Passionfruit'},
+   desc:{cs:'Vanilkový piškot, mascarpone, tvaroh, smetana, kousky manga a maracuji',uk:'Ванільний бісквіт, маскарпоне, сир, вершки, шматочки манго та маракуї',en:'Vanilla sponge, mascarpone, cottage cheese, cream, mango & passionfruit pieces'}},
+  // DEZERTY
+  {cat:'desserts', price:'97 Kč', badge:'', img:'https://imageproxy.wolt.com/assets/697992ef72674ce89f7a8f71',
+   name:{cs:'Nanuk jahodový',uk:'Нанук полуничний',en:'Strawberry Ice Bar'},
+   desc:{cs:'Čokoládový piškot, poleva z bílé čokolády s jahodovou příchutí',uk:'Шоколадний бісквіт, глазур із білого шоколаду з полуничним смаком',en:'Chocolate sponge, white chocolate glaze with strawberry flavour'}},
+  {cat:'desserts', price:'112 Kč', badge:'', img:'https://imageproxy.wolt.com/assets/697228caf1232b338e039783',
+   name:{cs:'Karamelový větrník',uk:'Карамельний вітряк',en:'Caramel Cream Puff'},
+   desc:{cs:'1 ks – 190g. Vanilkový a karamelový krém v odpalovaném těstě',uk:'1 шт – 190г. Ванільний та карамельний крем у заварному тісті',en:'1 pc – 190g. Vanilla and caramel cream in choux pastry'}},
+  {cat:'desserts', price:'112 Kč', badge:'', img:'https://imageproxy.wolt.com/assets/697228caf1232b338e03976f',
+   name:{cs:'Borůvková tartaletka',uk:'Чорничний тарталет',en:'Blueberry Tartlet'},
+   desc:{cs:'1 ks – 130g. Linecké těsto, tvarohová náplň a čerstvé borůvky',uk:'1 шт – 130г. Пісочне тісто, сирна начинка та свіжа чорниця',en:'1 pc – 130g. Shortcrust pastry, curd filling and fresh blueberries'}},
+  {cat:'desserts', price:'92 Kč', badge:'', img:'https://imageproxy.wolt.com/assets/697228caf1232b338e039773',
+   name:{cs:'Kremrole',uk:'Кремроле',en:'Cream Roll'},
+   desc:{cs:'Bílky, cukr, citronová šťáva',uk:'Білки, цукор, лимонний сік',en:'Egg whites, sugar, lemon juice'}},
+  {cat:'desserts', price:'66 Kč', badge:'', img:'https://imageproxy.wolt.com/assets/697998f6aded7a30ce7db068',
+   name:{cs:'Malinová makronka',uk:'Малиновий макарун',en:'Raspberry Macaron'},
+   desc:{cs:'Mandlová mouka, bílky, cukr, ganáž z bílé čokolády a malinová marmeláda',uk:'Мигдальне борошно, білки, цукор, ганаш із білого шоколаду та малинове варення',en:'Almond flour, egg whites, sugar, white chocolate ganache & raspberry jam'}},
+  {cat:'desserts', price:'112 Kč', badge:'', img:'https://imageproxy.wolt.com/assets/697228caf1232b338e039784',
+   name:{cs:'Malinová tartaletka',uk:'Малиновий тарталет',en:'Raspberry Tartlet'},
+   desc:{cs:'1 ks – 130g. Linecké těsto, tvarohová náplň a čerstvé maliny',uk:'1 шт – 130г. Пісочне тісто, сирна начинка та свіжа малина',en:'1 pc – 130g. Shortcrust pastry, curd filling and fresh raspberries'}},
+  {cat:'desserts', price:'102 Kč', badge:'', img:'https://imageproxy.wolt.com/assets/69a1815dea4a83292ef03b2c',
+   name:{cs:'Panna cotta',uk:'Панна котта',en:'Panna Cotta'},
+   desc:{cs:'Jemný smetanový dezert s vanilkovým extraktem a ovocným coulis',uk:'Ніжний вершковий десерт із ваніллю та фруктовим кулі',en:'Delicate cream dessert with vanilla extract and fruit coulis'}},
+  {cat:'desserts', price:'137 Kč', badge:'', img:'https://imageproxy.wolt.com/assets/697228caf1232b338e039771',
+   name:{cs:'Pistáciový mousse',uk:'Фісташковий мус',en:'Pistachio Mousse'},
+   desc:{cs:'1 ks – 120g. Pěna z pistáciové pasty, smetanového sýra a smetany',uk:'1 шт – 120г. Піна з фісташкової пасти, вершкового сиру та вершків',en:'1 pc – 120g. Pistachio paste, cream cheese and cream mousse'}},
+  {cat:'desserts', price:'247 Kč', badge:'', img:'https://imageproxy.wolt.com/assets/697228caf1232b338e039782',
+   name:{cs:'Slaný karamel',uk:'Солона карамель',en:'Salted Caramel'},
+   desc:{cs:'1 ks – 300g. Lahodná kombinace karamelu a slaného másla',uk:'1 шт – 300г. Вишукане поєднання карамелі та солоного масла',en:'1 pc – 300g. Delicious combination of caramel and salted butter'}},
+  {cat:'desserts', price:'92 Kč', badge:'', img:'https://imageproxy.wolt.com/assets/697228caf1232b338e039785',
+   name:{cs:'Vanilkový věneček',uk:'Ванільний венечок',en:'Vanilla Choux Ring'},
+   desc:{cs:'Odpalované těsto plněné vanilkovým crème pâtissière',uk:'Заварне тісто з ванільним кремом',en:'Choux pastry filled with vanilla crème pâtissière'}},
+  {cat:'desserts', price:'97 Kč', badge:'', img:'https://imageproxy.wolt.com/assets/697228caf1232b338e03977f',
+   name:{cs:'Věneček s jahodami',uk:'Венечок з полуницею',en:'Strawberry Choux Ring'},
+   desc:{cs:'Odpalované těsto plněné vanilkovým crème pâtissière a čerstvými jahodami',uk:'Заварне тісто з ванільним кремом та свіжою полуницею',en:'Choux pastry with vanilla crème pâtissière and fresh strawberries'}},
+  {cat:'desserts', price:'97 Kč', badge:'', img:'https://imageproxy.wolt.com/assets/69799345520d609a024a691a',
+   name:{cs:'Nanuk višňový',uk:'Нанук вишневий',en:'Cherry Ice Bar'},
+   desc:{cs:'Světlý piškot, poleva z bílé čokolády s višňovou příchutí',uk:'Світлий бісквіт, глазур із білого шоколаду з вишневим смаком',en:'Light sponge, white chocolate glaze with cherry flavour'}},
+  {cat:'desserts', price:'97 Kč', badge:'', img:'https://imageproxy.wolt.com/assets/6979924372674ce89f7a8f6d',
+   name:{cs:'Nanuk čokoládový',uk:'Нанук шоколадний',en:'Chocolate Ice Bar'},
+   desc:{cs:'Světlý piškot, čokoládová poleva z bílé čokolády',uk:'Світлий бісквіт, шоколадна глазур із білого шоколаду',en:'Light sponge with white chocolate coating'}},
+  {cat:'desserts', price:'97 Kč', badge:'', img:'https://imageproxy.wolt.com/assets/69799356a005afdf1964ffeb',
+   name:{cs:'Nanuk banánový',uk:'Нанук банановий',en:'Banana Ice Bar'},
+   desc:{cs:'Světlý piškot, poleva z bílé čokolády s banánovou příchutí',uk:'Світлий бісквіт, глазур із білого шоколаду з банановим смаком',en:'Light sponge, white chocolate glaze with banana flavour'}},
+  {cat:'desserts', price:'97 Kč', badge:'', img:'https://imageproxy.wolt.com/assets/6979935e520d609a024a691c',
+   name:{cs:'Nanuk pistáciový',uk:'Нанук фісташковий',en:'Pistachio Ice Bar'},
+   desc:{cs:'Světlý piškot, poleva z bílé čokolády s pistáciovou příchutí',uk:'Світлий бісквіт, глазур із білого шоколаду з фісташковим смаком',en:'Light sponge, white chocolate glaze with pistachio flavour'}},
+  {cat:'desserts', price:'67 Kč', badge:'', img:'https://imageproxy.wolt.com/assets/697992f6a005afdf1964ffe7',
+   name:{cs:'Makronka pistácie',uk:'Макарун фісташковий',en:'Pistachio Macaron'},
+   desc:{cs:'Mandlová mouka, bílky, cukr, ganáž z bílé čokolády a 100% pistáciové pasty',uk:'Мигдальне борошно, білки, цукор, ганаш із білого шоколаду та фісташкової пасти',en:'Almond flour, egg whites, sugar, white chocolate ganache & pistachio paste'}},
+  {cat:'desserts', price:'67 Kč', badge:'', img:'https://imageproxy.wolt.com/assets/6979934d520d609a024a691b',
+   name:{cs:'Makronka čokoláda',uk:'Макарун шоколадний',en:'Chocolate Macaron'},
+   desc:{cs:'Mandlová mouka, bílky, cukr, ganáž z hořké čokolády',uk:'Мигдальне борошно, білки, цукор, ганаш із гіркого шоколаду',en:'Almond flour, egg whites, sugar, dark chocolate ganache'}},
+  {cat:'desserts', price:'67 Kč', badge:'', img:'https://imageproxy.wolt.com/assets/6979980b8d71993ce32ff03a',
+   name:{cs:'Makronka borůvková',uk:'Макарун чорничний',en:'Blueberry Macaron'},
+   desc:{cs:'Mandlová mouka, bílky, cukr, ganáž z bílé čokolády a borůvkové pyré',uk:'Мигдальне борошно, білки, цукор, ганаш із білого шоколаду та чорничного пюре',en:'Almond flour, egg whites, sugar, white chocolate ganache & blueberry purée'}},
+  {cat:'desserts', price:'97 Kč', badge:'', img:'https://imageproxy.wolt.com/assets/69799917aded7a30ce7db06c',
+   name:{cs:'Rumová koule',uk:'Ромовий кульок',en:'Rum Ball'},
+   desc:{cs:'Čokoládový piškot s rumovou příchutí',uk:'Шоколадний бісквіт із ромовим смаком',en:'Chocolate sponge with rum flavour'}},
+  {cat:'desserts', price:'133 Kč', badge:'', img:'https://imageproxy.wolt.com/assets/69a18165ea4a83292ef03b36',
+   name:{cs:'Špička likérová',uk:'Лікерна шпичка',en:'Liqueur Špička'},
+   desc:{cs:'Čokoládová pěna s lahodným vaječňákem — moderní verze klasického dezertu',uk:'Шоколадна піна з яєчним лікером — сучасна версія класичного десерту',en:'Chocolate mousse with egg liqueur — a modern take on a classic Czech dessert'}},
+  {cat:'desserts', price:'66 Kč', badge:'', img:'https://imageproxy.wolt.com/assets/69c2630d6111b13a8d2d4870',
+   name:{cs:'Višňový Cake pop',uk:'Вишневий Cake pop',en:'Cherry Cake Pop'},
+   desc:{cs:'Vláčný piškot, jahodová marmeláda, čokoládová ganache',uk:'Пишний бісквіт, полунична мармелада, шоколадний ганаш',en:'Moist sponge, strawberry jam, chocolate ganache'}},
+  {cat:'desserts', price:'66 Kč', badge:'', img:'https://imageproxy.wolt.com/assets/69c26df049d0c19e440a34ba',
+   name:{cs:'Čokoládový Cake pop',uk:'Шоколадний Cake pop',en:'Chocolate Cake Pop'},
+   desc:{cs:'Vláčný piškot, jahodová marmeláda, čokoládová ganache',uk:'Пишний бісквіт, полунична мармелада, шоколадний ганаш',en:'Moist sponge, strawberry jam, chocolate ganache'}},
+  {cat:'desserts', price:'66 Kč', badge:'', img:'https://imageproxy.wolt.com/assets/69c26e1149d0c19e440a34c7',
+   name:{cs:'Banánový Cake pop',uk:'Банановий Cake pop',en:'Banana Cake Pop'},
+   desc:{cs:'Vláčný piškot, jahodová marmeláda, čokoládová ganache',uk:'Пишний бісквіт, полунична мармелада, шоколадний ганаш',en:'Moist sponge, strawberry jam, chocolate ganache'}},
+  {cat:'desserts', price:'66 Kč', badge:'', img:'https://imageproxy.wolt.com/assets/69c262b7e3a2b6d8564b038f',
+   name:{cs:'Jahodový Cake pop',uk:'Полуничний Cake pop',en:'Strawberry Cake Pop'},
+   desc:{cs:'Vláčný piškot, jahodová marmeláda, čokoládová ganache',uk:'Пишний бісквіт, полунична мармелада, шоколадний ганаш',en:'Moist sponge, strawberry jam, chocolate ganache'}},
+  {cat:'desserts', price:'66 Kč', badge:'', img:'https://imageproxy.wolt.com/assets/69c26e1749d0c19e440a34d3',
+   name:{cs:'Pistáciový Cake pop',uk:'Фісташковий Cake pop',en:'Pistachio Cake Pop'},
+   desc:{cs:'Vláčný piškot, jahodová marmeláda, čokoládová ganache',uk:'Пишний бісквіт, полунична мармелада, шоколадний ганаш',en:'Moist sponge, strawberry jam, chocolate ganache'}},
+  {cat:'desserts', price:'112 Kč', badge:'', img:'https://imageproxy.wolt.com/assets/69c3b0786111b13a8d2d5365',
+   name:{cs:'Tartaletka Slaný karamel',uk:'Тарталет Солона карамель',en:'Salted Caramel Tartlet'},
+   desc:{cs:'Křehká tartaletka plněná slaným karamelem a čokoládovou ganache',uk:'Крихка тарталетка з солоною карамеллю та шоколадним ганашем',en:'Crispy tartlet filled with salted caramel and chocolate ganache'}},
+  // NÁPOJE
+  {cat:'drinks', price:'40 Kč', badge:'', img:'https://imageproxy.wolt.com/assets/697228caf1232b338e03977e',
+   name:{cs:'Capri-Sun',uk:'Capri-Sun',en:'Capri-Sun'},
+   desc:{cs:'Ovocný nápoj',uk:'Фруктовий напій',en:'Fruit drink'}},
 ];
 
 let lang = 'cs';
@@ -686,30 +780,35 @@ function applyLang(){
 
 function renderMenu(){
   const list = tab==='all' ? ITEMS : ITEMS.filter(i=>i.cat===tab);
-  document.getElementById('mGrid').innerHTML = list.map(item=>`
+  document.getElementById('mGrid').innerHTML = list.map((item,idx)=>{
+    const name = item.name[lang] || item.name.cs;
+    const desc = item.desc[lang] || item.desc.cs;
+    return `
     <div class="m-card fi">
       <div class="m-img">
-        <img src="${item.img}" alt="${t(item.nk)}" loading="lazy">
+        <img src="${item.img}" alt="${name}" loading="lazy">
         ${item.badge?`<span class="m-badge">${item.badge}</span>`:''}
       </div>
       <div class="m-body">
-        <h3 class="m-name">${t(item.nk)}</h3>
-        <p class="m-desc">${t(item.dk)}</p>
+        <h3 class="m-name">${name}</h3>
+        <p class="m-desc">${desc}</p>
         <div class="m-ft">
           <span class="m-price">${item.price}</span>
-          <button class="btn-ord" onclick="doOrder('${item.nk}')">${t('ord')}</button>
+          <button class="btn-ord" onclick="doOrder(${idx})">${t('ord')}</button>
         </div>
       </div>
-    </div>
-  `).join('');
+    </div>`;
+  }).join('');
   setTimeout(()=>{
     document.querySelectorAll('.m-card').forEach(c=>c.classList.add('show'));
     initFI();
   },80);
 }
 
-function doOrder(nk){
-  const m={cs:`Zájem o: ${t(nk)}. Zavolejte +420 776 308 352`,uk:`Зацікавлені: ${t(nk)}. Тел. +420 776 308 352`,en:`Interested in: ${t(nk)}. Call +420 776 308 352`};
+function doOrder(idx){
+  const list = tab==='all' ? ITEMS : ITEMS.filter(i=>i.cat===tab);
+  const name = list[idx].name[lang] || list[idx].name.cs;
+  const m={cs:`Zájem o: ${name}. Zavolejte +420 776 308 352`,uk:`Зацікавлені: ${name}. Тел. +420 776 308 352`,en:`Interested in: ${name}. Call +420 776 308 352`};
   alert(m[lang]);
 }
 
