@@ -20,7 +20,7 @@
   --bdr:#242424;
 }
 html{scroll-behavior:smooth}
-body{font-family:'Raleway',sans-serif;background:var(--bg0);color:var(--tx0);line-height:1.6;overflow-x:hidden}
+body{font-family:'Raleway',sans-serif;background-color:var(--bg0);background-image:radial-gradient(ellipse 90% 60% at 50% 25%,rgba(201,169,110,.06) 0%,transparent 65%),linear-gradient(rgba(201,169,110,.025) 1px,transparent 1px),linear-gradient(90deg,rgba(201,169,110,.025) 1px,transparent 1px);background-size:100% 100%,55px 55px,55px 55px;color:var(--tx0);line-height:1.6;overflow-x:hidden}
 
 /* ── NAV ── */
 .nav{position:fixed;top:0;width:100%;z-index:1000;padding:18px 0;transition:.3s}
@@ -63,7 +63,7 @@ section{padding:96px 0}
 .fi.show{opacity:1;transform:translateY(0)}
 
 /* ── MENU ── */
-#menu{background:var(--bg1)}
+#menu{background:transparent}
 .m-tabs{display:flex;justify-content:center;gap:6px;margin-bottom:50px;flex-wrap:wrap}
 .m-tab{background:transparent;border:1px solid var(--bdr);color:var(--tx2);padding:10px 26px;cursor:pointer;font:.76rem 'Raleway',sans-serif;letter-spacing:2px;text-transform:uppercase;transition:.25s}
 .m-tab.on,.m-tab:hover{border-color:var(--gold);color:var(--gold);background:rgba(201,169,110,.07)}
