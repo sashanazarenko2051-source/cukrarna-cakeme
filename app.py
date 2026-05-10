@@ -66,7 +66,7 @@ def security_headers(resp):
 
 # ── Database ──
 def _get_conn():
-    return psycopg2.connect(DATABASE_URL)
+    return psycopg2.connect(DATABASE_URL, connect_timeout=5)
 
 def _init_db():
     if not DATABASE_URL or not psycopg2:

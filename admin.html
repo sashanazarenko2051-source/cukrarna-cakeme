@@ -534,7 +534,7 @@ const TA = {
     adm_all_items_title:'Všechny položky menu',
     adm_edit_title:'Upravit položku', adm_save_btn:'✓ Uložit změny',
     adm_cancel_edit:'✕ Zrušit úpravy', adm_saved_ok:'✓ Uloženo!',
-    adm_custom_only:'Vlastní', adm_static_lbl:'Základ',
+    adm_custom_only:'Vlastní', adm_static_lbl:'Základ', adm_save_as_new:'uložit jako novou',
     adm_analytics:'Analytika',
     adm_ap_7:'7 dní', adm_ap_30:'30 dní', adm_ap_90:'90 dní', adm_ap_all:'Vše',
     adm_an_orders:'Objednávky', adm_an_revenue:'Příjem (Kč)',
@@ -575,7 +575,7 @@ const TA = {
     adm_all_items_title:'Всі позиції меню',
     adm_edit_title:'Редагувати позицію', adm_save_btn:'✓ Зберегти зміни',
     adm_cancel_edit:'✕ Скасувати', adm_saved_ok:'✓ Збережено!',
-    adm_custom_only:'Власні', adm_static_lbl:'База',
+    adm_custom_only:'Власні', adm_static_lbl:'База', adm_save_as_new:'зберегти як новий',
     adm_analytics:'Аналітика',
     adm_ap_7:'7 днів', adm_ap_30:'30 днів', adm_ap_90:'90 днів', adm_ap_all:'Всі',
     adm_an_orders:'Замовлень', adm_an_revenue:'Дохід (Kč)',
@@ -861,7 +861,10 @@ function renderMenuItems(customItems){
            <button class="ci-edit" onclick="startEditById(${item.id})" title="✎">✎</button>
            <button class="ci-del"  onclick="deleteMenuItem(${item.id})" title="✕">✕</button>
          </div>`
-      : `<span class="ci-static-badge">${t('adm_static_lbl')}</span>`;
+      : `<div class="ci-btns">
+           <span class="ci-static-badge">${t('adm_static_lbl')}</span>
+           <button class="ci-edit" onclick="startEditStatic(${item.id})" title="✎">✎</button>
+         </div>`;
     return `<div class="ci-card">
       ${thumb}
       <div class="ci-info"><div style="min-width:0">
@@ -883,6 +886,30 @@ document.querySelectorAll('.ci-flt').forEach(btn=>btn.addEventListener('click',(
 function startEditById(id){
   const item = cachedMenuItems ? cachedMenuItems.find(i=>i.id===id) : null;
   if(item) startEdit(item);
+}
+
+function startEditStatic(id){
+  const item = STATIC_ITEMS.find(i=>i.id===id);
+  if(!item) return;
+  // editingId stays null → Save will POST as new custom item (copy of static base)
+  editingId = null;
+  document.getElementById('fCat').value    = item.cat || 'desserts';
+  document.getElementById('fPrice').value  = itemPrice(item);
+  document.getElementById('fNameCs').value = item.name?.cs || '';
+  document.getElementById('fNameUk').value = item.name?.uk || '';
+  document.getElementById('fNameEn').value = item.name?.en || '';
+  document.getElementById('fBadge').value  = item.badge || '';
+  document.getElementById('fDescCs').value = item.desc?.cs || '';
+  document.getElementById('fDescUk').value = item.desc?.uk || '';
+  document.getElementById('fDescEn').value = item.desc?.en || '';
+  resetImg();
+  document.getElementById('formTitle').textContent = t('adm_edit_title');
+  document.getElementById('addItemBtn').textContent = t('adm_save_btn');
+  document.getElementById('editModeBanner').textContent = '✎ ' + (item.name?.cs || '') + ' → ' + t('adm_save_as_new');
+  document.getElementById('editModeBanner').classList.add('show');
+  document.getElementById('cancelEditBtn').classList.add('show');
+  updateCardPreview();
+  document.getElementById('formPanel').scrollIntoView({behavior:'smooth', block:'start'});
 }
 
 function startEdit(item){
