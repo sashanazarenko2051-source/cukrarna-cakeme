@@ -857,9 +857,8 @@ async function renderOrders(){
         <div class="oc-field"><span class="oc-lbl">${t('adm_f_name')}</span><span class="oc-val">${esc(o.name)}</span></div>
         <div class="oc-field"><span class="oc-lbl">${t('adm_f_phone')}</span><span class="oc-val"><a href="tel:${esc(o.phone)}">${esc(o.phone)}</a></span></div>
         ${o.address?`<div class="oc-field full"><span class="oc-lbl">${t('adm_f_address')}</span><span class="oc-val">${esc(o.address)}</span></div>`:''}
-        <div class="oc-field full"><span class="oc-lbl">${t('adm_f_order')}</span><span class="oc-val items">${esc(orderItems(o.order))}</span></div>
+        <div class="oc-field full"><span class="oc-lbl">${t('adm_f_order')}</span><span class="oc-val items">${esc(orderItems(o.order))}${orderTotal(o.order)?`<span style="color:var(--gold);font-family:'Playfair Display',serif;display:block;margin-top:4px">${esc(orderTotal(o.order))}</span>`:''}</span></div>
         <div class="oc-field"><span class="oc-lbl">${t('adm_f_payment')}</span><span class="oc-val">${esc(o.payment||'—')}</span></div>
-        <div class="oc-field"><span class="oc-lbl">${t('adm_f_total')}</span><span class="oc-val" style="color:var(--gold);font-family:'Playfair Display',serif;font-size:1.05rem">${orderTotal(o.order)||'—'}</span></div>
       </div>
       <div class="oc-actions">
         ${o.status!=='new'         ?`<button onclick="setStatus(${o.id},'new')">${t('adm_btn_new')}</button>`:''}
