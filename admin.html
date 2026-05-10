@@ -291,6 +291,10 @@ body{font-family:'Raleway',sans-serif;background:var(--bg0);color:var(--tx0)}
             <input type="text" id="fNameCs" placeholder="Název česky">
           </div>
           <div class="mai-field">
+            <label>Назва UA</label>
+            <input type="text" id="fNameUk" placeholder="Назва українською">
+          </div>
+          <div class="mai-field">
             <label>Name EN</label>
             <input type="text" id="fNameEn" placeholder="Name in English">
           </div>
@@ -301,6 +305,10 @@ body{font-family:'Raleway',sans-serif;background:var(--bg0);color:var(--tx0)}
           <div class="mai-field full">
             <label>Popis CZ</label>
             <input type="text" id="fDescCs" placeholder="Krátký popis česky">
+          </div>
+          <div class="mai-field full">
+            <label>Опис UA</label>
+            <input type="text" id="fDescUk" placeholder="Короткий опис українською">
           </div>
           <div class="mai-field full">
             <label>Description EN</label>
@@ -546,16 +554,18 @@ document.getElementById('addItemBtn').addEventListener('click', async ()=>{
         cat:     document.getElementById('fCat').value,
         price,
         name_cs: nameCs,
+        name_uk: document.getElementById('fNameUk').value.trim(),
         name_en: document.getElementById('fNameEn').value.trim(),
         badge:   document.getElementById('fBadge').value.trim(),
         img:     currentImgData,
         desc_cs: document.getElementById('fDescCs').value.trim(),
+        desc_uk: document.getElementById('fDescUk').value.trim(),
         desc_en: document.getElementById('fDescEn').value.trim()
       })
     });
     if(r.ok){
       showAddMsg('✓ Položka přidána do menu!', 'ok');
-      ['fNameCs','fNameEn','fPrice','fBadge','fDescCs','fDescEn'].forEach(id=>document.getElementById(id).value='');
+      ['fNameCs','fNameUk','fNameEn','fPrice','fBadge','fDescCs','fDescUk','fDescEn'].forEach(id=>document.getElementById(id).value='');
       resetImg();
       updateCardPreview();
       loadMenuItems();
