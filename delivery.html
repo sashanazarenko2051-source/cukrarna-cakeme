@@ -370,10 +370,7 @@ footer{background:#070707;border-top:1px solid var(--bdr);padding:52px 0 28px}
       <h3 data-k="oc_ttl">Objednejte nyní</h3>
       <p data-k="oc_sub">Vyplňte formulář — potvrdíme objednávku do 15 minut</p>
       <form class="ord-form" id="orderForm">
-        <input type="hidden" name="access_key" value="YOUR_WEB3FORMS_ACCESS_KEY">
-        <input type="hidden" name="subject" id="subjectInput" value="Nová objednávka — CakeMe Doručení">
-        <input type="checkbox" name="botcheck" style="display:none">
-        <input type="hidden" name="order_type" id="orderTypeInput" value="Doručení domů">
+        <input type="hidden" id="orderTypeInput" value="Doručení domů">
         <div class="ord-field full">
           <label data-k="f_type">Způsob objednávky</label>
           <div class="ord-type">
@@ -616,19 +613,26 @@ document.getElementById('orderForm').addEventListener('submit',async function(e)
   const btn=this.querySelector('button[type="submit"]');
   const msg=document.getElementById('ordMsg');
   const orig=btn.textContent;
-  const fd=new FormData(this);
   btn.disabled=true; btn.textContent='...';
   msg.className='ord-msg';
+  const payload={
+    name:    this.querySelector('[name="name"]').value.trim(),
+    phone:   this.querySelector('[name="phone"]').value.trim(),
+    address: (this.querySelector('[name="address"]')||{value:''}).value.trim(),
+    order:   document.getElementById('cartHidden').value,
+    payment: this.querySelector('[name="payment"]').value,
+    order_type: document.getElementById('orderTypeInput').value,
+  };
   try{
-    const r=await fetch('https://api.web3forms.com/submit',{method:'POST',body:fd});
+    const r=await fetch('/api/order',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});
     const j=await r.json();
     if(j.success){
-      const stored=JSON.parse(localStorage.getItem('cakeme_orders')||'[]');
-      stored.unshift({id:Date.now(),ts:new Date().toISOString(),name:fd.get('name')||'',phone:fd.get('phone')||'',address:fd.get('address')||'',order:fd.get('order')||'',payment:fd.get('payment')||'',order_type:fd.get('order_type')||'',status:'new'});
-      localStorage.setItem('cakeme_orders',JSON.stringify(stored.slice(0,300)));
-      msg.className='ord-msg ok';msg.textContent=t('f_ok');this.reset();saveCart([]);renderCartDel();
-    }
-    else throw new Error();
+      msg.className='ord-msg ok';msg.textContent=t('f_ok');
+      this.querySelector('[name="name"]').value='';
+      this.querySelector('[name="phone"]').value='';
+      const addrI=this.querySelector('[name="address"]');if(addrI)addrI.value='';
+      saveCart([]);renderCartDel();
+    }else throw new Error();
   }catch{msg.className='ord-msg err';msg.textContent=t('f_err');}
   btn.disabled=false; btn.textContent=orig;
 });

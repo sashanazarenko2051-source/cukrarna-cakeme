@@ -4,7 +4,8 @@ from collections import defaultdict
 
 app = Flask(__name__, static_folder='.', static_url_path='')
 
-MENU_FILE  = 'custom_menu.json'
+MENU_FILE    = 'custom_menu.json'
+ORDERS_FILE  = 'orders.json'
 ADMIN_PASS = os.environ.get('ADMIN_PASS', 'Tort@Praha51')
 SECRET_KEY = os.environ.get('SECRET_KEY', secrets.token_hex(32))
 TOKEN_TTL  = 12 * 3600  # token window 12 h
@@ -68,6 +69,20 @@ def save_custom(items):
     with open(MENU_FILE, 'w', encoding='utf-8') as f:
         json.dump(items, f, ensure_ascii=False, indent=2)
 
+# ── Order helpers ──
+def load_orders():
+    try:
+        if os.path.exists(ORDERS_FILE):
+            with open(ORDERS_FILE, encoding='utf-8') as f:
+                return json.load(f)
+    except Exception:
+        pass
+    return []
+
+def save_orders(orders):
+    with open(ORDERS_FILE, 'w', encoding='utf-8') as f:
+        json.dump(orders, f, ensure_ascii=False, indent=2)
+
 # ── Routes ──
 @app.route('/')
 def index():
@@ -118,6 +133,34 @@ def api_add():
     items.append(item)
     save_custom(items)
     return jsonify({'ok': True, 'item': item})
+
+@app.route('/api/order', methods=['POST'])
+def api_order():
+    d = request.get_json(force=True, silent=True) or {}
+    order = {
+        'id':         int(time.time() * 1000),
+        'ts':         time.strftime('%Y-%m-%dT%H:%M:%SZ', time.gmtime()),
+        'name':       (d.get('name')       or '').strip(),
+        'phone':      (d.get('phone')      or '').strip(),
+        'address':    (d.get('address')    or '').strip(),
+        'order':      (d.get('order')      or '').strip(),
+        'payment':    (d.get('payment')    or '').strip(),
+        'order_type': (d.get('order_type') or '').strip(),
+        'status':     'new',
+    }
+    if not order['name'] or not order['phone']:
+        return jsonify({'success': False, 'error': 'name and phone required'}), 400
+    orders = load_orders()
+    orders.insert(0, order)
+    save_orders(orders[:300])
+    return jsonify({'success': True})
+
+@app.route('/api/orders', methods=['POST'])
+def api_orders():
+    d = request.get_json(force=True, silent=True) or {}
+    if not _authorized(d):
+        return jsonify({'error': 'Unauthorized'}), 401
+    return jsonify(load_orders())
 
 @app.route('/api/menu/<int:item_id>', methods=['DELETE'])
 def api_delete(item_id):
