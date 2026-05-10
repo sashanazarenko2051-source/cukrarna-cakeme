@@ -151,6 +151,21 @@ footer{background:#070707;border-top:1px solid var(--bdr);padding:52px 0 28px}
 .cdb-empty a{color:var(--gold);text-decoration:none}
 .cdb-empty a:hover{color:var(--gold-l)}
 
+/* ── PAYMENT BLOCK ── */
+.pay-block{margin-top:28px;padding:28px 36px;background:var(--bg2);border:1px solid var(--bdr);border-left:3px solid var(--gold);display:flex;gap:22px;align-items:flex-start}
+.pay-block-ico{font-size:2rem;flex-shrink:0;margin-top:2px}
+.pay-ttl{font-family:'Playfair Display',serif;font-size:1.1rem;color:var(--tx0);margin-bottom:8px}
+.pay-desc{font-size:.85rem;color:var(--tx1);line-height:1.65;margin-bottom:16px}
+.pay-rows{display:flex;flex-direction:column;gap:8px}
+.pay-row{display:flex;align-items:baseline;gap:12px}
+.pay-row-lbl{color:var(--tx2);text-transform:uppercase;font-size:.66rem;letter-spacing:1.2px;min-width:90px;flex-shrink:0}
+.pay-row-val{font-family:'Playfair Display',serif;color:var(--gold);font-size:.98rem;letter-spacing:.5px}
+@media(max-width:768px){
+  .pay-block{padding:20px 18px;flex-direction:column;gap:12px}
+  .pay-block-ico{font-size:1.6rem;margin-top:0}
+  .pay-row-lbl{min-width:76px}
+}
+
 /* ── RESPONSIVE ── */
 @media(max-width:1024px){
   .ft-grid{grid-template-columns:1fr 1fr}
@@ -332,6 +347,24 @@ footer{background:#070707;border-top:1px solid var(--bdr);padding:52px 0 28px}
         <p data-k="i2d">mimo Prahu 250 Kč</p>
       </div>
     </div>
+    <div class="pay-block fi">
+      <div class="pay-block-ico">💳</div>
+      <div>
+        <h4 class="pay-ttl" data-k="pay_ttl">Platební podmínky</h4>
+        <p class="pay-desc" data-k="pay_dep">Záloha 50 % z celkové ceny objednávky je splatná bankovním převodem při potvrzení. Zbývajících 50 % hradíte při převzetí.</p>
+        <div class="pay-rows">
+          <div class="pay-row">
+            <span class="pay-row-lbl" data-k="pay_acc">Číslo účtu</span>
+            <span class="pay-row-val">6706173349/0800</span>
+          </div>
+          <div class="pay-row">
+            <span class="pay-row-lbl">IBAN</span>
+            <span class="pay-row-val">CZ14&nbsp;0800&nbsp;0000&nbsp;0067&nbsp;0617&nbsp;3349</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
     <div class="ord-form-wrap fi">
       <h3 data-k="oc_ttl">Objednejte nyní</h3>
       <p data-k="oc_sub">Vyplňte formulář — potvrdíme objednávku do 15 minut</p>
@@ -372,6 +405,7 @@ footer{background:#070707;border-top:1px solid var(--bdr);padding:52px 0 28px}
         <div class="ord-field full">
           <label data-k="f_pay">Způsob platby</label>
           <select name="payment">
+            <option data-k="f_pay_transfer">50 % převodem + 50 % při převzetí</option>
             <option data-k="f_pay_cash">Hotově</option>
             <option data-k="f_pay_card">Kartou</option>
           </select>
@@ -459,7 +493,8 @@ cs:{nav_home:'Domů',nav_menu:'Menu',nav_about:'O nás',nav_del:'Doručení',nav
   f_name:'Jméno',f_phone:'Telefon',f_addr:'Adresa doručení',
   f_cart:'Vaše objednávka',cart_total:'Celkem',cart_empty_del:'Košík je prázdný — přidejte zboží z menu',go_menu:'Přejít na menu',
   f_type:'Způsob objednávky',ot_delivery:'Doručení domů',ot_instore:'Osobní odběr',
-  f_pay:'Způsob platby',f_pay_cash:'Hotově',f_pay_card:'Kartou',
+  f_pay:'Způsob platby',f_pay_transfer:'50 % převodem + 50 % při převzetí',f_pay_cash:'Hotově',f_pay_card:'Kartou',
+  pay_ttl:'Platební podmínky',pay_dep:'Záloha 50 % z celkové ceny objednávky je splatná bankovním převodem při potvrzení. Zbývajících 50 % hradíte při převzetí.',pay_acc:'Číslo účtu',
   f_submit:'Objednat',f_ok:'Děkujeme! Vaši objednávku jsme přijali.',f_err:'Chyba. Zkuste to znovu nebo zavolejte.',
   ft_nav:'Navigace',ft_con:'Kontakt',rights:'Všechna práva vyhrazena.'},
 uk:{nav_home:'Головна',nav_menu:'Меню',nav_about:'Про нас',nav_del:'Доставка',nav_con:'Контакт',tagline:'Святкуйте кожен день',
@@ -474,7 +509,8 @@ uk:{nav_home:'Головна',nav_menu:'Меню',nav_about:'Про нас',nav_
   f_name:'Ім\'я',f_phone:'Телефон',f_addr:'Адреса доставки',
   f_cart:'Ваше замовлення',cart_total:'Разом',cart_empty_del:'Кошик порожній — додайте товари з меню',go_menu:'Перейти до меню',
   f_type:'Спосіб замовлення',ot_delivery:'Доставка додому',ot_instore:'У закладі',
-  f_pay:'Спосіб оплати',f_pay_cash:'Готівкою',f_pay_card:'Карткою',
+  f_pay:'Спосіб оплати',f_pay_transfer:'50 % переказом + 50 % при отриманні',f_pay_cash:'Готівкою',f_pay_card:'Карткою',
+  pay_ttl:'Умови оплати',pay_dep:'Передоплата 50 % від загальної вартості сплачується банківським переказом при підтвердженні замовлення. Решта 50 % — при отриманні.',pay_acc:'Рахунок',
   f_submit:'Замовити',f_ok:'Дякуємо! Ваше замовлення прийнято.',f_err:'Помилка. Спробуйте ще раз або зателефонуйте.',
   ft_nav:'Навігація',ft_con:'Контакт',rights:'Всі права захищені.'},
 en:{nav_home:'Home',nav_menu:'Menu',nav_about:'About',nav_del:'Delivery',nav_con:'Contact',tagline:'Celebrate Every Day',
@@ -489,7 +525,8 @@ en:{nav_home:'Home',nav_menu:'Menu',nav_about:'About',nav_del:'Delivery',nav_con
   f_name:'Name',f_phone:'Phone',f_addr:'Delivery Address',
   f_cart:'Your Order',cart_total:'Total',cart_empty_del:'Cart is empty — add items from the menu',go_menu:'Go to Menu',
   f_type:'Order type',ot_delivery:'Home Delivery',ot_instore:'In-store Pickup',
-  f_pay:'Payment Method',f_pay_cash:'Cash',f_pay_card:'Card',
+  f_pay:'Payment Method',f_pay_transfer:'50% bank transfer + 50% on delivery',f_pay_cash:'Cash',f_pay_card:'Card',
+  pay_ttl:'Payment Terms',pay_dep:'A 50% deposit is payable by bank transfer upon order confirmation. The remaining 50% is paid upon receipt.',pay_acc:'Account',
   f_submit:'Order Now',f_ok:'Thank you! Your order has been received.',f_err:'Error. Please try again or call us.',
   ft_nav:'Navigation',ft_con:'Contact',rights:'All rights reserved.'}
 };
