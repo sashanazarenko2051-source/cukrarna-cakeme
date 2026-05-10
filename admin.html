@@ -367,6 +367,7 @@ body{font-family:'Raleway',sans-serif;background:var(--bg0);color:var(--tx0)}
 let activeFilter = 'all';
 let activeSection = 'orders';
 let cachedMenuItems = null;
+let ordersCache = [];
 
 /* ── i18n ── */
 let adminLang = localStorage.getItem('cm_admin_lang') || 'cs';
@@ -518,11 +519,15 @@ document.getElementById('refreshBtn').addEventListener('click', ()=>{
   else loadMenuItems();
 });
 
-document.getElementById('clearDoneBtn').addEventListener('click', ()=>{
-  const done = getOrders().filter(x=>x.status==='done').length;
-  if(!done){ alert(t('adm_no_done')); return; }
-  if(confirm(t('adm_clear_confirm', {n: done}))){
-    saveOrders(getOrders().filter(x=>x.status!=='done'));
+document.getElementById('clearDoneBtn').addEventListener('click', async ()=>{
+  const done = ordersCache.filter(x=>x.status==='done');
+  if(!done.length){ alert(t('adm_no_done')); return; }
+  if(confirm(t('adm_clear_confirm', {n: done.length}))){
+    const tok = sessionStorage.getItem('cm_token')||'';
+    await Promise.all(done.map(o=>fetch('/api/order/'+o.id,{
+      method:'DELETE',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({token:tok})
+    }).catch(()=>{})));
     renderOrders();
   }
 });
@@ -547,16 +552,37 @@ document.querySelectorAll('.adm-filter').forEach(btn => btn.addEventListener('cl
 }));
 
 /* ── Orders data ── */
-function getOrders(){ return JSON.parse(localStorage.getItem('cakeme_orders')||'[]'); }
-function saveOrders(o){ localStorage.setItem('cakeme_orders', JSON.stringify(o)); }
-
-function setStatus(id, status){
-  const o = getOrders(); const item = o.find(x=>x.id===id);
-  if(item) item.status = status; saveOrders(o); renderOrders();
+async function loadOrders(){
+  try{
+    const r = await fetch('/api/orders',{
+      method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({token:sessionStorage.getItem('cm_token')||''})
+    });
+    if(!r.ok) throw new Error();
+    ordersCache = await r.json();
+  }catch{}
+  return ordersCache;
 }
-function deleteOrder(id){
+
+async function setStatus(id, status){
+  try{
+    await fetch('/api/order/'+id,{
+      method:'PATCH',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({token:sessionStorage.getItem('cm_token')||'', status})
+    });
+  }catch{}
+  renderOrders();
+}
+
+async function deleteOrder(id){
   if(!confirm(t('adm_del_order'))) return;
-  saveOrders(getOrders().filter(x=>x.id!==id)); renderOrders();
+  try{
+    await fetch('/api/order/'+id,{
+      method:'DELETE',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({token:sessionStorage.getItem('cm_token')||''})
+    });
+  }catch{}
+  renderOrders();
 }
 
 /* ── Orders render ── */
@@ -568,8 +594,8 @@ function fmtTime(ts){
 
 function statusLbl(s){ return {new:t('adm_s_new'), in_progress:t('adm_s_progress'), done:t('adm_s_done')}[s]||s; }
 
-function renderOrders(){
-  const all = getOrders();
+async function renderOrders(){
+  const all = await loadOrders();
   const today = new Date().toDateString();
   const newO   = all.filter(o=>o.status==='new');
   const progO  = all.filter(o=>o.status==='in_progress');

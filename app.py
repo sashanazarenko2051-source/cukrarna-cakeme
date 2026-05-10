@@ -165,6 +165,36 @@ def api_orders():
         return jsonify({'error': 'Unauthorized'}), 401
     return jsonify(load_orders())
 
+@app.route('/api/order/<int:order_id>', methods=['PATCH'])
+def api_order_status(order_id):
+    d = request.get_json(force=True, silent=True) or {}
+    if not _authorized(d):
+        return jsonify({'error': 'Unauthorized'}), 401
+    status = (d.get('status') or '').strip()
+    if status not in ('new', 'in_progress', 'done'):
+        return jsonify({'error': 'Invalid status'}), 400
+    try:
+        orders = load_orders()
+        for o in orders:
+            if o.get('id') == order_id:
+                o['status'] = status
+                break
+        save_orders(orders)
+    except Exception:
+        pass
+    return jsonify({'ok': True})
+
+@app.route('/api/order/<int:order_id>', methods=['DELETE'])
+def api_order_del(order_id):
+    d = request.get_json(force=True, silent=True) or {}
+    if not _authorized(d):
+        return jsonify({'error': 'Unauthorized'}), 401
+    try:
+        save_orders([o for o in load_orders() if o.get('id') != order_id])
+    except Exception:
+        pass
+    return jsonify({'ok': True})
+
 @app.route('/api/menu/<int:item_id>', methods=['DELETE'])
 def api_delete(item_id):
     d = request.get_json(force=True, silent=True) or {}
