@@ -154,6 +154,8 @@ async def api_menu_patch(item_id: int, req: Request):
         for f in ('price', 'badge', 'img', 'cat'):
             if f in d:
                 item[f] = (d[f] or '').strip()
+        if 'favorite' in d:
+            item['favorite'] = bool(d['favorite'])
         item.setdefault('name', {})
         item.setdefault('desc', {})
         for lng in ('cs', 'uk', 'en'):

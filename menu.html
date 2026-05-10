@@ -670,7 +670,7 @@ async function loadCustomMenu(){
     const r=await fetch('/api/menu');
     if(!r.ok) return;
     const custom=await r.json();
-    custom.forEach(item=>ITEMS.push(item));
+    custom.forEach(item=>ITEMS.push({...item, fav:!!item.favorite}));
   }catch(e){}
 }
 

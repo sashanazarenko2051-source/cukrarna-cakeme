@@ -135,6 +135,8 @@ body{font-family:'Raleway',sans-serif;background:var(--bg0);color:var(--tx0)}
 .ci-meta{font-size:.72rem;color:var(--tx2);margin-top:2px}
 .ci-del{background:transparent;border:1px solid transparent;color:var(--tx2);width:30px;height:30px;cursor:pointer;font-size:.9rem;transition:.2s;flex-shrink:0;display:flex;align-items:center;justify-content:center}
 .ci-del:hover{border-color:#e08080;color:#e08080}
+.ci-fav{background:transparent;border:1px solid transparent;width:30px;height:30px;cursor:pointer;font-size:1rem;transition:.2s;flex-shrink:0;display:flex;align-items:center;justify-content:center;color:var(--tx2)}
+.ci-fav:hover{color:#e07070}.ci-fav.on{color:#e07070;border-color:transparent}
 .no-custom{color:var(--tx2);font-size:.84rem;padding:20px 0;text-align:center}
 .ci-list-wrap{max-height:460px;overflow-y:auto}
 .menu-actions{display:flex;gap:10px;margin-bottom:14px}
@@ -904,6 +906,7 @@ function renderMenuItems(customItems){
       : `<div class="ci-no-img">🎂</div>`;
     const actions = item._custom
       ? `<div class="ci-btns">
+           <button class="ci-fav${item.favorite?' on':''}" onclick="toggleFav(${item.id},${!!item.favorite})" title="❤">❤</button>
            <button class="ci-edit" onclick="startEditById(${item.id})" title="✎">✎</button>
            <button class="ci-del"  onclick="deleteMenuItem(${item.id})" title="✕">✕</button>
          </div>`
@@ -927,6 +930,26 @@ document.querySelectorAll('.ci-flt').forEach(btn=>btn.addEventListener('click',(
   document.querySelectorAll('.ci-flt').forEach(b=>b.classList.toggle('on',b===btn));
   if(cachedMenuItems!==null) renderMenuItems(cachedMenuItems);
 }));
+
+/* ── Favourite toggle ── */
+async function toggleFav(id, currentVal){
+  const token = sessionStorage.getItem('cm_token')||'';
+  const newVal = !currentVal;
+  try{
+    const r = await fetch(`/api/menu/${id}`, {
+      method:'PATCH',
+      headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({token, favorite: newVal})
+    });
+    if(r.status===401){ handleExpired(); return; }
+    if(!r.ok) return;
+    if(cachedMenuItems){
+      const item = cachedMenuItems.find(i=>i.id===id);
+      if(item) item.favorite = newVal;
+      renderMenuItems(cachedMenuItems);
+    }
+  }catch{}
+}
 
 /* ── Edit mode ── */
 function startEditById(id){
