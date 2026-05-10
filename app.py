@@ -344,6 +344,28 @@ def api_order_del(order_id):
         pass
     return jsonify({'ok': True})
 
+@app.route('/api/menu/<int:item_id>', methods=['PATCH'])
+def api_update_menu(item_id):
+    d = request.get_json(force=True, silent=True) or {}
+    if not _authorized(d):
+        return jsonify({'error': 'Unauthorized'}), 401
+    items = load_custom()
+    item = next((i for i in items if i.get('id') == item_id), None)
+    if not item:
+        return jsonify({'error': 'Not found'}), 404
+    for field in ('price', 'badge', 'img', 'cat'):
+        if field in d:
+            item[field] = (d[field] or '').strip()
+    item.setdefault('name', {})
+    item.setdefault('desc', {})
+    for lng in ('cs', 'uk', 'en'):
+        if f'name_{lng}' in d:
+            item['name'][lng] = (d[f'name_{lng}'] or '').strip() or item['name'].get(lng, '')
+        if f'desc_{lng}' in d:
+            item['desc'][lng] = (d[f'desc_{lng}'] or '').strip()
+    save_custom(items)
+    return jsonify({'ok': True, 'item': item})
+
 @app.route('/api/menu/<int:item_id>', methods=['DELETE'])
 def api_delete(item_id):
     d = request.get_json(force=True, silent=True) or {}
