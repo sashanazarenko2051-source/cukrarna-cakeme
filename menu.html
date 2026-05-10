@@ -85,11 +85,8 @@ section{padding:96px 0}
 .sz-btn{background:transparent;border:1px solid var(--bdr);color:var(--tx2);padding:5px 11px;cursor:pointer;font:.67rem 'Raleway',sans-serif;letter-spacing:.8px;transition:.2s;min-width:54px;line-height:1.3}
 .sz-btn:hover{border-color:var(--gold);color:var(--gold)}
 .sz-btn.on{border-color:var(--gold);color:var(--gold);background:rgba(201,169,110,.12)}
-.sz-btn.sz-slice{border-style:dashed;border-color:rgba(201,169,110,.4)}
-.sz-btn.sz-slice.on{border-style:solid}
 .sz-lbl{display:block;font-weight:700;font-size:.68rem}
 .sz-price{display:block;font-size:.6rem;opacity:.78;margin-top:1px}
-.m-slices{font-size:.72rem;color:var(--tx2);margin-bottom:12px;letter-spacing:.3px}
 .celeb-card{grid-column:1/-1;background:var(--bg3);border:1px solid var(--bdr);padding:52px 40px;text-align:center;max-width:700px;margin:0 auto;position:relative;overflow:hidden}
 .celeb-card::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse at center,rgba(201,169,110,.05) 0%,transparent 70%);pointer-events:none}
 .celeb-h{font-family:'Playfair Display',serif;font-size:1.9rem;color:var(--tx0);font-weight:400;margin-bottom:0}
@@ -333,31 +330,31 @@ en:{nav_home:'Home',nav_menu:'Menu',nav_about:'About',nav_del:'Delivery',nav_con
 
 let ITEMS=[
   // DORTY
-  {cat:'cakes',fav:true,sizes:[{label:'1 ks',price:133,slice:true},{label:'S 18cm',price:800}],slices:12,badge:'Bestseller',img:'https://imageproxy.wolt.com/assets/697228caf1232b338e039779',
+  {cat:'cakes',fav:true,sizes:[{label:'S 18cm',price:800}],badge:'Bestseller',img:'https://imageproxy.wolt.com/assets/697228caf1232b338e039779',
    name:{cs:'Cheesecake',uk:'Чізкейк',en:'Cheesecake'},
    desc:{cs:'Tvaroh, zakysaná smetana, krémový sýr. Cena vč. krabice.',uk:'Сир, сметана, вершковий сир. Ціна вкл. коробку.',en:'Cottage cheese, sour cream, cream cheese. Price incl. box.'}},
-  {cat:'cakes',sizes:[{label:'1 ks',price:126,slice:true},{label:'M 23cm',price:950}],slices:10,badge:'',img:'https://imageproxy.wolt.com/assets/697228caf1232b338e039778',
+  {cat:'cakes',sizes:[{label:'M 23cm',price:950}],badge:'',img:'https://imageproxy.wolt.com/assets/697228caf1232b338e039778',
    name:{cs:'Ořechový koláč',uk:'Горіховий пиріг',en:'Walnut Cake'},
    desc:{cs:'Linecké těsto, med, smetana, vlašské ořechy. Cena vč. krabice.',uk:'Пісочне тісто, мед, вершки, волоські горіхи. Ціна вкл. коробку.',en:'Shortcrust pastry, honey, cream, walnuts. Price incl. box.'}},
-  {cat:'cakes',sizes:[{label:'1 ks',price:133,slice:true},{label:'XS 16cm',price:590},{label:'S 18cm',price:800},{label:'M 23cm',price:1200}],slices:12,badge:'',img:'https://imageproxy.wolt.com/assets/697228caf1232b338e039772',
+  {cat:'cakes',sizes:[{label:'XS 16cm',price:590},{label:'S 18cm',price:800},{label:'M 23cm',price:1200}],badge:'',img:'https://imageproxy.wolt.com/assets/697228caf1232b338e039772',
    name:{cs:'Ovocný světlý',uk:'Фруктовий торт',en:'Fruit Cake'},
    desc:{cs:'Tvaroh, mascarpone, smetana, jahody, maliny, borůvky. Cena vč. krabice.',uk:'Сир, маскарпоне, вершки, полуниця, малина, чорниця. Ціна вкл. коробку.',en:'Cottage cheese, mascarpone, cream, strawberries, raspberries, blueberries. Price incl. box.'}},
-  {cat:'cakes',sizes:[{label:'1 ks',price:133,slice:true},{label:'XS 16cm',price:590},{label:'S 18cm',price:800},{label:'M 23cm',price:1200}],slices:12,badge:'',img:'https://imageproxy.wolt.com/assets/697f1db5789a4f50f68328fd',
+  {cat:'cakes',sizes:[{label:'XS 16cm',price:590},{label:'S 18cm',price:800},{label:'M 23cm',price:1200}],badge:'',img:'https://imageproxy.wolt.com/assets/697f1db5789a4f50f68328fd',
    name:{cs:'Arašídový dort',uk:'Арахісовий торт',en:'Peanut Butter Cake'},
    desc:{cs:'Čokoládový piškot s krémem ze smetanového sýra a arašídového másla. Cena vč. krabice.',uk:'Шоколадний бісквіт з кремом зі вершкового сиру та арахісового масла. Ціна вкл. коробку.',en:'Chocolate sponge with cream cheese and peanut butter frosting. Price incl. box.'}},
-  {cat:'cakes',fav:true,sizes:[{label:'1 ks',price:133,slice:true},{label:'M 23cm',price:1000}],slices:10,badge:'',img:'https://imageproxy.wolt.com/assets/698343bca2c5decc0bfdcb6d',
+  {cat:'cakes',fav:true,sizes:[{label:'M 23cm',price:1000}],badge:'',img:'https://imageproxy.wolt.com/assets/698343bca2c5decc0bfdcb6d',
    name:{cs:'Pavlova',uk:'Павлова',en:'Pavlova'},
    desc:{cs:'Lehký nadýchaný dezert ze křupavého sněhového korpusu s marshmallow vnitřkem. Cena vč. krabice.',uk:'Легкий повітряний десерт із хрусткого безе з серединкою як маршмелоу. Ціна вкл. коробку.',en:'Light airy dessert with crispy meringue and marshmallow centre. Price incl. box.'}},
-  {cat:'cakes',sizes:[{label:'1 ks',price:126,slice:true},{label:'M 23cm',price:950}],slices:10,badge:'',img:'https://imageproxy.wolt.com/assets/69997daf3eb3341f036ea0ae',
+  {cat:'cakes',sizes:[{label:'M 23cm',price:950}],badge:'',img:'https://imageproxy.wolt.com/assets/69997daf3eb3341f036ea0ae',
    name:{cs:'Citronový koláč',uk:'Лимонний пиріг',en:'Lemon Cake'},
    desc:{cs:'Křehké máslové těsto, jemný citronový krém, sněhová vrstva zapečená dozlatova. Cena vč. krabice.',uk:'Крихке вершкове тісто, ніжний лимонний крем, запечений білковий шар. Ціна вкл. коробку.',en:'Crispy butter pastry, delicate lemon cream, golden meringue topping. Price incl. box.'}},
-  {cat:'cakes',sizes:[{label:'1 ks',price:133,slice:true},{label:'XS 16cm',price:590},{label:'S 18cm',price:800},{label:'M 23cm',price:1200}],slices:12,badge:'',img:'https://imageproxy.wolt.com/assets/69de33ac73316796ef90e4cb',
+  {cat:'cakes',sizes:[{label:'XS 16cm',price:590},{label:'S 18cm',price:800},{label:'M 23cm',price:1200}],badge:'',img:'https://imageproxy.wolt.com/assets/69de33ac73316796ef90e4cb',
    name:{cs:'Citronový s malinami',uk:'Лимонний з малиною',en:'Lemon Raspberry Cake'},
    desc:{cs:'Citronový koláč s čerstvými malinami. Cena vč. krabice.',uk:'Лимонний пиріг зі свіжою малиною. Ціна вкл. коробку.',en:'Lemon cake with fresh raspberries. Price incl. box.'}},
-  {cat:'cakes',fav:true,sizes:[{label:'1 ks',price:133,slice:true},{label:'XS 16cm',price:590},{label:'S 18cm',price:800},{label:'M 23cm',price:1200}],slices:12,badge:'Nové',img:'https://imageproxy.wolt.com/assets/69f04c2c463746eef18c5ffd',
+  {cat:'cakes',fav:true,sizes:[{label:'XS 16cm',price:590},{label:'S 18cm',price:800},{label:'M 23cm',price:1200}],badge:'Nové',img:'https://imageproxy.wolt.com/assets/69f04c2c463746eef18c5ffd',
    name:{cs:'Mango-Maracuja',uk:'Манго-Маракуя',en:'Mango-Passionfruit'},
    desc:{cs:'Vanilkový piškot, mascarpone, tvaroh, smetana, kousky manga a maracuji. Cena vč. krabice.',uk:'Ванільний бісквіт, маскарпоне, сир, вершки, шматочки манго та маракуї. Ціна вкл. коробку.',en:'Vanilla sponge, mascarpone, cottage cheese, cream, mango & passionfruit pieces. Price incl. box.'}},
-  {cat:'cakes',fav:true,sizes:[{label:'1 ks',price:160,slice:true},{label:'XS 16cm',price:650},{label:'S 18cm',price:874},{label:'M 23cm',price:1300}],slices:12,badge:'Nové',img:'https://imageproxy.wolt.com/assets/697228caf1232b338e039784',
+  {cat:'cakes',fav:true,sizes:[{label:'XS 16cm',price:650},{label:'S 18cm',price:874},{label:'M 23cm',price:1300}],badge:'Nové',img:'https://imageproxy.wolt.com/assets/697228caf1232b338e039784',
    name:{cs:'Pistácie-Malina',uk:'Фісташка-малина',en:'Pistachio-Raspberry'},
    desc:{cs:'Jemný piškot s pistáciovou pěnou a čerstvými malinami. Cena vč. krabice.',uk:'Ніжний бісквіт з фісташковим мусом та свіжою малиною. Ціна вкл. коробку.',en:'Delicate sponge with pistachio mousse and fresh raspberries. Price incl. box.'}},
   // DEZERTY
@@ -540,8 +537,7 @@ function updateCartUI(){
 }
 
 function defSi(item){
-  if(selectedSizes[ITEMS.indexOf(item)]!==undefined) return selectedSizes[ITEMS.indexOf(item)];
-  return item.sizes[0]?.slice?(item.sizes.length>2?2:1):(item.sizes.length>1?1:0);
+  return selectedSizes[ITEMS.indexOf(item)]??0;
 }
 
 function renderMenu(){
@@ -580,7 +576,6 @@ function renderMenu(){
     if(item.sizes){
       const si=defSi(item);
       const curSz=item.sizes[si];
-      const sliceTxt=lang==='uk'?item.slices+' шт — кусочків':lang==='en'?item.slices+' pcs — slices':item.slices+' ks — porcí';
       return `<div class="m-card fi">
       <div class="m-img">
         <img src="${item.img}" alt="${name}" loading="lazy">
@@ -589,9 +584,8 @@ function renderMenu(){
       <div class="m-body">
         <h3 class="m-name">${name}</h3>
         <p class="m-desc">${desc}</p>
-        <p class="m-slices">${sliceTxt}</p>
         <div class="m-sizes" id="szg-${gi}">
-          ${item.sizes.map((sz,i)=>`<button class="sz-btn${i===si?' on':''}${sz.slice?' sz-slice':''}" onclick="selectSize(${gi},${i})"><span class="sz-lbl">${sz.label}</span><span class="sz-price">${sz.price} Kč</span></button>`).join('')}
+          ${item.sizes.map((sz,i)=>`<button class="sz-btn${i===si?' on':''}" onclick="selectSize(${gi},${i})"><span class="sz-lbl">${sz.label}</span><span class="sz-price">${sz.price} Kč</span></button>`).join('')}
         </div>
         <div class="m-ft">
           <span class="m-price" id="price-${gi}">${curSz.price} Kč</span>
