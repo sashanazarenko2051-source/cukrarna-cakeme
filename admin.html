@@ -395,7 +395,7 @@ const TA = {
     adm_server_err:'Chyba serveru', adm_no_connect:'Nelze se připojit k serveru',
     adm_fill_req:'Vyplňte název a cenu *', adm_export_err:'Chyba exportu',
     adm_no_orders:'Žádné objednávky', adm_wrong_pwd:'Nesprávné heslo', adm_rate_limit:'Příliš mnoho pokusů. Zkuste za 15 minut.',adm_login_err:'Chyba připojení.',
-    adm_img_big:'Soubor je příliš velký (max 3 MB).',
+    adm_img_big:'Soubor je příliš velký (max 3 MB).', adm_session_exp:'Relace vypršela. Přihlaste se znovu.',
     adm_del_order:'Smazat objednávku?', adm_no_done:'Žádné dokončené objednávky.',
     adm_clear_confirm:'Smazat {n} dokončených objednávek?', adm_del_item:'Smazat tuto položku z menu?',
     adm_f_name:'Jméno', adm_f_phone:'Telefon', adm_f_address:'Adresa',
@@ -426,7 +426,7 @@ const TA = {
     adm_server_err:'Помилка сервера', adm_no_connect:'Неможливо підключитися до сервера',
     adm_fill_req:'Заповніть назву та ціну *', adm_export_err:'Помилка експорту',
     adm_no_orders:'Немає замовлень', adm_wrong_pwd:'Неправильний пароль', adm_rate_limit:'Забагато спроб. Спробуйте через 15 хвилин.',adm_login_err:'Помилка підключення.',
-    adm_img_big:'Файл завеликий (макс 3 МБ).',
+    adm_img_big:'Файл завеликий (макс 3 МБ).', adm_session_exp:'Сесія закінчилась. Увійдіть знову.',
     adm_del_order:'Видалити замовлення?', adm_no_done:'Немає завершених замовлень.',
     adm_clear_confirm:'Видалити {n} завершених замовлень?', adm_del_item:'Видалити цю позицію з меню?',
     adm_f_name:"Ім'я", adm_f_phone:'Телефон', adm_f_address:'Адреса',
@@ -535,6 +535,13 @@ document.getElementById('clearDoneBtn').addEventListener('click', async ()=>{
 if(sessionStorage.getItem('cm_admin')==='1') showPanel();
 else applyAdminLang();
 
+// Auto-refresh orders every 30s while panel is open
+setInterval(()=>{
+  if(sessionStorage.getItem('cm_admin')==='1' && activeSection==='orders'){
+    renderOrders();
+  }
+}, 30000);
+
 /* ── Main nav ── */
 document.querySelectorAll('.amn').forEach(btn => btn.addEventListener('click', ()=>{
   activeSection = btn.dataset.sec;
@@ -551,6 +558,15 @@ document.querySelectorAll('.adm-filter').forEach(btn => btn.addEventListener('cl
   renderOrders();
 }));
 
+/* ── Session expired ── */
+function handleExpired(){
+  sessionStorage.removeItem('cm_admin');
+  sessionStorage.removeItem('cm_token');
+  document.getElementById('adminPanel').style.display = 'none';
+  document.getElementById('loginScreen').style.display = 'flex';
+  document.getElementById('loginErr').textContent = t('adm_session_exp');
+}
+
 /* ── Orders data ── */
 async function loadOrders(){
   try{
@@ -558,6 +574,7 @@ async function loadOrders(){
       method:'POST',headers:{'Content-Type':'application/json'},
       body:JSON.stringify({token:sessionStorage.getItem('cm_token')||''})
     });
+    if(r.status === 401){ handleExpired(); return []; }
     if(!r.ok) throw new Error();
     ordersCache = await r.json();
   }catch{}
@@ -566,10 +583,11 @@ async function loadOrders(){
 
 async function setStatus(id, status){
   try{
-    await fetch('/api/order/'+id,{
+    const r = await fetch('/api/order/'+id,{
       method:'PATCH',headers:{'Content-Type':'application/json'},
       body:JSON.stringify({token:sessionStorage.getItem('cm_token')||'', status})
     });
+    if(r.status === 401){ handleExpired(); return; }
   }catch{}
   renderOrders();
 }
@@ -577,10 +595,11 @@ async function setStatus(id, status){
 async function deleteOrder(id){
   if(!confirm(t('adm_del_order'))) return;
   try{
-    await fetch('/api/order/'+id,{
+    const r = await fetch('/api/order/'+id,{
       method:'DELETE',headers:{'Content-Type':'application/json'},
       body:JSON.stringify({token:sessionStorage.getItem('cm_token')||''})
     });
+    if(r.status === 401){ handleExpired(); return; }
   }catch{}
   renderOrders();
 }

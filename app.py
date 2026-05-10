@@ -325,8 +325,13 @@ def api_delete(item_id):
     save_custom([i for i in load_custom() if i.get('id') != item_id])
     return jsonify({'ok': True})
 
+_BLOCKED = {'app.py', 'orders.json', 'custom_menu.json', 'requirements.txt',
+            'Procfile', '.env', 'wsgi.py'}
+
 @app.route('/<path:path>')
 def serve(path):
+    if path in _BLOCKED or path.startswith('.'):
+        return '', 404
     return send_from_directory('.', path)
 
 if __name__ == '__main__':

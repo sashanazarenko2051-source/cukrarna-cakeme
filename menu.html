@@ -658,7 +658,7 @@ function initFI(){
 
 (function(){
   const p=location.pathname.split('/').pop()||'index.html';
-  document.querySelectorAll('.nav-links a, .mob-menu a[class="mob-lnk"]').forEach(a=>{
+  document.querySelectorAll('.nav-links a, .mob-menu a.mob-lnk').forEach(a=>{
     if(a.getAttribute('href')===p) a.classList.add('active');
   });
 })();
