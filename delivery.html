@@ -395,15 +395,6 @@ footer{background:#070707;border-top:1px solid var(--bdr);padding:52px 0 28px}
           <div id="cartBox" class="cart-del-box"></div>
           <input type="hidden" name="order" id="cartHidden">
         </div>
-        <div class="ord-field full">
-          <label data-k="f_pay">Způsob platby</label>
-          <input type="hidden" name="payment" id="paymentHidden" value="cash">
-          <div class="pay-btns">
-            <button type="button" class="pay-btn on" data-pay="cash" onclick="setPayment(this)" data-k="f_pay_cash">Hotově</button>
-            <button type="button" class="pay-btn" data-pay="card" onclick="setPayment(this)" data-k="f_pay_card">Kartou</button>
-            <button type="button" class="pay-btn" data-pay="split" onclick="setPayment(this)" data-k="f_pay_split">50 % hotově + 50 % kartou</button>
-          </div>
-        </div>
         <div class="ord-submit">
           <button type="submit" data-k="f_submit">Objednat</button>
         </div>
@@ -630,7 +621,7 @@ document.getElementById('orderForm').addEventListener('submit',async function(e)
       ? `${t('f_table')} №${selectedTable}`
       : (this.querySelector('[name="address"]')||{value:''}).value.trim(),
     order:      document.getElementById('cartHidden').value,
-    payment:    document.getElementById('paymentHidden').value || 'cash',
+    payment:    '',
     order_type: document.getElementById('orderTypeInput').value,
   };
 
