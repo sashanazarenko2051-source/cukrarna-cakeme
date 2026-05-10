@@ -138,6 +138,7 @@ footer{background:#070707;border-top:1px solid var(--bdr);padding:52px 0 28px}
 .pay-btns{display:flex;flex-direction:column;gap:8px;margin-top:4px}
 .pay-btn{background:transparent;border:1px solid var(--bdr);color:var(--tx2);padding:13px 18px;text-align:left;cursor:pointer;font:.85rem 'Raleway',sans-serif;letter-spacing:.5px;transition:.25s;width:100%}
 .pay-btn:hover,.pay-btn.on{border-color:var(--gold);color:var(--gold);background:rgba(201,169,110,.08)}
+.pay-dep-note{font-size:.78rem;color:var(--tx2);margin-top:8px;padding:8px 12px;background:rgba(201,169,110,.05);border-left:2px solid var(--gold-d)}
 .ord-msg{display:none;padding:16px 20px;margin-top:8px;text-align:center;font-size:.9rem;grid-column:1/-1}
 .ord-msg.ok{display:block;background:rgba(201,169,110,.1);border:1px solid var(--gold);color:var(--gold)}
 .ord-msg.err{display:block;background:rgba(200,50,50,.1);border:1px solid #c83232;color:#e08080}
@@ -393,6 +394,7 @@ footer{background:#070707;border-top:1px solid var(--bdr);padding:52px 0 28px}
             <button type="button" class="pay-btn on" data-pay="cash" onclick="setPayment(this)" id="payOptCash"></button>
             <button type="button" class="pay-btn" data-pay="card" onclick="setPayment(this)" id="payOptCard"></button>
           </div>
+          <div class="pay-dep-note" id="payDepNote"></div>
         </div>
         <div class="ord-field full" id="addrField">
           <label data-k="f_addr">Adresa doručení</label>
@@ -484,7 +486,7 @@ cs:{nav_home:'Domů',nav_menu:'Menu',nav_about:'O nás',nav_del:'Doručení',nav
   i2t:'Cena doručení',i2d:'mimo Prahu do 15 km · 250 Kč',i2e:'nad 15 km · dle dohody',
   oc_ttl:'Objednejte nyní',oc_sub:'Vyplňte formulář — potvrdíme do 15 minut',
   f_name:'Jméno',f_phone:'Telefon',f_phone_opt:'nepovinné',f_addr:'Adresa doručení',
-  f_pay_dep_cash:'50 % hotově',f_pay_dep_card:'50 % kartou',
+  f_pay_dep_cash:'50 % hotově',f_pay_dep_card:'50 % kartou',f_pay_dep_note:'50% záloha při doručení',
   f_cart:'Vaše objednávka',cart_total:'Celkem',cart_empty_del:'Košík je prázdný — přidejte zboží z menu',go_menu:'Přejít na menu',
   f_table:'Stůl', f_type:'Způsob objednávky',ot_delivery:'Doručení domů',ot_instore:'Osobní odběr',
   f_pay:'Způsob platby',f_pay_cash:'Hotově',f_pay_card:'Kartou',f_pay_split:'50 % hotově + 50 % kartou',
@@ -501,7 +503,7 @@ uk:{nav_home:'Головна',nav_menu:'Меню',nav_about:'Про нас',nav_
   i2t:'Ціна доставки',i2d:'за Прагою до 15 км · 250 Кч',i2e:'понад 15 км · за домовленістю',
   oc_ttl:'Замовте зараз',oc_sub:'Заповніть форму — підтвердимо протягом 15 хвилин',
   f_name:'Ім\'я',f_phone:'Телефон',f_phone_opt:'не обов\'язково',f_addr:'Адреса доставки',
-  f_pay_dep_cash:'50% готівкою',f_pay_dep_card:'50% карткою',
+  f_pay_dep_cash:'50% готівкою',f_pay_dep_card:'50% карткою',f_pay_dep_note:'50% передоплата при доставці',
   f_cart:'Ваше замовлення',cart_total:'Разом',cart_empty_del:'Кошик порожній — додайте товари з меню',go_menu:'Перейти до меню',
   f_table:'Столик', f_type:'Спосіб замовлення',ot_delivery:'Доставка додому',ot_instore:'У закладі',
   f_pay:'Спосіб оплати',f_pay_cash:'Готівкою',f_pay_card:'Карткою',f_pay_split:'50% готівкою + 50% карткою',
@@ -518,7 +520,7 @@ en:{nav_home:'Home',nav_menu:'Menu',nav_about:'About',nav_del:'Delivery',nav_con
   i2t:'Delivery Price',i2d:'outside Prague up to 15 km · 250 CZK',i2e:'over 15 km · by arrangement',
   oc_ttl:'Order Now',oc_sub:'Fill in the form — we\'ll confirm within 15 minutes',
   f_name:'Name',f_phone:'Phone',f_phone_opt:'optional',f_addr:'Delivery Address',
-  f_pay_dep_cash:'50% cash',f_pay_dep_card:'50% card',
+  f_pay_dep_cash:'50% cash',f_pay_dep_card:'50% card',f_pay_dep_note:'50% prepayment upon delivery',
   f_cart:'Your Order',cart_total:'Total',cart_empty_del:'Cart is empty — add items from the menu',go_menu:'Go to Menu',
   f_table:'Table', f_type:'Order type',ot_delivery:'Home Delivery',ot_instore:'In-store Pickup',
   f_pay:'Payment Method',f_pay_cash:'Cash',f_pay_card:'Card',f_pay_split:'50% cash + 50% card',
@@ -572,6 +574,9 @@ function updatePaymentLabels(){
   document.getElementById('payOptCard').textContent=isDelivery?t('f_pay_dep_card'):t('f_pay_card');
   document.getElementById('paymentHidden').value='cash';
   document.querySelectorAll('.pay-btn').forEach((b,i)=>b.classList.toggle('on',i===0));
+  const note=document.getElementById('payDepNote');
+  note.textContent=isDelivery?t('f_pay_dep_note'):'';
+  note.style.display=isDelivery?'':'none';
 }
 function setOrderType(btn){
   document.querySelectorAll('.ord-type-btn').forEach(b=>b.classList.remove('on'));
