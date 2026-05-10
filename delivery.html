@@ -630,26 +630,9 @@ document.getElementById('orderForm').addEventListener('submit',async function(e)
       return r.ok && j.success;
     }catch{clearTimeout(tid);return false;}
   };
-  let ok=false;
-  // Attempt 1: 20s timeout (server should be warm from page-load ping)
-  ok=await tryPost(20000);
-  if(!ok){
-    // Server still cold-starting — show message, wait 30s, retry
-    msg.className='ord-msg';
-    msg.style.display='block';
-    msg.style.background='rgba(201,169,110,.07)';
-    msg.style.border='1px solid rgba(201,169,110,.3)';
-    msg.style.color='var(--tx1)';
-    msg.textContent=lang==='uk'?'Сервер прокидається, зачекайте…':lang==='en'?'Server waking up, please wait…':'Server se probouzí, počkejte prosím…';
-    await new Promise(res=>setTimeout(res,30000));
-    // Attempt 2: 20s timeout
-    ok=await tryPost(20000);
-  }
-  if(!ok){
-    // One last try after another 20s
-    await new Promise(res=>setTimeout(res,20000));
-    ok=await tryPost(20000);
-  }
+  let ok=await tryPost(20000);
+  if(!ok){ await new Promise(res=>setTimeout(res,30000)); ok=await tryPost(20000); }
+  if(!ok){ await new Promise(res=>setTimeout(res,20000)); ok=await tryPost(20000); }
   if(ok){
     msg.className='ord-msg ok';
     msg.style.cssText='';
