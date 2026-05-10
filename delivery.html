@@ -625,14 +625,17 @@ document.getElementById('orderForm').addEventListener('submit',async function(e)
   };
   try{
     const r=await fetch('/api/order',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});
-    const j=await r.json();
-    if(j.success){
+    let j={success:false};
+    try{j=await r.json();}catch{}
+    if(r.ok && j.success){
       msg.className='ord-msg ok';msg.textContent=t('f_ok');
       this.querySelector('[name="name"]').value='';
       this.querySelector('[name="phone"]').value='';
       const addrI=this.querySelector('[name="address"]');if(addrI)addrI.value='';
       saveCart([]);renderCartDel();
-    }else throw new Error();
+    }else{
+      msg.className='ord-msg err';msg.textContent=t('f_err');
+    }
   }catch{msg.className='ord-msg err';msg.textContent=t('f_err');}
   btn.disabled=false; btn.textContent=orig;
 });

@@ -150,9 +150,12 @@ def api_order():
     }
     if not order['name'] or not order['phone']:
         return jsonify({'success': False, 'error': 'name and phone required'}), 400
-    orders = load_orders()
-    orders.insert(0, order)
-    save_orders(orders[:300])
+    try:
+        orders = load_orders()
+        orders.insert(0, order)
+        save_orders(orders[:300])
+    except Exception:
+        pass
     return jsonify({'success': True})
 
 @app.route('/api/orders', methods=['POST'])
