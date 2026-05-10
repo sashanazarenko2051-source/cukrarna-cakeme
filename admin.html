@@ -364,7 +364,6 @@ body{font-family:'Raleway',sans-serif;background:var(--bg0);color:var(--tx0)}
 </div><!-- /adminPanel -->
 
 <script>
-const PASS = 'Tort@Praha51';
 let activeFilter = 'all';
 let activeSection = 'orders';
 let cachedMenuItems = null;
@@ -394,7 +393,7 @@ const TA = {
     adm_conn_err:'Chyba připojení k serveru', adm_added_ok:'✓ Položka přidána do menu!',
     adm_server_err:'Chyba serveru', adm_no_connect:'Nelze se připojit k serveru',
     adm_fill_req:'Vyplňte název a cenu *', adm_export_err:'Chyba exportu',
-    adm_no_orders:'Žádné objednávky', adm_wrong_pwd:'Nesprávné heslo',
+    adm_no_orders:'Žádné objednávky', adm_wrong_pwd:'Nesprávné heslo', adm_rate_limit:'Příliš mnoho pokusů. Zkuste za 15 minut.',adm_login_err:'Chyba připojení.',
     adm_img_big:'Soubor je příliš velký (max 3 MB).',
     adm_del_order:'Smazat objednávku?', adm_no_done:'Žádné dokončené objednávky.',
     adm_clear_confirm:'Smazat {n} dokončených objednávek?', adm_del_item:'Smazat tuto položku z menu?',
@@ -425,7 +424,7 @@ const TA = {
     adm_conn_err:'Помилка підключення до сервера', adm_added_ok:'✓ Позицію додано до меню!',
     adm_server_err:'Помилка сервера', adm_no_connect:'Неможливо підключитися до сервера',
     adm_fill_req:'Заповніть назву та ціну *', adm_export_err:'Помилка експорту',
-    adm_no_orders:'Немає замовлень', adm_wrong_pwd:'Неправильний пароль',
+    adm_no_orders:'Немає замовлень', adm_wrong_pwd:'Неправильний пароль', adm_rate_limit:'Забагато спроб. Спробуйте через 15 хвилин.',adm_login_err:'Помилка підключення.',
     adm_img_big:'Файл завеликий (макс 3 МБ).',
     adm_del_order:'Видалити замовлення?', adm_no_done:'Немає завершених замовлень.',
     adm_clear_confirm:'Видалити {n} завершених замовлень?', adm_del_item:'Видалити цю позицію з меню?',
@@ -467,15 +466,33 @@ document.querySelectorAll('.adm-lang').forEach(btn => {
 document.getElementById('loginBtn').addEventListener('click', tryLogin);
 document.getElementById('pwdInput').addEventListener('keydown', e => { if(e.key==='Enter') tryLogin(); });
 
-function tryLogin(){
-  if(document.getElementById('pwdInput').value === PASS){
-    sessionStorage.setItem('cm_admin','1');
-    showPanel();
-  } else {
-    document.getElementById('loginErr').textContent = t('adm_wrong_pwd');
-    document.getElementById('pwdInput').value = '';
-    document.getElementById('pwdInput').focus();
+async function tryLogin(){
+  const pwd = document.getElementById('pwdInput').value;
+  const btn = document.getElementById('loginBtn');
+  const err = document.getElementById('loginErr');
+  btn.disabled = true;
+  try {
+    const r = await fetch('/api/auth', {
+      method: 'POST',
+      headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({pass: pwd})
+    });
+    const j = await r.json();
+    if(r.ok && j.token){
+      sessionStorage.setItem('cm_admin','1');
+      sessionStorage.setItem('cm_token', j.token);
+      showPanel();
+    } else if(r.status === 429){
+      err.textContent = t('adm_rate_limit');
+    } else {
+      err.textContent = t('adm_wrong_pwd');
+      document.getElementById('pwdInput').value = '';
+      document.getElementById('pwdInput').focus();
+    }
+  } catch {
+    err.textContent = t('adm_login_err');
   }
+  btn.disabled = false;
 }
 
 function showPanel(){
@@ -489,6 +506,7 @@ function showPanel(){
 
 document.getElementById('logoutBtn').addEventListener('click', ()=>{
   sessionStorage.removeItem('cm_admin');
+  sessionStorage.removeItem('cm_token');
   document.getElementById('loginScreen').style.display = 'flex';
   document.getElementById('adminPanel').style.display = 'none';
   document.getElementById('pwdInput').value = '';
@@ -648,7 +666,7 @@ document.getElementById('addItemBtn').addEventListener('click', async ()=>{
       method:'POST',
       headers:{'Content-Type':'application/json'},
       body: JSON.stringify({
-        pass: PASS,
+        token:   sessionStorage.getItem('cm_token')||'',
         cat:     document.getElementById('fCat').value,
         price,
         name_cs: nameCs,
@@ -680,7 +698,7 @@ async function deleteMenuItem(id){
     await fetch('/api/menu/'+id, {
       method:'DELETE',
       headers:{'Content-Type':'application/json'},
-      body: JSON.stringify({pass: PASS})
+      body: JSON.stringify({token: sessionStorage.getItem('cm_token')||''})
     });
     loadMenuItems();
   }catch{}
