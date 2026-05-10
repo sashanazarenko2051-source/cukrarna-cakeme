@@ -81,6 +81,21 @@ section{padding:96px 0}
 .m-price{font-family:'Playfair Display',serif;font-size:1.25rem;color:var(--gold)}
 .btn-ord{background:transparent;border:1px solid var(--gold-d);color:var(--gold);padding:8px 18px;font:.72rem 'Raleway',sans-serif;letter-spacing:1.5px;text-transform:uppercase;cursor:pointer;transition:.25s}
 .btn-ord:hover{background:var(--gold);color:var(--bg0)}
+.m-sizes{display:flex;gap:7px;flex-wrap:wrap;margin-bottom:14px}
+.sz-btn{background:transparent;border:1px solid var(--bdr);color:var(--tx2);padding:5px 11px;cursor:pointer;font:.67rem 'Raleway',sans-serif;letter-spacing:.8px;transition:.2s;min-width:54px;line-height:1.3}
+.sz-btn:hover{border-color:var(--gold);color:var(--gold)}
+.sz-btn.on{border-color:var(--gold);color:var(--gold);background:rgba(201,169,110,.12)}
+.sz-btn.sz-slice{border-style:dashed;border-color:rgba(201,169,110,.4)}
+.sz-btn.sz-slice.on{border-style:solid}
+.sz-lbl{display:block;font-weight:700;font-size:.68rem}
+.sz-price{display:block;font-size:.6rem;opacity:.78;margin-top:1px}
+.m-slices{font-size:.72rem;color:var(--tx2);margin-bottom:12px;letter-spacing:.3px}
+.celeb-card{grid-column:1/-1;background:var(--bg3);border:1px solid var(--bdr);padding:52px 40px;text-align:center;max-width:700px;margin:0 auto;position:relative;overflow:hidden}
+.celeb-card::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse at center,rgba(201,169,110,.05) 0%,transparent 70%);pointer-events:none}
+.celeb-h{font-family:'Playfair Display',serif;font-size:1.9rem;color:var(--tx0);font-weight:400;margin-bottom:0}
+.celeb-warn{display:inline-flex;align-items:center;gap:9px;background:rgba(201,169,110,.1);border:1px solid var(--gold-d);color:var(--gold);padding:10px 20px;font-size:.76rem;letter-spacing:1.5px;text-transform:uppercase;margin:22px 0 26px}
+.celeb-p{color:var(--tx2);font-size:.88rem;line-height:1.85;margin-bottom:8px}
+.celeb-cta{display:flex;justify-content:center;gap:14px;flex-wrap:wrap;margin-top:28px}
 
 /* ── FOOTER ── */
 footer{background:#070707;border-top:1px solid var(--bdr);padding:52px 0 28px}
@@ -208,6 +223,8 @@ footer{background:#070707;border-top:1px solid var(--bdr);padding:52px 0 28px}
       <button class="m-tab"    data-tab="cakes"    data-k="t_cakes">Dorty</button>
       <button class="m-tab"    data-tab="desserts" data-k="t_des">Dezerty</button>
       <button class="m-tab"    data-tab="drinks"   data-k="t_drk">Nápoje</button>
+      <button class="m-tab"    data-tab="fav"      data-k="t_fav">Oblíbené</button>
+      <button class="m-tab"    data-tab="celebration" data-k="t_celeb">Slavnostní dorty</button>
     </div>
     <div class="m-grid" id="mGrid"></div>
   </div>
@@ -291,42 +308,45 @@ footer{background:#070707;border-top:1px solid var(--bdr);padding:52px 0 28px}
 
 <script>
 const T={
-cs:{nav_home:'Domů',nav_menu:'Menu',nav_about:'O nás',nav_del:'Doručení',nav_con:'Kontakt',tagline:'Oslavte každý den',menu_lbl:'Naše nabídka',menu_ttl:'Menu',t_all:'Vše',t_cakes:'Dorty',t_des:'Dezerty',t_drk:'Nápoje',cart_add:'Do košíku',cart_ttl:'Košík',cart_empty:'Košík je prázdný',cart_total:'Celkem',cart_go:'Objednat s doručením',ft_nav:'Navigace',ft_con:'Kontakt',rights:'Všechna práva vyhrazena.'},
-uk:{nav_home:'Головна',nav_menu:'Меню',nav_about:'Про нас',nav_del:'Доставка',nav_con:'Контакт',tagline:'Святкуйте кожен день',menu_lbl:'Наша пропозиція',menu_ttl:'Меню',t_all:'Все',t_cakes:'Торти',t_des:'Десерти',t_drk:'Напої',cart_add:'До кошика',cart_ttl:'Кошик',cart_empty:'Кошик порожній',cart_total:'Разом',cart_go:'Замовити з доставкою',ft_nav:'Навігація',ft_con:'Контакт',rights:'Всі права захищені.'},
-en:{nav_home:'Home',nav_menu:'Menu',nav_about:'About',nav_del:'Delivery',nav_con:'Contact',tagline:'Celebrate Every Day',menu_lbl:'Our Offerings',menu_ttl:'Menu',t_all:'All',t_cakes:'Cakes',t_des:'Desserts',t_drk:'Drinks',cart_add:'Add to Cart',cart_ttl:'Cart',cart_empty:'Your cart is empty',cart_total:'Total',cart_go:'Order with Delivery',ft_nav:'Navigation',ft_con:'Contact',rights:'All rights reserved.'}
+cs:{nav_home:'Domů',nav_menu:'Menu',nav_about:'O nás',nav_del:'Doručení',nav_con:'Kontakt',tagline:'Oslavte každý den',menu_lbl:'Naše nabídka',menu_ttl:'Menu',t_all:'Vše',t_cakes:'Dorty',t_des:'Dezerty',t_drk:'Nápoje',t_fav:'Oblíbené',t_celeb:'Slavnostní dorty',celeb_h:'Slavnostní & narozeninové dorty',celeb_warn:'Objednávky přijímáme minimálně 14 dní předem',celeb_p1:'Připravíme dort přesně podle vašich přání — narozeniny, svatba, výročí nebo firemní akce. Zvolte design, chuť a velikost.',celeb_p2:'Pro objednávku nás prosím kontaktujte telefonicky nebo e-mailem.',cart_add:'Do košíku',cart_ttl:'Košík',cart_empty:'Košík je prázdný',cart_total:'Celkem',cart_go:'Objednat s doručením',ft_nav:'Navigace',ft_con:'Kontakt',rights:'Všechna práva vyhrazena.'},
+uk:{nav_home:'Головна',nav_menu:'Меню',nav_about:'Про нас',nav_del:'Доставка',nav_con:'Контакт',tagline:'Святкуйте кожен день',menu_lbl:'Наша пропозиція',menu_ttl:'Меню',t_all:'Все',t_cakes:'Торти',t_des:'Десерти',t_drk:'Напої',t_fav:'Улюблені',t_celeb:'Святкові торти',celeb_h:'Святкові та весільні торти',celeb_warn:'Замовлення приймаємо мінімум за 2 тижні',celeb_p1:'Приготуємо торт за вашими побажаннями — день народження, весілля, ювілей або корпоратив. Оберіть дизайн, смак та розмір.',celeb_p2:'Для замовлення зв\'яжіться з нами телефоном або поштою.',cart_add:'До кошика',cart_ttl:'Кошик',cart_empty:'Кошик порожній',cart_total:'Разом',cart_go:'Замовити з доставкою',ft_nav:'Навігація',ft_con:'Контакт',rights:'Всі права захищені.'},
+en:{nav_home:'Home',nav_menu:'Menu',nav_about:'About',nav_del:'Delivery',nav_con:'Contact',tagline:'Celebrate Every Day',menu_lbl:'Our Offerings',menu_ttl:'Menu',t_all:'All',t_cakes:'Cakes',t_des:'Desserts',t_drk:'Drinks',t_fav:'Favorites',t_celeb:'Celebration Cakes',celeb_h:'Wedding & Celebration Cakes',celeb_warn:'Orders accepted minimum 2 weeks in advance',celeb_p1:'We\'ll create a cake tailored to your wishes — birthdays, weddings, anniversaries or corporate events. Choose the design, flavour and size.',celeb_p2:'To place an order, please contact us by phone or email.',cart_add:'Add to Cart',cart_ttl:'Cart',cart_empty:'Your cart is empty',cart_total:'Total',cart_go:'Order with Delivery',ft_nav:'Navigation',ft_con:'Contact',rights:'All rights reserved.'}
 };
 
-const ITEMS=[
+let ITEMS=[
   // DORTY
-  {cat:'cakes',price:'133 Kč',badge:'Bestseller',img:'https://imageproxy.wolt.com/assets/697228caf1232b338e039779',
+  {cat:'cakes',fav:true,sizes:[{label:'1 ks',price:133,slice:true},{label:'S 18cm',price:800}],slices:12,badge:'Bestseller',img:'https://imageproxy.wolt.com/assets/697228caf1232b338e039779',
    name:{cs:'Cheesecake',uk:'Чізкейк',en:'Cheesecake'},
-   desc:{cs:'1 ks – 160g. Tvaroh, zakysaná smetana, krémový sýr',uk:'1 шт – 160г. Сир, сметана, вершковий сир',en:'1 pc – 160g. Cottage cheese, sour cream, cream cheese'}},
-  {cat:'cakes',price:'126 Kč',badge:'',img:'https://imageproxy.wolt.com/assets/697228caf1232b338e039778',
+   desc:{cs:'Tvaroh, zakysaná smetana, krémový sýr. Cena vč. krabice.',uk:'Сир, сметана, вершковий сир. Ціна вкл. коробку.',en:'Cottage cheese, sour cream, cream cheese. Price incl. box.'}},
+  {cat:'cakes',sizes:[{label:'1 ks',price:126,slice:true},{label:'M 23cm',price:950}],slices:10,badge:'',img:'https://imageproxy.wolt.com/assets/697228caf1232b338e039778',
    name:{cs:'Ořechový koláč',uk:'Горіховий пиріг',en:'Walnut Cake'},
-   desc:{cs:'1 ks – 170g. Linecké těsto, med, smetana, vlašské ořechy',uk:'1 шт – 170г. Пісочне тісто, мед, вершки, волоські горіхи',en:'1 pc – 170g. Shortcrust pastry, honey, cream, walnuts'}},
-  {cat:'cakes',price:'133 Kč',badge:'',img:'https://imageproxy.wolt.com/assets/697228caf1232b338e039772',
+   desc:{cs:'Linecké těsto, med, smetana, vlašské ořechy. Cena vč. krabice.',uk:'Пісочне тісто, мед, вершки, волоські горіхи. Ціна вкл. коробку.',en:'Shortcrust pastry, honey, cream, walnuts. Price incl. box.'}},
+  {cat:'cakes',sizes:[{label:'1 ks',price:133,slice:true},{label:'XS 16cm',price:590},{label:'S 18cm',price:800},{label:'M 23cm',price:1200}],slices:12,badge:'',img:'https://imageproxy.wolt.com/assets/697228caf1232b338e039772',
    name:{cs:'Ovocný světlý',uk:'Фруктовий торт',en:'Fruit Cake'},
-   desc:{cs:'1 ks – 160g. Tvaroh, mascarpone, smetana, jahody, maliny, borůvky',uk:'1 шт – 160г. Сир, маскарпоне, вершки, полуниця, малина, чорниця',en:'1 pc – 160g. Cottage cheese, mascarpone, cream, strawberries, raspberries, blueberries'}},
-  {cat:'cakes',price:'133 Kč',badge:'',img:'https://imageproxy.wolt.com/assets/697f1db5789a4f50f68328fd',
+   desc:{cs:'Tvaroh, mascarpone, smetana, jahody, maliny, borůvky. Cena vč. krabice.',uk:'Сир, маскарпоне, вершки, полуниця, малина, чорниця. Ціна вкл. коробку.',en:'Cottage cheese, mascarpone, cream, strawberries, raspberries, blueberries. Price incl. box.'}},
+  {cat:'cakes',sizes:[{label:'1 ks',price:133,slice:true},{label:'XS 16cm',price:590},{label:'S 18cm',price:800},{label:'M 23cm',price:1200}],slices:12,badge:'',img:'https://imageproxy.wolt.com/assets/697f1db5789a4f50f68328fd',
    name:{cs:'Arašídový dort',uk:'Арахісовий торт',en:'Peanut Butter Cake'},
-   desc:{cs:'Čokoládový piškot s krémem ze smetanového sýra a arašídového másla',uk:'Шоколадний бісквіт з кремом зі вершкового сиру та арахісового масла',en:'Chocolate sponge with cream cheese and peanut butter frosting'}},
-  {cat:'cakes',price:'133 Kč',badge:'',img:'https://imageproxy.wolt.com/assets/698343bca2c5decc0bfdcb6d',
+   desc:{cs:'Čokoládový piškot s krémem ze smetanového sýra a arašídového másla. Cena vč. krabice.',uk:'Шоколадний бісквіт з кремом зі вершкового сиру та арахісового масла. Ціна вкл. коробку.',en:'Chocolate sponge with cream cheese and peanut butter frosting. Price incl. box.'}},
+  {cat:'cakes',fav:true,sizes:[{label:'1 ks',price:133,slice:true},{label:'M 23cm',price:1000}],slices:10,badge:'',img:'https://imageproxy.wolt.com/assets/698343bca2c5decc0bfdcb6d',
    name:{cs:'Pavlova',uk:'Павлова',en:'Pavlova'},
-   desc:{cs:'Lehký nadýchaný dezert ze křupavého sněhového korpusu s marshmallow vnitřkem',uk:'Легкий повітряний десерт із хрусткого безе з серединкою як маршмелоу',en:'Light airy dessert with crispy meringue and marshmallow centre'}},
-  {cat:'cakes',price:'126 Kč',badge:'',img:'https://imageproxy.wolt.com/assets/69997daf3eb3341f036ea0ae',
+   desc:{cs:'Lehký nadýchaný dezert ze křupavého sněhového korpusu s marshmallow vnitřkem. Cena vč. krabice.',uk:'Легкий повітряний десерт із хрусткого безе з серединкою як маршмелоу. Ціна вкл. коробку.',en:'Light airy dessert with crispy meringue and marshmallow centre. Price incl. box.'}},
+  {cat:'cakes',sizes:[{label:'1 ks',price:126,slice:true},{label:'M 23cm',price:950}],slices:10,badge:'',img:'https://imageproxy.wolt.com/assets/69997daf3eb3341f036ea0ae',
    name:{cs:'Citronový koláč',uk:'Лимонний пиріг',en:'Lemon Cake'},
-   desc:{cs:'Křehké máslové těsto, jemný citronový krém, sněhová vrstva zapečená dozlatova',uk:'Крихке вершкове тісто, ніжний лимонний крем, запечений білковий шар',en:'Crispy butter pastry, delicate lemon cream, golden meringue topping'}},
-  {cat:'cakes',price:'133 Kč',badge:'',img:'https://imageproxy.wolt.com/assets/69de33ac73316796ef90e4cb',
+   desc:{cs:'Křehké máslové těsto, jemný citronový krém, sněhová vrstva zapečená dozlatova. Cena vč. krabice.',uk:'Крихке вершкове тісто, ніжний лимонний крем, запечений білковий шар. Ціна вкл. коробку.',en:'Crispy butter pastry, delicate lemon cream, golden meringue topping. Price incl. box.'}},
+  {cat:'cakes',sizes:[{label:'1 ks',price:133,slice:true},{label:'XS 16cm',price:590},{label:'S 18cm',price:800},{label:'M 23cm',price:1200}],slices:12,badge:'',img:'https://imageproxy.wolt.com/assets/69de33ac73316796ef90e4cb',
    name:{cs:'Citronový s malinami',uk:'Лимонний з малиною',en:'Lemon Raspberry Cake'},
-   desc:{cs:'Citronový koláč s čerstvými malinami',uk:'Лимонний пиріг зі свіжою малиною',en:'Lemon cake with fresh raspberries'}},
-  {cat:'cakes',price:'133 Kč',badge:'Nové',img:'https://imageproxy.wolt.com/assets/69f04c2c463746eef18c5ffd',
+   desc:{cs:'Citronový koláč s čerstvými malinami. Cena vč. krabice.',uk:'Лимонний пиріг зі свіжою малиною. Ціна вкл. коробку.',en:'Lemon cake with fresh raspberries. Price incl. box.'}},
+  {cat:'cakes',fav:true,sizes:[{label:'1 ks',price:133,slice:true},{label:'XS 16cm',price:590},{label:'S 18cm',price:800},{label:'M 23cm',price:1200}],slices:12,badge:'Nové',img:'https://imageproxy.wolt.com/assets/69f04c2c463746eef18c5ffd',
    name:{cs:'Mango-Maracuja',uk:'Манго-Маракуя',en:'Mango-Passionfruit'},
-   desc:{cs:'Vanilkový piškot, mascarpone, tvaroh, smetana, kousky manga a maracuji',uk:'Ванільний бісквіт, маскарпоне, сир, вершки, шматочки манго та маракуї',en:'Vanilla sponge, mascarpone, cottage cheese, cream, mango & passionfruit pieces'}},
+   desc:{cs:'Vanilkový piškot, mascarpone, tvaroh, smetana, kousky manga a maracuji. Cena vč. krabice.',uk:'Ванільний бісквіт, маскарпоне, сир, вершки, шматочки манго та маракуї. Ціна вкл. коробку.',en:'Vanilla sponge, mascarpone, cottage cheese, cream, mango & passionfruit pieces. Price incl. box.'}},
+  {cat:'cakes',fav:true,sizes:[{label:'1 ks',price:160,slice:true},{label:'XS 16cm',price:650},{label:'S 18cm',price:874},{label:'M 23cm',price:1300}],slices:12,badge:'Nové',img:'https://imageproxy.wolt.com/assets/697228caf1232b338e039784',
+   name:{cs:'Pistácie-Malina',uk:'Фісташка-малина',en:'Pistachio-Raspberry'},
+   desc:{cs:'Jemný piškot s pistáciovou pěnou a čerstvými malinami. Cena vč. krabice.',uk:'Ніжний бісквіт з фісташковим мусом та свіжою малиною. Ціна вкл. коробку.',en:'Delicate sponge with pistachio mousse and fresh raspberries. Price incl. box.'}},
   // DEZERTY
   {cat:'desserts',price:'97 Kč',badge:'',img:'https://imageproxy.wolt.com/assets/697992ef72674ce89f7a8f71',
    name:{cs:'Nanuk jahodový',uk:'Нанук полуничний',en:'Strawberry Ice Bar'},
    desc:{cs:'Čokoládový piškot, poleva z bílé čokolády s jahodovou příchutí',uk:'Шоколадний бісквіт, глазур із білого шоколаду з полуничним смаком',en:'Chocolate sponge, white chocolate glaze with strawberry flavour'}},
-  {cat:'desserts',price:'112 Kč',badge:'',img:'https://imageproxy.wolt.com/assets/697228caf1232b338e039783',
+  {cat:'desserts',fav:true,price:'112 Kč',badge:'',img:'https://imageproxy.wolt.com/assets/697228caf1232b338e039783',
    name:{cs:'Karamelový větrník',uk:'Карамельний вітряк',en:'Caramel Cream Puff'},
    desc:{cs:'1 ks – 190g. Vanilkový a karamelový krém v odpalovaném těstě',uk:'1 шт – 190г. Ванільний та карамельний крем у заварному тісті',en:'1 pc – 190g. Vanilla and caramel cream in choux pastry'}},
   {cat:'desserts',price:'112 Kč',badge:'',img:'https://imageproxy.wolt.com/assets/697228caf1232b338e03976f',
@@ -344,7 +364,7 @@ const ITEMS=[
   {cat:'desserts',price:'102 Kč',badge:'',img:'https://imageproxy.wolt.com/assets/69a1815dea4a83292ef03b2c',
    name:{cs:'Panna cotta',uk:'Панна котта',en:'Panna Cotta'},
    desc:{cs:'Jemný smetanový dezert s vanilkovým extraktem a ovocným coulis',uk:'Ніжний вершковий десерт із ваніллю та фруктовим кулі',en:'Delicate cream dessert with vanilla extract and fruit coulis'}},
-  {cat:'desserts',price:'137 Kč',badge:'',img:'https://imageproxy.wolt.com/assets/697228caf1232b338e039771',
+  {cat:'desserts',fav:true,price:'137 Kč',badge:'',img:'https://imageproxy.wolt.com/assets/697228caf1232b338e039771',
    name:{cs:'Pistáciový mousse',uk:'Фісташковий мус',en:'Pistachio Mousse'},
    desc:{cs:'1 ks – 120g. Pěna z pistáciové pasty, smetanového sýra a smetany',uk:'1 шт – 120г. Піна з фісташкової пасти, вершкового сиру та вершків',en:'1 pc – 120g. Pistachio paste, cream cheese and cream mousse'}},
   {cat:'desserts',price:'247 Kč',badge:'',img:'https://imageproxy.wolt.com/assets/697228caf1232b338e039782',
@@ -377,7 +397,7 @@ const ITEMS=[
   {cat:'desserts',price:'67 Kč',badge:'',img:'https://imageproxy.wolt.com/assets/6979980b8d71993ce32ff03a',
    name:{cs:'Makronka borůvková',uk:'Макарун чорничний',en:'Blueberry Macaron'},
    desc:{cs:'Mandlová mouka, bílky, cukr, ganáž z bílé čokolády a borůvkové pyré',uk:'Мигдальне борошно, білки, цукор, ганаш із білого шоколаду та чорничного пюре',en:'Almond flour, egg whites, sugar, white chocolate ganache & blueberry purée'}},
-  {cat:'desserts',price:'97 Kč',badge:'',img:'https://imageproxy.wolt.com/assets/69799917aded7a30ce7db06c',
+  {cat:'desserts',fav:true,price:'97 Kč',badge:'',img:'https://imageproxy.wolt.com/assets/69799917aded7a30ce7db06c',
    name:{cs:'Rumová koule',uk:'Ромовий кульок',en:'Rum Ball'},
    desc:{cs:'Čokoládový piškot s rumovou příchutí',uk:'Шоколадний бісквіт із ромовим смаком',en:'Chocolate sponge with rum flavour'}},
   {cat:'desserts',price:'133 Kč',badge:'',img:'https://imageproxy.wolt.com/assets/69a18165ea4a83292ef03b36',
@@ -409,8 +429,17 @@ const ITEMS=[
 
 let lang=localStorage.getItem('cakeme_lang')||'cs';
 let tab='all';
+const selectedSizes={};
 
 function t(k){ return T[lang][k]||k; }
+
+function selectSize(gi,si){
+  selectedSizes[gi]=si;
+  const sz=ITEMS[gi].sizes[si];
+  const priceEl=document.getElementById('price-'+gi);
+  if(priceEl) priceEl.textContent=sz.price+' Kč';
+  document.querySelectorAll('#szg-'+gi+' .sz-btn').forEach((b,i)=>b.classList.toggle('on',i===si));
+}
 
 function applyLang(){
   document.documentElement.lang=lang==='uk'?'uk':lang==='en'?'en':'cs';
@@ -431,11 +460,20 @@ function saveCart(c){localStorage.setItem('cakeme_cart',JSON.stringify(c));}
 
 function addToCart(gi){
   const item=ITEMS[gi];
-  const price=parseInt(item.price);
+  let price,sizeLabel='',id;
+  if(item.sizes){
+    const si=defSi(item);
+    price=item.sizes[si].price;
+    sizeLabel=item.sizes[si].label;
+    id=gi+'_'+si;
+  } else {
+    price=parseInt(item.price);
+    id=''+gi;
+  }
   let cart=getCart();
-  const found=cart.find(c=>c.id===gi);
+  const found=cart.find(c=>c.id===id);
   if(found) found.qty++;
-  else cart.push({id:gi,names:item.name,price,qty:1});
+  else cart.push({id,gi,names:item.name,price,sizeLabel,qty:1});
   saveCart(cart);
   updateCartUI();
   document.getElementById('cartPanel').classList.add('open');
@@ -463,11 +501,11 @@ function renderCartPanel(){
   }
   const total=cart.reduce((s,c)=>s+c.price*c.qty,0);
   itemsEl.innerHTML=cart.map(c=>`<div class="cart-item">
-    <span class="ci-name">${c.names[lang]||c.names.cs}</span>
+    <span class="ci-name">${c.names[lang]||c.names.cs}${c.sizeLabel?' — '+c.sizeLabel:''}</span>
     <div class="ci-qty">
-      <button onclick="changeQty(${c.id},-1)">−</button>
+      <button onclick="changeQty('${c.id}',-1)">−</button>
       <span>${c.qty}</span>
-      <button onclick="changeQty(${c.id},1)">+</button>
+      <button onclick="changeQty('${c.id}',1)">+</button>
     </div>
     <span class="ci-price">${c.price*c.qty} Kč</span>
   </div>`).join('');
@@ -483,12 +521,67 @@ function updateCartUI(){
   renderCartPanel();
 }
 
+function defSi(item){
+  if(selectedSizes[ITEMS.indexOf(item)]!==undefined) return selectedSizes[ITEMS.indexOf(item)];
+  return item.sizes[0]?.slice?(item.sizes.length>2?2:1):(item.sizes.length>1?1:0);
+}
+
 function renderMenu(){
-  const list=tab==='all'?ITEMS:ITEMS.filter(i=>i.cat===tab);
-  document.getElementById('mGrid').innerHTML=list.map((item)=>{
+  const grid=document.getElementById('mGrid');
+  if(tab==='celebration'){
+    grid.innerHTML=`<div class="celeb-card fi show">
+      <div style="margin-bottom:18px">
+        <svg width="52" height="52" viewBox="0 0 36 36" fill="none">
+          <path d="M4 28 L4 18 L10 23 L15 13 L18 7 L21 13 L26 23 L32 18 L32 28 Z" stroke="#c9a96e" stroke-width="1.4" stroke-linejoin="round" fill="none"/>
+          <circle cx="18" cy="7" r="1.6" fill="#c9a96e"/>
+          <circle cx="15" cy="13" r="1.3" fill="#c9a96e"/>
+          <circle cx="21" cy="13" r="1.3" fill="#c9a96e"/>
+          <circle cx="4" cy="18" r="1.3" fill="#c9a96e"/>
+          <circle cx="32" cy="18" r="1.3" fill="#c9a96e"/>
+        </svg>
+      </div>
+      <h3 class="celeb-h">${t('celeb_h')}</h3>
+      <div class="celeb-warn">⏰ ${t('celeb_warn')}</div>
+      <p class="celeb-p">${t('celeb_p1')}</p>
+      <p class="celeb-p">${t('celeb_p2')}</p>
+      <div class="celeb-cta">
+        <a href="tel:+420776308352" class="btn-ord" style="text-decoration:none">+420 776 308 352</a>
+        <a href="mailto:cakeme.cukrarna@seznam.cz" class="btn-ord" style="text-decoration:none;font-size:.65rem;padding:8px 14px">cakeme.cukrarna@seznam.cz</a>
+      </div>
+    </div>`;
+    return;
+  }
+  let list;
+  if(tab==='fav') list=ITEMS.filter(i=>i.fav);
+  else if(tab==='all') list=ITEMS;
+  else list=ITEMS.filter(i=>i.cat===tab);
+  grid.innerHTML=list.map((item)=>{
     const gi=ITEMS.indexOf(item);
     const name=item.name[lang]||item.name.cs;
     const desc=item.desc[lang]||item.desc.cs;
+    if(item.sizes){
+      const si=defSi(item);
+      const curSz=item.sizes[si];
+      const sliceTxt=lang==='uk'?item.slices+' шт — кусочків':lang==='en'?item.slices+' pcs — slices':item.slices+' ks — porcí';
+      return `<div class="m-card fi">
+      <div class="m-img">
+        <img src="${item.img}" alt="${name}" loading="lazy">
+        ${item.badge?`<span class="m-badge">${item.badge}</span>`:''}
+      </div>
+      <div class="m-body">
+        <h3 class="m-name">${name}</h3>
+        <p class="m-desc">${desc}</p>
+        <p class="m-slices">${sliceTxt}</p>
+        <div class="m-sizes" id="szg-${gi}">
+          ${item.sizes.map((sz,i)=>`<button class="sz-btn${i===si?' on':''}${sz.slice?' sz-slice':''}" onclick="selectSize(${gi},${i})"><span class="sz-lbl">${sz.label}</span><span class="sz-price">${sz.price} Kč</span></button>`).join('')}
+        </div>
+        <div class="m-ft">
+          <span class="m-price" id="price-${gi}">${curSz.price} Kč</span>
+          <button class="btn-ord" onclick="addToCart(${gi})">${t('cart_add')}</button>
+        </div>
+      </div>
+    </div>`;
+    }
     return `<div class="m-card fi">
       <div class="m-img">
         <img src="${item.img}" alt="${name}" loading="lazy">
@@ -560,9 +653,21 @@ function initFI(){
 
 document.getElementById('cartBtn').addEventListener('click',()=>{document.getElementById('cartPanel').classList.toggle('open');});
 document.getElementById('cartClose').addEventListener('click',()=>{document.getElementById('cartPanel').classList.remove('open');});
-initLangBtns();
-applyLang();
-initFI();
+async function loadCustomMenu(){
+  try{
+    const r=await fetch('/api/menu');
+    if(!r.ok) return;
+    const custom=await r.json();
+    custom.forEach(item=>ITEMS.push(item));
+  }catch(e){}
+}
+
+(async()=>{
+  await loadCustomMenu();
+  initLangBtns();
+  applyLang();
+  initFI();
+})();
 </script>
 </body>
 </html>

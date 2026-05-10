@@ -1,0 +1,546 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="noindex, nofollow">
+<title>Admin — CakeMe</title>
+<link rel="icon" type="image/svg+xml" href="favicon.svg">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600&family=Raleway:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --gold:#c9a96e;--gold-l:#e8d5a3;--gold-d:#9a7a4a;
+  --bg0:#0a0a0a;--bg1:#111;--bg2:#161616;--bg3:#1c1c1c;
+  --tx0:#f5f0e8;--tx1:#c8b898;--tx2:#777;
+  --bdr:#242424;
+}
+html,body{height:100%}
+body{font-family:'Raleway',sans-serif;background:var(--bg0);color:var(--tx0)}
+
+/* ── LOGIN ── */
+#loginScreen{
+  display:flex;align-items:center;justify-content:center;min-height:100vh;padding:20px;
+  background-color:var(--bg0);
+  background-image:radial-gradient(ellipse 80% 55% at 50% 30%,rgba(201,169,110,.07) 0%,transparent 65%),
+    linear-gradient(rgba(201,169,110,.02) 1px,transparent 1px),
+    linear-gradient(90deg,rgba(201,169,110,.02) 1px,transparent 1px);
+  background-size:100% 100%,55px 55px,55px 55px;
+}
+.login-box{background:var(--bg2);border:1px solid var(--bdr);padding:52px 44px;text-align:center;width:100%;max-width:360px}
+.login-crown{margin-bottom:22px}
+.login-title{font-family:'Playfair Display',serif;font-size:1.75rem;color:var(--gold);letter-spacing:1.5px;margin-bottom:6px}
+.login-sub{font-size:.68rem;color:var(--tx2);letter-spacing:3px;text-transform:uppercase;margin-bottom:36px;display:block}
+.login-input{width:100%;background:var(--bg3);border:1px solid var(--bdr);color:var(--tx0);padding:13px 16px;font:1rem 'Raleway',sans-serif;outline:none;transition:.25s;text-align:center;letter-spacing:4px}
+.login-input:focus{border-color:var(--gold)}
+.login-btn{width:100%;margin-top:14px;background:var(--gold);color:var(--bg0);border:none;padding:13px;font:.8rem 'Raleway',sans-serif;font-weight:700;letter-spacing:2px;text-transform:uppercase;cursor:pointer;transition:.25s}
+.login-btn:hover{background:var(--gold-l)}
+.login-err{color:#e08080;font-size:.8rem;margin-top:12px;min-height:20px}
+
+/* ── PANEL ── */
+#adminPanel{display:none;min-height:100vh;flex-direction:column}
+
+/* Header */
+.adm-hdr{background:rgba(10,10,10,.98);border-bottom:1px solid var(--bdr);padding:14px 28px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100;backdrop-filter:blur(12px)}
+.adm-logo{display:flex;align-items:center;gap:10px}
+.adm-logo-txt{font-family:'Playfair Display',serif;color:var(--gold);font-size:1rem;letter-spacing:1.5px;line-height:1.3}
+.adm-logo-sub{font-size:.6rem;color:var(--tx2);letter-spacing:2.5px;text-transform:uppercase;font-family:'Raleway',sans-serif;display:block}
+.adm-hdr-right{display:flex;align-items:center;gap:10px}
+.adm-btn{background:transparent;border:1px solid var(--bdr);color:var(--tx2);padding:7px 14px;cursor:pointer;font:.7rem 'Raleway',sans-serif;letter-spacing:1px;text-transform:uppercase;transition:.25s}
+.adm-btn:hover{border-color:var(--gold);color:var(--gold)}
+.adm-btn.danger:hover{border-color:#e08080;color:#e08080}
+
+/* Main nav */
+.adm-main-nav{display:flex;border-bottom:2px solid var(--bdr);background:var(--bg1)}
+.amn{flex:1;background:transparent;border:none;border-bottom:2px solid transparent;margin-bottom:-2px;color:var(--tx2);padding:16px 20px;cursor:pointer;font:.78rem 'Raleway',sans-serif;letter-spacing:2px;text-transform:uppercase;transition:.25s;display:flex;align-items:center;justify-content:center;gap:8px}
+.amn:hover{color:var(--tx0)}
+.amn.on{color:var(--gold);border-bottom-color:var(--gold)}
+.amn-ic{font-size:1.1rem}
+
+/* ── ORDERS SECTION ── */
+.adm-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:var(--bdr);border-bottom:1px solid var(--bdr)}
+.stat-box{background:var(--bg2);padding:22px 20px;text-align:center}
+.stat-val{font-family:'Playfair Display',serif;font-size:2.4rem;color:var(--gold);display:block;line-height:1}
+.stat-lbl{font-size:.68rem;color:var(--tx2);letter-spacing:2px;text-transform:uppercase;margin-top:7px;display:block}
+.adm-filters{display:flex;border-bottom:1px solid var(--bdr);background:var(--bg1);overflow-x:auto}
+.adm-filter{background:transparent;border:none;border-right:1px solid var(--bdr);color:var(--tx2);padding:13px 20px;cursor:pointer;font:.72rem 'Raleway',sans-serif;letter-spacing:1.5px;text-transform:uppercase;transition:.25s;display:flex;align-items:center;gap:8px;white-space:nowrap;flex-shrink:0;border-bottom:2px solid transparent}
+.adm-filter:hover{color:var(--tx0)}
+.adm-filter.on{color:var(--gold);border-bottom-color:var(--gold)}
+.f-cnt{background:var(--bg3);border:1px solid var(--bdr);border-radius:10px;font-size:.62rem;padding:1px 7px;min-width:20px;text-align:center;font-weight:600}
+.adm-filter.on .f-cnt{background:rgba(201,169,110,.15);border-color:var(--gold-d);color:var(--gold)}
+.adm-body{flex:1;padding:24px 28px;max-width:960px;width:100%;margin:0 auto}
+.adm-top-bar{display:flex;justify-content:space-between;align-items:center;margin-bottom:18px}
+.adm-count{font-size:.78rem;color:var(--tx2)}
+.btn-clear{background:transparent;border:1px solid var(--bdr);color:var(--tx2);padding:7px 14px;cursor:pointer;font:.7rem 'Raleway',sans-serif;letter-spacing:1px;text-transform:uppercase;transition:.25s}
+.btn-clear:hover{border-color:#e08080;color:#e08080}
+
+/* Order cards */
+.order-card{background:var(--bg2);border:1px solid var(--bdr);margin-bottom:12px;transition:.25s}
+.order-card.new{border-left:3px solid var(--gold)}
+.order-card.in_progress{border-left:3px solid #5a8fc5}
+.order-card.done{opacity:.55}
+.order-card.done:hover{opacity:.75}
+.oc-head{display:flex;align-items:center;justify-content:space-between;padding:12px 18px;border-bottom:1px solid var(--bdr);background:var(--bg3)}
+.oc-time{font-size:.76rem;color:var(--tx2)}
+.oc-type{font-size:.7rem;color:var(--tx1);margin-top:2px}
+.oc-status-badge{font-size:.66rem;letter-spacing:1.5px;text-transform:uppercase;font-weight:700;padding:4px 10px}
+.badge-new{background:rgba(201,169,110,.15);color:var(--gold)}
+.badge-in_progress{background:rgba(90,143,197,.15);color:#7aabd4}
+.badge-done{background:rgba(74,122,74,.15);color:#88cc88}
+.oc-body{padding:14px 18px;display:grid;grid-template-columns:1fr 1fr;gap:10px 20px}
+.oc-field{display:flex;flex-direction:column;gap:3px}
+.oc-field.full{grid-column:1/-1}
+.oc-lbl{font-size:.63rem;letter-spacing:1.8px;text-transform:uppercase;color:var(--tx2);font-weight:600}
+.oc-val{font-size:.85rem;color:var(--tx0);line-height:1.5}
+.oc-val a{color:var(--gold);text-decoration:none;transition:.2s}
+.oc-val a:hover{color:var(--gold-l)}
+.oc-val.items{color:var(--tx1);font-size:.82rem;line-height:1.65}
+.oc-actions{padding:10px 18px;border-top:1px solid var(--bdr);display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.oc-actions button{background:transparent;border:1px solid var(--bdr);color:var(--tx2);padding:5px 13px;cursor:pointer;font:.67rem 'Raleway',sans-serif;letter-spacing:1px;text-transform:uppercase;transition:.2s}
+.oc-actions button:hover{border-color:var(--gold);color:var(--gold)}
+.btn-done:hover{border-color:#88cc88!important;color:#88cc88!important}
+.btn-del{margin-left:auto!important;border-color:transparent!important}
+.btn-del:hover{border-color:#e08080!important;color:#e08080!important}
+.no-orders{text-align:center;color:var(--tx2);padding:56px;font-size:.88rem}
+
+/* ── MENU SECTION ── */
+.menu-admin-body{padding:28px;max-width:960px;margin:0 auto;display:grid;grid-template-columns:1fr 1fr;gap:28px;align-items:start}
+.menu-panel{background:var(--bg2);border:1px solid var(--bdr);padding:24px}
+.menu-panel h3{font-family:'Playfair Display',serif;font-size:1.15rem;color:var(--tx0);margin-bottom:20px;padding-bottom:12px;border-bottom:1px solid var(--bdr)}
+.mai-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px}
+.mai-field{display:flex;flex-direction:column;gap:6px}
+.mai-field.full{grid-column:1/-1}
+.mai-field label{font-size:.68rem;letter-spacing:1.5px;text-transform:uppercase;color:var(--tx1);font-weight:600}
+.mai-field input,.mai-field select{background:var(--bg3);border:1px solid var(--bdr);color:var(--tx0);padding:10px 12px;font:.85rem 'Raleway',sans-serif;outline:none;transition:.25s;width:100%}
+.mai-field input:focus,.mai-field select:focus{border-color:var(--gold)}
+.mai-field select option{background:var(--bg2)}
+.btn-add-item{width:100%;background:var(--gold);color:var(--bg0);border:none;padding:12px;font:.76rem 'Raleway',sans-serif;font-weight:700;letter-spacing:2px;text-transform:uppercase;cursor:pointer;transition:.25s;margin-bottom:10px}
+.btn-add-item:hover{background:var(--gold-l)}
+.btn-add-item:disabled{opacity:.6;cursor:default}
+.add-msg{text-align:center;font-size:.8rem;min-height:20px;padding:6px}
+.add-msg.ok{color:#88cc88}
+.add-msg.err{color:#e08080}
+.ci-card{display:flex;align-items:center;gap:12px;padding:12px 0;border-bottom:1px solid var(--bdr)}
+.ci-card:last-child{border-bottom:none}
+.ci-thumb{width:48px;height:48px;object-fit:cover;flex-shrink:0;background:var(--bg3)}
+.ci-no-img{width:48px;height:48px;background:var(--bg3);display:flex;align-items:center;justify-content:center;color:var(--tx2);font-size:1.4rem;flex-shrink:0}
+.ci-info{display:flex;align-items:center;gap:12px;flex:1;min-width:0}
+.ci-name{font-size:.88rem;color:var(--tx0);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ci-meta{font-size:.72rem;color:var(--tx2);margin-top:2px}
+.ci-del{background:transparent;border:1px solid transparent;color:var(--tx2);width:30px;height:30px;cursor:pointer;font-size:.9rem;transition:.2s;flex-shrink:0;display:flex;align-items:center;justify-content:center}
+.ci-del:hover{border-color:#e08080;color:#e08080}
+.no-custom{color:var(--tx2);font-size:.84rem;padding:20px 0;text-align:center}
+.ci-list-wrap{max-height:460px;overflow-y:auto}
+.menu-actions{display:flex;gap:10px;margin-bottom:14px}
+.btn-export{background:transparent;border:1px solid var(--bdr);color:var(--tx2);padding:7px 14px;cursor:pointer;font:.7rem 'Raleway',sans-serif;letter-spacing:1px;text-transform:uppercase;transition:.25s}
+.btn-export:hover{border-color:var(--gold);color:var(--gold)}
+
+@media(max-width:860px){
+  .menu-admin-body{grid-template-columns:1fr}
+  .adm-stats{grid-template-columns:1fr 1fr 1fr}
+  .stat-val{font-size:1.7rem}
+  .oc-body{grid-template-columns:1fr}
+  .adm-body{padding:16px}
+  .adm-hdr{padding:12px 16px}
+  .login-box{padding:36px 22px}
+  .mai-grid{grid-template-columns:1fr}
+}
+</style>
+</head>
+<body>
+
+<!-- ── LOGIN ── -->
+<div id="loginScreen">
+  <div class="login-box">
+    <div class="login-crown">
+      <svg width="54" height="54" viewBox="0 0 36 36" fill="none">
+        <path d="M4 28 L4 18 L10 23 L15 13 L18 7 L21 13 L26 23 L32 18 L32 28 Z" stroke="#c9a96e" stroke-width="1.4" stroke-linejoin="round" fill="none"/>
+        <circle cx="18" cy="7" r="1.6" fill="#c9a96e"/>
+        <circle cx="15" cy="13" r="1.3" fill="#c9a96e"/>
+        <circle cx="21" cy="13" r="1.3" fill="#c9a96e"/>
+        <circle cx="4"  cy="18" r="1.3" fill="#c9a96e"/>
+        <circle cx="32" cy="18" r="1.3" fill="#c9a96e"/>
+      </svg>
+    </div>
+    <h1 class="login-title">CakeMe</h1>
+    <span class="login-sub">Admin Panel</span>
+    <input type="password" id="pwdInput" class="login-input" placeholder="••••••••" autocomplete="current-password">
+    <button class="login-btn" id="loginBtn">Přihlásit se</button>
+    <p class="login-err" id="loginErr"></p>
+  </div>
+</div>
+
+<!-- ── ADMIN PANEL ── -->
+<div id="adminPanel">
+
+  <header class="adm-hdr">
+    <div class="adm-logo">
+      <svg width="30" height="30" viewBox="0 0 36 36" fill="none">
+        <path d="M4 28 L4 18 L10 23 L15 13 L18 7 L21 13 L26 23 L32 18 L32 28 Z" stroke="#c9a96e" stroke-width="1.4" stroke-linejoin="round" fill="none"/>
+        <circle cx="18" cy="7" r="1.6" fill="#c9a96e"/>
+        <circle cx="15" cy="13" r="1.3" fill="#c9a96e"/>
+        <circle cx="21" cy="13" r="1.3" fill="#c9a96e"/>
+        <circle cx="4"  cy="18" r="1.3" fill="#c9a96e"/>
+        <circle cx="32" cy="18" r="1.3" fill="#c9a96e"/>
+      </svg>
+      <div class="adm-logo-txt">Cukrárna CakeMe<span class="adm-logo-sub">Admin panel</span></div>
+    </div>
+    <div class="adm-hdr-right">
+      <button class="adm-btn" id="refreshBtn">↻ Obnovit</button>
+      <button class="adm-btn danger" id="logoutBtn">Odhlásit</button>
+    </div>
+  </header>
+
+  <!-- MAIN NAV -->
+  <div class="adm-main-nav">
+    <button class="amn on" data-sec="orders"><span class="amn-ic">📋</span> Objednávky</button>
+    <button class="amn" data-sec="menu"><span class="amn-ic">🎂</span> Menu</button>
+  </div>
+
+  <!-- ── ORDERS ── -->
+  <div id="secOrders">
+    <div class="adm-stats">
+      <div class="stat-box">
+        <span class="stat-val" id="statNew">—</span>
+        <span class="stat-lbl">Nové</span>
+      </div>
+      <div class="stat-box">
+        <span class="stat-val" id="statToday">—</span>
+        <span class="stat-lbl">Dnes</span>
+      </div>
+      <div class="stat-box">
+        <span class="stat-val" id="statTotal">—</span>
+        <span class="stat-lbl">Celkem</span>
+      </div>
+    </div>
+    <div class="adm-filters">
+      <button class="adm-filter on" data-filter="all">Vše <span class="f-cnt" id="cntAll">0</span></button>
+      <button class="adm-filter" data-filter="new">Nové <span class="f-cnt" id="cntNew">0</span></button>
+      <button class="adm-filter" data-filter="in_progress">Přijaty <span class="f-cnt" id="cntProg">0</span></button>
+      <button class="adm-filter" data-filter="done">Hotové <span class="f-cnt" id="cntDone">0</span></button>
+    </div>
+    <div class="adm-body">
+      <div class="adm-top-bar">
+        <span class="adm-count" id="orderCount"></span>
+        <button class="btn-clear" id="clearDoneBtn">Smazat hotové</button>
+      </div>
+      <div id="ordersList"></div>
+    </div>
+  </div>
+
+  <!-- ── MENU MANAGEMENT ── -->
+  <div id="secMenu" style="display:none">
+    <div class="menu-admin-body">
+
+      <!-- Add form -->
+      <div class="menu-panel">
+        <h3>Přidat položku do menu</h3>
+        <div class="mai-grid">
+          <div class="mai-field">
+            <label>Kategorie *</label>
+            <select id="fCat">
+              <option value="desserts">Dezerty</option>
+              <option value="cakes">Dorty</option>
+              <option value="drinks">Nápoje</option>
+            </select>
+          </div>
+          <div class="mai-field">
+            <label>Cena * (např. 133 Kč)</label>
+            <input type="text" id="fPrice" placeholder="133 Kč">
+          </div>
+          <div class="mai-field">
+            <label>Název CZ *</label>
+            <input type="text" id="fNameCs" placeholder="Název česky">
+          </div>
+          <div class="mai-field">
+            <label>Назва UA</label>
+            <input type="text" id="fNameUk" placeholder="Назва українською">
+          </div>
+          <div class="mai-field">
+            <label>Ціна UK (необов.)</label>
+            <input type="text" id="fPriceUk" placeholder="133 Kč">
+          </div>
+          <div class="mai-field">
+            <label>Badge (Nové, Bestseller…)</label>
+            <input type="text" id="fBadge" placeholder="">
+          </div>
+          <div class="mai-field full">
+            <label>Popis CZ</label>
+            <input type="text" id="fDescCs" placeholder="Krátký popis">
+          </div>
+          <div class="mai-field full">
+            <label>Опис UA</label>
+            <input type="text" id="fDescUk" placeholder="Короткий опис">
+          </div>
+          <div class="mai-field full">
+            <label>URL obrázku</label>
+            <input type="text" id="fImg" placeholder="https://…">
+          </div>
+        </div>
+        <button class="btn-add-item" id="addItemBtn">+ Přidat</button>
+        <div class="add-msg" id="addMsg"></div>
+      </div>
+
+      <!-- Custom items list -->
+      <div class="menu-panel">
+        <h3>Vlastní položky</h3>
+        <div class="menu-actions">
+          <button class="btn-export" id="exportBtn">↓ Exportovat JSON</button>
+        </div>
+        <div class="ci-list-wrap">
+          <div id="customItemsList"><p class="no-custom">Načítání…</p></div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+</div><!-- /adminPanel -->
+
+<script>
+const PASS = 'Tort@Praha51';
+let activeFilter = 'all';
+let activeSection = 'orders';
+
+/* ── Auth ── */
+document.getElementById('loginBtn').addEventListener('click', tryLogin);
+document.getElementById('pwdInput').addEventListener('keydown', e => { if(e.key==='Enter') tryLogin(); });
+
+function tryLogin(){
+  if(document.getElementById('pwdInput').value === PASS){
+    sessionStorage.setItem('cm_admin','1');
+    showPanel();
+  } else {
+    document.getElementById('loginErr').textContent = 'Nesprávné heslo';
+    document.getElementById('pwdInput').value = '';
+    document.getElementById('pwdInput').focus();
+  }
+}
+
+function showPanel(){
+  document.getElementById('loginScreen').style.display = 'none';
+  const p = document.getElementById('adminPanel');
+  p.style.display = 'flex';
+  p.style.flexDirection = 'column';
+  renderOrders();
+}
+
+document.getElementById('logoutBtn').addEventListener('click', ()=>{
+  sessionStorage.removeItem('cm_admin');
+  document.getElementById('loginScreen').style.display = 'flex';
+  document.getElementById('adminPanel').style.display = 'none';
+  document.getElementById('pwdInput').value = '';
+  document.getElementById('loginErr').textContent = '';
+});
+
+document.getElementById('refreshBtn').addEventListener('click', ()=>{
+  if(activeSection==='orders') renderOrders();
+  else loadMenuItems();
+});
+
+document.getElementById('clearDoneBtn').addEventListener('click', ()=>{
+  const done = getOrders().filter(x=>x.status==='done').length;
+  if(!done){ alert('Žádné dokončené objednávky.'); return; }
+  if(confirm('Smazat '+done+' dokončených objednávek?')){
+    saveOrders(getOrders().filter(x=>x.status!=='done'));
+    renderOrders();
+  }
+});
+
+if(sessionStorage.getItem('cm_admin')==='1') showPanel();
+
+/* ── Main nav ── */
+document.querySelectorAll('.amn').forEach(btn => btn.addEventListener('click', ()=>{
+  activeSection = btn.dataset.sec;
+  document.querySelectorAll('.amn').forEach(b => b.classList.toggle('on', b===btn));
+  document.getElementById('secOrders').style.display = activeSection==='orders' ? '' : 'none';
+  document.getElementById('secMenu').style.display   = activeSection==='menu'   ? '' : 'none';
+  if(activeSection==='menu') loadMenuItems();
+}));
+
+/* ── Order filters ── */
+document.querySelectorAll('.adm-filter').forEach(btn => btn.addEventListener('click', ()=>{
+  activeFilter = btn.dataset.filter;
+  document.querySelectorAll('.adm-filter').forEach(b => b.classList.toggle('on', b===btn));
+  renderOrders();
+}));
+
+/* ── Orders data ── */
+function getOrders(){ return JSON.parse(localStorage.getItem('cakeme_orders')||'[]'); }
+function saveOrders(o){ localStorage.setItem('cakeme_orders', JSON.stringify(o)); }
+
+function setStatus(id, status){
+  const o = getOrders(); const item = o.find(x=>x.id===id);
+  if(item) item.status = status; saveOrders(o); renderOrders();
+}
+function deleteOrder(id){
+  if(!confirm('Smazat objednávku?')) return;
+  saveOrders(getOrders().filter(x=>x.id!==id)); renderOrders();
+}
+
+/* ── Orders render ── */
+function fmtTime(ts){
+  const d = new Date(ts);
+  return d.toLocaleDateString('cs-CZ',{day:'2-digit',month:'2-digit',year:'numeric'})
+       + ' ' + d.toLocaleTimeString('cs-CZ',{hour:'2-digit',minute:'2-digit'});
+}
+const STATUS_LBL = {new:'Nová', in_progress:'Přijata', done:'Hotovo'};
+
+function renderOrders(){
+  const all = getOrders();
+  const today = new Date().toDateString();
+  const newO   = all.filter(o=>o.status==='new');
+  const progO  = all.filter(o=>o.status==='in_progress');
+  const doneO  = all.filter(o=>o.status==='done');
+  const todayO = all.filter(o=>new Date(o.ts).toDateString()===today);
+
+  document.getElementById('statNew').textContent   = newO.length;
+  document.getElementById('statToday').textContent = todayO.length;
+  document.getElementById('statTotal').textContent = all.length;
+  document.getElementById('cntAll').textContent    = all.length;
+  document.getElementById('cntNew').textContent    = newO.length;
+  document.getElementById('cntProg').textContent   = progO.length;
+  document.getElementById('cntDone').textContent   = doneO.length;
+
+  let list = all;
+  if(activeFilter==='new')          list = newO;
+  else if(activeFilter==='in_progress') list = progO;
+  else if(activeFilter==='done')    list = doneO;
+
+  document.getElementById('orderCount').textContent = list.length+' objednávek';
+
+  const el = document.getElementById('ordersList');
+  if(!list.length){ el.innerHTML='<div class="no-orders">Žádné objednávky</div>'; return; }
+
+  el.innerHTML = list.map(o=>`
+    <div class="order-card ${o.status}">
+      <div class="oc-head">
+        <div>
+          <div class="oc-time">${fmtTime(o.ts)}</div>
+          ${o.order_type?`<div class="oc-type">${esc(o.order_type)}</div>`:''}
+        </div>
+        <span class="oc-status-badge badge-${o.status}">${STATUS_LBL[o.status]||o.status}</span>
+      </div>
+      <div class="oc-body">
+        <div class="oc-field"><span class="oc-lbl">Jméno</span><span class="oc-val">${esc(o.name)}</span></div>
+        <div class="oc-field"><span class="oc-lbl">Telefon</span><span class="oc-val"><a href="tel:${esc(o.phone)}">${esc(o.phone)}</a></span></div>
+        ${o.address?`<div class="oc-field full"><span class="oc-lbl">Adresa</span><span class="oc-val">${esc(o.address)}</span></div>`:''}
+        <div class="oc-field full"><span class="oc-lbl">Objednávka</span><span class="oc-val items">${esc(o.order)}</span></div>
+        <div class="oc-field"><span class="oc-lbl">Platba</span><span class="oc-val">${esc(o.payment)}</span></div>
+      </div>
+      <div class="oc-actions">
+        ${o.status!=='new'         ?`<button onclick="setStatus(${o.id},'new')">Nová</button>`:''}
+        ${o.status!=='in_progress' ?`<button onclick="setStatus(${o.id},'in_progress')">Přijata</button>`:''}
+        ${o.status!=='done'        ?`<button class="btn-done" onclick="setStatus(${o.id},'done')">✓ Hotovo</button>`:''}
+        <button class="btn-del" onclick="deleteOrder(${o.id})">✕ Smazat</button>
+      </div>
+    </div>
+  `).join('');
+}
+
+/* ── Menu CRUD ── */
+async function loadMenuItems(){
+  const el = document.getElementById('customItemsList');
+  el.innerHTML = '<p class="no-custom">Načítání…</p>';
+  try{
+    const r = await fetch('/api/menu');
+    if(!r.ok) throw new Error();
+    renderMenuItems(await r.json());
+  }catch{
+    el.innerHTML = '<p class="no-custom" style="color:#e08080">Chyba připojení k serveru</p>';
+  }
+}
+
+function renderMenuItems(items){
+  const el = document.getElementById('customItemsList');
+  if(!items.length){ el.innerHTML='<p class="no-custom">Žádné vlastní položky</p>'; return; }
+  el.innerHTML = items.map(item=>`
+    <div class="ci-card">
+      <div class="ci-info">
+        ${item.img
+          ? `<img src="${esc(item.img)}" class="ci-thumb" alt="" onerror="this.style.display='none'">`
+          : `<div class="ci-no-img">🎂</div>`}
+        <div style="min-width:0">
+          <div class="ci-name">${esc(item.name?.cs||'')}</div>
+          <div class="ci-meta">${esc(item.cat)} · ${esc(item.price)}${item.badge?' · '+esc(item.badge):''}</div>
+        </div>
+      </div>
+      <button class="ci-del" title="Smazat" onclick="deleteMenuItem(${item.id})">✕</button>
+    </div>
+  `).join('');
+}
+
+document.getElementById('addItemBtn').addEventListener('click', async ()=>{
+  const btn = document.getElementById('addItemBtn');
+  const msg = document.getElementById('addMsg');
+  const nameCs = document.getElementById('fNameCs').value.trim();
+  const price  = document.getElementById('fPrice').value.trim();
+  if(!nameCs || !price){ showAddMsg('Vyplňte název a cenu *', 'err'); return; }
+  btn.disabled = true; btn.textContent = '…';
+  msg.className = 'add-msg'; msg.textContent = '';
+  try{
+    const r = await fetch('/api/menu', {
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({
+        pass: PASS,
+        cat:     document.getElementById('fCat').value,
+        price,
+        name_cs: nameCs,
+        name_uk: document.getElementById('fNameUk').value.trim(),
+        badge:   document.getElementById('fBadge').value.trim(),
+        img:     document.getElementById('fImg').value.trim(),
+        desc_cs: document.getElementById('fDescCs').value.trim(),
+        desc_uk: document.getElementById('fDescUk').value.trim()
+      })
+    });
+    if(r.ok){
+      showAddMsg('✓ Položka přidána do menu!', 'ok');
+      ['fNameCs','fNameUk','fPrice','fPriceUk','fBadge','fImg','fDescCs','fDescUk'].forEach(id=>document.getElementById(id).value='');
+      loadMenuItems();
+    } else {
+      showAddMsg('Chyba serveru', 'err');
+    }
+  }catch{
+    showAddMsg('Nelze se připojit k serveru', 'err');
+  }
+  btn.disabled = false; btn.textContent = '+ Přidat';
+});
+
+async function deleteMenuItem(id){
+  if(!confirm('Smazat tuto položku z menu?')) return;
+  try{
+    await fetch('/api/menu/'+id, {
+      method:'DELETE',
+      headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({pass: PASS})
+    });
+    loadMenuItems();
+  }catch{}
+}
+
+document.getElementById('exportBtn').addEventListener('click', async ()=>{
+  try{
+    const r = await fetch('/api/menu');
+    const data = await r.json();
+    const blob = new Blob([JSON.stringify(data,null,2)], {type:'application/json'});
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = 'cakeme-menu-' + new Date().toISOString().slice(0,10) + '.json';
+    a.click();
+  }catch{ alert('Chyba exportu'); }
+});
+
+function showAddMsg(text, type){
+  const el = document.getElementById('addMsg');
+  el.className = 'add-msg ' + type;
+  el.textContent = text;
+  setTimeout(()=>{ el.textContent=''; el.className='add-msg'; }, 4000);
+}
+
+function esc(s){
+  return String(s||'—').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+</script>
+</body>
+</html>

@@ -127,6 +127,11 @@ footer{background:#070707;border-top:1px solid var(--bdr);padding:52px 0 28px}
 .ord-submit button{width:100%;max-width:320px;border:none;cursor:pointer;font:.8rem 'Raleway',sans-serif;letter-spacing:2px;text-transform:uppercase;font-weight:700;padding:14px 36px;background:var(--gold);color:var(--bg0);transition:.3s}
 .ord-submit button:hover:not(:disabled){background:var(--gold-l)}
 .ord-submit button:disabled{opacity:.6;cursor:default}
+.ord-type{display:flex;gap:10px;margin-top:4px}
+.ord-type-btn{flex:1;background:transparent;border:1px solid var(--bdr);color:var(--tx2);padding:15px 10px;cursor:pointer;font:.76rem 'Raleway',sans-serif;letter-spacing:1px;text-transform:uppercase;transition:.25s;display:flex;align-items:center;justify-content:center;gap:9px;border-radius:0}
+.ord-type-btn:hover,.ord-type-btn.on{border-color:var(--gold);color:var(--gold);background:rgba(201,169,110,.08)}
+.ord-type-btn .ot-ic{font-size:1.2rem}
+.instore-note{color:var(--gold-d);font-size:.78rem;margin-top:10px;padding:10px 14px;background:rgba(201,169,110,.07);border:1px solid rgba(201,169,110,.2);display:none}
 .ord-msg{display:none;padding:16px 20px;margin-top:8px;text-align:center;font-size:.9rem;grid-column:1/-1}
 .ord-msg.ok{display:block;background:rgba(201,169,110,.1);border:1px solid var(--gold);color:var(--gold)}
 .ord-msg.err{display:block;background:rgba(200,50,50,.1);border:1px solid #c83232;color:#e08080}
@@ -321,8 +326,21 @@ footer{background:#070707;border-top:1px solid var(--bdr);padding:52px 0 28px}
       <p data-k="oc_sub">Vyplňte formulář — potvrdíme objednávku do 15 minut</p>
       <form class="ord-form" id="orderForm">
         <input type="hidden" name="access_key" value="YOUR_WEB3FORMS_ACCESS_KEY">
-        <input type="hidden" name="subject" value="Nová objednávka — CakeMe Doručení">
+        <input type="hidden" name="subject" id="subjectInput" value="Nová objednávka — CakeMe Doručení">
         <input type="checkbox" name="botcheck" style="display:none">
+        <input type="hidden" name="order_type" id="orderTypeInput" value="Doručení domů">
+        <div class="ord-field full">
+          <label data-k="f_type">Způsob objednávky</label>
+          <div class="ord-type">
+            <button type="button" class="ord-type-btn on" data-type="delivery" onclick="setOrderType(this)">
+              <span class="ot-ic">🚗</span><span data-k="ot_delivery">Doručení domů</span>
+            </button>
+            <button type="button" class="ord-type-btn" data-type="instore" onclick="setOrderType(this)">
+              <span class="ot-ic">🏪</span><span data-k="ot_instore">Osobní odběr</span>
+            </button>
+          </div>
+          <div class="instore-note" id="instoreNote">📍 Kodanská 649/20, Praha 10 · Po–Ne 09:00–20:00</div>
+        </div>
         <div class="ord-field">
           <label data-k="f_name">Jméno</label>
           <input type="text" name="name" required>
@@ -331,7 +349,7 @@ footer{background:#070707;border-top:1px solid var(--bdr);padding:52px 0 28px}
           <label data-k="f_phone">Telefon</label>
           <input type="tel" name="phone" required>
         </div>
-        <div class="ord-field full">
+        <div class="ord-field full" id="addrField">
           <label data-k="f_addr">Adresa doručení</label>
           <input type="text" name="address" required>
         </div>
@@ -429,6 +447,7 @@ cs:{nav_home:'Domů',nav_menu:'Menu',nav_about:'O nás',nav_del:'Doručení',nav
   oc_ttl:'Objednejte nyní',oc_sub:'Vyplňte formulář — potvrdíme do 15 minut',
   f_name:'Jméno',f_phone:'Telefon',f_addr:'Adresa doručení',
   f_cart:'Vaše objednávka',cart_total:'Celkem',cart_empty_del:'Košík je prázdný — přidejte zboží z menu',go_menu:'Přejít na menu',
+  f_type:'Způsob objednávky',ot_delivery:'Doručení domů',ot_instore:'Osobní odběr',
   f_pay:'Způsob platby',f_pay_cash:'Hotově',f_pay_card:'Kartou',
   f_submit:'Objednat',f_ok:'Děkujeme! Vaši objednávku jsme přijali.',f_err:'Chyba. Zkuste to znovu nebo zavolejte.',
   ft_nav:'Navigace',ft_con:'Kontakt',rights:'Všechna práva vyhrazena.'},
@@ -443,6 +462,7 @@ uk:{nav_home:'Головна',nav_menu:'Меню',nav_about:'Про нас',nav_
   oc_ttl:'Замовте зараз',oc_sub:'Заповніть форму — підтвердимо протягом 15 хвилин',
   f_name:'Ім\'я',f_phone:'Телефон',f_addr:'Адреса доставки',
   f_cart:'Ваше замовлення',cart_total:'Разом',cart_empty_del:'Кошик порожній — додайте товари з меню',go_menu:'Перейти до меню',
+  f_type:'Спосіб замовлення',ot_delivery:'Доставка додому',ot_instore:'У закладі',
   f_pay:'Спосіб оплати',f_pay_cash:'Готівкою',f_pay_card:'Карткою',
   f_submit:'Замовити',f_ok:'Дякуємо! Ваше замовлення прийнято.',f_err:'Помилка. Спробуйте ще раз або зателефонуйте.',
   ft_nav:'Навігація',ft_con:'Контакт',rights:'Всі права захищені.'},
@@ -457,6 +477,7 @@ en:{nav_home:'Home',nav_menu:'Menu',nav_about:'About',nav_del:'Delivery',nav_con
   oc_ttl:'Order Now',oc_sub:'Fill in the form — we\'ll confirm within 15 minutes',
   f_name:'Name',f_phone:'Phone',f_addr:'Delivery Address',
   f_cart:'Your Order',cart_total:'Total',cart_empty_del:'Cart is empty — add items from the menu',go_menu:'Go to Menu',
+  f_type:'Order type',ot_delivery:'Home Delivery',ot_instore:'In-store Pickup',
   f_pay:'Payment Method',f_pay_cash:'Cash',f_pay_card:'Card',
   f_submit:'Order Now',f_ok:'Thank you! Your order has been received.',f_err:'Error. Please try again or call us.',
   ft_nav:'Navigation',ft_con:'Contact',rights:'All rights reserved.'}
@@ -488,6 +509,17 @@ function initFI(){
   const p=location.pathname.split('/').pop()||'index.html';
   document.querySelectorAll('.nav-links a,.mob-menu a[class="mob-lnk"]').forEach(a=>{if(a.getAttribute('href')===p)a.classList.add('active');});
 })();
+function setOrderType(btn){
+  document.querySelectorAll('.ord-type-btn').forEach(b=>b.classList.remove('on'));
+  btn.classList.add('on');
+  const isDelivery=btn.dataset.type==='delivery';
+  document.getElementById('orderTypeInput').value=isDelivery?t('ot_delivery'):t('ot_instore');
+  document.getElementById('subjectInput').value=isDelivery?'Nová objednávka — Doručení':'Nová objednávka — Osobní odběr';
+  const af=document.getElementById('addrField');
+  af.style.display=isDelivery?'':'none';
+  af.querySelector('input').required=isDelivery;
+  document.getElementById('instoreNote').style.display=isDelivery?'none':'block';
+}
 function getCart(){return JSON.parse(localStorage.getItem('cakeme_cart')||'[]');}
 function saveCart(c){localStorage.setItem('cakeme_cart',JSON.stringify(c));}
 
@@ -516,18 +548,18 @@ function renderCartDel(){
   if(btn) btn.disabled=false;
   const total=cart.reduce((s,c)=>s+c.price*c.qty,0);
   box.innerHTML=cart.map(c=>`<div class="cdb-item">
-    <span class="cdb-name">${c.names[lang]||c.names.cs}</span>
+    <span class="cdb-name">${c.names[lang]||c.names.cs}${c.sizeLabel?' — '+c.sizeLabel:''}</span>
     <div class="cdb-qty">
-      <button onclick="changeQtyDel(${c.id},-1)">−</button>
+      <button onclick="changeQtyDel('${c.id}',-1)">−</button>
       <span>${c.qty}</span>
-      <button onclick="changeQtyDel(${c.id},1)">+</button>
+      <button onclick="changeQtyDel('${c.id}',1)">+</button>
     </div>
     <span class="cdb-price">${c.price*c.qty} Kč</span>
   </div>`).join('')+`<div class="cdb-total">
     <span class="cdb-total-lbl">${t('cart_total')}</span>
     <span class="cdb-total-val">${total} Kč</span>
   </div>`;
-  if(hidden) hidden.value=cart.map(c=>`${c.names.cs} x${c.qty} (${c.price*c.qty} Kč)`).join(', ')+` | Celkem: ${total} Kč`;
+  if(hidden) hidden.value=cart.map(c=>`${c.names.cs}${c.sizeLabel?' ('+c.sizeLabel+')':''} x${c.qty} (${c.price*c.qty} Kč)`).join(', ')+` | Celkem: ${total} Kč`;
 }
 
 document.getElementById('orderForm').addEventListener('submit',async function(e){
@@ -535,12 +567,18 @@ document.getElementById('orderForm').addEventListener('submit',async function(e)
   const btn=this.querySelector('button[type="submit"]');
   const msg=document.getElementById('ordMsg');
   const orig=btn.textContent;
+  const fd=new FormData(this);
   btn.disabled=true; btn.textContent='...';
   msg.className='ord-msg';
   try{
-    const r=await fetch('https://api.web3forms.com/submit',{method:'POST',body:new FormData(this)});
+    const r=await fetch('https://api.web3forms.com/submit',{method:'POST',body:fd});
     const j=await r.json();
-    if(j.success){msg.className='ord-msg ok';msg.textContent=t('f_ok');this.reset();saveCart([]);renderCartDel();}
+    if(j.success){
+      const stored=JSON.parse(localStorage.getItem('cakeme_orders')||'[]');
+      stored.unshift({id:Date.now(),ts:new Date().toISOString(),name:fd.get('name')||'',phone:fd.get('phone')||'',address:fd.get('address')||'',order:fd.get('order')||'',payment:fd.get('payment')||'',order_type:fd.get('order_type')||'',status:'new'});
+      localStorage.setItem('cakeme_orders',JSON.stringify(stored.slice(0,300)));
+      msg.className='ord-msg ok';msg.textContent=t('f_ok');this.reset();saveCart([]);renderCartDel();
+    }
     else throw new Error();
   }catch{msg.className='ord-msg err';msg.textContent=t('f_err');}
   btn.disabled=false; btn.textContent=orig;
