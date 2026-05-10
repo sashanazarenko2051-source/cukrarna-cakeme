@@ -271,8 +271,8 @@ body{font-family:'Raleway',sans-serif;background:var(--bg0);color:var(--tx0)}
             <input type="text" id="fNameUk" placeholder="Назва українською">
           </div>
           <div class="mai-field">
-            <label>Ціна UK (необов.)</label>
-            <input type="text" id="fPriceUk" placeholder="133 Kč">
+            <label>Name EN</label>
+            <input type="text" id="fNameEn" placeholder="Name in English">
           </div>
           <div class="mai-field">
             <label>Badge (Nové, Bestseller…)</label>
@@ -280,11 +280,15 @@ body{font-family:'Raleway',sans-serif;background:var(--bg0);color:var(--tx0)}
           </div>
           <div class="mai-field full">
             <label>Popis CZ</label>
-            <input type="text" id="fDescCs" placeholder="Krátký popis">
+            <input type="text" id="fDescCs" placeholder="Krátký popis česky">
           </div>
           <div class="mai-field full">
             <label>Опис UA</label>
-            <input type="text" id="fDescUk" placeholder="Короткий опис">
+            <input type="text" id="fDescUk" placeholder="Короткий опис українською">
+          </div>
+          <div class="mai-field full">
+            <label>Description EN</label>
+            <input type="text" id="fDescEn" placeholder="Short description in English">
           </div>
           <div class="mai-field full">
             <label>URL obrázku</label>
@@ -502,15 +506,17 @@ document.getElementById('addItemBtn').addEventListener('click', async ()=>{
         price,
         name_cs: nameCs,
         name_uk: document.getElementById('fNameUk').value.trim(),
+        name_en: document.getElementById('fNameEn').value.trim(),
         badge:   document.getElementById('fBadge').value.trim(),
         img:     document.getElementById('fImg').value.trim(),
         desc_cs: document.getElementById('fDescCs').value.trim(),
-        desc_uk: document.getElementById('fDescUk').value.trim()
+        desc_uk: document.getElementById('fDescUk').value.trim(),
+        desc_en: document.getElementById('fDescEn').value.trim()
       })
     });
     if(r.ok){
       showAddMsg('✓ Položka přidána do menu!', 'ok');
-      ['fNameCs','fNameUk','fPrice','fPriceUk','fBadge','fImg','fDescCs','fDescUk'].forEach(id=>document.getElementById(id).value='');
+      ['fNameCs','fNameUk','fNameEn','fPrice','fBadge','fImg','fDescCs','fDescUk','fDescEn'].forEach(id=>document.getElementById(id).value='');
       loadMenuItems();
     } else {
       showAddMsg('Chyba serveru', 'err');
