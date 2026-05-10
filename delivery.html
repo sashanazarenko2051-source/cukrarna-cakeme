@@ -474,8 +474,6 @@ footer{background:#070707;border-top:1px solid var(--bdr);padding:52px 0 28px}
 </footer>
 
 <script>
-// Warm up the server as soon as the page loads so it's ready by the time the user submits
-(function(){try{var c=new AbortController();setTimeout(function(){c.abort();},30000);fetch('/api/menu',{signal:c.signal});}catch(e){}})();
 const T={
 cs:{nav_home:'Domů',nav_menu:'Menu',nav_about:'O nás',nav_del:'Doručení',nav_con:'Kontakt',tagline:'Oslavte každý den',
   del_lbl:'Rychle a pohodlně',del_ttl:'Doručení',
@@ -620,19 +618,12 @@ document.getElementById('orderForm').addEventListener('submit',async function(e)
     payment:    this.querySelector('[name="payment"]').value,
     order_type: document.getElementById('orderTypeInput').value,
   };
-  const tryPost=async(timeout)=>{
-    const ctrl=new AbortController();
-    const tid=setTimeout(()=>ctrl.abort(),timeout);
-    try{
-      const r=await fetch('/api/order',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload),signal:ctrl.signal});
-      clearTimeout(tid);
-      let j={success:false};try{j=await r.json();}catch{}
-      return r.ok && j.success;
-    }catch{clearTimeout(tid);return false;}
-  };
-  let ok=await tryPost(20000);
-  if(!ok){ await new Promise(res=>setTimeout(res,30000)); ok=await tryPost(20000); }
-  if(!ok){ await new Promise(res=>setTimeout(res,20000)); ok=await tryPost(20000); }
+  let ok=false;
+  try{
+    const r=await fetch('/api/order',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});
+    let j={success:false};try{j=await r.json();}catch{}
+    ok=r.ok&&j.success;
+  }catch{}
   if(ok){
     msg.className='ord-msg ok';
     msg.style.cssText='';
