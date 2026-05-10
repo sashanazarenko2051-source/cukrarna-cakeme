@@ -1,11 +1,16 @@
 from flask import Flask, send_from_directory, request, jsonify
-import json, os, time, hmac, hashlib, secrets
+import json, os, time, hmac, hashlib, secrets, smtplib
 from collections import defaultdict
+from email.mime.text import MIMEText
+from email.mime.multipart import MIMEMultipart
 
 app = Flask(__name__, static_folder='.', static_url_path='')
 
 MENU_FILE    = 'custom_menu.json'
 ORDERS_FILE  = 'orders.json'
+SMTP_USER    = os.environ.get('SMTP_USER', '')   # Gmail address
+SMTP_PASS    = os.environ.get('SMTP_PASS', '')   # Gmail App Password
+ORDER_TO     = os.environ.get('ORDER_TO', '')    # Recipient email
 ADMIN_PASS = os.environ.get('ADMIN_PASS', 'Tort@Praha51')
 SECRET_KEY = os.environ.get('SECRET_KEY', secrets.token_hex(32))
 TOKEN_TTL  = 12 * 3600  # token window 12 h
@@ -68,6 +73,32 @@ def load_custom():
 def save_custom(items):
     with open(MENU_FILE, 'w', encoding='utf-8') as f:
         json.dump(items, f, ensure_ascii=False, indent=2)
+
+# ── Email notification ──
+def send_order_email(order):
+    if not SMTP_USER or not SMTP_PASS or not ORDER_TO:
+        return
+    try:
+        msg = MIMEMultipart()
+        msg['Subject'] = f"\U0001f382 Нове замовлення CakeMe — {order['name']}"
+        msg['From']    = SMTP_USER
+        msg['To']      = ORDER_TO
+        body = (
+            f"Нове замовлення!\n\n"
+            f"Ім'я:       {order['name']}\n"
+            f"Телефон:    {order['phone']}\n"
+            f"Адреса:     {order.get('address') or '—'}\n"
+            f"Тип:        {order.get('order_type') or '—'}\n"
+            f"Замовлення: {order.get('order') or '—'}\n"
+            f"Оплата:     {order.get('payment') or '—'}\n"
+            f"Час:        {order['ts']}\n"
+        )
+        msg.attach(MIMEText(body, 'plain', 'utf-8'))
+        with smtplib.SMTP_SSL('smtp.gmail.com', 465, timeout=10) as s:
+            s.login(SMTP_USER, SMTP_PASS)
+            s.send_message(msg)
+    except Exception:
+        pass
 
 # ── Order helpers ──
 def load_orders():
@@ -156,6 +187,7 @@ def api_order():
         save_orders(orders[:300])
     except Exception:
         pass
+    send_order_email(order)
     return jsonify({'success': True})
 
 @app.route('/api/orders', methods=['POST'])

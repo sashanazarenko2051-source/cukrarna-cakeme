@@ -623,20 +623,25 @@ document.getElementById('orderForm').addEventListener('submit',async function(e)
     payment: this.querySelector('[name="payment"]').value,
     order_type: document.getElementById('orderTypeInput').value,
   };
-  try{
+  const tryPost=async()=>{
     const r=await fetch('/api/order',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});
-    let j={success:false};
-    try{j=await r.json();}catch{}
-    if(r.ok && j.success){
-      msg.className='ord-msg ok';msg.textContent=t('f_ok');
-      this.querySelector('[name="name"]').value='';
-      this.querySelector('[name="phone"]').value='';
-      const addrI=this.querySelector('[name="address"]');if(addrI)addrI.value='';
-      saveCart([]);renderCartDel();
-    }else{
-      msg.className='ord-msg err';msg.textContent=t('f_err');
-    }
-  }catch{msg.className='ord-msg err';msg.textContent=t('f_err');}
+    let j={success:false};try{j=await r.json();}catch{}
+    return r.ok && j.success;
+  };
+  let ok=false;
+  for(let i=0;i<3;i++){
+    try{ ok=await tryPost(); if(ok) break; }catch{}
+    if(i<2) await new Promise(res=>setTimeout(res,3000));
+  }
+  if(ok){
+    msg.className='ord-msg ok';msg.textContent=t('f_ok');
+    this.querySelector('[name="name"]').value='';
+    this.querySelector('[name="phone"]').value='';
+    const addrI=this.querySelector('[name="address"]');if(addrI)addrI.value='';
+    saveCart([]);renderCartDel();
+  }else{
+    msg.className='ord-msg err';msg.textContent=t('f_err');
+  }
   btn.disabled=false; btn.textContent=orig;
 });
 initLangBtns();applyLang();initFI();
