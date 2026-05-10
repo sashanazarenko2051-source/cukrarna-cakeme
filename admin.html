@@ -272,6 +272,7 @@ body{font-family:'Raleway',sans-serif;background:var(--bg0);color:var(--tx0)}
       <div class="adm-langs">
         <button class="adm-lang on" data-al="cs">🇨🇿 CZ</button>
         <button class="adm-lang" data-al="uk">🇺🇦 UA</button>
+        <button class="adm-lang" data-al="en">🇬🇧 EN</button>
       </div>
       <button class="adm-btn" id="refreshBtn" data-k="adm_refresh">↻ Obnovit</button>
       <button class="adm-btn danger" id="logoutBtn" data-k="adm_logout">Odhlásit</button>
@@ -586,6 +587,47 @@ const TA = {
     adm_an_items:'Позицій', adm_an_avg:'Сер. чек (Kč)',
     adm_an_product:'Товар', adm_an_qty:'Кількість', adm_an_rev:'Дохід', adm_an_share:'Частка',
     adm_an_no_data:'Немає даних за цей період.',
+  },
+  en:{
+    adm_panel:'Admin Panel', adm_login:'Login', adm_refresh:'↻ Refresh', adm_logout:'Logout',
+    adm_orders:'Orders', adm_menu:'Menu',
+    adm_stat_new:'New', adm_stat_today:'Today', adm_stat_total:'Total',
+    adm_filter_all:'All', adm_filter_new:'New', adm_filter_prog:'In Progress', adm_filter_done:'Done',
+    adm_clear_done:'Delete completed',
+    adm_add_title:'Add menu item',
+    adm_cat_lbl:'Category *', adm_price_lbl:'Price * (e.g. 133 Kč)',
+    adm_name_cs_lbl:'Name CZ *', adm_name_uk_lbl:'Name UA', adm_name_en_lbl:'Name EN',
+    adm_badge_lbl:'Badge (New, Bestseller…)',
+    adm_desc_cs_lbl:'Description CZ', adm_desc_uk_lbl:'Description UA', adm_desc_en_lbl:'Description EN',
+    adm_img_lbl:'Image', adm_img_click:'Click or drag a file here',
+    adm_img_hint:'JPG, PNG, WebP · max 3 MB · auto-compressed',
+    adm_img_remove:'✕ Remove image', adm_card_prev:'Card preview',
+    adm_cart_btn:'Add to cart', adm_add_btn:'+ Add',
+    adm_custom_title:'Custom items', adm_export:'↓ Export JSON',
+    adm_cat_desserts:'Desserts', adm_cat_cakes:'Cakes', adm_cat_drinks:'Drinks',
+    adm_loading:'Loading…', adm_no_custom:'No custom items',
+    adm_conn_err:'Server connection error', adm_added_ok:'✓ Item added to menu!',
+    adm_server_err:'Server error', adm_no_connect:'Cannot connect to server',
+    adm_fill_req:'Fill in name and price *', adm_export_err:'Export error',
+    adm_no_orders:'No orders', adm_wrong_pwd:'Incorrect password', adm_rate_limit:'Too many attempts. Try again in 15 minutes.', adm_login_err:'Connection error.',
+    adm_img_big:'File too large (max 3 MB).', adm_session_exp:'Session expired. Please log in again.',
+    adm_del_order:'Delete this order?', adm_no_done:'No completed orders.',
+    adm_clear_confirm:'Delete {n} completed orders?', adm_del_item:'Delete this menu item?',
+    adm_f_name:'Name', adm_f_phone:'Phone', adm_f_address:'Address',
+    adm_f_order:'Order', adm_f_payment:'Payment',
+    adm_s_new:'New', adm_s_progress:'In progress', adm_s_done:'Done', adm_s_paid:'✓ Paid 50%', adm_s_pending:'⏳ Awaiting payment',
+    adm_btn_new:'New', adm_btn_progress:'In progress', adm_btn_done:'✓ Done', adm_btn_delete:'✕ Delete',
+    adm_count:'{n} orders',
+    adm_all_items_title:'All menu items',
+    adm_edit_title:'Edit item', adm_save_btn:'✓ Save changes',
+    adm_cancel_edit:'✕ Cancel editing', adm_saved_ok:'✓ Saved!',
+    adm_custom_only:'Custom', adm_static_lbl:'Base', adm_save_as_new:'save as new',
+    adm_analytics:'Analytics',
+    adm_ap_7:'7 days', adm_ap_30:'30 days', adm_ap_90:'90 days', adm_ap_all:'All',
+    adm_an_orders:'Orders', adm_an_revenue:'Revenue (Kč)',
+    adm_an_items:'Items', adm_an_avg:'Avg. order (Kč)',
+    adm_an_product:'Product', adm_an_qty:'Qty', adm_an_rev:'Revenue', adm_an_share:'Share',
+    adm_an_no_data:'No data for this period.',
   }
 };
 
