@@ -82,6 +82,8 @@ body{font-family:'Raleway',sans-serif;background:var(--bg0);color:var(--tx0)}
 .order-card.in_progress{border-left:3px solid #5a8fc5}
 .order-card.done{opacity:.55}
 .order-card.done:hover{opacity:.75}
+.order-card.pending_payment{border-left:3px solid #c9a96e;opacity:.75}
+.order-card.paid{border-left:3px solid #5ab88a}
 .oc-head{display:flex;align-items:center;justify-content:space-between;padding:12px 18px;border-bottom:1px solid var(--bdr);background:var(--bg3)}
 .oc-time{font-size:.76rem;color:var(--tx2)}
 .oc-type{font-size:.7rem;color:var(--tx1);margin-top:2px}
@@ -89,6 +91,8 @@ body{font-family:'Raleway',sans-serif;background:var(--bg0);color:var(--tx0)}
 .badge-new{background:rgba(201,169,110,.15);color:var(--gold)}
 .badge-in_progress{background:rgba(90,143,197,.15);color:#7aabd4}
 .badge-done{background:rgba(74,122,74,.15);color:#88cc88}
+.badge-paid{background:rgba(90,184,138,.15);color:#5ab88a}
+.badge-pending_payment{background:rgba(201,169,110,.1);color:#b8973a}
 .oc-body{padding:14px 18px;display:grid;grid-template-columns:1fr 1fr;gap:10px 20px}
 .oc-field{display:flex;flex-direction:column;gap:3px}
 .oc-field.full{grid-column:1/-1}
@@ -528,7 +532,7 @@ const TA = {
     adm_clear_confirm:'Smazat {n} dokončených objednávek?', adm_del_item:'Smazat tuto položku z menu?',
     adm_f_name:'Jméno', adm_f_phone:'Telefon', adm_f_address:'Adresa',
     adm_f_order:'Objednávka', adm_f_payment:'Platba',
-    adm_s_new:'Nová', adm_s_progress:'Přijata', adm_s_done:'Hotovo',
+    adm_s_new:'Nová', adm_s_progress:'Přijata', adm_s_done:'Hotovo', adm_s_paid:'✓ Zaplaceno 50%', adm_s_pending:'⏳ Čeká na platbu',
     adm_btn_new:'Nová', adm_btn_progress:'Přijata', adm_btn_done:'✓ Hotovo', adm_btn_delete:'✕ Smazat',
     adm_count:'{n} objednávek',
     adm_all_items_title:'Všechny položky menu',
@@ -569,7 +573,7 @@ const TA = {
     adm_clear_confirm:'Видалити {n} завершених замовлень?', adm_del_item:'Видалити цю позицію з меню?',
     adm_f_name:"Ім'я", adm_f_phone:'Телефон', adm_f_address:'Адреса',
     adm_f_order:'Замовлення', adm_f_payment:'Оплата',
-    adm_s_new:'Нова', adm_s_progress:'Прийнята', adm_s_done:'Готово',
+    adm_s_new:'Нова', adm_s_progress:'Прийнята', adm_s_done:'Готово', adm_s_paid:'✓ Оплачено 50%', adm_s_pending:'⏳ Очікує оплати',
     adm_btn_new:'Нова', adm_btn_progress:'Прийнята', adm_btn_done:'✓ Готово', adm_btn_delete:'✕ Видалити',
     adm_count:'{n} замовлень',
     adm_all_items_title:'Всі позиції меню',
@@ -762,12 +766,12 @@ function fmtTime(ts){
        + ' ' + d.toLocaleTimeString('cs-CZ',{hour:'2-digit',minute:'2-digit'});
 }
 
-function statusLbl(s){ return {new:t('adm_s_new'), in_progress:t('adm_s_progress'), done:t('adm_s_done')}[s]||s; }
+function statusLbl(s){ return {new:t('adm_s_new'), in_progress:t('adm_s_progress'), done:t('adm_s_done'), paid:t('adm_s_paid'), pending_payment:t('adm_s_pending')}[s]||s; }
 
 async function renderOrders(){
   const all = await loadOrders();
   const today = new Date().toDateString();
-  const newO   = all.filter(o=>o.status==='new');
+  const newO   = all.filter(o=>['new','paid','pending_payment'].includes(o.status));
   const progO  = all.filter(o=>o.status==='in_progress');
   const doneO  = all.filter(o=>o.status==='done');
   const todayO = all.filter(o=>new Date(o.ts).toDateString()===today);
@@ -843,7 +847,7 @@ async function loadMenuItems(){
 function renderMenuItems(customItems){
   const el = document.getElementById('customItemsList');
   const all = [
-    ...STATIC_ITEMS.map(i=>({...i, _static:true})),
+    ...STATIC_ITEMS.map((i, idx)=>({...i, _static:true, _staticIdx:idx})),
     ...customItems.map(i=>({...i, _custom:true}))
   ];
   let filtered = menuFilter==='custom' ? all.filter(i=>i._custom)
@@ -863,7 +867,7 @@ function renderMenuItems(customItems){
          </div>`
       : `<div class="ci-btns">
            <span class="ci-static-badge">${t('adm_static_lbl')}</span>
-           <button class="ci-edit" onclick="startEditStatic(${item.id})" title="✎">✎</button>
+           <button class="ci-edit" onclick="startEditStatic(${item._staticIdx})" title="✎">✎</button>
          </div>`;
     return `<div class="ci-card">
       ${thumb}
@@ -888,8 +892,8 @@ function startEditById(id){
   if(item) startEdit(item);
 }
 
-function startEditStatic(id){
-  const item = STATIC_ITEMS.find(i=>i.id===id);
+function startEditStatic(idx){
+  const item = STATIC_ITEMS[idx];
   if(!item) return;
   // editingId stays null → Save will POST as new custom item (copy of static base)
   editingId = null;
@@ -983,6 +987,8 @@ document.getElementById('addItemBtn').addEventListener('click', async ()=>{
       showAddMsg(editingId!==null ? t('adm_saved_ok') : t('adm_added_ok'), 'ok');
       cancelEdit();
       loadMenuItems();
+    } else if(r.status===401){
+      handleExpired();
     } else {
       showAddMsg(t('adm_server_err'), 'err');
     }

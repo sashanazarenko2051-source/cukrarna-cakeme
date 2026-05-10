@@ -364,11 +364,11 @@ footer{background:#070707;border-top:1px solid var(--bdr);padding:52px 0 28px}
         </div>
         <div class="ord-field">
           <label data-k="f_name">Jméno</label>
-          <input type="text" name="name">
+          <input type="text" name="name" required>
         </div>
         <div class="ord-field">
           <label data-k="f_phone">Telefon</label>
-          <input type="tel" name="phone">
+          <input type="tel" name="phone" required>
         </div>
         <div class="ord-field full" id="addrField">
           <label data-k="f_addr">Adresa doručení</label>
@@ -381,9 +381,10 @@ footer{background:#070707;border-top:1px solid var(--bdr);padding:52px 0 28px}
         </div>
         <div class="ord-field">
           <label data-k="f_pay">Způsob platby</label>
-          <select name="payment">
+          <select name="payment" id="paymentSelect">
             <option data-k="f_pay_cash">Hotově</option>
             <option data-k="f_pay_card">Kartou</option>
+            <option value="online" data-k="f_pay_online">Online kartou (50 % záloha)</option>
           </select>
         </div>
         <div class="ord-submit">
@@ -487,7 +488,7 @@ cs:{nav_home:'Domů',nav_menu:'Menu',nav_about:'O nás',nav_del:'Doručení',nav
   f_name:'Jméno',f_phone:'Telefon',f_addr:'Adresa doručení',
   f_cart:'Vaše objednávka',cart_total:'Celkem',cart_empty_del:'Košík je prázdný — přidejte zboží z menu',go_menu:'Přejít na menu',
   f_type:'Způsob objednávky',ot_delivery:'Doručení domů',ot_instore:'Osobní odběr',
-  f_pay:'Způsob platby',f_pay_cash:'Hotově',f_pay_card:'Kartou',
+  f_pay:'Způsob platby',f_pay_cash:'Hotově',f_pay_card:'Kartou',f_pay_online:'Online kartou (50 % záloha)',f_redirecting:'Přesměrování na platební bránu…',
   pay_ttl:'Platební podmínky',pay_dep:'Záloha 50 % z celkové ceny objednávky je splatná bankovním převodem při potvrzení. Zbývajících 50 % hradíte při převzetí.',pay_acc:'Číslo účtu',
   f_submit:'Objednat',f_ok:'Děkujeme! Vaši objednávku jsme přijali.',f_err:'Chyba. Zkuste to znovu nebo zavolejte.',
   ft_nav:'Navigace',ft_con:'Kontakt',rights:'Všechna práva vyhrazena.'},
@@ -503,7 +504,7 @@ uk:{nav_home:'Головна',nav_menu:'Меню',nav_about:'Про нас',nav_
   f_name:'Ім\'я',f_phone:'Телефон',f_addr:'Адреса доставки',
   f_cart:'Ваше замовлення',cart_total:'Разом',cart_empty_del:'Кошик порожній — додайте товари з меню',go_menu:'Перейти до меню',
   f_type:'Спосіб замовлення',ot_delivery:'Доставка додому',ot_instore:'У закладі',
-  f_pay:'Спосіб оплати',f_pay_cash:'Готівкою',f_pay_card:'Карткою',
+  f_pay:'Спосіб оплати',f_pay_cash:'Готівкою',f_pay_card:'Карткою',f_pay_online:'Онлайн карткою (50% завдаток)',f_redirecting:'Перенаправлення на платіжний шлюз…',
   pay_ttl:'Умови оплати',pay_dep:'Передоплата 50 % від загальної вартості сплачується банківським переказом при підтвердженні замовлення. Решта 50 % — при отриманні.',pay_acc:'Рахунок',
   f_submit:'Замовити',f_ok:'Дякуємо! Ваше замовлення прийнято.',f_err:'Помилка. Спробуйте ще раз або зателефонуйте.',
   ft_nav:'Навігація',ft_con:'Контакт',rights:'Всі права захищені.'},
@@ -519,7 +520,7 @@ en:{nav_home:'Home',nav_menu:'Menu',nav_about:'About',nav_del:'Delivery',nav_con
   f_name:'Name',f_phone:'Phone',f_addr:'Delivery Address',
   f_cart:'Your Order',cart_total:'Total',cart_empty_del:'Cart is empty — add items from the menu',go_menu:'Go to Menu',
   f_type:'Order type',ot_delivery:'Home Delivery',ot_instore:'In-store Pickup',
-  f_pay:'Payment Method',f_pay_cash:'Cash',f_pay_card:'Card',
+  f_pay:'Payment Method',f_pay_cash:'Cash',f_pay_card:'Card',f_pay_online:'Online card (50% deposit)',f_redirecting:'Redirecting to payment…',
   pay_ttl:'Payment Terms',pay_dep:'A 50% deposit is payable by bank transfer upon order confirmation. The remaining 50% is paid upon receipt.',pay_acc:'Account',
   f_submit:'Order Now',f_ok:'Thank you! Your order has been received.',f_err:'Error. Please try again or call us.',
   ft_nav:'Navigation',ft_con:'Contact',rights:'All rights reserved.'}
@@ -558,7 +559,7 @@ function setOrderType(btn){
   document.getElementById('orderTypeInput').value=isDelivery?t('ot_delivery'):t('ot_instore');
   const af=document.getElementById('addrField');
   af.style.display=isDelivery?'':'none';
-  // af.querySelector('input').required=isDelivery; // DEBUG: disabled
+  af.querySelector('input').required=isDelivery;
   document.getElementById('instoreNote').style.display=isDelivery?'none':'block';
 }
 function getCart(){return JSON.parse(localStorage.getItem('cakeme_cart')||'[]');}
@@ -618,6 +619,28 @@ document.getElementById('orderForm').addEventListener('submit',async function(e)
     payment:    this.querySelector('[name="payment"]').value,
     order_type: document.getElementById('orderTypeInput').value,
   };
+
+  // ── Online payment via Stripe ──
+  if(payload.payment==='online'){
+    btn.textContent=t('f_redirecting');
+    const cart=getCart();
+    payload.total_czk=cart.reduce((s,c)=>s+c.price*c.qty,0);
+    try{
+      const r=await fetch('/api/create-checkout-session',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});
+      if(r.ok){
+        const j=await r.json();
+        window.location.href=j.url;
+        return;
+      }
+      msg.className='ord-msg err'; msg.style.cssText=''; msg.textContent=t('f_err');
+    }catch{
+      msg.className='ord-msg err'; msg.style.cssText=''; msg.textContent=t('f_err');
+    }
+    btn.disabled=false; btn.textContent=orig;
+    return;
+  }
+
+  // ── Cash / card payment ──
   let ok=false;
   try{
     const r=await fetch('/api/order',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});

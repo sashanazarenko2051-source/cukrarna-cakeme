@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Platba úspěšná — CakeMe</title>
+<style>
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:'Segoe UI',sans-serif;background:#0f0e0b;color:#e8e0d0;min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px}
+  .card{background:#1a1915;border:1px solid #2e2b24;border-radius:16px;padding:48px 40px;max-width:480px;width:100%;text-align:center}
+  .icon{font-size:64px;margin-bottom:24px}
+  h1{font-size:1.6rem;color:#c9a96e;margin-bottom:12px}
+  p{color:#b0a898;line-height:1.6;margin-bottom:8px}
+  .detail{font-size:.85rem;color:#7a7268;margin-bottom:32px}
+  a.btn{display:inline-block;margin-top:8px;padding:12px 28px;background:#c9a96e;color:#0f0e0b;border-radius:8px;text-decoration:none;font-weight:600}
+  a.btn:hover{background:#d9b97e}
+  .spinner{width:40px;height:40px;border:3px solid #2e2b24;border-top-color:#c9a96e;border-radius:50%;animation:spin .8s linear infinite;margin:0 auto 24px}
+  @keyframes spin{to{transform:rotate(360deg)}}
+</style>
+</head>
+<body>
+<div class="card" id="card">
+  <div class="spinner" id="spinner"></div>
+  <p id="msg">Ověřujeme platbu…</p>
+</div>
+<script>
+const lang = localStorage.getItem('cakeme_lang') || 'cs';
+const T = {
+  cs: {
+    verifying: 'Ověřujeme platbu…',
+    ok_icon: '🎂',
+    ok_title: 'Platba přijata!',
+    ok_body: 'Záloha 50 % byla úspěšně zaplacena. Brzy vás kontaktujeme pro potvrzení objednávky.',
+    home: '← Zpět na hlavní stránku',
+    fail_icon: '⚠️',
+    fail_title: 'Platba nebyla potvrzena',
+    fail_body: 'Zkuste obnovit stránku nebo nás kontaktujte.',
+    retry: 'Zkusit znovu',
+  },
+  uk: {
+    verifying: 'Перевіряємо оплату…',
+    ok_icon: '🎂',
+    ok_title: 'Оплату прийнято!',
+    ok_body: 'Завдаток 50% успішно оплачено. Ми зв\'яжемося з вами найближчим часом для підтвердження замовлення.',
+    home: '← На головну',
+    fail_icon: '⚠️',
+    fail_title: 'Оплату не підтверджено',
+    fail_body: 'Спробуйте оновити сторінку або зв\'яжіться з нами.',
+    retry: 'Спробувати ще',
+  },
+  en: {
+    verifying: 'Verifying payment…',
+    ok_icon: '🎂',
+    ok_title: 'Payment received!',
+    ok_body: 'Your 50% deposit was successfully paid. We will contact you shortly to confirm your order.',
+    home: '← Back to home',
+    fail_icon: '⚠️',
+    fail_title: 'Payment not confirmed',
+    fail_body: 'Please refresh the page or contact us.',
+    retry: 'Try again',
+  }
+};
+const tx = T[lang] || T.cs;
+
+const params = new URLSearchParams(location.search);
+const sessionId = params.get('session_id');
+const orderId   = params.get('order_id');
+
+function showOk(){
+  document.getElementById('card').innerHTML = `
+    <div class="icon">${tx.ok_icon}</div>
+    <h1>${tx.ok_title}</h1>
+    <p>${tx.ok_body}</p>
+    <p class="detail" style="margin-top:12px">№ ${orderId}</p>
+    <a class="btn" href="/">${tx.home}</a>`;
+}
+function showFail(){
+  document.getElementById('card').innerHTML = `
+    <div class="icon">${tx.fail_icon}</div>
+    <h1>${tx.fail_title}</h1>
+    <p>${tx.fail_body}</p>
+    <a class="btn" href="/delivery.html" style="margin-top:24px">${tx.retry}</a>`;
+}
+
+document.getElementById('msg').textContent = tx.verifying;
+
+async function verify(){
+  if(!sessionId || !orderId){ showFail(); return; }
+  try{
+    const r = await fetch(`/api/verify-payment?session_id=${encodeURIComponent(sessionId)}&order_id=${encodeURIComponent(orderId)}`);
+    if(!r.ok){ showFail(); return; }
+    const j = await r.json();
+    j.paid ? showOk() : showFail();
+  }catch{ showFail(); }
+}
+verify();
+</script>
+</body>
+</html>

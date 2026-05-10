@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Platba zrušena — CakeMe</title>
+<style>
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:'Segoe UI',sans-serif;background:#0f0e0b;color:#e8e0d0;min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px}
+  .card{background:#1a1915;border:1px solid #2e2b24;border-radius:16px;padding:48px 40px;max-width:480px;width:100%;text-align:center}
+  .icon{font-size:64px;margin-bottom:24px}
+  h1{font-size:1.6rem;color:#c9a96e;margin-bottom:12px}
+  p{color:#b0a898;line-height:1.6;margin-bottom:8px}
+  .btns{margin-top:32px;display:flex;gap:12px;justify-content:center;flex-wrap:wrap}
+  a.btn{display:inline-block;padding:12px 28px;border-radius:8px;text-decoration:none;font-weight:600}
+  a.btn-primary{background:#c9a96e;color:#0f0e0b}
+  a.btn-primary:hover{background:#d9b97e}
+  a.btn-secondary{background:transparent;color:#c9a96e;border:1px solid #c9a96e}
+  a.btn-secondary:hover{background:rgba(201,169,110,.1)}
+</style>
+</head>
+<body>
+<div class="card">
+  <div class="icon" id="ico">❌</div>
+  <h1 id="title">Platba zrušena</h1>
+  <p id="body">Platba nebyla dokončena. Vaše objednávka nebyla potvrzena.</p>
+  <div class="btns">
+    <a class="btn btn-primary" href="/delivery.html" id="retry">← Zkusit znovu</a>
+    <a class="btn btn-secondary" href="/" id="home">Hlavní stránka</a>
+  </div>
+</div>
+<script>
+const lang = localStorage.getItem('cakeme_lang') || 'cs';
+const T = {
+  cs: { ico:'❌', title:'Platba zrušena', body:'Platba nebyla dokončena. Vaše objednávka nebyla potvrzena. Zkuste to znovu nebo vyberte jiný způsob platby.', retry:'← Zkusit znovu', home:'Hlavní stránka' },
+  uk: { ico:'❌', title:'Оплату скасовано', body:'Оплату не завершено. Ваше замовлення не підтверджено. Спробуйте ще раз або оберіть інший спосіб оплати.', retry:'← Спробувати знову', home:'Головна' },
+  en: { ico:'❌', title:'Payment cancelled', body:'Your payment was not completed. Your order has not been confirmed. Please try again or choose a different payment method.', retry:'← Try again', home:'Home' }
+};
+const tx = T[lang] || T.cs;
+document.getElementById('ico').textContent   = tx.ico;
+document.getElementById('title').textContent = tx.title;
+document.getElementById('body').textContent  = tx.body;
+document.getElementById('retry').textContent = tx.retry;
+document.getElementById('home').textContent  = tx.home;
+</script>
+</body>
+</html>
