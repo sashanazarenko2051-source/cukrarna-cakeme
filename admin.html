@@ -807,7 +807,9 @@ function statusLbl(s){ return {new:t('adm_s_new'), in_progress:t('adm_s_progress
 
 function orderTotal(str){
   const m = (str||'').match(/\|\s*Celkem:\s*(\d[\d\s]*Kč)/);
-  return m ? m[1].trim() : '';
+  if(m) return m[1].trim();
+  const prices = [...(str||'').matchAll(/\((\d+)\s*Kč\)/g)].map(x=>parseInt(x[1]));
+  return prices.length ? prices.reduce((a,b)=>a+b,0)+' Kč' : '';
 }
 function orderItems(str){
   return (str||'')
