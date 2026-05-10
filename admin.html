@@ -136,6 +136,9 @@ body{font-family:'Raleway',sans-serif;background:var(--bg0);color:var(--tx0)}
 .menu-actions{display:flex;gap:10px;margin-bottom:14px}
 .btn-export{background:transparent;border:1px solid var(--bdr);color:var(--tx2);padding:7px 14px;cursor:pointer;font:.7rem 'Raleway',sans-serif;letter-spacing:1px;text-transform:uppercase;transition:.25s}
 .btn-export:hover{border-color:var(--gold);color:var(--gold)}
+.adm-langs{display:flex;gap:4px;align-items:center}
+.adm-lang{background:transparent;border:1px solid var(--bdr);color:var(--tx2);padding:5px 10px;cursor:pointer;font:.68rem 'Raleway',sans-serif;font-weight:600;letter-spacing:.5px;transition:.2s;border-radius:2px}
+.adm-lang:hover,.adm-lang.on{border-color:var(--gold);color:var(--gold);background:rgba(201,169,110,.1)}
 
 /* ── IMAGE UPLOAD ── */
 .img-upload-zone{border:2px dashed var(--bdr);padding:28px 16px;text-align:center;cursor:pointer;transition:.25s;background:var(--bg3)}
@@ -201,9 +204,9 @@ body{font-family:'Raleway',sans-serif;background:var(--bg0);color:var(--tx0)}
       </svg>
     </div>
     <h1 class="login-title">CakeMe</h1>
-    <span class="login-sub">Admin Panel</span>
+    <span class="login-sub" data-k="adm_panel">Admin Panel</span>
     <input type="password" id="pwdInput" class="login-input" placeholder="••••••••" autocomplete="current-password">
-    <button class="login-btn" id="loginBtn">Přihlásit se</button>
+    <button class="login-btn" id="loginBtn" data-k="adm_login">Přihlásit se</button>
     <p class="login-err" id="loginErr"></p>
   </div>
 </div>
@@ -224,15 +227,19 @@ body{font-family:'Raleway',sans-serif;background:var(--bg0);color:var(--tx0)}
       <div class="adm-logo-txt">Cukrárna CakeMe<span class="adm-logo-sub">Admin panel</span></div>
     </div>
     <div class="adm-hdr-right">
-      <button class="adm-btn" id="refreshBtn">↻ Obnovit</button>
-      <button class="adm-btn danger" id="logoutBtn">Odhlásit</button>
+      <div class="adm-langs">
+        <button class="adm-lang on" data-al="cs">🇨🇿 CZ</button>
+        <button class="adm-lang" data-al="uk">🇺🇦 UA</button>
+      </div>
+      <button class="adm-btn" id="refreshBtn" data-k="adm_refresh">↻ Obnovit</button>
+      <button class="adm-btn danger" id="logoutBtn" data-k="adm_logout">Odhlásit</button>
     </div>
   </header>
 
   <!-- MAIN NAV -->
   <div class="adm-main-nav">
-    <button class="amn on" data-sec="orders"><span class="amn-ic">📋</span> Objednávky</button>
-    <button class="amn" data-sec="menu"><span class="amn-ic">🎂</span> Menu</button>
+    <button class="amn on" data-sec="orders"><span class="amn-ic">📋</span> <span data-k="adm_orders">Objednávky</span></button>
+    <button class="amn" data-sec="menu"><span class="amn-ic">🎂</span> <span data-k="adm_menu">Menu</span></button>
   </div>
 
   <!-- ── ORDERS ── -->
@@ -240,27 +247,27 @@ body{font-family:'Raleway',sans-serif;background:var(--bg0);color:var(--tx0)}
     <div class="adm-stats">
       <div class="stat-box">
         <span class="stat-val" id="statNew">—</span>
-        <span class="stat-lbl">Nové</span>
+        <span class="stat-lbl" data-k="adm_stat_new">Nové</span>
       </div>
       <div class="stat-box">
         <span class="stat-val" id="statToday">—</span>
-        <span class="stat-lbl">Dnes</span>
+        <span class="stat-lbl" data-k="adm_stat_today">Dnes</span>
       </div>
       <div class="stat-box">
         <span class="stat-val" id="statTotal">—</span>
-        <span class="stat-lbl">Celkem</span>
+        <span class="stat-lbl" data-k="adm_stat_total">Celkem</span>
       </div>
     </div>
     <div class="adm-filters">
-      <button class="adm-filter on" data-filter="all">Vše <span class="f-cnt" id="cntAll">0</span></button>
-      <button class="adm-filter" data-filter="new">Nové <span class="f-cnt" id="cntNew">0</span></button>
-      <button class="adm-filter" data-filter="in_progress">Přijaty <span class="f-cnt" id="cntProg">0</span></button>
-      <button class="adm-filter" data-filter="done">Hotové <span class="f-cnt" id="cntDone">0</span></button>
+      <button class="adm-filter on" data-filter="all"><span data-k="adm_filter_all">Vše</span> <span class="f-cnt" id="cntAll">0</span></button>
+      <button class="adm-filter" data-filter="new"><span data-k="adm_filter_new">Nové</span> <span class="f-cnt" id="cntNew">0</span></button>
+      <button class="adm-filter" data-filter="in_progress"><span data-k="adm_filter_prog">Přijaty</span> <span class="f-cnt" id="cntProg">0</span></button>
+      <button class="adm-filter" data-filter="done"><span data-k="adm_filter_done">Hotové</span> <span class="f-cnt" id="cntDone">0</span></button>
     </div>
     <div class="adm-body">
       <div class="adm-top-bar">
         <span class="adm-count" id="orderCount"></span>
-        <button class="btn-clear" id="clearDoneBtn">Smazat hotové</button>
+        <button class="btn-clear" id="clearDoneBtn" data-k="adm_clear_done">Smazat hotové</button>
       </div>
       <div id="ordersList"></div>
     </div>
@@ -272,62 +279,62 @@ body{font-family:'Raleway',sans-serif;background:var(--bg0);color:var(--tx0)}
 
       <!-- Add form -->
       <div class="menu-panel">
-        <h3>Přidat položku do menu</h3>
+        <h3 data-k="adm_add_title">Přidat položku do menu</h3>
         <div class="mai-grid">
           <div class="mai-field">
-            <label>Kategorie *</label>
+            <label data-k="adm_cat_lbl">Kategorie *</label>
             <select id="fCat">
-              <option value="desserts">Dezerty</option>
-              <option value="cakes">Dorty</option>
-              <option value="drinks">Nápoje</option>
+              <option value="desserts" data-k="adm_cat_desserts">Dezerty</option>
+              <option value="cakes" data-k="adm_cat_cakes">Dorty</option>
+              <option value="drinks" data-k="adm_cat_drinks">Nápoje</option>
             </select>
           </div>
           <div class="mai-field">
-            <label>Cena * (např. 133 Kč)</label>
+            <label data-k="adm_price_lbl">Cena * (např. 133 Kč)</label>
             <input type="text" id="fPrice" placeholder="133 Kč">
           </div>
           <div class="mai-field">
-            <label>Název CZ *</label>
+            <label data-k="adm_name_cs_lbl">Název CZ *</label>
             <input type="text" id="fNameCs" placeholder="Název česky">
           </div>
           <div class="mai-field">
-            <label>Назва UA</label>
+            <label data-k="adm_name_uk_lbl">Назва UA</label>
             <input type="text" id="fNameUk" placeholder="Назва українською">
           </div>
           <div class="mai-field">
-            <label>Name EN</label>
+            <label data-k="adm_name_en_lbl">Name EN</label>
             <input type="text" id="fNameEn" placeholder="Name in English">
           </div>
           <div class="mai-field">
-            <label>Badge (Nové, Bestseller…)</label>
+            <label data-k="adm_badge_lbl">Badge (Nové, Bestseller…)</label>
             <input type="text" id="fBadge" placeholder="">
           </div>
           <div class="mai-field full">
-            <label>Popis CZ</label>
+            <label data-k="adm_desc_cs_lbl">Popis CZ</label>
             <input type="text" id="fDescCs" placeholder="Krátký popis česky">
           </div>
           <div class="mai-field full">
-            <label>Опис UA</label>
+            <label data-k="adm_desc_uk_lbl">Опис UA</label>
             <input type="text" id="fDescUk" placeholder="Короткий опис українською">
           </div>
           <div class="mai-field full">
-            <label>Description EN</label>
+            <label data-k="adm_desc_en_lbl">Description EN</label>
             <input type="text" id="fDescEn" placeholder="Short description in English">
           </div>
           <div class="mai-field full">
-            <label>Obrázek</label>
+            <label data-k="adm_img_lbl">Obrázek</label>
             <input type="file" id="fImgFile" accept="image/*" style="display:none">
             <div class="img-upload-zone" id="uploadZone">
               <span class="img-upload-ico">🖼️</span>
-              <div class="img-upload-lbl">Klikněte nebo přetáhněte soubor</div>
-              <div class="img-upload-sub">JPG, PNG, WebP · max 3 MB · automaticky zkomprimováno</div>
+              <div class="img-upload-lbl" data-k="adm_img_click">Klikněte nebo přetáhněte soubor</div>
+              <div class="img-upload-sub" data-k="adm_img_hint">JPG, PNG, WebP · max 3 MB · automaticky zkomprimováno</div>
             </div>
             <img class="img-upload-preview" id="imgUploadPreview" alt="">
-            <button type="button" class="img-reset-btn" id="imgResetBtn">✕ Odebrat obrázek</button>
+            <button type="button" class="img-reset-btn" id="imgResetBtn" data-k="adm_img_remove">✕ Odebrat obrázek</button>
           </div>
         </div>
         <div class="card-prev-wrap">
-          <span class="card-prev-lbl">Náhled karty</span>
+          <span class="card-prev-lbl" data-k="adm_card_prev">Náhled karty</span>
           <div class="card-prev">
             <div class="cp-img-box" id="cpImgBox">
               <span id="cpImgPlaceholder">🎂</span>
@@ -339,20 +346,20 @@ body{font-family:'Raleway',sans-serif;background:var(--bg0);color:var(--tx0)}
               <div class="cp-desc" id="cpDesc">Popis…</div>
               <div class="cp-ft">
                 <span class="cp-price" id="cpPrice">— Kč</span>
-                <span class="cp-btn-fake">Do košíku</span>
+                <span class="cp-btn-fake" data-k="adm_cart_btn">Do košíku</span>
               </div>
             </div>
           </div>
         </div>
-        <button class="btn-add-item" id="addItemBtn" style="margin-top:16px">+ Přidat</button>
+        <button class="btn-add-item" id="addItemBtn" style="margin-top:16px" data-k="adm_add_btn">+ Přidat</button>
         <div class="add-msg" id="addMsg"></div>
       </div>
 
       <!-- Custom items list -->
       <div class="menu-panel">
-        <h3>Vlastní položky</h3>
+        <h3 data-k="adm_custom_title">Vlastní položky</h3>
         <div class="menu-actions">
-          <button class="btn-export" id="exportBtn">↓ Exportovat JSON</button>
+          <button class="btn-export" id="exportBtn" data-k="adm_export">↓ Exportovat JSON</button>
         </div>
         <div class="ci-list-wrap">
           <div id="customItemsList"><p class="no-custom">Načítání…</p></div>
@@ -368,6 +375,101 @@ body{font-family:'Raleway',sans-serif;background:var(--bg0);color:var(--tx0)}
 const PASS = 'Tort@Praha51';
 let activeFilter = 'all';
 let activeSection = 'orders';
+let cachedMenuItems = null;
+
+/* ── i18n ── */
+let adminLang = localStorage.getItem('cm_admin_lang') || 'cs';
+
+const TA = {
+  cs:{
+    adm_panel:'Admin Panel', adm_login:'Přihlásit se', adm_refresh:'↻ Obnovit', adm_logout:'Odhlásit',
+    adm_orders:'Objednávky', adm_menu:'Menu',
+    adm_stat_new:'Nové', adm_stat_today:'Dnes', adm_stat_total:'Celkem',
+    adm_filter_all:'Vše', adm_filter_new:'Nové', adm_filter_prog:'Přijaty', adm_filter_done:'Hotové',
+    adm_clear_done:'Smazat hotové',
+    adm_add_title:'Přidat položku do menu',
+    adm_cat_lbl:'Kategorie *', adm_price_lbl:'Cena * (např. 133 Kč)',
+    adm_name_cs_lbl:'Název CZ *', adm_name_uk_lbl:'Назва UA', adm_name_en_lbl:'Name EN',
+    adm_badge_lbl:'Badge (Nové, Bestseller…)',
+    adm_desc_cs_lbl:'Popis CZ', adm_desc_uk_lbl:'Опис UA', adm_desc_en_lbl:'Description EN',
+    adm_img_lbl:'Obrázek', adm_img_click:'Klikněte nebo přetáhněte soubor',
+    adm_img_hint:'JPG, PNG, WebP · max 3 MB · automaticky zkomprimováno',
+    adm_img_remove:'✕ Odebrat obrázek', adm_card_prev:'Náhled karty',
+    adm_cart_btn:'Do košíku', adm_add_btn:'+ Přidat',
+    adm_custom_title:'Vlastní položky', adm_export:'↓ Exportovat JSON',
+    adm_cat_desserts:'Dezerty', adm_cat_cakes:'Dorty', adm_cat_drinks:'Nápoje',
+    adm_loading:'Načítání…', adm_no_custom:'Žádné vlastní položky',
+    adm_conn_err:'Chyba připojení k serveru', adm_added_ok:'✓ Položka přidána do menu!',
+    adm_server_err:'Chyba serveru', adm_no_connect:'Nelze se připojit k serveru',
+    adm_fill_req:'Vyplňte název a cenu *', adm_export_err:'Chyba exportu',
+    adm_no_orders:'Žádné objednávky', adm_wrong_pwd:'Nesprávné heslo',
+    adm_img_big:'Soubor je příliš velký (max 3 MB).',
+    adm_del_order:'Smazat objednávku?', adm_no_done:'Žádné dokončené objednávky.',
+    adm_clear_confirm:'Smazat {n} dokončených objednávek?', adm_del_item:'Smazat tuto položku z menu?',
+    adm_f_name:'Jméno', adm_f_phone:'Telefon', adm_f_address:'Adresa',
+    adm_f_order:'Objednávka', adm_f_payment:'Platba',
+    adm_s_new:'Nová', adm_s_progress:'Přijata', adm_s_done:'Hotovo',
+    adm_btn_new:'Nová', adm_btn_progress:'Přijata', adm_btn_done:'✓ Hotovo', adm_btn_delete:'✕ Smazat',
+    adm_count:'{n} objednávek',
+  },
+  uk:{
+    adm_panel:'Адмін Панель', adm_login:'Увійти', adm_refresh:'↻ Оновити', adm_logout:'Вийти',
+    adm_orders:'Замовлення', adm_menu:'Меню',
+    adm_stat_new:'Нові', adm_stat_today:'Сьогодні', adm_stat_total:'Всього',
+    adm_filter_all:'Всі', adm_filter_new:'Нові', adm_filter_prog:'Прийняті', adm_filter_done:'Готові',
+    adm_clear_done:'Видалити готові',
+    adm_add_title:'Додати позицію до меню',
+    adm_cat_lbl:'Категорія *', adm_price_lbl:'Ціна * (напр. 133 Kč)',
+    adm_name_cs_lbl:'Назва CZ *', adm_name_uk_lbl:'Назва UA', adm_name_en_lbl:"Ім'я EN",
+    adm_badge_lbl:'Значок (Нове, Bestseller…)',
+    adm_desc_cs_lbl:'Опис CZ', adm_desc_uk_lbl:'Опис UA', adm_desc_en_lbl:'Опис EN',
+    adm_img_lbl:'Зображення', adm_img_click:'Натисніть або перетягніть файл',
+    adm_img_hint:'JPG, PNG, WebP · макс 3 МБ · стискається автоматично',
+    adm_img_remove:'✕ Видалити зображення', adm_card_prev:'Попередній перегляд',
+    adm_cart_btn:'До кошика', adm_add_btn:'+ Додати',
+    adm_custom_title:'Власні позиції', adm_export:'↓ Експорт JSON',
+    adm_cat_desserts:'Десерти', adm_cat_cakes:'Торти', adm_cat_drinks:'Напої',
+    adm_loading:'Завантаження…', adm_no_custom:'Немає власних позицій',
+    adm_conn_err:'Помилка підключення до сервера', adm_added_ok:'✓ Позицію додано до меню!',
+    adm_server_err:'Помилка сервера', adm_no_connect:'Неможливо підключитися до сервера',
+    adm_fill_req:'Заповніть назву та ціну *', adm_export_err:'Помилка експорту',
+    adm_no_orders:'Немає замовлень', adm_wrong_pwd:'Неправильний пароль',
+    adm_img_big:'Файл завеликий (макс 3 МБ).',
+    adm_del_order:'Видалити замовлення?', adm_no_done:'Немає завершених замовлень.',
+    adm_clear_confirm:'Видалити {n} завершених замовлень?', adm_del_item:'Видалити цю позицію з меню?',
+    adm_f_name:"Ім'я", adm_f_phone:'Телефон', adm_f_address:'Адреса',
+    adm_f_order:'Замовлення', adm_f_payment:'Оплата',
+    adm_s_new:'Нова', adm_s_progress:'Прийнята', adm_s_done:'Готово',
+    adm_btn_new:'Нова', adm_btn_progress:'Прийнята', adm_btn_done:'✓ Готово', adm_btn_delete:'✕ Видалити',
+    adm_count:'{n} замовлень',
+  }
+};
+
+function t(k, vars){
+  let s = (TA[adminLang]||TA.cs)[k] || TA.cs[k] || k;
+  if(vars) Object.keys(vars).forEach(v => s = s.replace('{'+v+'}', vars[v]));
+  return s;
+}
+
+function applyAdminLang(){
+  document.querySelectorAll('[data-k]').forEach(el => {
+    const val = (TA[adminLang]||TA.cs)[el.dataset.k];
+    if(val !== undefined) el.textContent = val;
+  });
+  document.querySelectorAll('.adm-lang').forEach(btn => {
+    btn.classList.toggle('on', btn.dataset.al === adminLang);
+  });
+  if(activeSection === 'orders') renderOrders();
+  if(activeSection === 'menu' && cachedMenuItems !== null) renderMenuItems(cachedMenuItems);
+}
+
+document.querySelectorAll('.adm-lang').forEach(btn => {
+  btn.addEventListener('click', () => {
+    adminLang = btn.dataset.al;
+    localStorage.setItem('cm_admin_lang', adminLang);
+    applyAdminLang();
+  });
+});
 
 /* ── Auth ── */
 document.getElementById('loginBtn').addEventListener('click', tryLogin);
@@ -378,7 +480,7 @@ function tryLogin(){
     sessionStorage.setItem('cm_admin','1');
     showPanel();
   } else {
-    document.getElementById('loginErr').textContent = 'Nesprávné heslo';
+    document.getElementById('loginErr').textContent = t('adm_wrong_pwd');
     document.getElementById('pwdInput').value = '';
     document.getElementById('pwdInput').focus();
   }
@@ -389,6 +491,7 @@ function showPanel(){
   const p = document.getElementById('adminPanel');
   p.style.display = 'flex';
   p.style.flexDirection = 'column';
+  applyAdminLang();
   renderOrders();
 }
 
@@ -407,14 +510,15 @@ document.getElementById('refreshBtn').addEventListener('click', ()=>{
 
 document.getElementById('clearDoneBtn').addEventListener('click', ()=>{
   const done = getOrders().filter(x=>x.status==='done').length;
-  if(!done){ alert('Žádné dokončené objednávky.'); return; }
-  if(confirm('Smazat '+done+' dokončených objednávek?')){
+  if(!done){ alert(t('adm_no_done')); return; }
+  if(confirm(t('adm_clear_confirm', {n: done}))){
     saveOrders(getOrders().filter(x=>x.status!=='done'));
     renderOrders();
   }
 });
 
 if(sessionStorage.getItem('cm_admin')==='1') showPanel();
+else applyAdminLang();
 
 /* ── Main nav ── */
 document.querySelectorAll('.amn').forEach(btn => btn.addEventListener('click', ()=>{
@@ -441,7 +545,7 @@ function setStatus(id, status){
   if(item) item.status = status; saveOrders(o); renderOrders();
 }
 function deleteOrder(id){
-  if(!confirm('Smazat objednávku?')) return;
+  if(!confirm(t('adm_del_order'))) return;
   saveOrders(getOrders().filter(x=>x.id!==id)); renderOrders();
 }
 
@@ -451,7 +555,8 @@ function fmtTime(ts){
   return d.toLocaleDateString('cs-CZ',{day:'2-digit',month:'2-digit',year:'numeric'})
        + ' ' + d.toLocaleTimeString('cs-CZ',{hour:'2-digit',minute:'2-digit'});
 }
-const STATUS_LBL = {new:'Nová', in_progress:'Přijata', done:'Hotovo'};
+
+function statusLbl(s){ return {new:t('adm_s_new'), in_progress:t('adm_s_progress'), done:t('adm_s_done')}[s]||s; }
 
 function renderOrders(){
   const all = getOrders();
@@ -470,14 +575,14 @@ function renderOrders(){
   document.getElementById('cntDone').textContent   = doneO.length;
 
   let list = all;
-  if(activeFilter==='new')          list = newO;
+  if(activeFilter==='new')              list = newO;
   else if(activeFilter==='in_progress') list = progO;
-  else if(activeFilter==='done')    list = doneO;
+  else if(activeFilter==='done')        list = doneO;
 
-  document.getElementById('orderCount').textContent = list.length+' objednávek';
+  document.getElementById('orderCount').textContent = t('adm_count', {n: list.length});
 
   const el = document.getElementById('ordersList');
-  if(!list.length){ el.innerHTML='<div class="no-orders">Žádné objednávky</div>'; return; }
+  if(!list.length){ el.innerHTML=`<div class="no-orders">${t('adm_no_orders')}</div>`; return; }
 
   el.innerHTML = list.map(o=>`
     <div class="order-card ${o.status}">
@@ -486,20 +591,20 @@ function renderOrders(){
           <div class="oc-time">${fmtTime(o.ts)}</div>
           ${o.order_type?`<div class="oc-type">${esc(o.order_type)}</div>`:''}
         </div>
-        <span class="oc-status-badge badge-${o.status}">${STATUS_LBL[o.status]||o.status}</span>
+        <span class="oc-status-badge badge-${o.status}">${statusLbl(o.status)}</span>
       </div>
       <div class="oc-body">
-        <div class="oc-field"><span class="oc-lbl">Jméno</span><span class="oc-val">${esc(o.name)}</span></div>
-        <div class="oc-field"><span class="oc-lbl">Telefon</span><span class="oc-val"><a href="tel:${esc(o.phone)}">${esc(o.phone)}</a></span></div>
-        ${o.address?`<div class="oc-field full"><span class="oc-lbl">Adresa</span><span class="oc-val">${esc(o.address)}</span></div>`:''}
-        <div class="oc-field full"><span class="oc-lbl">Objednávka</span><span class="oc-val items">${esc(o.order)}</span></div>
-        <div class="oc-field"><span class="oc-lbl">Platba</span><span class="oc-val">${esc(o.payment)}</span></div>
+        <div class="oc-field"><span class="oc-lbl">${t('adm_f_name')}</span><span class="oc-val">${esc(o.name)}</span></div>
+        <div class="oc-field"><span class="oc-lbl">${t('adm_f_phone')}</span><span class="oc-val"><a href="tel:${esc(o.phone)}">${esc(o.phone)}</a></span></div>
+        ${o.address?`<div class="oc-field full"><span class="oc-lbl">${t('adm_f_address')}</span><span class="oc-val">${esc(o.address)}</span></div>`:''}
+        <div class="oc-field full"><span class="oc-lbl">${t('adm_f_order')}</span><span class="oc-val items">${esc(o.order)}</span></div>
+        <div class="oc-field"><span class="oc-lbl">${t('adm_f_payment')}</span><span class="oc-val">${esc(o.payment)}</span></div>
       </div>
       <div class="oc-actions">
-        ${o.status!=='new'         ?`<button onclick="setStatus(${o.id},'new')">Nová</button>`:''}
-        ${o.status!=='in_progress' ?`<button onclick="setStatus(${o.id},'in_progress')">Přijata</button>`:''}
-        ${o.status!=='done'        ?`<button class="btn-done" onclick="setStatus(${o.id},'done')">✓ Hotovo</button>`:''}
-        <button class="btn-del" onclick="deleteOrder(${o.id})">✕ Smazat</button>
+        ${o.status!=='new'         ?`<button onclick="setStatus(${o.id},'new')">${t('adm_btn_new')}</button>`:''}
+        ${o.status!=='in_progress' ?`<button onclick="setStatus(${o.id},'in_progress')">${t('adm_btn_progress')}</button>`:''}
+        ${o.status!=='done'        ?`<button class="btn-done" onclick="setStatus(${o.id},'done')">${t('adm_btn_done')}</button>`:''}
+        <button class="btn-del" onclick="deleteOrder(${o.id})">${t('adm_btn_delete')}</button>
       </div>
     </div>
   `).join('');
@@ -508,19 +613,20 @@ function renderOrders(){
 /* ── Menu CRUD ── */
 async function loadMenuItems(){
   const el = document.getElementById('customItemsList');
-  el.innerHTML = '<p class="no-custom">Načítání…</p>';
+  el.innerHTML = `<p class="no-custom">${t('adm_loading')}</p>`;
   try{
     const r = await fetch('/api/menu');
     if(!r.ok) throw new Error();
-    renderMenuItems(await r.json());
+    cachedMenuItems = await r.json();
+    renderMenuItems(cachedMenuItems);
   }catch{
-    el.innerHTML = '<p class="no-custom" style="color:#e08080">Chyba připojení k serveru</p>';
+    el.innerHTML = `<p class="no-custom" style="color:#e08080">${t('adm_conn_err')}</p>`;
   }
 }
 
 function renderMenuItems(items){
   const el = document.getElementById('customItemsList');
-  if(!items.length){ el.innerHTML='<p class="no-custom">Žádné vlastní položky</p>'; return; }
+  if(!items.length){ el.innerHTML=`<p class="no-custom">${t('adm_no_custom')}</p>`; return; }
   el.innerHTML = items.map(item=>`
     <div class="ci-card">
       <div class="ci-info">
@@ -532,7 +638,7 @@ function renderMenuItems(items){
           <div class="ci-meta">${esc(item.cat)} · ${esc(item.price)}${item.badge?' · '+esc(item.badge):''}</div>
         </div>
       </div>
-      <button class="ci-del" title="Smazat" onclick="deleteMenuItem(${item.id})">✕</button>
+      <button class="ci-del" title="${t('adm_btn_delete')}" onclick="deleteMenuItem(${item.id})">✕</button>
     </div>
   `).join('');
 }
@@ -542,7 +648,7 @@ document.getElementById('addItemBtn').addEventListener('click', async ()=>{
   const msg = document.getElementById('addMsg');
   const nameCs = document.getElementById('fNameCs').value.trim();
   const price  = document.getElementById('fPrice').value.trim();
-  if(!nameCs || !price){ showAddMsg('Vyplňte název a cenu *', 'err'); return; }
+  if(!nameCs || !price){ showAddMsg(t('adm_fill_req'), 'err'); return; }
   btn.disabled = true; btn.textContent = '…';
   msg.className = 'add-msg'; msg.textContent = '';
   try{
@@ -564,22 +670,22 @@ document.getElementById('addItemBtn').addEventListener('click', async ()=>{
       })
     });
     if(r.ok){
-      showAddMsg('✓ Položka přidána do menu!', 'ok');
+      showAddMsg(t('adm_added_ok'), 'ok');
       ['fNameCs','fNameUk','fNameEn','fPrice','fBadge','fDescCs','fDescUk','fDescEn'].forEach(id=>document.getElementById(id).value='');
       resetImg();
       updateCardPreview();
       loadMenuItems();
     } else {
-      showAddMsg('Chyba serveru', 'err');
+      showAddMsg(t('adm_server_err'), 'err');
     }
   }catch{
-    showAddMsg('Nelze se připojit k serveru', 'err');
+    showAddMsg(t('adm_no_connect'), 'err');
   }
-  btn.disabled = false; btn.textContent = '+ Přidat';
+  btn.disabled = false; btn.textContent = t('adm_add_btn');
 });
 
 async function deleteMenuItem(id){
-  if(!confirm('Smazat tuto položku z menu?')) return;
+  if(!confirm(t('adm_del_item'))) return;
   try{
     await fetch('/api/menu/'+id, {
       method:'DELETE',
@@ -599,7 +705,7 @@ document.getElementById('exportBtn').addEventListener('click', async ()=>{
     a.href = URL.createObjectURL(blob);
     a.download = 'cakeme-menu-' + new Date().toISOString().slice(0,10) + '.json';
     a.click();
-  }catch{ alert('Chyba exportu'); }
+  }catch{ alert(t('adm_export_err')); }
 });
 
 /* ── Image upload & card preview ── */
@@ -622,7 +728,7 @@ fImgFile.addEventListener('change', function(){ if(this.files[0]) loadImgFile(th
 imgResetBtn.addEventListener('click', resetImg);
 
 function loadImgFile(file){
-  if(file.size > 3*1024*1024){ alert('Soubor je příliš velký (max 3 MB).'); return; }
+  if(file.size > 3*1024*1024){ alert(t('adm_img_big')); return; }
   const reader = new FileReader();
   reader.onload = ev => {
     const img = new Image();
