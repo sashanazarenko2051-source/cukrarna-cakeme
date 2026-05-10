@@ -364,15 +364,15 @@ footer{background:#070707;border-top:1px solid var(--bdr);padding:52px 0 28px}
         </div>
         <div class="ord-field">
           <label data-k="f_name">Jméno</label>
-          <input type="text" name="name" required>
+          <input type="text" name="name">
         </div>
         <div class="ord-field">
           <label data-k="f_phone">Telefon</label>
-          <input type="tel" name="phone" required>
+          <input type="tel" name="phone">
         </div>
         <div class="ord-field full" id="addrField">
           <label data-k="f_addr">Adresa doručení</label>
-          <input type="text" name="address" required>
+          <input type="text" name="address">
         </div>
         <div class="ord-field full">
           <label data-k="f_cart">Vaše objednávka</label>
@@ -560,7 +560,7 @@ function setOrderType(btn){
   document.getElementById('orderTypeInput').value=isDelivery?t('ot_delivery'):t('ot_instore');
   const af=document.getElementById('addrField');
   af.style.display=isDelivery?'':'none';
-  af.querySelector('input').required=isDelivery;
+  // af.querySelector('input').required=isDelivery; // DEBUG: disabled
   document.getElementById('instoreNote').style.display=isDelivery?'none':'block';
 }
 function getCart(){return JSON.parse(localStorage.getItem('cakeme_cart')||'[]');}

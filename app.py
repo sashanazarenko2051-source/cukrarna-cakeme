@@ -211,8 +211,9 @@ async def api_order(req: Request):
         'order_type': (d.get('order_type') or '').strip(),
         'status':     'new',
     }
-    if not order['name'] or not order['phone']:
-        raise HTTPException(400, {'success': False, 'error': 'name and phone required'})
+    # DEBUG: validation disabled
+    # if not order['name'] or not order['phone']:
+    #     raise HTTPException(400, {'success': False, 'error': 'name and phone required'})
     pool = _get_pool()
     conn = pool.getconn()
     try:
