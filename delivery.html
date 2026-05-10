@@ -319,7 +319,7 @@ footer{background:#070707;border-top:1px solid var(--bdr);padding:52px 0 28px}
         <p data-k="s3d">Váš čerstvý dort bude doručen přímo k vašim dveřím</p>
       </div>
     </div>
-    <div class="del-info fi">
+    <div class="del-info fi" id="deliveryInfoBlock">
       <div class="di">
         <div class="ic">
           <svg width="32" height="32" viewBox="0 0 36 36" fill="none">
@@ -592,6 +592,7 @@ function setOrderType(btn){
   pi.placeholder=isDelivery?'':t('f_phone_opt');
   document.getElementById('tableField').style.display=isDelivery?'none':'';
   document.getElementById('instoreNote').style.display=isDelivery?'none':'block';
+  document.getElementById('deliveryInfoBlock').style.display=isDelivery?'':'none';
   updatePaymentLabels();
 }
 function getCart(){return JSON.parse(localStorage.getItem('cakeme_cart')||'[]');}
