@@ -298,10 +298,6 @@ body{font-family:'Raleway',sans-serif;background:var(--bg0);color:var(--tx0)}
             <input type="text" id="fNameCs" placeholder="Název česky">
           </div>
           <div class="mai-field">
-            <label data-k="adm_name_uk_lbl">Назва UA</label>
-            <input type="text" id="fNameUk" placeholder="Назва українською">
-          </div>
-          <div class="mai-field">
             <label data-k="adm_name_en_lbl">Name EN</label>
             <input type="text" id="fNameEn" placeholder="Name in English">
           </div>
@@ -312,10 +308,6 @@ body{font-family:'Raleway',sans-serif;background:var(--bg0);color:var(--tx0)}
           <div class="mai-field full">
             <label data-k="adm_desc_cs_lbl">Popis CZ</label>
             <input type="text" id="fDescCs" placeholder="Krátký popis česky">
-          </div>
-          <div class="mai-field full">
-            <label data-k="adm_desc_uk_lbl">Опис UA</label>
-            <input type="text" id="fDescUk" placeholder="Короткий опис українською">
           </div>
           <div class="mai-field full">
             <label data-k="adm_desc_en_lbl">Description EN</label>
@@ -660,18 +652,16 @@ document.getElementById('addItemBtn').addEventListener('click', async ()=>{
         cat:     document.getElementById('fCat').value,
         price,
         name_cs: nameCs,
-        name_uk: document.getElementById('fNameUk').value.trim(),
         name_en: document.getElementById('fNameEn').value.trim(),
         badge:   document.getElementById('fBadge').value.trim(),
         img:     currentImgData,
         desc_cs: document.getElementById('fDescCs').value.trim(),
-        desc_uk: document.getElementById('fDescUk').value.trim(),
         desc_en: document.getElementById('fDescEn').value.trim()
       })
     });
     if(r.ok){
       showAddMsg(t('adm_added_ok'), 'ok');
-      ['fNameCs','fNameUk','fNameEn','fPrice','fBadge','fDescCs','fDescUk','fDescEn'].forEach(id=>document.getElementById(id).value='');
+      ['fNameCs','fNameEn','fPrice','fBadge','fDescCs','fDescEn'].forEach(id=>document.getElementById(id).value='');
       resetImg();
       updateCardPreview();
       loadMenuItems();
