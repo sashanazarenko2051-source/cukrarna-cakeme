@@ -525,7 +525,7 @@ const TA = {
     adm_del_order:'Smazat objednávku?', adm_no_done:'Žádné dokončené objednávky.',
     adm_clear_confirm:'Smazat {n} dokončených objednávek?', adm_del_item:'Smazat tuto položku z menu?',
     adm_f_name:'Jméno', adm_f_phone:'Telefon', adm_f_address:'Adresa',
-    adm_f_order:'Objednávka', adm_f_payment:'Platba',
+    adm_f_order:'Objednávka', adm_f_payment:'Platba', adm_f_total:'Celková suma',
     adm_s_new:'Nová', adm_s_progress:'Přijata', adm_s_done:'Hotovo', adm_s_paid:'✓ Zaplaceno 50%', adm_s_pending:'⏳ Čeká na platbu',
     adm_btn_new:'Nová', adm_btn_progress:'Přijata', adm_btn_done:'✓ Hotovo', adm_btn_delete:'✕ Smazat',
     adm_count:'{n} objednávek',
@@ -567,7 +567,7 @@ const TA = {
     adm_del_order:'Видалити замовлення?', adm_no_done:'Немає завершених замовлень.',
     adm_clear_confirm:'Видалити {n} завершених замовлень?', adm_del_item:'Видалити цю позицію з меню?',
     adm_f_name:"Ім'я", adm_f_phone:'Телефон', adm_f_address:'Адреса',
-    adm_f_order:'Замовлення', adm_f_payment:'Оплата',
+    adm_f_order:'Замовлення', adm_f_payment:'Оплата', adm_f_total:'Загальна сума',
     adm_s_new:'Нова', adm_s_progress:'Прийнята', adm_s_done:'Готово', adm_s_paid:'✓ Оплачено 50%', adm_s_pending:'⏳ Очікує оплати',
     adm_btn_new:'Нова', adm_btn_progress:'Прийнята', adm_btn_done:'✓ Готово', adm_btn_delete:'✕ Видалити',
     adm_count:'{n} замовлень',
@@ -609,7 +609,7 @@ const TA = {
     adm_del_order:'Delete this order?', adm_no_done:'No completed orders.',
     adm_clear_confirm:'Delete {n} completed orders?', adm_del_item:'Delete this menu item?',
     adm_f_name:'Name', adm_f_phone:'Phone', adm_f_address:'Address',
-    adm_f_order:'Order', adm_f_payment:'Payment',
+    adm_f_order:'Order', adm_f_payment:'Payment', adm_f_total:'Total',
     adm_s_new:'New', adm_s_progress:'In progress', adm_s_done:'Done', adm_s_paid:'✓ Paid 50%', adm_s_pending:'⏳ Awaiting payment',
     adm_btn_new:'New', adm_btn_progress:'In progress', adm_btn_done:'✓ Done', adm_btn_delete:'✕ Delete',
     adm_count:'{n} orders',
@@ -858,7 +858,8 @@ async function renderOrders(){
         <div class="oc-field"><span class="oc-lbl">${t('adm_f_phone')}</span><span class="oc-val"><a href="tel:${esc(o.phone)}">${esc(o.phone)}</a></span></div>
         ${o.address?`<div class="oc-field full"><span class="oc-lbl">${t('adm_f_address')}</span><span class="oc-val">${esc(o.address)}</span></div>`:''}
         <div class="oc-field full"><span class="oc-lbl">${t('adm_f_order')}</span><span class="oc-val items">${esc(orderItems(o.order))}</span></div>
-        <div class="oc-field"><span class="oc-lbl">${t('adm_f_payment')}</span><span class="oc-val">${esc(o.payment||'—')}${orderTotal(o.order)?` &middot; <b style="color:var(--gold);font-family:\'Playfair Display\',serif">${esc(orderTotal(o.order))}</b>`:''}</span></div>
+        <div class="oc-field"><span class="oc-lbl">${t('adm_f_payment')}</span><span class="oc-val">${esc(o.payment||'—')}</span></div>
+        <div class="oc-field"><span class="oc-lbl">${t('adm_f_total')}</span><span class="oc-val" style="color:var(--gold);font-family:'Playfair Display',serif;font-size:1.05rem">${orderTotal(o.order)||'—'}</span></div>
       </div>
       <div class="oc-actions">
         ${o.status!=='new'         ?`<button onclick="setStatus(${o.id},'new')">${t('adm_btn_new')}</button>`:''}
