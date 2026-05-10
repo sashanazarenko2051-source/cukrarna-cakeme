@@ -1,8 +1,8 @@
-import asyncpg, hashlib, hmac, json, os, re, secrets, ssl, time
+import hashlib, hmac, json, os, secrets, time
 from collections import defaultdict
+import psycopg2, psycopg2.extras, psycopg2.pool
 from fastapi import FastAPI, HTTPException, Request
 from fastapi.responses import FileResponse, JSONResponse
-from fastapi.middleware.cors import CORSMiddleware
 
 app = FastAPI(docs_url=None, redoc_url=None)
 
@@ -33,46 +33,38 @@ def _get_ip(req: Request) -> str:
     return req.headers.get('X-Forwarded-For', req.client.host or '').split(',')[0].strip()
 
 # ── DB pool ───────────────────────────────────────────────────────────────────
-def _json_codec():
-    async def _init(conn):
-        await conn.set_type_codec('jsonb', encoder=json.dumps, decoder=json.loads,
-                                  schema='pg_catalog')
-    return _init
-
-async def _get_pool():
+def _get_pool():
     global _pool
-    if _pool:
-        return _pool
-    url = DATABASE_URL
-    needs_ssl = 'sslmode=require' in url or 'sslmode=verify' in url
-    url = re.sub(r'[?&]sslmode=\w+', '', url).rstrip('?&')
-    ssl_ctx = None
-    if needs_ssl:
-        ssl_ctx = ssl.create_default_context()
-        ssl_ctx.check_hostname = False
-        ssl_ctx.verify_mode = ssl.CERT_NONE
-    _pool = await asyncpg.create_pool(
-        url, ssl=ssl_ctx, min_size=1, max_size=5,
-        command_timeout=10, init=_json_codec()
-    )
-    async with _pool.acquire() as c:
-        await c.execute("""
-            CREATE TABLE IF NOT EXISTS orders (
-                id BIGINT PRIMARY KEY, ts TEXT, name TEXT, phone TEXT,
-                address TEXT, ord TEXT, payment TEXT, order_type TEXT,
-                status TEXT DEFAULT 'new'
-            )""")
-        await c.execute("""
-            CREATE TABLE IF NOT EXISTS menu_items (
-                id BIGINT PRIMARY KEY, data JSONB NOT NULL
-            )""")
+    if _pool is None and DATABASE_URL:
+        _pool = psycopg2.pool.ThreadedConnectionPool(
+            1, 5, DATABASE_URL, connect_timeout=10
+        )
+        _init_tables()
     return _pool
+
+def _init_tables():
+    conn = _pool.getconn()
+    try:
+        with conn.cursor() as cur:
+            cur.execute("""
+                CREATE TABLE IF NOT EXISTS orders (
+                    id BIGINT PRIMARY KEY, ts TEXT, name TEXT, phone TEXT,
+                    address TEXT, ord TEXT, payment TEXT, order_type TEXT,
+                    status TEXT DEFAULT 'new'
+                )""")
+            cur.execute("""
+                CREATE TABLE IF NOT EXISTS menu_items (
+                    id BIGINT PRIMARY KEY, data JSONB NOT NULL
+                )""")
+        conn.commit()
+    finally:
+        _pool.putconn(conn)
 
 @app.on_event('startup')
 async def _startup():
     if DATABASE_URL:
         try:
-            await _get_pool()
+            _get_pool()
         except Exception as e:
             print('DB startup error:', e)
 
@@ -112,11 +104,15 @@ async def api_auth(req: Request):
 
 # ── /api/menu ─────────────────────────────────────────────────────────────────
 @app.get('/api/menu')
-async def api_menu_get():
-    pool = await _get_pool()
-    async with pool.acquire() as c:
-        rows = await c.fetch('SELECT data FROM menu_items ORDER BY id ASC')
-    return [r['data'] for r in rows]
+def api_menu_get():
+    pool = _get_pool()
+    conn = pool.getconn()
+    try:
+        with conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor) as cur:
+            cur.execute('SELECT data FROM menu_items ORDER BY id ASC')
+            return [r['data'] for r in cur.fetchall()]
+    finally:
+        pool.putconn(conn)
 
 @app.post('/api/menu')
 async def api_menu_add(req: Request):
@@ -143,9 +139,15 @@ async def api_menu_add(req: Request):
             'en': (d.get('desc_en') or '').strip() or (d.get('desc_cs') or '').strip(),
         },
     }
-    pool = await _get_pool()
-    async with pool.acquire() as c:
-        await c.execute('INSERT INTO menu_items (id, data) VALUES ($1, $2)', item['id'], item)
+    pool = _get_pool()
+    conn = pool.getconn()
+    try:
+        with conn.cursor() as cur:
+            cur.execute('INSERT INTO menu_items (id, data) VALUES (%s, %s)',
+                        (item['id'], json.dumps(item, ensure_ascii=False)))
+        conn.commit()
+    finally:
+        pool.putconn(conn)
     return {'ok': True, 'item': item}
 
 @app.patch('/api/menu/{item_id}')
@@ -153,23 +155,30 @@ async def api_menu_patch(item_id: int, req: Request):
     d = await req.json()
     if not _verify_token(d.get('token')):
         raise HTTPException(401, 'Unauthorized')
-    pool = await _get_pool()
-    async with pool.acquire() as c:
-        row = await c.fetchrow('SELECT data FROM menu_items WHERE id=$1', item_id)
-        if not row:
-            raise HTTPException(404, 'Not found')
-        item = dict(row['data'])
-        for f in ('price', 'badge', 'img', 'cat'):
-            if f in d:
-                item[f] = (d[f] or '').strip()
-        item.setdefault('name', {})
-        item.setdefault('desc', {})
-        for lng in ('cs', 'uk', 'en'):
-            if f'name_{lng}' in d:
-                item['name'][lng] = (d[f'name_{lng}'] or '').strip() or item['name'].get(lng, '')
-            if f'desc_{lng}' in d:
-                item['desc'][lng] = (d[f'desc_{lng}'] or '').strip()
-        await c.execute('UPDATE menu_items SET data=$1 WHERE id=$2', item, item_id)
+    pool = _get_pool()
+    conn = pool.getconn()
+    try:
+        with conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor) as cur:
+            cur.execute('SELECT data FROM menu_items WHERE id=%s', (item_id,))
+            row = cur.fetchone()
+            if not row:
+                raise HTTPException(404, 'Not found')
+            item = dict(row['data'])
+            for f in ('price', 'badge', 'img', 'cat'):
+                if f in d:
+                    item[f] = (d[f] or '').strip()
+            item.setdefault('name', {})
+            item.setdefault('desc', {})
+            for lng in ('cs', 'uk', 'en'):
+                if f'name_{lng}' in d:
+                    item['name'][lng] = (d[f'name_{lng}'] or '').strip() or item['name'].get(lng, '')
+                if f'desc_{lng}' in d:
+                    item['desc'][lng] = (d[f'desc_{lng}'] or '').strip()
+            cur.execute('UPDATE menu_items SET data=%s WHERE id=%s',
+                        (json.dumps(item, ensure_ascii=False), item_id))
+        conn.commit()
+    finally:
+        pool.putconn(conn)
     return {'ok': True, 'item': item}
 
 @app.delete('/api/menu/{item_id}')
@@ -177,9 +186,14 @@ async def api_menu_del(item_id: int, req: Request):
     d = await req.json()
     if not _verify_token(d.get('token')):
         raise HTTPException(401, 'Unauthorized')
-    pool = await _get_pool()
-    async with pool.acquire() as c:
-        await c.execute('DELETE FROM menu_items WHERE id=$1', item_id)
+    pool = _get_pool()
+    conn = pool.getconn()
+    try:
+        with conn.cursor() as cur:
+            cur.execute('DELETE FROM menu_items WHERE id=%s', (item_id,))
+        conn.commit()
+    finally:
+        pool.putconn(conn)
     return {'ok': True}
 
 # ── /api/order ────────────────────────────────────────────────────────────────
@@ -199,15 +213,20 @@ async def api_order(req: Request):
     }
     if not order['name'] or not order['phone']:
         raise HTTPException(400, {'success': False, 'error': 'name and phone required'})
-    pool = await _get_pool()
-    async with pool.acquire() as c:
-        await c.execute(
-            'INSERT INTO orders (id,ts,name,phone,address,ord,payment,order_type,status)'
-            ' VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9)',
-            order['id'], order['ts'], order['name'], order['phone'],
-            order['address'], order['order'], order['payment'],
-            order['order_type'], order['status']
-        )
+    pool = _get_pool()
+    conn = pool.getconn()
+    try:
+        with conn.cursor() as cur:
+            cur.execute(
+                'INSERT INTO orders (id,ts,name,phone,address,ord,payment,order_type,status)'
+                ' VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s)',
+                (order['id'], order['ts'], order['name'], order['phone'],
+                 order['address'], order['order'], order['payment'],
+                 order['order_type'], order['status'])
+            )
+        conn.commit()
+    finally:
+        pool.putconn(conn)
     return {'success': True}
 
 # ── /api/orders ───────────────────────────────────────────────────────────────
@@ -216,13 +235,17 @@ async def api_orders(req: Request):
     d = await req.json()
     if not _verify_token(d.get('token')):
         raise HTTPException(401, 'Unauthorized')
-    pool = await _get_pool()
-    async with pool.acquire() as c:
-        rows = await c.fetch(
-            'SELECT id,ts,name,phone,address,ord AS "order",'
-            'payment,order_type,status FROM orders ORDER BY id DESC'
-        )
-    return [dict(r) for r in rows]
+    pool = _get_pool()
+    conn = pool.getconn()
+    try:
+        with conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor) as cur:
+            cur.execute(
+                'SELECT id,ts,name,phone,address,ord AS "order",'
+                'payment,order_type,status FROM orders ORDER BY id DESC'
+            )
+            return [dict(r) for r in cur.fetchall()]
+    finally:
+        pool.putconn(conn)
 
 @app.patch('/api/order/{order_id}')
 async def api_order_status(order_id: int, req: Request):
@@ -232,9 +255,14 @@ async def api_order_status(order_id: int, req: Request):
     status = (d.get('status') or '').strip()
     if status not in ('new', 'in_progress', 'done'):
         raise HTTPException(400, 'Invalid status')
-    pool = await _get_pool()
-    async with pool.acquire() as c:
-        await c.execute('UPDATE orders SET status=$1 WHERE id=$2', status, order_id)
+    pool = _get_pool()
+    conn = pool.getconn()
+    try:
+        with conn.cursor() as cur:
+            cur.execute('UPDATE orders SET status=%s WHERE id=%s', (status, order_id))
+        conn.commit()
+    finally:
+        pool.putconn(conn)
     return {'ok': True}
 
 @app.delete('/api/order/{order_id}')
@@ -242,9 +270,14 @@ async def api_order_del(order_id: int, req: Request):
     d = await req.json()
     if not _verify_token(d.get('token')):
         raise HTTPException(401, 'Unauthorized')
-    pool = await _get_pool()
-    async with pool.acquire() as c:
-        await c.execute('DELETE FROM orders WHERE id=$1', order_id)
+    pool = _get_pool()
+    conn = pool.getconn()
+    try:
+        with conn.cursor() as cur:
+            cur.execute('DELETE FROM orders WHERE id=%s', (order_id,))
+        conn.commit()
+    finally:
+        pool.putconn(conn)
     return {'ok': True}
 
 # ── Static files ──────────────────────────────────────────────────────────────
@@ -254,11 +287,11 @@ _BLOCKED = {
 }
 
 @app.get('/')
-async def _index():
+def _index():
     return FileResponse('index.html')
 
 @app.get('/{path:path}')
-async def _static(path: str):
+def _static(path: str):
     if path in _BLOCKED or path.startswith('.'):
         raise HTTPException(404)
     if os.path.isfile(path):
