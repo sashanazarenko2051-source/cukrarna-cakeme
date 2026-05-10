@@ -87,6 +87,12 @@ def _init_db():
                         status TEXT DEFAULT 'new'
                     )
                 """)
+                cur.execute("""
+                    CREATE TABLE IF NOT EXISTS menu_items (
+                        id BIGINT PRIMARY KEY,
+                        data JSONB NOT NULL
+                    )
+                """)
     except Exception:
         pass
 
@@ -94,6 +100,14 @@ _init_db()
 
 # ── Menu helpers ──
 def load_custom():
+    if DATABASE_URL and psycopg2:
+        try:
+            with _get_conn() as conn:
+                with conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor) as cur:
+                    cur.execute("SELECT data FROM menu_items ORDER BY id ASC")
+                    return [r['data'] for r in cur.fetchall()]
+        except Exception:
+            pass
     try:
         if os.path.exists(MENU_FILE):
             with open(MENU_FILE, encoding='utf-8') as f:
@@ -103,6 +117,19 @@ def load_custom():
     return []
 
 def save_custom(items):
+    if DATABASE_URL and psycopg2:
+        try:
+            with _get_conn() as conn:
+                with conn.cursor() as cur:
+                    cur.execute("DELETE FROM menu_items")
+                    for item in items:
+                        cur.execute(
+                            "INSERT INTO menu_items (id, data) VALUES (%s, %s)",
+                            (item['id'], json.dumps(item, ensure_ascii=False))
+                        )
+            return
+        except Exception:
+            pass
     with open(MENU_FILE, 'w', encoding='utf-8') as f:
         json.dump(items, f, ensure_ascii=False, indent=2)
 
