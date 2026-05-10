@@ -4,21 +4,27 @@ from collections import defaultdict
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 
+try:
+    import psycopg2
+    import psycopg2.extras
+except ImportError:
+    psycopg2 = None
+
 app = Flask(__name__, static_folder='.', static_url_path='')
 
 MENU_FILE    = 'custom_menu.json'
 ORDERS_FILE  = 'orders.json'
-SMTP_USER    = os.environ.get('SMTP_USER', '')   # Gmail address
-SMTP_PASS    = os.environ.get('SMTP_PASS', '')   # Gmail App Password
-ORDER_TO     = os.environ.get('ORDER_TO', '')    # Recipient email
-ADMIN_PASS = os.environ.get('ADMIN_PASS', 'Tort@Praha51')
-SECRET_KEY = os.environ.get('SECRET_KEY', secrets.token_hex(32))
-TOKEN_TTL  = 12 * 3600  # token window 12 h
+SMTP_USER    = os.environ.get('SMTP_USER', '')
+SMTP_PASS    = os.environ.get('SMTP_PASS', '')
+ORDER_TO     = os.environ.get('ORDER_TO', '')
+ADMIN_PASS   = os.environ.get('ADMIN_PASS', 'Tort@Praha51')
+SECRET_KEY   = os.environ.get('SECRET_KEY', secrets.token_hex(32))
+DATABASE_URL = os.environ.get('DATABASE_URL', '')
+TOKEN_TTL    = 12 * 3600
 
-# ── Rate limiting (in-memory, resets on restart) ──
 _fail_log  = defaultdict(list)
 MAX_FAILS  = 5
-FAIL_WIN   = 900  # 15 min
+FAIL_WIN   = 900
 
 def _rate_ok(ip):
     now = time.time()
@@ -28,7 +34,6 @@ def _rate_ok(ip):
 def _record_fail(ip):
     _fail_log[ip].append(time.time())
 
-# ── HMAC token helpers ──
 def _make_token():
     ts = int(time.time()) // TOKEN_TTL
     return hmac.new(SECRET_KEY.encode(), str(ts).encode(), hashlib.sha256).hexdigest()
@@ -49,16 +54,43 @@ def _authorized(d):
 def _get_ip():
     return request.headers.get('X-Forwarded-For', request.remote_addr or '').split(',')[0].strip()
 
-# ── Security headers on every response ──
 @app.after_request
 def security_headers(resp):
-    resp.headers['X-Frame-Options']           = 'DENY'
-    resp.headers['X-Content-Type-Options']    = 'nosniff'
-    resp.headers['X-XSS-Protection']          = '1; mode=block'
-    resp.headers['Referrer-Policy']           = 'strict-origin-when-cross-origin'
-    resp.headers['Permissions-Policy']        = 'camera=(), microphone=(), geolocation=()'
-    resp.headers['Cache-Control']             = 'no-store' if request.path.startswith('/api/') else resp.headers.get('Cache-Control', '')
+    resp.headers['X-Frame-Options']        = 'DENY'
+    resp.headers['X-Content-Type-Options'] = 'nosniff'
+    resp.headers['X-XSS-Protection']       = '1; mode=block'
+    resp.headers['Referrer-Policy']        = 'strict-origin-when-cross-origin'
+    resp.headers['Permissions-Policy']     = 'camera=(), microphone=(), geolocation=()'
+    resp.headers['Cache-Control']          = 'no-store' if request.path.startswith('/api/') else resp.headers.get('Cache-Control', '')
     return resp
+
+# ── Database ──
+def _get_conn():
+    return psycopg2.connect(DATABASE_URL)
+
+def _init_db():
+    if not DATABASE_URL or not psycopg2:
+        return
+    try:
+        with _get_conn() as conn:
+            with conn.cursor() as cur:
+                cur.execute("""
+                    CREATE TABLE IF NOT EXISTS orders (
+                        id BIGINT PRIMARY KEY,
+                        ts TEXT,
+                        name TEXT,
+                        phone TEXT,
+                        address TEXT,
+                        ord TEXT,
+                        payment TEXT,
+                        order_type TEXT,
+                        status TEXT DEFAULT 'new'
+                    )
+                """)
+    except Exception:
+        pass
+
+_init_db()
 
 # ── Menu helpers ──
 def load_custom():
@@ -74,7 +106,7 @@ def save_custom(items):
     with open(MENU_FILE, 'w', encoding='utf-8') as f:
         json.dump(items, f, ensure_ascii=False, indent=2)
 
-# ── Email notification ──
+# ── Email ──
 def send_order_email(order):
     if not SMTP_USER or not SMTP_PASS or not ORDER_TO:
         return
@@ -100,8 +132,16 @@ def send_order_email(order):
     except Exception:
         pass
 
-# ── Order helpers ──
+# ── Order helpers (DB + JSON fallback) ──
 def load_orders():
+    if DATABASE_URL and psycopg2:
+        try:
+            with _get_conn() as conn:
+                with conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor) as cur:
+                    cur.execute("SELECT id,ts,name,phone,address,ord AS \"order\",payment,order_type,status FROM orders ORDER BY id DESC")
+                    return [dict(r) for r in cur.fetchall()]
+        except Exception:
+            pass
     try:
         if os.path.exists(ORDERS_FILE):
             with open(ORDERS_FILE, encoding='utf-8') as f:
@@ -110,9 +150,38 @@ def load_orders():
         pass
     return []
 
-def save_orders(orders):
+def _save_order_db(order):
+    with _get_conn() as conn:
+        with conn.cursor() as cur:
+            cur.execute(
+                "INSERT INTO orders (id,ts,name,phone,address,ord,payment,order_type,status) "
+                "VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s) ON CONFLICT (id) DO NOTHING",
+                (order['id'], order['ts'], order['name'], order['phone'],
+                 order.get('address',''), order.get('order',''),
+                 order.get('payment',''), order.get('order_type',''), order['status'])
+            )
+
+def _update_status_db(order_id, status):
+    with _get_conn() as conn:
+        with conn.cursor() as cur:
+            cur.execute("UPDATE orders SET status=%s WHERE id=%s", (status, order_id))
+
+def _delete_order_db(order_id):
+    with _get_conn() as conn:
+        with conn.cursor() as cur:
+            cur.execute("DELETE FROM orders WHERE id=%s", (order_id,))
+
+def _save_order_json(order):
+    orders = []
+    try:
+        if os.path.exists(ORDERS_FILE):
+            with open(ORDERS_FILE, encoding='utf-8') as f:
+                orders = json.load(f)
+    except Exception:
+        pass
+    orders.insert(0, order)
     with open(ORDERS_FILE, 'w', encoding='utf-8') as f:
-        json.dump(orders, f, ensure_ascii=False, indent=2)
+        json.dump(orders[:300], f, ensure_ascii=False, indent=2)
 
 # ── Routes ──
 @app.route('/')
@@ -181,12 +250,18 @@ def api_order():
     }
     if not order['name'] or not order['phone']:
         return jsonify({'success': False, 'error': 'name and phone required'}), 400
-    try:
-        orders = load_orders()
-        orders.insert(0, order)
-        save_orders(orders[:300])
-    except Exception:
-        pass
+    saved = False
+    if DATABASE_URL and psycopg2:
+        try:
+            _save_order_db(order)
+            saved = True
+        except Exception:
+            pass
+    if not saved:
+        try:
+            _save_order_json(order)
+        except Exception:
+            pass
     send_order_email(order)
     return jsonify({'success': True})
 
@@ -205,13 +280,20 @@ def api_order_status(order_id):
     status = (d.get('status') or '').strip()
     if status not in ('new', 'in_progress', 'done'):
         return jsonify({'error': 'Invalid status'}), 400
+    if DATABASE_URL and psycopg2:
+        try:
+            _update_status_db(order_id, status)
+            return jsonify({'ok': True})
+        except Exception:
+            pass
     try:
         orders = load_orders()
         for o in orders:
             if o.get('id') == order_id:
                 o['status'] = status
                 break
-        save_orders(orders)
+        with open(ORDERS_FILE, 'w', encoding='utf-8') as f:
+            json.dump(orders, f, ensure_ascii=False, indent=2)
     except Exception:
         pass
     return jsonify({'ok': True})
@@ -221,8 +303,16 @@ def api_order_del(order_id):
     d = request.get_json(force=True, silent=True) or {}
     if not _authorized(d):
         return jsonify({'error': 'Unauthorized'}), 401
+    if DATABASE_URL and psycopg2:
+        try:
+            _delete_order_db(order_id)
+            return jsonify({'ok': True})
+        except Exception:
+            pass
     try:
-        save_orders([o for o in load_orders() if o.get('id') != order_id])
+        orders = [o for o in load_orders() if o.get('id') != order_id]
+        with open(ORDERS_FILE, 'w', encoding='utf-8') as f:
+            json.dump(orders, f, ensure_ascii=False, indent=2)
     except Exception:
         pass
     return jsonify({'ok': True})
