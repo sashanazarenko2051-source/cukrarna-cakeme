@@ -61,6 +61,10 @@ def _init_tables():
             CREATE TABLE IF NOT EXISTS menu_items (
                 id BIGINT PRIMARY KEY, data JSONB NOT NULL
             )""")
+        conn.execute("""
+            CREATE TABLE IF NOT EXISTS settings (
+                key VARCHAR(100) PRIMARY KEY, value TEXT NOT NULL DEFAULT ''
+            )""")
 
 @app.on_event('startup')
 async def _startup():
@@ -173,6 +177,28 @@ async def api_menu_del(item_id: int, req: Request):
         raise HTTPException(401, 'Unauthorized')
     with _get_pool().connection() as conn:
         conn.execute('DELETE FROM menu_items WHERE id=%s', (item_id,))
+    return {'ok': True}
+
+# ── /api/static-favs ─────────────────────────────────────────────────────────
+import json as _json
+
+@app.get('/api/static-favs')
+def api_static_favs_get():
+    with _get_pool().connection() as conn:
+        row = conn.execute("SELECT value FROM settings WHERE key='static_favs'").fetchone()
+        return {'favs': _json.loads(row[0]) if row and row[0] else []}
+
+@app.post('/api/static-favs')
+async def api_static_favs_set(req: Request):
+    d = await req.json()
+    if not _verify_token(d.get('token')):
+        raise HTTPException(401, 'Unauthorized')
+    favs = [int(x) for x in (d.get('favs') or [])]
+    with _get_pool().connection() as conn:
+        conn.execute(
+            "INSERT INTO settings(key,value) VALUES('static_favs',%s) ON CONFLICT(key) DO UPDATE SET value=EXCLUDED.value",
+            (_json.dumps(favs),)
+        )
     return {'ok': True}
 
 # ── /api/order ────────────────────────────────────────────────────────────────

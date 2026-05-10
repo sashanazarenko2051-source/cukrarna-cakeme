@@ -403,6 +403,7 @@ body{font-family:'Raleway',sans-serif;background:var(--bg0);color:var(--tx0)}
           <button class="ci-flt" data-mf="desserts" data-k="adm_cat_desserts">Dezerty</button>
           <button class="ci-flt" data-mf="drinks" data-k="adm_cat_drinks">Nápoje</button>
           <button class="ci-flt" data-mf="custom" data-k="adm_custom_only">Vlastní</button>
+          <button class="ci-flt" data-mf="fav" data-k="adm_filter_fav">❤ Улюблені</button>
         </div>
         <div class="ci-list-wrap" style="max-height:600px">
           <div id="customItemsList"><p class="no-custom">Načítání…</p></div>
@@ -448,6 +449,7 @@ body{font-family:'Raleway',sans-serif;background:var(--bg0);color:var(--tx0)}
 let activeFilter = 'all';
 let activeSection = 'orders';
 let cachedMenuItems = null;
+let staticFavs = new Set();
 let ordersCache = [];
 let editingId = null;
 let menuFilter = 'all';
@@ -501,6 +503,7 @@ const TA = {
     adm_orders:'Objednávky', adm_menu:'Menu',
     adm_stat_new:'Nové', adm_stat_today:'Dnes', adm_stat_total:'Celkem',
     adm_filter_all:'Vše', adm_filter_new:'Nové', adm_filter_prog:'Přijaty', adm_filter_done:'Hotové',
+    adm_filter_fav:'❤ Oblíbené',
     adm_clear_done:'Smazat hotové',
     adm_add_title:'Přidat položku do menu',
     adm_cat_lbl:'Kategorie *', adm_price_lbl:'Cena * (např. 133 Kč)',
@@ -542,6 +545,7 @@ const TA = {
     adm_orders:'Замовлення', adm_menu:'Меню',
     adm_stat_new:'Нові', adm_stat_today:'Сьогодні', adm_stat_total:'Всього',
     adm_filter_all:'Всі', adm_filter_new:'Нові', adm_filter_prog:'Прийняті', adm_filter_done:'Готові',
+    adm_filter_fav:'❤ Улюблені',
     adm_clear_done:'Видалити готові',
     adm_add_title:'Додати позицію до меню',
     adm_cat_lbl:'Категорія *', adm_price_lbl:'Ціна * (напр. 133 Kč)',
@@ -583,6 +587,7 @@ const TA = {
     adm_orders:'Orders', adm_menu:'Menu',
     adm_stat_new:'New', adm_stat_today:'Today', adm_stat_total:'Total',
     adm_filter_all:'All', adm_filter_new:'New', adm_filter_prog:'In Progress', adm_filter_done:'Done',
+    adm_filter_fav:'❤ Favorites',
     adm_clear_done:'Delete completed',
     adm_add_title:'Add menu item',
     adm_cat_lbl:'Category *', adm_price_lbl:'Price * (e.g. 133 Kč)',
@@ -734,7 +739,7 @@ document.querySelectorAll('.amn').forEach(btn => btn.addEventListener('click', (
   document.getElementById('secOrders').style.display    = activeSection==='orders'    ? '' : 'none';
   document.getElementById('secMenu').style.display      = activeSection==='menu'      ? '' : 'none';
   document.getElementById('secAnalytics').style.display = activeSection==='analytics' ? '' : 'none';
-  if(activeSection==='menu') loadMenuItems();
+  if(activeSection==='menu'){ loadStaticFavs().then(()=>loadMenuItems()); }
   if(activeSection==='analytics') renderAnalytics();
 }));
 
@@ -883,6 +888,7 @@ function renderMenuItems(customItems){
     ...customItems.map(i=>({...i, _custom:true}))
   ];
   let filtered = menuFilter==='custom' ? all.filter(i=>i._custom)
+    : menuFilter==='fav' ? all.filter(i=>i._custom?!!i.favorite:staticFavs.has(i._staticIdx))
     : menuFilter==='all' ? all
     : all.filter(i=>i.cat===menuFilter);
   if(!filtered.length){ el.innerHTML=`<p class="no-custom">${t('adm_no_custom')}</p>`; return; }
@@ -900,6 +906,7 @@ function renderMenuItems(customItems){
          </div>`
       : `<div class="ci-btns">
            <span class="ci-static-badge">${t('adm_static_lbl')}</span>
+           <button class="ci-fav${staticFavs.has(item._staticIdx)?' on':''}" onclick="toggleStaticFav(${item._staticIdx})" title="❤">❤</button>
            <button class="ci-edit" onclick="startEditStatic(${item._staticIdx})" title="✎">✎</button>
          </div>`;
     return `<div class="ci-card">
@@ -918,6 +925,33 @@ document.querySelectorAll('.ci-flt').forEach(btn=>btn.addEventListener('click',(
   document.querySelectorAll('.ci-flt').forEach(b=>b.classList.toggle('on',b===btn));
   if(cachedMenuItems!==null) renderMenuItems(cachedMenuItems);
 }));
+
+/* ── Static favourites ── */
+async function loadStaticFavs(){
+  try{
+    const r = await fetch('/api/static-favs');
+    if(!r.ok) return;
+    const j = await r.json();
+    staticFavs = new Set(j.favs||[]);
+  }catch{}
+}
+
+async function toggleStaticFav(idx){
+  const hasFav = staticFavs.has(idx);
+  const newFavs = hasFav ? [...staticFavs].filter(i=>i!==idx) : [...staticFavs, idx];
+  const token = sessionStorage.getItem('cm_token')||'';
+  try{
+    const r = await fetch('/api/static-favs', {
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({token, favs: newFavs})
+    });
+    if(r.status===401){handleExpired(); return;}
+    if(!r.ok) return;
+    staticFavs = new Set(newFavs);
+    if(cachedMenuItems!==null) renderMenuItems(cachedMenuItems);
+  }catch{}
+}
 
 /* ── Favourite toggle ── */
 async function toggleFav(id, currentVal){

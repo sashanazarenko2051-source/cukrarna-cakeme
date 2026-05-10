@@ -667,9 +667,14 @@ document.getElementById('cartBtn').addEventListener('click',()=>{document.getEle
 document.getElementById('cartClose').addEventListener('click',()=>{document.getElementById('cartPanel').classList.remove('open');});
 async function loadCustomMenu(){
   try{
-    const r=await fetch('/api/menu');
-    if(!r.ok) return;
-    const custom=await r.json();
+    const [mr,fr]=await Promise.allSettled([fetch('/api/menu'),fetch('/api/static-favs')]);
+    if(mr.status!=='fulfilled'||!mr.value.ok) return;
+    const custom=await mr.value.json();
+    if(fr.status==='fulfilled'&&fr.value.ok){
+      const {favs}=await fr.value.json();
+      const favSet=new Set(favs||[]);
+      ITEMS.forEach((item,i)=>{item.fav=favSet.has(i);});
+    }
     custom.forEach(item=>ITEMS.push({...item, fav:!!item.favorite}));
   }catch(e){}
 }
