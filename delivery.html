@@ -534,7 +534,8 @@ function t(k){ return T[lang][k]||k; }
 function applyLang(){
   document.documentElement.lang=lang==='uk'?'uk':lang==='en'?'en':'cs';
   document.querySelectorAll('[data-k]').forEach(el=>{const val=t(el.dataset.k);if(val)el.textContent=val;});
-  const pi=document.getElementById('phoneInput');if(pi)pi.placeholder=t('f_phone_opt');
+  const pi=document.getElementById('phoneInput');
+  if(pi){const isDelivery=document.querySelector('.ord-type-btn.on').dataset.type==='delivery';pi.placeholder=isDelivery?'':t('f_phone_opt');pi.required=isDelivery;}
   updatePaymentLabels();
   renderCartDel();
   setTimeout(()=>{document.querySelectorAll('[data-k]').forEach(el=>{const val=t(el.dataset.k);if(val)el.textContent=val;});},100);
@@ -586,6 +587,9 @@ function setOrderType(btn){
   const af=document.getElementById('addrField');
   af.style.display=isDelivery?'':'none';
   af.querySelector('input').required=isDelivery;
+  const pi=document.getElementById('phoneInput');
+  pi.required=isDelivery;
+  pi.placeholder=isDelivery?'':t('f_phone_opt');
   document.getElementById('tableField').style.display=isDelivery?'none':'';
   document.getElementById('instoreNote').style.display=isDelivery?'none':'block';
   updatePaymentLabels();
