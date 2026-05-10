@@ -136,14 +136,26 @@ body{font-family:'Raleway',sans-serif;background:var(--bg0);color:var(--tx0)}
 .btn-export:hover{border-color:var(--gold);color:var(--gold)}
 
 @media(max-width:860px){
-  .menu-admin-body{grid-template-columns:1fr}
-  .adm-stats{grid-template-columns:1fr 1fr 1fr}
+  .menu-admin-body{grid-template-columns:1fr;padding:16px}
+  .adm-stats{grid-template-columns:repeat(3,1fr)}
   .stat-val{font-size:1.7rem}
   .oc-body{grid-template-columns:1fr}
-  .adm-body{padding:16px}
+  .adm-body{padding:14px}
   .adm-hdr{padding:12px 16px}
   .login-box{padding:36px 22px}
   .mai-grid{grid-template-columns:1fr}
+}
+@media(max-width:560px){
+  .adm-stats{grid-template-columns:repeat(3,1fr);gap:1px}
+  .stat-val{font-size:1.4rem}
+  .stat-lbl{font-size:.6rem;letter-spacing:1px}
+  .stat-box{padding:16px 10px}
+  .adm-main-nav{overflow-x:auto}
+  .amn{font-size:.68rem;padding:14px 12px;white-space:nowrap}
+  .oc-head{flex-direction:column;gap:6px;align-items:flex-start}
+  .oc-actions{gap:6px}
+  .oc-actions button{font-size:.62rem;padding:4px 10px}
+  .login-box{padding:28px 16px}
 }
 </style>
 </head>
