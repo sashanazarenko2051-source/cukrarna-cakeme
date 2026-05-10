@@ -374,7 +374,7 @@ footer{background:#070707;border-top:1px solid var(--bdr);padding:52px 0 28px}
         </div>
         <div class="ord-field">
           <label data-k="f_phone">Telefon</label>
-          <input type="tel" name="phone">
+          <input type="tel" name="phone" id="phoneInput">
         </div>
         <div class="ord-field full" id="tableField" style="display:none">
           <label data-k="f_table">Číslo stolu</label>
@@ -384,6 +384,14 @@ footer{background:#070707;border-top:1px solid var(--bdr);padding:52px 0 28px}
             <button type="button" class="table-btn" data-tbl="3" onclick="setTable(this)">3</button>
             <button type="button" class="table-btn" data-tbl="4" onclick="setTable(this)">4</button>
             <button type="button" class="table-btn" data-tbl="5" onclick="setTable(this)">5</button>
+          </div>
+        </div>
+        <div class="ord-field full" id="payField">
+          <label data-k="f_pay">Způsob platby</label>
+          <input type="hidden" id="paymentHidden" value="cash">
+          <div class="pay-btns">
+            <button type="button" class="pay-btn on" data-pay="cash" onclick="setPayment(this)" id="payOptCash"></button>
+            <button type="button" class="pay-btn" data-pay="card" onclick="setPayment(this)" id="payOptCard"></button>
           </div>
         </div>
         <div class="ord-field full" id="addrField">
@@ -475,7 +483,8 @@ cs:{nav_home:'Domů',nav_menu:'Menu',nav_about:'O nás',nav_del:'Doručení',nav
   i1t:'Doba doručení',i1d:'minut po objednávce',
   i2t:'Cena doručení',i2d:'mimo Prahu do 15 km · 250 Kč',i2e:'nad 15 km · dle dohody',
   oc_ttl:'Objednejte nyní',oc_sub:'Vyplňte formulář — potvrdíme do 15 minut',
-  f_name:'Jméno',f_phone:'Telefon',f_addr:'Adresa doručení',
+  f_name:'Jméno',f_phone:'Telefon',f_phone_opt:'nepovinné',f_addr:'Adresa doručení',
+  f_pay_dep_cash:'50 % hotově',f_pay_dep_card:'50 % kartou',
   f_cart:'Vaše objednávka',cart_total:'Celkem',cart_empty_del:'Košík je prázdný — přidejte zboží z menu',go_menu:'Přejít na menu',
   f_table:'Stůl', f_type:'Způsob objednávky',ot_delivery:'Doručení domů',ot_instore:'Osobní odběr',
   f_pay:'Způsob platby',f_pay_cash:'Hotově',f_pay_card:'Kartou',f_pay_split:'50 % hotově + 50 % kartou',
@@ -491,7 +500,8 @@ uk:{nav_home:'Головна',nav_menu:'Меню',nav_about:'Про нас',nav_
   i1t:'Час доставки',i1d:'хвилин після замовлення',
   i2t:'Ціна доставки',i2d:'за Прагою до 15 км · 250 Кч',i2e:'понад 15 км · за домовленістю',
   oc_ttl:'Замовте зараз',oc_sub:'Заповніть форму — підтвердимо протягом 15 хвилин',
-  f_name:'Ім\'я',f_phone:'Телефон',f_addr:'Адреса доставки',
+  f_name:'Ім\'я',f_phone:'Телефон',f_phone_opt:'не обов\'язково',f_addr:'Адреса доставки',
+  f_pay_dep_cash:'50% готівкою',f_pay_dep_card:'50% карткою',
   f_cart:'Ваше замовлення',cart_total:'Разом',cart_empty_del:'Кошик порожній — додайте товари з меню',go_menu:'Перейти до меню',
   f_table:'Столик', f_type:'Спосіб замовлення',ot_delivery:'Доставка додому',ot_instore:'У закладі',
   f_pay:'Спосіб оплати',f_pay_cash:'Готівкою',f_pay_card:'Карткою',f_pay_split:'50% готівкою + 50% карткою',
@@ -507,7 +517,8 @@ en:{nav_home:'Home',nav_menu:'Menu',nav_about:'About',nav_del:'Delivery',nav_con
   i1t:'Delivery Time',i1d:'minutes after ordering',
   i2t:'Delivery Price',i2d:'outside Prague up to 15 km · 250 CZK',i2e:'over 15 km · by arrangement',
   oc_ttl:'Order Now',oc_sub:'Fill in the form — we\'ll confirm within 15 minutes',
-  f_name:'Name',f_phone:'Phone',f_addr:'Delivery Address',
+  f_name:'Name',f_phone:'Phone',f_phone_opt:'optional',f_addr:'Delivery Address',
+  f_pay_dep_cash:'50% cash',f_pay_dep_card:'50% card',
   f_cart:'Your Order',cart_total:'Total',cart_empty_del:'Cart is empty — add items from the menu',go_menu:'Go to Menu',
   f_table:'Table', f_type:'Order type',ot_delivery:'Home Delivery',ot_instore:'In-store Pickup',
   f_pay:'Payment Method',f_pay_cash:'Cash',f_pay_card:'Card',f_pay_split:'50% cash + 50% card',
@@ -521,6 +532,8 @@ function t(k){ return T[lang][k]||k; }
 function applyLang(){
   document.documentElement.lang=lang==='uk'?'uk':lang==='en'?'en':'cs';
   document.querySelectorAll('[data-k]').forEach(el=>{const val=t(el.dataset.k);if(val)el.textContent=val;});
+  const pi=document.getElementById('phoneInput');if(pi)pi.placeholder=t('f_phone_opt');
+  updatePaymentLabels();
   renderCartDel();
   setTimeout(()=>{document.querySelectorAll('[data-k]').forEach(el=>{const val=t(el.dataset.k);if(val)el.textContent=val;});},100);
 }
@@ -553,6 +566,13 @@ function setPayment(btn){
   btn.classList.add('on');
   document.getElementById('paymentHidden').value=btn.dataset.pay;
 }
+function updatePaymentLabels(){
+  const isDelivery=document.querySelector('.ord-type-btn.on').dataset.type==='delivery';
+  document.getElementById('payOptCash').textContent=isDelivery?t('f_pay_dep_cash'):t('f_pay_cash');
+  document.getElementById('payOptCard').textContent=isDelivery?t('f_pay_dep_card'):t('f_pay_card');
+  document.getElementById('paymentHidden').value='cash';
+  document.querySelectorAll('.pay-btn').forEach((b,i)=>b.classList.toggle('on',i===0));
+}
 function setOrderType(btn){
   document.querySelectorAll('.ord-type-btn').forEach(b=>b.classList.remove('on'));
   btn.classList.add('on');
@@ -563,6 +583,7 @@ function setOrderType(btn){
   af.querySelector('input').required=isDelivery;
   document.getElementById('tableField').style.display=isDelivery?'none':'';
   document.getElementById('instoreNote').style.display=isDelivery?'none':'block';
+  updatePaymentLabels();
 }
 function getCart(){return JSON.parse(localStorage.getItem('cakeme_cart')||'[]');}
 function saveCart(c){localStorage.setItem('cakeme_cart',JSON.stringify(c));}
@@ -621,7 +642,7 @@ document.getElementById('orderForm').addEventListener('submit',async function(e)
       ? `${t('f_table')} №${selectedTable}`
       : (this.querySelector('[name="address"]')||{value:''}).value.trim(),
     order:      document.getElementById('cartHidden').value,
-    payment:    '',
+    payment:    document.getElementById('paymentHidden').value,
     order_type: document.getElementById('orderTypeInput').value,
   };
 
