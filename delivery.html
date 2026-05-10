@@ -560,7 +560,6 @@ function setOrderType(btn){
   btn.classList.add('on');
   const isDelivery=btn.dataset.type==='delivery';
   document.getElementById('orderTypeInput').value=isDelivery?t('ot_delivery'):t('ot_instore');
-  document.getElementById('subjectInput').value=isDelivery?'Nová objednávka — Doručení':'Nová objednávka — Osobní odběr';
   const af=document.getElementById('addrField');
   af.style.display=isDelivery?'':'none';
   af.querySelector('input').required=isDelivery;
@@ -616,31 +615,55 @@ document.getElementById('orderForm').addEventListener('submit',async function(e)
   btn.disabled=true; btn.textContent='...';
   msg.className='ord-msg';
   const payload={
-    name:    this.querySelector('[name="name"]').value.trim(),
-    phone:   this.querySelector('[name="phone"]').value.trim(),
-    address: (this.querySelector('[name="address"]')||{value:''}).value.trim(),
-    order:   document.getElementById('cartHidden').value,
-    payment: this.querySelector('[name="payment"]').value,
+    name:       this.querySelector('[name="name"]').value.trim(),
+    phone:      this.querySelector('[name="phone"]').value.trim(),
+    address:    (this.querySelector('[name="address"]')||{value:''}).value.trim(),
+    order:      document.getElementById('cartHidden').value,
+    payment:    this.querySelector('[name="payment"]').value,
     order_type: document.getElementById('orderTypeInput').value,
   };
-  const tryPost=async()=>{
-    const r=await fetch('/api/order',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});
-    let j={success:false};try{j=await r.json();}catch{}
-    return r.ok && j.success;
+  const tryPost=async(timeout)=>{
+    const ctrl=new AbortController();
+    const tid=setTimeout(()=>ctrl.abort(),timeout);
+    try{
+      const r=await fetch('/api/order',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload),signal:ctrl.signal});
+      clearTimeout(tid);
+      let j={success:false};try{j=await r.json();}catch{}
+      return r.ok && j.success;
+    }catch{clearTimeout(tid);return false;}
   };
   let ok=false;
-  for(let i=0;i<3;i++){
-    try{ ok=await tryPost(); if(ok) break; }catch{}
-    if(i<2) await new Promise(res=>setTimeout(res,3000));
+  // Attempt 1: 8s timeout (server awake)
+  ok=await tryPost(8000);
+  if(!ok){
+    // Server may be cold-starting — show message, wait 45s, retry
+    msg.className='ord-msg';
+    msg.style.display='block';
+    msg.style.background='rgba(201,169,110,.07)';
+    msg.style.border='1px solid rgba(201,169,110,.3)';
+    msg.style.color='var(--tx1)';
+    msg.textContent=lang==='uk'?'Сервер прокидається, зачекайте…':lang==='en'?'Server waking up, please wait…':'Server se probouzí, počkejte prosím…';
+    await new Promise(res=>setTimeout(res,45000));
+    // Attempt 2: 15s timeout
+    ok=await tryPost(15000);
+  }
+  if(!ok){
+    // One last try after another 15s
+    await new Promise(res=>setTimeout(res,15000));
+    ok=await tryPost(15000);
   }
   if(ok){
-    msg.className='ord-msg ok';msg.textContent=t('f_ok');
+    msg.className='ord-msg ok';
+    msg.style.cssText='';
+    msg.textContent=t('f_ok');
     this.querySelector('[name="name"]').value='';
     this.querySelector('[name="phone"]').value='';
     const addrI=this.querySelector('[name="address"]');if(addrI)addrI.value='';
     saveCart([]);renderCartDel();
   }else{
-    msg.className='ord-msg err';msg.textContent=t('f_err');
+    msg.className='ord-msg err';
+    msg.style.cssText='';
+    msg.textContent=t('f_err');
   }
   btn.disabled=false; btn.textContent=orig;
 });
