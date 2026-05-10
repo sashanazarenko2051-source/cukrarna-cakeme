@@ -199,12 +199,13 @@ async def api_orders(req: Request):
     if not _verify_token(d.get('token')):
         raise HTTPException(401, 'Unauthorized')
     with _get_pool().connection() as conn:
-        rows = conn.execute(
-            'SELECT id,ts,name,phone,address,ord AS "order",'
-            'payment,order_type,status FROM orders ORDER BY id DESC',
-            row_factory=dict_row
-        ).fetchall()
-    return [dict(r) for r in rows]
+        with conn.cursor(row_factory=dict_row) as cur:
+            cur.execute(
+                'SELECT id,ts,name,phone,address,ord AS "order",'
+                'payment,order_type,status FROM orders ORDER BY id DESC'
+            )
+            rows = cur.fetchall()
+    return rows
 
 @app.patch('/api/order/{order_id}')
 async def api_order_status(order_id: int, req: Request):
