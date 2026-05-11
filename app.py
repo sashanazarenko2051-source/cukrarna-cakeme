@@ -86,6 +86,8 @@ async def _sec(req: Request, call_next):
     })
     if req.url.path.startswith('/api/'):
         resp.headers['Cache-Control'] = 'no-store'
+    elif 'text/html' in resp.headers.get('content-type', ''):
+        resp.headers['Cache-Control'] = 'no-cache, must-revalidate'
     return resp
 
 @app.exception_handler(HTTPException)

@@ -621,8 +621,9 @@ function renderCartDel(){
     return;
   }
   if(btn) btn.disabled=false;
-  const total=cart.reduce((s,c)=>s+c.price*c.qty,0);
-  box.innerHTML=cart.map(c=>`<div class="cdb-item">
+  const cart2=cart.map(c=>({...c,price:Number(c.price)||0}));
+  const total=cart2.reduce((s,c)=>s+c.price*c.qty,0);
+  box.innerHTML=cart2.map(c=>`<div class="cdb-item">
     <span class="cdb-name">${c.names[lang]||c.names.cs}${c.sizeLabel?' — '+c.sizeLabel:''}</span>
     <div class="cdb-qty">
       <button onclick="changeQtyDel('${c.id}',-1)">−</button>
@@ -634,7 +635,7 @@ function renderCartDel(){
     <span class="cdb-total-lbl">${t('cart_total')}</span>
     <span class="cdb-total-val">${total} Kč</span>
   </div>`;
-  if(hidden) hidden.value=cart.map(c=>`${c.names.cs}${c.sizeLabel?' ('+c.sizeLabel+')':''} x${c.qty} (${c.price*c.qty} Kč)`).join(', ')+` | Celkem: ${total} Kč`;
+  if(hidden) hidden.value=cart2.map(c=>`${c.names.cs}${c.sizeLabel?' ('+c.sizeLabel+')':''} x${c.qty} (${c.price*c.qty} Kč)`).join(', ')+` | Celkem: ${total} Kč`;
 }
 
 document.getElementById('orderForm').addEventListener('submit',async function(e){
