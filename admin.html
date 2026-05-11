@@ -428,10 +428,10 @@ body{font-family:'Raleway',sans-serif;background:var(--bg0);color:var(--tx0)}
   <div id="secAnalytics" style="display:none">
     <div class="analytics-wrap">
       <div class="analytics-period">
-        <button class="ap-btn on" data-ap="7" data-k="adm_ap_7">7 днів</button>
+        <button class="ap-btn" data-ap="7" data-k="adm_ap_7">7 днів</button>
         <button class="ap-btn" data-ap="30" data-k="adm_ap_30">30 днів</button>
         <button class="ap-btn" data-ap="90" data-k="adm_ap_90">90 днів</button>
-        <button class="ap-btn" data-ap="0" data-k="adm_ap_all">Всі</button>
+        <button class="ap-btn on" data-ap="0" data-k="adm_ap_all">Всі</button>
       </div>
       <div class="analytics-stats">
         <div class="an-stat"><span class="an-val" id="anViews">—</span><span class="an-lbl" data-k="adm_an_views">Переглядів</span></div>
@@ -489,7 +489,7 @@ let hiddenStatics = new Set();
 let ordersCache = [];
 let editingId = null;
 let menuFilter = 'all';
-let analyticsPeriod = 7;
+let analyticsPeriod = 0;
 
 const STATIC_ITEMS = [
   {cat:'cakes',sizes:[{label:'S 18cm',price:800},{label:'M 23cm',price:1200}],badge:'Bestseller',img:'https://imageproxy.wolt.com/assets/697228caf1232b338e039779',name:{cs:'Cheesecake',uk:'Чізкейк',en:'Cheesecake'},desc:{cs:'Tvaroh, zakysaná smetana, krémový sýr.',uk:'Сир, сметана, вершковий сир.',en:'Cottage cheese, sour cream, cream cheese.'}},
