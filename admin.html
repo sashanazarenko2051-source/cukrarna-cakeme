@@ -202,8 +202,19 @@ body{font-family:'Raleway',sans-serif;background:var(--bg0);color:var(--tx0)}
 .an-bar-fill{height:100%;background:var(--gold);border-radius:3px;transition:.4s}
 .an-revenue{color:var(--gold);font-family:'Playfair Display',serif}
 .an-empty{text-align:center;color:var(--tx2);padding:48px;font-size:.88rem}
+.an-cats{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:20px}
+.an-cat{background:var(--bg2);border:1px solid var(--bdr);padding:14px 16px}
+.an-cat-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px}
+.an-cat-label{display:flex;align-items:center;gap:6px;font-size:.63rem;color:var(--tx2);letter-spacing:1.5px;text-transform:uppercase}
+.an-cat-count{font-family:'Playfair Display',serif;font-size:1.5rem;color:var(--gold);line-height:1}
+.an-cat-bar{height:4px;background:var(--bg3);border-radius:2px;overflow:hidden}
+.an-cat-fill{height:100%;border-radius:2px;transition:width .5s ease}
+.an-cat-fill-cakes{background:#c9a96e}
+.an-cat-fill-desserts{background:#9e7fc0}
+.an-cat-fill-drinks{background:#5b9bd5}
 @media(max-width:860px){
   .analytics-stats{grid-template-columns:repeat(3,1fr)}
+  .an-cats{grid-template-columns:1fr}
   .analytics-wrap{padding:16px}
   .analytics-table th:nth-child(4),.analytics-table td:nth-child(4){display:none}
 }
@@ -428,6 +439,29 @@ body{font-family:'Raleway',sans-serif;background:var(--bg0);color:var(--tx0)}
         <div class="an-stat"><span class="an-val" id="anRevenue">—</span><span class="an-lbl" data-k="adm_an_revenue">Дохід (Kč)</span></div>
         <div class="an-stat"><span class="an-val" id="anItems">—</span><span class="an-lbl" data-k="adm_an_items">Позицій</span></div>
         <div class="an-stat"><span class="an-val" id="anAvg">—</span><span class="an-lbl" data-k="adm_an_avg">Сер. чек (Kč)</span></div>
+      </div>
+      <div class="an-cats">
+        <div class="an-cat">
+          <div class="an-cat-head">
+            <span class="an-cat-label">🎂 <span data-k="adm_cat_cakes">Торти</span></span>
+            <span class="an-cat-count" id="anCatCakes">—</span>
+          </div>
+          <div class="an-cat-bar"><div class="an-cat-fill an-cat-fill-cakes" id="anCatCakesBar" style="width:0%"></div></div>
+        </div>
+        <div class="an-cat">
+          <div class="an-cat-head">
+            <span class="an-cat-label">🍮 <span data-k="adm_cat_desserts">Десерти</span></span>
+            <span class="an-cat-count" id="anCatDesserts">—</span>
+          </div>
+          <div class="an-cat-bar"><div class="an-cat-fill an-cat-fill-desserts" id="anCatDessertsBar" style="width:0%"></div></div>
+        </div>
+        <div class="an-cat">
+          <div class="an-cat-head">
+            <span class="an-cat-label">🥤 <span data-k="adm_cat_drinks">Напої</span></span>
+            <span class="an-cat-count" id="anCatDrinks">—</span>
+          </div>
+          <div class="an-cat-bar"><div class="an-cat-fill an-cat-fill-drinks" id="anCatDrinksBar" style="width:0%"></div></div>
+        </div>
       </div>
       <table class="analytics-table">
         <thead>
@@ -1245,6 +1279,21 @@ async function renderAnalytics(){
   document.getElementById('anItems').textContent   = totalItems || '—';
   document.getElementById('anAvg').textContent     = orders.length > 0 && totalRevenue > 0
     ? Math.round(totalRevenue/orders.length).toLocaleString('cs-CZ') : '—';
+
+  // Category breakdown
+  const allMenuItems = [...STATIC_ITEMS, ...(cachedMenuItems||[])];
+  const catQty = {cakes:0, desserts:0, drinks:0};
+  for(const [name, data] of Object.entries(itemMap)){
+    const found = allMenuItems.find(i=>i.name?.cs===name||i.name?.uk===name||i.name?.en===name);
+    if(found && catQty.hasOwnProperty(found.cat)) catQty[found.cat] += data.qty;
+  }
+  const maxCat = Math.max(catQty.cakes, catQty.desserts, catQty.drinks, 1);
+  document.getElementById('anCatCakes').textContent    = catQty.cakes    || '0';
+  document.getElementById('anCatDesserts').textContent = catQty.desserts || '0';
+  document.getElementById('anCatDrinks').textContent   = catQty.drinks   || '0';
+  document.getElementById('anCatCakesBar').style.width    = Math.round(catQty.cakes/maxCat*100)+'%';
+  document.getElementById('anCatDessertsBar').style.width = Math.round(catQty.desserts/maxCat*100)+'%';
+  document.getElementById('anCatDrinksBar').style.width   = Math.round(catQty.drinks/maxCat*100)+'%';
 
   const tbody = document.getElementById('analyticsBody');
   const sorted = Object.values(itemMap).sort((a,b)=>b.qty-a.qty);
