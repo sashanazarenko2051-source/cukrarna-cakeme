@@ -805,11 +805,31 @@ function fmtTime(ts){
 
 function statusLbl(s){ return {new:t('adm_s_new'), in_progress:t('adm_s_progress'), done:t('adm_s_done'), paid:t('adm_s_paid'), pending_payment:t('adm_s_pending')}[s]||s; }
 
+function _lookupPrice(name, size){
+  const all=[...STATIC_ITEMS,...(cachedMenuItems||[])];
+  const item=all.find(i=>i.name?.cs===name||i.name?.uk===name||i.name?.en===name);
+  if(!item) return 0;
+  if(size&&item.sizes){const sz=item.sizes.find(s=>s.label===size);if(sz)return sz.price;}
+  return parseInt(item.price)||0;
+}
+function _parseItems(str){
+  return (str||'').split(',').map(s=>{
+    s=s.trim();
+    const qm=s.match(/\s+x(\d+)$/); if(!qm) return null;
+    const qty=parseInt(qm[1]);
+    const rest=s.slice(0,-qm[0].length).trim();
+    const sm=rest.match(/^(.+?)\s+\(([^)]+)\)$/);
+    return sm?{name:sm[1].trim(),size:sm[2],qty}:{name:rest,size:'',qty};
+  }).filter(Boolean);
+}
 function orderTotal(str){
-  const m = (str||'').match(/\|\s*Celkem:\s*(\d[\d\s]*Kč)/);
+  const m=(str||'').match(/\|\s*Celkem:\s*(\d[\d\s]*Kč)/);
   if(m) return m[1].trim();
-  const prices = [...(str||'').matchAll(/\((\d+)\s*Kč\)/g)].map(x=>parseInt(x[1]));
-  return prices.length ? prices.reduce((a,b)=>a+b,0)+' Kč' : '';
+  const tagged=[...(str||'').matchAll(/\((\d+)\s*Kč\)/g)].map(x=>parseInt(x[1]));
+  if(tagged.length) return tagged.reduce((a,b)=>a+b,0)+' Kč';
+  const items=_parseItems(str.replace(/\s*\|.*$/,''));
+  const total=items.reduce((s,i)=>s+_lookupPrice(i.name,i.size)*i.qty,0);
+  return total>0?total+' Kč':'';
 }
 function orderItems(str){
   return (str||'')
