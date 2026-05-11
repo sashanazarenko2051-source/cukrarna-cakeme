@@ -353,6 +353,7 @@ function initFI(){
   document.querySelectorAll('.nav-links a,.mob-menu a[class="mob-lnk"]').forEach(a=>{if(a.getAttribute('href')===p)a.classList.add('active');});
 })();
 initLangBtns();applyLang();initFI();
+document.querySelectorAll('a[href^="mailto:"]').forEach(a=>{a.addEventListener('click',function(){const em=this.getAttribute('href').replace('mailto:','').split('?')[0];if(navigator.clipboard)navigator.clipboard.writeText(em).catch(()=>{});const d=document.createElement('div');d.textContent='✓ '+em;Object.assign(d.style,{position:'fixed',bottom:'24px',left:'50%',transform:'translateX(-50%)',background:'#1c1c1c',color:'#c9a96e',padding:'10px 22px',borderRadius:'4px',border:'1px solid rgba(201,169,110,.35)',fontSize:'.85rem',zIndex:'9999',whiteSpace:'nowrap',pointerEvents:'none'});document.body.appendChild(d);setTimeout(()=>{d.style.transition='opacity .4s';d.style.opacity='0';setTimeout(()=>d.remove(),400);},2500);});});
 </script>
 </body>
 </html>
