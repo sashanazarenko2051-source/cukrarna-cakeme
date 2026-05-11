@@ -212,44 +212,70 @@ body{font-family:'Raleway',sans-serif;background:var(--bg0);color:var(--tx0)}
 .an-cat-fill-cakes{background:#c9a96e}
 .an-cat-fill-desserts{background:#9e7fc0}
 .an-cat-fill-drinks{background:#5b9bd5}
+/* ── Tablet ── */
 @media(max-width:860px){
+  .menu-admin-body{grid-template-columns:1fr;padding:20px}
+  .mai-grid{grid-template-columns:1fr}
+  .oc-body{grid-template-columns:1fr}
+  .adm-body{padding:18px}
+  .adm-hdr{padding:12px 20px}
+  .login-box{padding:36px 22px}
   .analytics-stats{grid-template-columns:repeat(3,1fr)}
   .an-cats{grid-template-columns:1fr}
-  .analytics-wrap{padding:16px}
+  .analytics-wrap{padding:20px}
   .analytics-table th:nth-child(4),.analytics-table td:nth-child(4){display:none}
-}
-
-@media(max-width:860px){
-  .menu-admin-body{grid-template-columns:1fr;padding:16px}
   .adm-stats{grid-template-columns:repeat(3,1fr)}
   .stat-val{font-size:1.7rem}
-  .oc-body{grid-template-columns:1fr}
-  .adm-body{padding:14px}
-  .adm-hdr{padding:12px 16px}
-  .login-box{padding:36px 22px}
-  .mai-grid{grid-template-columns:1fr}
 }
-@media(max-width:560px){
-  .adm-stats{grid-template-columns:repeat(3,1fr);gap:1px}
-  .stat-val{font-size:1.4rem}
-  .stat-lbl{font-size:.6rem;letter-spacing:1px}
-  .stat-box{padding:16px 10px}
+/* ── Phone (covers wide Android & iPhone) ── */
+@media(max-width:680px){
+  /* Header: wrap to 2 rows so logo + controls both fit */
+  .adm-hdr{flex-wrap:wrap;padding:10px 14px;gap:6px}
+  .adm-logo-sub{display:none}
+  .adm-logo-txt{font-size:.9rem;letter-spacing:.5px}
+  .adm-hdr-right{width:100%;gap:6px;flex-wrap:wrap}
+  .adm-langs{gap:4px}
+  .adm-lang{padding:5px 9px;font-size:.64rem;letter-spacing:0}
+  .adm-btn{padding:6px 12px;font-size:.64rem;letter-spacing:.5px}
+  /* Nav tabs */
   .adm-main-nav{overflow-x:auto}
-  .amn{font-size:.68rem;padding:14px 12px;white-space:nowrap}
+  .amn{font-size:.65rem;padding:14px 10px;white-space:nowrap;gap:5px}
+  .amn-ic{font-size:.95rem}
+  /* Analytics stats: 2-col grid */
+  .analytics-stats{grid-template-columns:repeat(2,1fr)}
+  .an-val{font-size:1.6rem}
+  .an-lbl{font-size:.56rem;letter-spacing:1px}
+  .an-stat{padding:14px 10px}
+  .analytics-wrap{padding:14px}
+  .analytics-period{gap:5px;margin-bottom:14px}
+  .ap-btn{padding:5px 12px;font-size:.65rem;letter-spacing:.5px}
+  /* Orders */
+  .adm-stats{grid-template-columns:repeat(3,1fr)}
+  .stat-val{font-size:1.4rem}
+  .stat-lbl{font-size:.58rem;letter-spacing:1px}
+  .stat-box{padding:14px 8px}
   .oc-head{flex-direction:column;gap:6px;align-items:flex-start}
   .oc-actions{gap:6px}
   .oc-actions button{font-size:.62rem;padding:4px 10px}
+  .adm-body{padding:12px}
+  /* Menu */
+  .menu-admin-body{padding:14px}
+  .menu-panel{padding:16px}
+  /* Login */
   .login-box{padding:28px 16px}
-  /* Header mobile fix */
-  .adm-hdr{padding:10px 12px;gap:6px}
-  .adm-logo-sub{display:none}
-  .adm-logo-txt{font-size:.85rem;letter-spacing:.5px}
-  .adm-hdr-right{gap:4px}
-  .adm-langs{gap:3px}
-  .adm-lang{padding:5px 7px;font-size:.62rem;letter-spacing:0}
-  .adm-btn{padding:5px 9px;font-size:.62rem;letter-spacing:0}
 }
-@media(max-width:400px){
+/* ── Small phone ── */
+@media(max-width:430px){
+  .adm-hdr{padding:8px 12px;gap:4px}
+  .adm-logo-txt{font-size:.8rem;letter-spacing:0}
+  .adm-hdr-right{gap:4px}
+  .adm-lang{padding:4px 7px;font-size:.6rem}
+  .adm-btn{padding:5px 9px;font-size:.6rem;letter-spacing:0}
+  .analytics-stats{grid-template-columns:repeat(2,1fr)}
+  .adm-stats{grid-template-columns:repeat(3,1fr)}
+}
+/* ── Very small (≤360px): hide logo text ── */
+@media(max-width:360px){
   .adm-logo-txt{display:none}
   .adm-hdr{padding:8px 10px}
 }
