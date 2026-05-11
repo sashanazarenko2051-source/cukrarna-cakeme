@@ -189,7 +189,7 @@ body{font-family:'Raleway',sans-serif;background:var(--bg0);color:var(--tx0)}
 .analytics-period{display:flex;gap:6px;margin-bottom:22px;flex-wrap:wrap}
 .ap-btn{background:transparent;border:1px solid var(--bdr);color:var(--tx2);padding:7px 16px;cursor:pointer;font:.7rem 'Raleway',sans-serif;letter-spacing:1px;text-transform:uppercase;transition:.2s}
 .ap-btn:hover,.ap-btn.on{border-color:var(--gold);color:var(--gold);background:rgba(201,169,110,.08)}
-.analytics-stats{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:var(--bdr);border:1px solid var(--bdr);margin-bottom:24px}
+.analytics-stats{display:grid;grid-template-columns:repeat(5,1fr);gap:1px;background:var(--bdr);border:1px solid var(--bdr);margin-bottom:24px}
 .an-stat{background:var(--bg2);padding:18px 14px;text-align:center}
 .an-val{font-family:'Playfair Display',serif;font-size:1.9rem;color:var(--gold);display:block;line-height:1}
 .an-lbl{font-size:.63rem;color:var(--tx2);letter-spacing:1.8px;text-transform:uppercase;margin-top:6px;display:block}
@@ -203,7 +203,7 @@ body{font-family:'Raleway',sans-serif;background:var(--bg0);color:var(--tx0)}
 .an-revenue{color:var(--gold);font-family:'Playfair Display',serif}
 .an-empty{text-align:center;color:var(--tx2);padding:48px;font-size:.88rem}
 @media(max-width:860px){
-  .analytics-stats{grid-template-columns:repeat(2,1fr)}
+  .analytics-stats{grid-template-columns:repeat(3,1fr)}
   .analytics-wrap{padding:16px}
   .analytics-table th:nth-child(4),.analytics-table td:nth-child(4){display:none}
 }
@@ -423,6 +423,7 @@ body{font-family:'Raleway',sans-serif;background:var(--bg0);color:var(--tx0)}
         <button class="ap-btn" data-ap="0" data-k="adm_ap_all">Всі</button>
       </div>
       <div class="analytics-stats">
+        <div class="an-stat"><span class="an-val" id="anViews">—</span><span class="an-lbl" data-k="adm_an_views">Переглядів</span></div>
         <div class="an-stat"><span class="an-val" id="anOrders">—</span><span class="an-lbl" data-k="adm_an_orders">Замовлень</span></div>
         <div class="an-stat"><span class="an-val" id="anRevenue">—</span><span class="an-lbl" data-k="adm_an_revenue">Дохід (Kč)</span></div>
         <div class="an-stat"><span class="an-val" id="anItems">—</span><span class="an-lbl" data-k="adm_an_items">Позицій</span></div>
@@ -536,7 +537,7 @@ const TA = {
     adm_custom_only:'Vlastní', adm_static_lbl:'Základ', adm_save_as_new:'uložit jako novou',
     adm_analytics:'Analytika',
     adm_ap_7:'7 dní', adm_ap_30:'30 dní', adm_ap_90:'90 dní', adm_ap_all:'Vše',
-    adm_an_orders:'Objednávky', adm_an_revenue:'Příjem (Kč)',
+    adm_an_views:'Zobrazení', adm_an_orders:'Objednávky', adm_an_revenue:'Příjem (Kč)',
     adm_an_items:'Pozice', adm_an_avg:'Průměr (Kč)',
     adm_an_product:'Produkt', adm_an_qty:'Počet', adm_an_rev:'Příjem', adm_an_share:'Podíl',
     adm_an_no_data:'Žádná data pro toto období.',
@@ -578,7 +579,7 @@ const TA = {
     adm_custom_only:'Власні', adm_static_lbl:'База', adm_save_as_new:'зберегти як новий',
     adm_analytics:'Аналітика',
     adm_ap_7:'7 днів', adm_ap_30:'30 днів', adm_ap_90:'90 днів', adm_ap_all:'Всі',
-    adm_an_orders:'Замовлень', adm_an_revenue:'Дохід (Kč)',
+    adm_an_views:'Переглядів', adm_an_orders:'Замовлень', adm_an_revenue:'Дохід (Kč)',
     adm_an_items:'Позицій', adm_an_avg:'Сер. чек (Kč)',
     adm_an_product:'Товар', adm_an_qty:'Кількість', adm_an_rev:'Дохід', adm_an_share:'Частка',
     adm_an_no_data:'Немає даних за цей період.',
@@ -620,7 +621,7 @@ const TA = {
     adm_custom_only:'Custom', adm_static_lbl:'Base', adm_save_as_new:'save as new',
     adm_analytics:'Analytics',
     adm_ap_7:'7 days', adm_ap_30:'30 days', adm_ap_90:'90 days', adm_ap_all:'All',
-    adm_an_orders:'Orders', adm_an_revenue:'Revenue (Kč)',
+    adm_an_views:'Views', adm_an_orders:'Orders', adm_an_revenue:'Revenue (Kč)',
     adm_an_items:'Items', adm_an_avg:'Avg. order (Kč)',
     adm_an_product:'Product', adm_an_qty:'Qty', adm_an_rev:'Revenue', adm_an_share:'Share',
     adm_an_no_data:'No data for this period.',
@@ -1198,13 +1199,26 @@ function _analyticsTot(order){
   return null;
 }
 
-function renderAnalytics(){
+async function renderAnalytics(){
   const now = Date.now();
   const cutoff = analyticsPeriod > 0 ? now - analyticsPeriod*86400000 : 0;
   const orders = ordersCache.filter(o=> {
     if(!cutoff) return true;
     return new Date(o.ts).getTime() >= cutoff;
   });
+
+  // Pageviews for period
+  try{
+    const r = await fetch('/api/pageviews');
+    if(r.ok){
+      const {daily} = await r.json();
+      const cutoffDate = cutoff ? new Date(cutoff).toISOString().slice(0,10) : '0000-00-00';
+      const total = Object.entries(daily||{})
+        .filter(([d])=>d>=cutoffDate)
+        .reduce((s,[,v])=>s+v, 0);
+      document.getElementById('anViews').textContent = total || '0';
+    }
+  }catch{ document.getElementById('anViews').textContent = '—'; }
 
   document.getElementById('anOrders').textContent = orders.length;
 

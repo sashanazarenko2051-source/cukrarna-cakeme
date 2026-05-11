@@ -396,14 +396,45 @@ async def api_verify_payment(session_id: str, order_id: int):
 # ── /api/order/{id} PATCH — allow 'paid' status for admin ────────────────────
 # (override to extend valid statuses)
 
+# ── /api/pageviews ────────────────────────────────────────────────────────────
+@app.get('/api/pageviews')
+def api_pageviews():
+    with _get_pool().connection() as conn:
+        row = conn.execute("SELECT value FROM settings WHERE key='pageviews_daily'").fetchone()
+        return {'daily': _json.loads(row[0]) if row and row[0] else {}}
+
+def _inc_pageviews():
+    try:
+        pool = _get_pool()
+        if not pool:
+            return
+        today = time.strftime('%Y-%m-%d', time.gmtime())
+        with pool.connection() as conn:
+            row = conn.execute("SELECT value FROM settings WHERE key='pageviews_daily'").fetchone()
+            data = _json.loads(row[0]) if row and row[0] else {}
+            data[today] = data.get(today, 0) + 1
+            cutoff = time.time() - 90 * 86400
+            data = {k: v for k, v in data.items()
+                    if time.mktime(time.strptime(k, '%Y-%m-%d')) >= cutoff}
+            conn.execute(
+                "INSERT INTO settings(key,value) VALUES('pageviews_daily',%s)"
+                " ON CONFLICT(key) DO UPDATE SET value=EXCLUDED.value",
+                (_json.dumps(data),)
+            )
+    except:
+        pass
+
 # ── Static files ──────────────────────────────────────────────────────────────
 _BLOCKED = {
     'app.py', 'orders.json', 'custom_menu.json',
     'requirements.txt', 'Procfile', '.env', 'wsgi.py',
 }
 
+_NO_TRACK = {'admin.html', 'success.html', 'cancel.html'}
+
 @app.get('/')
 def _index():
+    _inc_pageviews()
     return FileResponse('index.html')
 
 @app.get('/success')
@@ -419,5 +450,7 @@ def _static(path: str):
     if path in _BLOCKED or path.startswith('.'):
         raise HTTPException(404)
     if os.path.isfile(path):
+        if path.endswith('.html') and path not in _NO_TRACK:
+            _inc_pageviews()
         return FileResponse(path)
     raise HTTPException(404)
