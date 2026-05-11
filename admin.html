@@ -1158,9 +1158,9 @@ function parseOrderItems(orderText){
   return result;
 }
 
-function orderTotal(order){
-  const m = (order.order||'').match(/(\d[\d\s]*)\s*Kč\s*$/m);
-  if(m) return parseInt(m[1].replace(/\s/g,''));
+function _analyticsTot(order){
+  const t = orderTotal(order.order);
+  if(t) return parseInt(t.replace(/\D/g,''))||null;
   return null;
 }
 
@@ -1188,7 +1188,7 @@ function renderAnalytics(){
     }
     // fallback total from order text
     if(!items.some(i=>i.total)){
-      const tot = orderTotal(o);
+      const tot = _analyticsTot(o);
       if(tot) totalRevenue += tot;
     }
   }
