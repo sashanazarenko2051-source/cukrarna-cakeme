@@ -499,7 +499,7 @@ cs:{nav_home:'Domů',nav_menu:'Menu',nav_about:'O nás',nav_del:'Doručení',nav
   f_table:'Stůl', f_type:'Způsob objednávky',ot_delivery:'Doručení domů',ot_instore:'Osobní odběr',
   f_pay:'Způsob platby',f_pay_cash:'Hotově',f_pay_card:'Kartou',f_pay_split:'50 % hotově + 50 % kartou',
   pay_ttl:'Platební podmínky',pay_dep:'Záloha 50 % z celkové ceny objednávky je splatná bankovním převodem při potvrzení. Zbývajících 50 % hradíte při převzetí.',pay_acc:'Číslo účtu',
-  f_submit:'Objednat',f_ok:'Děkujeme! Vaši objednávku jsme přijali.',f_err:'Chyba. Zkuste to znovu nebo zavolejte.',
+  f_submit:'Objednat',f_redirecting:'Přesměrování na platbu...',f_ok:'Děkujeme! Vaši objednávku jsme přijali.',f_err:'Chyba. Zkuste to znovu nebo zavolejte.',
   ft_nav:'Navigace',ft_con:'Kontakt',rights:'Všechna práva vyhrazena.'},
 uk:{nav_home:'Головна',nav_menu:'Меню',nav_about:'Про нас',nav_del:'Доставка',nav_con:'Контакт',tagline:'Святкуйте кожен день',
   del_lbl:'Швидко та зручно',del_ttl:'Доставка',
@@ -516,7 +516,7 @@ uk:{nav_home:'Головна',nav_menu:'Меню',nav_about:'Про нас',nav_
   f_table:'Столик', f_type:'Спосіб замовлення',ot_delivery:'Доставка додому',ot_instore:'У закладі',
   f_pay:'Спосіб оплати',f_pay_cash:'Готівкою',f_pay_card:'Карткою',f_pay_split:'50% готівкою + 50% карткою',
   pay_ttl:'Умови оплати',pay_dep:'Передоплата 50 % від загальної вартості сплачується банківським переказом при підтвердженні замовлення. Решта 50 % — при отриманні.',pay_acc:'Рахунок',
-  f_submit:'Замовити',f_ok:'Дякуємо! Ваше замовлення прийнято.',f_err:'Помилка. Спробуйте ще раз або зателефонуйте.',
+  f_submit:'Замовити',f_redirecting:'Перенаправлення на оплату...',f_ok:'Дякуємо! Ваше замовлення прийнято.',f_err:'Помилка. Спробуйте ще раз або зателефонуйте.',
   ft_nav:'Навігація',ft_con:'Контакт',rights:'Всі права захищені.'},
 en:{nav_home:'Home',nav_menu:'Menu',nav_about:'About',nav_del:'Delivery',nav_con:'Contact',tagline:'Celebrate Every Day',
   del_lbl:'Fast & Convenient',del_ttl:'Delivery',
@@ -533,7 +533,7 @@ en:{nav_home:'Home',nav_menu:'Menu',nav_about:'About',nav_del:'Delivery',nav_con
   f_table:'Table', f_type:'Order type',ot_delivery:'Home Delivery',ot_instore:'In-store Pickup',
   f_pay:'Payment Method',f_pay_cash:'Cash',f_pay_card:'Card',f_pay_split:'50% cash + 50% card',
   pay_ttl:'Payment Terms',pay_dep:'A 50% deposit is payable by bank transfer upon order confirmation. The remaining 50% is paid upon receipt.',pay_acc:'Account',
-  f_submit:'Order Now',f_ok:'Thank you! Your order has been received.',f_err:'Error. Please try again or call us.',
+  f_submit:'Order Now',f_redirecting:'Redirecting to payment...',f_ok:'Thank you! Your order has been received.',f_err:'Error. Please try again or call us.',
   ft_nav:'Navigation',ft_con:'Contact',rights:'All rights reserved.'}
 };
 
@@ -666,7 +666,7 @@ document.getElementById('orderForm').addEventListener('submit',async function(e)
   };
 
   // ── Online payment via Stripe ──
-  if(payload.payment==='online'){
+  if(payload.payment==='online'||payload.payment==='card'){
     btn.textContent=t('f_redirecting');
     const cart=getCart();
     payload.total_czk=cart.reduce((s,c)=>s+c.price*c.qty,0);
