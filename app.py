@@ -49,6 +49,30 @@ def _get_pool() -> ConnectionPool:
         _init_tables()
     return _pool
 
+_STATIC_IMG_BY_NAME = {
+    'Cheesecake':              'https://imageproxy.wolt.com/assets/697228caf1232b338e039779',
+    'Ořechový koláč':          'https://imageproxy.wolt.com/assets/697228caf1232b338e039778',
+    'Pavlova':                 'https://imageproxy.wolt.com/assets/698343bca2c5decc0bfdcb6d',
+    'Citronový koláč':         'https://imageproxy.wolt.com/assets/69997daf3eb3341f036ea0ae',
+    'Citronový s malinami':    'https://imageproxy.wolt.com/assets/69de33ac73316796ef90e4cb',
+    'Nanuk jahodový':          'https://imageproxy.wolt.com/assets/697992ef72674ce89f7a8f71',
+    'Karamelový větrník':      'https://imageproxy.wolt.com/assets/697228caf1232b338e039783',
+    'Borůvková tartaletka':    'https://imageproxy.wolt.com/assets/697228caf1232b338e03976f',
+    'Kremrole':                'https://imageproxy.wolt.com/assets/697228caf1232b338e039773',
+    'Malinová makronka':       'https://imageproxy.wolt.com/assets/697998f6aded7a30ce7db068',
+    'Malinová tartaletka':     'https://imageproxy.wolt.com/assets/697228caf1232b338e039784',
+    'Panna cotta':             'https://imageproxy.wolt.com/assets/69a1815dea4a83292ef03b2c',
+    'Pistáciový mousse':       'https://imageproxy.wolt.com/assets/697228caf1232b338e039771',
+    'Slaný karamel':           'https://imageproxy.wolt.com/assets/697228caf1232b338e039782',
+    'Vanilkový věneček':       'https://imageproxy.wolt.com/assets/697228caf1232b338e039785',
+    'Věneček s jahodami':      'https://imageproxy.wolt.com/assets/697228caf1232b338e03977f',
+    'Nanuk višňový':           'https://imageproxy.wolt.com/assets/69799345520d609a024a691a',
+    'Nanuk čokoládový':        'https://imageproxy.wolt.com/assets/6979924372674ce89f7a8f6d',
+    'Nanuk banánový':          'https://imageproxy.wolt.com/assets/69799356a005afdf1964ffeb',
+    'Nanuk pistáciový':        'https://imageproxy.wolt.com/assets/6979935e520d609a024a691c',
+    'Capri-Sun':               'https://imageproxy.wolt.com/assets/697228caf1232b338e03977e',
+}
+
 def _init_tables():
     with _pool.connection() as conn:
         conn.execute("""
@@ -65,6 +89,15 @@ def _init_tables():
             CREATE TABLE IF NOT EXISTS settings (
                 key VARCHAR(100) PRIMARY KEY, value TEXT NOT NULL DEFAULT ''
             )""")
+        # Backfill missing images for custom items that match a known static item
+        rows = conn.execute("SELECT id, data FROM menu_items WHERE data->>'img' = '' OR data->>'img' IS NULL").fetchall()
+        for row in rows:
+            item = dict(row[1])
+            name_cs = item.get('name', {}).get('cs', '')
+            img_url = _STATIC_IMG_BY_NAME.get(name_cs)
+            if img_url:
+                item['img'] = img_url
+                conn.execute('UPDATE menu_items SET data=%s WHERE id=%s', (Jsonb(item), row[0]))
 
 @app.on_event('startup')
 async def _startup():
@@ -189,6 +222,25 @@ def api_static_favs_get():
     with _get_pool().connection() as conn:
         row = conn.execute("SELECT value FROM settings WHERE key='static_favs'").fetchone()
         return {'favs': _json.loads(row[0]) if row and row[0] else []}
+
+@app.get('/api/hidden-statics')
+def api_hidden_statics_get():
+    with _get_pool().connection() as conn:
+        row = conn.execute("SELECT value FROM settings WHERE key='hidden_statics'").fetchone()
+        return {'hidden': _json.loads(row[0]) if row and row[0] else []}
+
+@app.post('/api/hidden-statics')
+async def api_hidden_statics_set(req: Request):
+    d = await req.json()
+    if not _verify_token(d.get('token')):
+        raise HTTPException(401, 'Unauthorized')
+    hidden = [int(x) for x in (d.get('hidden') or [])]
+    with _get_pool().connection() as conn:
+        conn.execute(
+            "INSERT INTO settings(key,value) VALUES('hidden_statics',%s) ON CONFLICT(key) DO UPDATE SET value=EXCLUDED.value",
+            (_json.dumps(hidden),)
+        )
+    return {'ok': True}
 
 @app.post('/api/static-favs')
 async def api_static_favs_set(req: Request):

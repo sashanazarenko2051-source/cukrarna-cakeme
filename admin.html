@@ -364,7 +364,7 @@ body{font-family:'Raleway',sans-serif;background:var(--bg0);color:var(--tx0)}
               <div class="img-upload-lbl" data-k="adm_img_click">Klikněte nebo přetáhněte soubor</div>
               <div class="img-upload-sub" data-k="adm_img_hint">JPG, PNG, WebP · max 3 MB · automaticky zkomprimováno</div>
             </div>
-            <img class="img-upload-preview" id="imgUploadPreview" alt="">
+            <img class="img-upload-preview" id="imgUploadPreview" alt="" onerror="this.style.display='none';document.getElementById('uploadZone').style.display=''">
             <button type="button" class="img-reset-btn" id="imgResetBtn" data-k="adm_img_remove">✕ Odebrat obrázek</button>
           </div>
         </div>
@@ -450,6 +450,7 @@ let activeFilter = 'all';
 let activeSection = 'orders';
 let cachedMenuItems = null;
 let staticFavs = new Set();
+let hiddenStatics = new Set();
 let ordersCache = [];
 let editingId = null;
 let menuFilter = 'all';
@@ -739,7 +740,7 @@ document.querySelectorAll('.amn').forEach(btn => btn.addEventListener('click', (
   document.getElementById('secOrders').style.display    = activeSection==='orders'    ? '' : 'none';
   document.getElementById('secMenu').style.display      = activeSection==='menu'      ? '' : 'none';
   document.getElementById('secAnalytics').style.display = activeSection==='analytics' ? '' : 'none';
-  if(activeSection==='menu'){ loadStaticFavs().then(()=>loadMenuItems()); }
+  if(activeSection==='menu'){ Promise.all([loadStaticFavs(), loadHiddenStatics()]).then(()=>loadMenuItems()); }
   if(activeSection==='analytics') renderAnalytics();
 }));
 
@@ -916,9 +917,11 @@ async function loadMenuItems(){
 
 function renderMenuItems(customItems){
   const el = document.getElementById('customItemsList');
+  const customNames = new Set((customItems||[]).map(i=>i.name?.cs).filter(Boolean));
   const all = [
-    ...STATIC_ITEMS.map((i, idx)=>({...i, _static:true, _staticIdx:idx})),
-    ...customItems.map(i=>({...i, _custom:true}))
+    ...STATIC_ITEMS.map((i, idx)=>({...i, _static:true, _staticIdx:idx}))
+      .filter(i=>!hiddenStatics.has(i._staticIdx) && !customNames.has(i.name?.cs)),
+    ...(customItems||[]).map(i=>({...i, _custom:true}))
   ];
   let filtered = menuFilter==='custom' ? all.filter(i=>i._custom)
     : menuFilter==='fav' ? all.filter(i=>i._custom?!!i.favorite:staticFavs.has(i._staticIdx))
@@ -941,6 +944,7 @@ function renderMenuItems(customItems){
            <span class="ci-static-badge">${t('adm_static_lbl')}</span>
            <button class="ci-fav${staticFavs.has(item._staticIdx)?' on':''}" onclick="toggleStaticFav(${item._staticIdx})" title="❤">❤</button>
            <button class="ci-edit" onclick="startEditStatic(${item._staticIdx})" title="✎">✎</button>
+           <button class="ci-del" onclick="hideStatic(${item._staticIdx})" title="✕">✕</button>
          </div>`;
     return `<div class="ci-card">
       ${thumb}
@@ -967,6 +971,27 @@ async function loadStaticFavs(){
     const j = await r.json();
     staticFavs = new Set(j.favs||[]);
   }catch{}
+}
+
+async function loadHiddenStatics(){
+  try{
+    const r = await fetch('/api/hidden-statics');
+    if(!r.ok) return;
+    const j = await r.json();
+    hiddenStatics = new Set(j.hidden||[]);
+  }catch{}
+}
+
+async function hideStatic(idx){
+  if(!confirm(t('adm_del_item'))) return;
+  hiddenStatics.add(idx);
+  try{
+    await fetch('/api/hidden-statics', {
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({token: sessionStorage.getItem('cm_token')||'', hidden:[...hiddenStatics]})
+    });
+    if(cachedMenuItems!==null) renderMenuItems(cachedMenuItems);
+  }catch{ hiddenStatics.delete(idx); }
 }
 
 async function toggleStaticFav(idx){
@@ -1026,7 +1051,13 @@ function startEditStatic(idx){
   document.getElementById('fDescCs').value = item.desc?.cs || '';
   document.getElementById('fDescUk').value = item.desc?.uk || '';
   document.getElementById('fDescEn').value = item.desc?.en || '';
-  resetImg();
+  if(item.img){
+    currentImgData = item.img;
+    const prev = document.getElementById('imgUploadPreview');
+    prev.src = item.img; prev.style.display = 'block';
+    document.getElementById('uploadZone').style.display = 'none';
+    document.getElementById('imgResetBtn').style.display = 'block';
+  } else { resetImg(); }
   document.getElementById('formTitle').textContent = t('adm_edit_title');
   document.getElementById('addItemBtn').textContent = t('adm_save_btn');
   document.getElementById('editModeBanner').textContent = '✎ ' + (item.name?.cs || '') + ' → ' + t('adm_save_as_new');
@@ -1047,10 +1078,13 @@ function startEdit(item){
   document.getElementById('fDescCs').value     = item.desc?.cs || '';
   document.getElementById('fDescUk').value     = item.desc?.uk || '';
   document.getElementById('fDescEn').value     = item.desc?.en || '';
-  if(item.img){
-    currentImgData = item.img;
+  const _imgSrc = item.img || STATIC_ITEMS.find(si=>
+    si.name?.cs===item.name?.cs || si.name?.uk===item.name?.uk || si.name?.en===item.name?.en
+  )?.img || '';
+  if(_imgSrc){
+    currentImgData = _imgSrc;
     const prev = document.getElementById('imgUploadPreview');
-    prev.src = item.img; prev.style.display = 'block';
+    prev.src = _imgSrc; prev.style.display = 'block';
     document.getElementById('uploadZone').style.display = 'none';
     document.getElementById('imgResetBtn').style.display = 'block';
   } else { resetImg(); }

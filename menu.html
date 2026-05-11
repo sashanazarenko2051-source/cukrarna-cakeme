@@ -566,9 +566,9 @@ function renderMenu(){
     return;
   }
   let list;
-  if(tab==='fav') list=ITEMS.filter(i=>i.fav);
-  else if(tab==='all') list=ITEMS;
-  else list=ITEMS.filter(i=>i.cat===tab);
+  if(tab==='fav') list=ITEMS.filter(i=>i.fav&&!i._hidden);
+  else if(tab==='all') list=ITEMS.filter(i=>!i._hidden);
+  else list=ITEMS.filter(i=>i.cat===tab&&!i._hidden);
   grid.innerHTML=list.map((item)=>{
     const gi=ITEMS.indexOf(item);
     const name=item.name[lang]||item.name.cs;
@@ -578,7 +578,7 @@ function renderMenu(){
       const curSz=item.sizes[si];
       return `<div class="m-card fi">
       <div class="m-img">
-        <img src="${item.img}" alt="${name}" loading="lazy">
+        ${item.img?`<img src="${item.img}" alt="${name}" loading="lazy" onerror="this.style.display='none'">`:''}
         ${item.badge?`<span class="m-badge">${item.badge}</span>`:''}
       </div>
       <div class="m-body">
@@ -596,7 +596,7 @@ function renderMenu(){
     }
     return `<div class="m-card fi">
       <div class="m-img">
-        <img src="${item.img}" alt="${name}" loading="lazy">
+        ${item.img?`<img src="${item.img}" alt="${name}" loading="lazy" onerror="this.style.display='none'">`:''}
         ${item.badge?`<span class="m-badge">${item.badge}</span>`:''}
       </div>
       <div class="m-body">
@@ -667,7 +667,9 @@ document.getElementById('cartBtn').addEventListener('click',()=>{document.getEle
 document.getElementById('cartClose').addEventListener('click',()=>{document.getElementById('cartPanel').classList.remove('open');});
 async function loadCustomMenu(){
   try{
-    const [mr,fr]=await Promise.allSettled([fetch('/api/menu'),fetch('/api/static-favs')]);
+    const [mr,fr,hr]=await Promise.allSettled([
+      fetch('/api/menu'), fetch('/api/static-favs'), fetch('/api/hidden-statics')
+    ]);
     if(mr.status!=='fulfilled'||!mr.value.ok) return;
     const custom=await mr.value.json();
     if(fr.status==='fulfilled'&&fr.value.ok){
@@ -675,6 +677,13 @@ async function loadCustomMenu(){
       const favSet=new Set(favs||[]);
       ITEMS.forEach((item,i)=>{item.fav=favSet.has(i);});
     }
+    if(hr.status==='fulfilled'&&hr.value.ok){
+      const {hidden}=await hr.value.json();
+      const hiddenSet=new Set(hidden||[]);
+      ITEMS.forEach((item,i)=>{if(hiddenSet.has(i)) item._hidden=true;});
+    }
+    const customNames=new Set(custom.map(i=>i.name?.cs).filter(Boolean));
+    ITEMS.forEach(item=>{if(customNames.has(item.name?.cs)) item._hidden=true;});
     custom.forEach(item=>ITEMS.push({...item, fav:!!item.favorite}));
   }catch(e){}
 }
