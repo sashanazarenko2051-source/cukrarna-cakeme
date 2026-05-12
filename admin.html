@@ -126,18 +126,20 @@ body{font-family:'Raleway',sans-serif;background:var(--bg0);color:var(--tx0)}
 .add-msg{text-align:center;font-size:.8rem;min-height:20px;padding:6px}
 .add-msg.ok{color:#88cc88}
 .add-msg.err{color:#e08080}
+.sizes-section{margin-bottom:16px}
+.sizes-lbl{display:block;font-size:.68rem;letter-spacing:1.5px;text-transform:uppercase;color:var(--tx1);font-weight:600;margin-bottom:8px}
 .sizes-list{display:flex;flex-direction:column;gap:6px;margin-bottom:8px}
 .size-row{display:flex;align-items:center;gap:8px;background:var(--bg3);border:1px solid var(--bdr);padding:6px 10px;font-size:.82rem}
-.size-row-input-lbl{flex:1;background:transparent;border:none;border-bottom:1px solid var(--bdr);color:var(--tx0);padding:3px 4px;font:.82rem 'Raleway',sans-serif;outline:none;transition:.2s;min-width:0}
-.size-row-input-lbl:focus{border-bottom-color:var(--gold)}
-.size-row-input-price{width:64px;background:transparent;border:none;border-bottom:1px solid var(--bdr);color:var(--gold);padding:3px 4px;font:.82rem 'Raleway',sans-serif;font-weight:600;outline:none;transition:.2s;text-align:right}
-.size-row-input-price:focus{border-bottom-color:var(--gold)}
+.size-row-input-lbl{flex:1;min-width:0;border-bottom:1px solid var(--bdr) !important;border-top:none !important;border-left:none !important;border-right:none !important;background:transparent !important;padding:3px 4px !important;color:var(--tx0) !important}
+.size-row-input-lbl:focus{border-bottom-color:var(--gold) !important;outline:none}
+.size-row-input-price{width:64px;border-bottom:1px solid var(--bdr) !important;border-top:none !important;border-left:none !important;border-right:none !important;background:transparent !important;padding:3px 4px !important;color:var(--gold) !important;font-weight:600;text-align:right}
+.size-row-input-price:focus{border-bottom-color:var(--gold) !important;outline:none}
 .size-row-unit{color:var(--tx2);font-size:.75rem;white-space:nowrap}
 .size-row-del{background:transparent;border:none;color:var(--tx2);cursor:pointer;font-size:1.1rem;padding:0 4px;line-height:1;transition:.2s}
 .size-row-del:hover{color:#e08080}
 .size-add-row{display:grid;grid-template-columns:1fr 90px auto;gap:8px;align-items:end}
-.size-add-row input{background:var(--bg3);border:1px solid var(--bdr);color:var(--tx0);padding:9px 12px;font:.82rem 'Raleway',sans-serif;outline:none;transition:.25s;width:100%}
-.size-add-row input:focus{border-color:var(--gold)}
+.sizes-section input{background:var(--bg3);border:1px solid var(--bdr);color:var(--tx0);padding:9px 12px;font:.82rem 'Raleway',sans-serif;outline:none;transition:.25s}
+.sizes-section input:focus{border-color:var(--gold)}
 .btn-add-size{background:transparent;border:1px solid var(--gold-d);color:var(--gold);padding:9px 14px;cursor:pointer;font:.72rem 'Raleway',sans-serif;letter-spacing:1px;white-space:nowrap;transition:.25s}
 .btn-add-size:hover{background:rgba(201,169,110,.1)}
 .ci-card{display:flex;align-items:center;gap:12px;padding:12px 0;border-bottom:1px solid var(--bdr)}
@@ -423,15 +425,6 @@ body{font-family:'Raleway',sans-serif;background:var(--bg0);color:var(--tx0)}
             <input type="hidden" id="fDescEn">
           </div>
           <div class="mai-field full">
-            <label>Velikosti / Sizes <span style="font-weight:400;color:var(--tx2)">(nepovinné — pokud jsou nastaveny, pole Cena se ignoruje)</span></label>
-            <div class="sizes-list" id="sizesList"></div>
-            <div class="size-add-row">
-              <input type="text" id="fSizeLbl" placeholder="Malý (6 porcí) / Small">
-              <input type="text" id="fSizePrice" placeholder="350">
-              <button type="button" class="btn-add-size" id="addSizeBtn">+ Přidat</button>
-            </div>
-          </div>
-          <div class="mai-field full">
             <label data-k="adm_img_lbl">Obrázek</label>
             <input type="file" id="fImgFile" accept="image/*" style="display:none">
             <div class="img-upload-zone" id="uploadZone">
@@ -441,6 +434,15 @@ body{font-family:'Raleway',sans-serif;background:var(--bg0);color:var(--tx0)}
             </div>
             <img class="img-upload-preview" id="imgUploadPreview" alt="" onerror="this.style.display='none';document.getElementById('uploadZone').style.display=''">
             <button type="button" class="img-reset-btn" id="imgResetBtn" data-k="adm_img_remove">✕ Odebrat obrázek</button>
+          </div>
+        </div>
+        <div class="sizes-section">
+          <label class="sizes-lbl">Velikosti / Sizes <span style="font-weight:400;color:var(--tx2)">(nepovinné — pokud jsou nastaveny, pole Cena se ignoruje)</span></label>
+          <div class="sizes-list" id="sizesList"></div>
+          <div class="size-add-row">
+            <input type="text" id="fSizeLbl" placeholder="Malý (6 porcí) / Small">
+            <input type="text" id="fSizePrice" placeholder="350">
+            <button type="button" class="btn-add-size" id="addSizeBtn">+ Přidat</button>
           </div>
         </div>
         <div class="card-prev-wrap">
