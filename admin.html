@@ -149,6 +149,8 @@ body{font-family:'Raleway',sans-serif;background:var(--bg0);color:var(--tx0)}
 .ci-info{display:flex;align-items:center;gap:12px;flex:1;min-width:0}
 .ci-name{font-size:.88rem;color:var(--tx0);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .ci-meta{font-size:.72rem;color:var(--tx2);margin-top:2px}
+.ci-sizes{display:flex;flex-wrap:wrap;gap:3px;margin-top:4px}
+.ci-sz-tag{font-size:.65rem;background:var(--bg3);border:1px solid var(--bdr);color:var(--tx1);padding:1px 6px;white-space:nowrap}
 .ci-del{background:transparent;border:1px solid transparent;color:var(--tx2);width:30px;height:30px;cursor:pointer;font-size:.9rem;transition:.2s;flex-shrink:0;display:flex;align-items:center;justify-content:center}
 .ci-del:hover{border-color:#e08080;color:#e08080}
 .ci-fav{background:transparent;border:1px solid transparent;width:30px;height:30px;cursor:pointer;font-size:1rem;transition:.2s;flex-shrink:0;display:flex;align-items:center;justify-content:center;color:var(--tx2)}
@@ -1010,7 +1012,8 @@ function renderMenuItems(customItems){
       ${thumb}
       <div class="ci-info"><div style="min-width:0">
         <div class="ci-name">${esc(name)}</div>
-        <div class="ci-meta">${esc(item.cat)} · ${esc(price)}${item.badge?' · '+esc(item.badge):''}</div>
+        <div class="ci-meta">${esc(item.cat)}${item.badge?' · '+esc(item.badge):''}</div>
+        ${(item.sizes&&item.sizes.length)?`<div class="ci-sizes">${item.sizes.map(sz=>`<span class="ci-sz-tag">${esc(sz.label||'?')} — ${sz.price} Kč</span>`).join('')}</div>`:`<div class="ci-meta">${esc(price)}</div>`}
       </div></div>
       ${actions}
     </div>`;
