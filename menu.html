@@ -482,7 +482,7 @@ function saveCart(c){localStorage.setItem('cakeme_cart',JSON.stringify(c));}
 function addToCart(gi){
   const item=ITEMS[gi];
   let price,sizeLabel='',id;
-  if(item.sizes){
+  if(item.sizes && item.sizes.length){
     const si=defSi(item);
     price=item.sizes[si].price;
     sizeLabel=item.sizes[si].label;
@@ -579,7 +579,7 @@ function renderMenu(){
     const gi=ITEMS.indexOf(item);
     const name=item.name[lang]||item.name.cs;
     const desc=item.desc[lang]||item.desc.cs;
-    if(item.sizes){
+    if(item.sizes && item.sizes.length){
       const si=defSi(item);
       const curSz=item.sizes[si];
       return `<div class="m-card fi">
