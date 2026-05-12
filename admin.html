@@ -183,6 +183,10 @@ body{font-family:'Raleway',sans-serif;background:var(--bg0);color:var(--tx0)}
 .cp-ft{display:flex;align-items:center;justify-content:space-between}
 .cp-price{font-family:'Playfair Display',serif;font-size:1.05rem;color:var(--gold)}
 .cp-btn-fake{background:transparent;border:1px solid rgba(201,169,110,.4);color:var(--gold);padding:5px 12px;font:.62rem 'Raleway',sans-serif;letter-spacing:1px;text-transform:uppercase}
+.cp-sizes{display:flex;flex-wrap:wrap;gap:4px;margin-bottom:8px}
+.cp-sz-btn{border:1px solid rgba(201,169,110,.4);padding:3px 8px;display:flex;flex-direction:column;align-items:center;min-width:48px}
+.cp-sz-lbl{font-size:.58rem;color:var(--tx2);line-height:1.3}
+.cp-sz-price{font-size:.76rem;color:var(--gold);font-weight:600;line-height:1.3}
 
 /* ── EDIT MODE ── */
 .edit-mode-banner{display:none;background:rgba(201,169,110,.07);border-left:3px solid var(--gold);padding:10px 14px;margin-bottom:14px;font-size:.76rem;color:var(--gold);letter-spacing:.3px}
@@ -450,6 +454,7 @@ body{font-family:'Raleway',sans-serif;background:var(--bg0);color:var(--tx0)}
               <div class="cp-badge" id="cpBadge"></div>
               <div class="cp-name" id="cpName">Název položky</div>
               <div class="cp-desc" id="cpDesc">Popis…</div>
+              <div class="cp-sizes" id="cpSizes" style="display:none"></div>
               <div class="cp-ft">
                 <span class="cp-price" id="cpPrice">— Kč</span>
                 <span class="cp-btn-fake" data-k="adm_cart_btn">Do košíku</span>
@@ -1191,6 +1196,7 @@ function renderSizesList(){
     row.append(lblIn, priceIn, unit, del);
     el.appendChild(row);
   });
+  updateCardPreview();
 }
 
 function removeSize(i){
@@ -1461,12 +1467,25 @@ function updateCardPreview(){
   const desc  = document.getElementById('fDescCs').value.trim() || 'Popis…';
   const price = document.getElementById('fPrice').value.trim();
   const badge = document.getElementById('fBadge').value.trim();
-  document.getElementById('cpName').textContent  = name;
-  document.getElementById('cpDesc').textContent  = desc;
-  document.getElementById('cpPrice').textContent = price || '— Kč';
+  document.getElementById('cpName').textContent = name;
+  document.getElementById('cpDesc').textContent = desc;
   const badgeEl = document.getElementById('cpBadge');
   badgeEl.textContent = badge;
   badgeEl.style.display = badge ? 'inline-block' : 'none';
+  const sizesEl = document.getElementById('cpSizes');
+  const priceEl = document.getElementById('cpPrice');
+  if(formSizes.length){
+    sizesEl.style.display = 'flex';
+    sizesEl.innerHTML = formSizes.map(sz=>
+      `<span class="cp-sz-btn"><span class="cp-sz-lbl">${sz.label||'—'}</span><span class="cp-sz-price">${sz.price} Kč</span></span>`
+    ).join('');
+    priceEl.style.display = 'none';
+  } else {
+    sizesEl.style.display = 'none';
+    sizesEl.innerHTML = '';
+    priceEl.style.display = '';
+    priceEl.textContent = price || '— Kč';
+  }
   const cpImg = document.getElementById('cpImg');
   const cpPl  = document.getElementById('cpImgPlaceholder');
   if(currentImgData){ cpImg.src = currentImgData; cpImg.style.display = 'block'; cpPl.style.display = 'none'; }
