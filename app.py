@@ -386,14 +386,65 @@ async def api_push_test(req: Request, bg: BackgroundTasks):
     with _get_pool().connection() as conn:
         row = conn.execute("SELECT value FROM settings WHERE key='push_subscriptions'").fetchone()
         subs = _json.loads(row[0]) if row and row[0] else []
+    bg.add_task(_send_ntfy, {
+        'name': 'TEST', 'phone': '', 'order': 'Testovaci zprava — notifikace fungují!'
+    })
     if not subs:
-        return {'ok': False, 'error': 'No subscribers'}
+        return {'ok': True, 'subscribers': 0, 'note': 'ntfy sent, no web-push subscribers'}
     bg.add_task(_send_push_notifications, {
         'title': 'Test notifikace ✅',
         'body':  'Push notifikace fungují správně!',
         'url':   '/admin.html'
     }, subs)
     return {'ok': True, 'subscribers': len(subs)}
+
+# ── ntfy.sh notifications ────────────────────────────────────────────────────
+def _get_ntfy_topic() -> str:
+    with _get_pool().connection() as conn:
+        row = conn.execute("SELECT value FROM settings WHERE key='ntfy_topic'").fetchone()
+        if row and row[0]:
+            return row[0]
+    topic = 'cakeme-' + secrets.token_urlsafe(20)
+    with _get_pool().connection() as conn:
+        conn.execute(
+            "INSERT INTO settings(key,value) VALUES('ntfy_topic',%s) ON CONFLICT(key) DO UPDATE SET value=EXCLUDED.value",
+            (topic,)
+        )
+    import sys
+    print(f'[NTFY] Generated new topic: {topic}', file=sys.stderr)
+    return topic
+
+def _send_ntfy(order: dict):
+    import sys, urllib.request, urllib.error
+    try:
+        topic = _get_ntfy_topic()
+        name  = (order.get('name') or '').strip()
+        items = (order.get('order') or '').strip()[:120]
+        phone = (order.get('phone') or '').strip()
+        body  = f"{name} | {phone}\n{items}".strip().encode('utf-8')
+        req   = urllib.request.Request(
+            f'https://ntfy.sh/{topic}',
+            data=body,
+            headers={
+                'Title':        'Nova objednavka! Cukrarna CakeMe',
+                'Priority':     'urgent',
+                'Tags':         'bell,cake',
+                'Content-Type': 'text/plain; charset=utf-8',
+            },
+            method='POST'
+        )
+        urllib.request.urlopen(req, timeout=8)
+        print(f'[NTFY] Sent for order: {name}', file=sys.stderr)
+    except Exception as e:
+        print(f'[NTFY] Error: {e}', file=sys.stderr)
+
+@app.post('/api/notif-info')
+async def api_notif_info(req: Request):
+    d = await req.json()
+    if not _verify_token(d.get('token')):
+        raise HTTPException(401, 'Unauthorized')
+    topic = _get_ntfy_topic()
+    return {'topic': topic, 'url': f'https://ntfy.sh/{topic}'}
 
 # ── /api/categories ───────────────────────────────────────────────────────────
 @app.get('/api/categories')
@@ -438,6 +489,7 @@ async def api_order(req: Request, bg: BackgroundTasks):
              order['address'], order['order'], order['payment'],
              order['order_type'], order['status'])
         )
+    bg.add_task(_send_ntfy, order)
     bg.add_task(_send_push_notifications, {
         'title': 'Nová objednávka! 🎂',
         'body':  f"{order['name']} — {(order['order'] or '')[:80]}",

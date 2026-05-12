@@ -239,6 +239,21 @@ body{font-family:'Raleway',sans-serif;background:var(--bg0);color:var(--tx0)}
 .an-cat-fill-cakes{background:#c9a96e}
 .an-cat-fill-desserts{background:#9e7fc0}
 .an-cat-fill-drinks{background:#5b9bd5}
+/* ── NTFY SETUP CARD ── */
+.ntfy-card{background:var(--bg2);border:1px solid var(--gold-d);padding:18px 20px;margin:16px 28px 0;position:relative;display:none}
+.ntfy-card.show{display:block}
+.ntfy-card-title{font-size:.72rem;letter-spacing:2px;text-transform:uppercase;color:var(--gold);margin-bottom:10px;display:flex;align-items:center;gap:8px}
+.ntfy-steps{font-size:.8rem;color:var(--tx1);line-height:1.8}
+.ntfy-steps strong{color:var(--tx0)}
+.ntfy-url-row{display:flex;align-items:center;gap:8px;margin:10px 0}
+.ntfy-url{flex:1;background:var(--bg3);border:1px solid var(--bdr);color:var(--gold);padding:8px 12px;font:.75rem 'Raleway',monospace;word-break:break-all;user-select:all}
+.ntfy-copy{background:transparent;border:1px solid var(--gold-d);color:var(--gold);padding:7px 14px;cursor:pointer;font:.68rem 'Raleway',sans-serif;white-space:nowrap;transition:.2s;flex-shrink:0}
+.ntfy-copy:hover{background:rgba(201,169,110,.12)}
+.ntfy-copy.copied{border-color:#6dbf8f;color:#6dbf8f}
+.ntfy-dismiss{position:absolute;top:10px;right:12px;background:transparent;border:none;color:var(--tx2);cursor:pointer;font:1rem 'Raleway',sans-serif;line-height:1;padding:2px 6px;transition:.2s}
+.ntfy-dismiss:hover{color:var(--tx0)}
+.ntfy-test-btn{background:transparent;border:1px solid var(--bdr);color:var(--tx2);padding:6px 14px;cursor:pointer;font:.68rem 'Raleway',sans-serif;letter-spacing:1px;text-transform:uppercase;transition:.2s;margin-top:6px}
+.ntfy-test-btn:hover{border-color:var(--gold);color:var(--gold)}
 /* ── CATEGORY MANAGER ── */
 .cat-mgr{margin-bottom:18px;padding:16px;background:var(--bg2);border:1px solid var(--bdr)}
 .cat-mgr-title{font-size:.68rem;letter-spacing:2px;text-transform:uppercase;color:var(--tx2);margin-bottom:12px}
@@ -369,6 +384,22 @@ body{font-family:'Raleway',sans-serif;background:var(--bg0);color:var(--tx0)}
       <button class="adm-btn danger" id="logoutBtn" data-k="adm_logout">Odhlásit</button>
     </div>
   </header>
+
+  <!-- NTFY SETUP CARD -->
+  <div class="ntfy-card" id="ntfyCard">
+    <button class="ntfy-dismiss" id="ntfyDismiss">✕</button>
+    <div class="ntfy-card-title">📱 Notifikace na telefon</div>
+    <div class="ntfy-steps">
+      <div>1. Nainstalujte aplikaci <strong>ntfy</strong> — <strong>Android</strong> (Play Store) nebo <strong>iOS</strong> (App Store) — zdarma</div>
+      <div>2. V aplikaci klikněte <strong>+</strong> a vložte tento odkaz:</div>
+    </div>
+    <div class="ntfy-url-row">
+      <div class="ntfy-url" id="ntfyUrl">načítání…</div>
+      <button class="ntfy-copy" id="ntfyCopyBtn">📋 Kopírovat</button>
+    </div>
+    <div class="ntfy-steps">3. Po přidání budete dostávat <strong>okamžitá upozornění</strong> o každé nové objednávce.</div>
+    <button class="ntfy-test-btn" id="ntfyTestBtn">↗ Odeslat testovací zprávu</button>
+  </div>
 
   <!-- MAIN NAV -->
   <div class="adm-main-nav">
@@ -795,6 +826,7 @@ function showPanel(){
   applyAdminLang();
   renderOrders();
   _initPush();
+  loadNtfyCard();
 }
 
 document.getElementById('logoutBtn').addEventListener('click', ()=>{
@@ -1708,6 +1740,53 @@ function showAddMsg(text, type){
 function esc(s){
   return String(s||'—').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
 }
+
+/* ── ntfy setup card ── */
+async function loadNtfyCard(){
+  const card = document.getElementById('ntfyCard');
+  const urlEl = document.getElementById('ntfyUrl');
+  if(!card || !urlEl) return;
+  if(sessionStorage.getItem('ntfy_dismissed')) return;
+  try{
+    const r = await fetch('/api/notif-info',{
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({token: sessionStorage.getItem('cm_token')||''})
+    });
+    if(!r.ok) return;
+    const {url} = await r.json();
+    urlEl.textContent = url;
+    card.classList.add('show');
+  }catch(e){}
+}
+
+document.getElementById('ntfyDismiss').addEventListener('click',()=>{
+  document.getElementById('ntfyCard').classList.remove('show');
+  sessionStorage.setItem('ntfy_dismissed','1');
+});
+
+document.getElementById('ntfyCopyBtn').addEventListener('click',()=>{
+  const url = document.getElementById('ntfyUrl').textContent;
+  navigator.clipboard.writeText(url).then(()=>{
+    const btn = document.getElementById('ntfyCopyBtn');
+    btn.textContent = '✓ Zkopírováno';
+    btn.classList.add('copied');
+    setTimeout(()=>{ btn.textContent='📋 Kopírovat'; btn.classList.remove('copied'); }, 2500);
+  }).catch(()=>{ prompt('Zkopírujte odkaz:', url); });
+});
+
+document.getElementById('ntfyTestBtn').addEventListener('click', async ()=>{
+  const btn = document.getElementById('ntfyTestBtn');
+  btn.textContent = '…'; btn.disabled = true;
+  try{
+    const r = await fetch('/api/push/test',{
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({token: sessionStorage.getItem('cm_token')||''})
+    });
+    const j = await r.json();
+    btn.textContent = j.ok ? '✓ Odesláno!' : '✗ Chyba';
+  }catch(e){ btn.textContent = '✗ Chyba'; }
+  setTimeout(()=>{ btn.textContent='↗ Odeslat testovací zprávu'; btn.disabled=false; }, 2500);
+});
 
 /* ── Web Push Notifications ── */
 let _swReg = null;
