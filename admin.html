@@ -51,10 +51,11 @@ body{font-family:'Raleway',sans-serif;background:var(--bg0);color:var(--tx0)}
 .adm-btn{background:transparent;border:1px solid var(--bdr);color:var(--tx2);padding:7px 14px;cursor:pointer;font:.7rem 'Raleway',sans-serif;letter-spacing:1px;text-transform:uppercase;transition:.25s}
 .adm-btn:hover{border-color:var(--gold);color:var(--gold)}
 .adm-btn.danger:hover{border-color:#e08080;color:#e08080}
-#pushBtn{font-size:1rem;padding:7px 10px;min-width:34px}
+#pushBtn{font-size:1.15rem;padding:8px 13px;min-width:44px;min-height:40px;touch-action:manipulation}
 #pushBtn.push-on{border-color:var(--gold);color:var(--gold)}
 #pushBtn.push-off{color:var(--tx2)}
 #pushBtn.push-denied{color:#e08080;border-color:#e08080;opacity:.7;cursor:not-allowed}
+#pushTestBtn{touch-action:manipulation}
 
 /* Main nav */
 .adm-main-nav{display:flex;border-bottom:2px solid var(--bdr);background:var(--bg1)}
@@ -832,6 +833,62 @@ setInterval(()=>{
     renderOrders();
   }
 }, 30000);
+
+/* ── Polling notifications (works when tab is open) ── */
+let _lastNewCount = -1;
+
+function _playNotifSound(){
+  try{
+    const ctx = new (window.AudioContext||window.webkitAudioContext)();
+    [[0,880],[0.18,1100],[0.36,880]].forEach(([t,freq])=>{
+      const osc = ctx.createOscillator(), g = ctx.createGain();
+      osc.connect(g); g.connect(ctx.destination);
+      osc.frequency.value = freq; osc.type = 'sine';
+      g.gain.setValueAtTime(0.35, ctx.currentTime+t);
+      g.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime+t+0.28);
+      osc.start(ctx.currentTime+t); osc.stop(ctx.currentTime+t+0.28);
+    });
+  }catch(e){}
+}
+
+function _flashOrdersBtn(){
+  const btn = document.querySelector('.amn[data-sec="orders"]');
+  if(!btn) return;
+  let n = 0;
+  const iv = setInterval(()=>{
+    btn.style.color = n%2===0 ? 'var(--gold)' : '';
+    if(++n > 6) { clearInterval(iv); btn.style.color=''; }
+  }, 350);
+}
+
+async function _pollNewOrders(){
+  if(sessionStorage.getItem('cm_admin') !== '1') return;
+  try{
+    const r = await fetch('/api/orders',{
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({token: sessionStorage.getItem('cm_token')||''})
+    });
+    if(!r.ok) return;
+    const orders = await r.json();
+    const newCount = orders.filter(o=>o.status==='new').length;
+    if(_lastNewCount >= 0 && newCount > _lastNewCount){
+      _playNotifSound();
+      _flashOrdersBtn();
+      if(Notification.permission === 'granted'){
+        const diff = newCount - _lastNewCount;
+        const n = new Notification('Nová objednávka! 🎂', {
+          body: diff===1 ? 'Přišla 1 nová objednávka' : `Přišlo ${diff} nové objednávky`,
+          icon: '/favicon.svg', tag: 'cakeme-poll', requireInteraction: true
+        });
+        n.onclick = ()=>{ window.focus(); n.close(); };
+      }
+    }
+    _lastNewCount = newCount;
+  }catch(e){}
+}
+
+setInterval(_pollNewOrders, 20000);
+setTimeout(_pollNewOrders, 4000);
 
 /* ── Main nav ── */
 document.querySelectorAll('.amn').forEach(btn => btn.addEventListener('click', ()=>{
@@ -1678,9 +1735,9 @@ function _updatePushBtn(){
     if(testBtn) testBtn.style.display = 'none';
     return;
   }
-  if(_pushSub){
+  if(Notification.permission === 'granted'){
     btn.className = 'adm-btn push-on';
-    btn.title = 'Notifikace zapnuty — klikněte pro vypnutí';
+    btn.title = _pushSub ? 'Notifikace zapnuty (Push+Polling) — klikněte pro vypnutí push' : 'Notifikace zapnuty (Polling) — klikněte pro zapnutí Push';
     btn.textContent = '🔔';
     if(testBtn) testBtn.style.display = '';
   } else {
@@ -1707,6 +1764,8 @@ document.getElementById('pushTestBtn').addEventListener('click', async ()=>{
 });
 
 async function _initPush(){
+  // Always update button based on Notification.permission first
+  _updatePushBtn();
   if(!('serviceWorker' in navigator) || !('PushManager' in window)) return;
   try{
     _swReg = await navigator.serviceWorker.register('/sw.js');
@@ -1759,8 +1818,24 @@ async function _unsubscribePush(){
 }
 
 document.getElementById('pushBtn').addEventListener('click', async ()=>{
+  if(Notification.permission === 'denied'){
+    alert('Notifikace jsou zablokovány v prohlížeči. Povolte je v nastavení prohlížeče a obnovte stránku.');
+    return;
+  }
+  if(Notification.permission === 'default'){
+    const perm = await Notification.requestPermission();
+    if(perm !== 'granted'){ _updatePushBtn(); return; }
+    _lastNewCount = -1;
+    await _pollNewOrders();
+    _updatePushBtn();
+    if('serviceWorker' in navigator && 'PushManager' in window){
+      if(!_swReg) await _initPush();
+      if(!_pushSub) await _subscribePush();
+    }
+    return;
+  }
+  // Already granted — toggle push subscription
   if(!('serviceWorker' in navigator) || !('PushManager' in window)) return;
-  if(Notification.permission === 'denied') return;
   if(!_swReg) await _initPush();
   if(_pushSub){ await _unsubscribePush(); } else { await _subscribePush(); }
 });
