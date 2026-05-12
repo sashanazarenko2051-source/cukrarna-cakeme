@@ -1159,17 +1159,37 @@ let formSizes = [];
 
 function renderSizesList(){
   const el = document.getElementById('sizesList');
-  if(!formSizes.length){ el.innerHTML=''; return; }
-  el.innerHTML = formSizes.map((sz,i)=>`
-    <div class="size-row">
-      <input class="size-row-input-lbl" placeholder="Název" onchange="formSizes[${i}].label=this.value.trim()">
-      <input class="size-row-input-price" type="number" min="1" placeholder="Kč" onchange="formSizes[${i}].price=parseInt(this.value)||formSizes[${i}].price">
-      <span class="size-row-unit">Kč</span>
-      <button class="size-row-del" type="button" onclick="removeSize(${i})">×</button>
-    </div>`).join('');
-  el.querySelectorAll('.size-row').forEach((row, i) => {
-    row.querySelector('.size-row-input-lbl').value   = formSizes[i].label || '';
-    row.querySelector('.size-row-input-price').value = formSizes[i].price || '';
+  el.innerHTML = '';
+  formSizes.forEach((sz, i) => {
+    const row = document.createElement('div');
+    row.className = 'size-row';
+
+    const lblIn = document.createElement('input');
+    lblIn.className = 'size-row-input-lbl';
+    lblIn.placeholder = 'Název velikosti';
+    lblIn.value = sz.label || '';
+    lblIn.addEventListener('change', () => { formSizes[i].label = lblIn.value.trim(); });
+
+    const priceIn = document.createElement('input');
+    priceIn.className = 'size-row-input-price';
+    priceIn.type = 'number';
+    priceIn.min = '1';
+    priceIn.placeholder = 'Kč';
+    priceIn.value = sz.price || '';
+    priceIn.addEventListener('change', () => { formSizes[i].price = parseInt(priceIn.value) || formSizes[i].price; });
+
+    const unit = document.createElement('span');
+    unit.className = 'size-row-unit';
+    unit.textContent = 'Kč';
+
+    const del = document.createElement('button');
+    del.className = 'size-row-del';
+    del.type = 'button';
+    del.textContent = '×';
+    del.addEventListener('click', () => removeSize(i));
+
+    row.append(lblIn, priceIn, unit, del);
+    el.appendChild(row);
   });
 }
 
