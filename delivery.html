@@ -668,9 +668,15 @@ document.getElementById('orderForm').addEventListener('submit',async function(e)
 
   // ── Online payment via Stripe ──
   if(payload.payment==='online'||payload.payment==='card'||(!isInstore&&payload.payment==='cash')){
-    btn.textContent=t('f_redirecting');
     const cart=getCart();
     payload.total_czk=cart.reduce((s,c)=>s+c.price*c.qty,0);
+    if(!payload.total_czk){
+      msg.className='ord-msg err'; msg.style.cssText='';
+      msg.textContent={cs:'Košík je prázdný.',uk:'Кошик порожній.',en:'Cart is empty.'}[lang]||'Cart is empty.';
+      btn.disabled=false; btn.textContent=orig;
+      return;
+    }
+    btn.textContent=t('f_redirecting');
     try{
       const r=await fetch('/api/create-checkout-session',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});
       if(r.ok){
