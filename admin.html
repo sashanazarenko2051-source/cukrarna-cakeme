@@ -385,22 +385,6 @@ body{font-family:'Raleway',sans-serif;background:var(--bg0);color:var(--tx0)}
     </div>
   </header>
 
-  <!-- NTFY SETUP CARD -->
-  <div class="ntfy-card" id="ntfyCard">
-    <button class="ntfy-dismiss" id="ntfyDismiss">✕</button>
-    <div class="ntfy-card-title">📱 Notifikace na telefon</div>
-    <div class="ntfy-steps">
-      <div>1. Nainstalujte aplikaci <strong>ntfy</strong> — <strong>Android</strong> (Play Store) nebo <strong>iOS</strong> (App Store) — zdarma</div>
-      <div>2. V aplikaci klikněte <strong>+</strong> a vložte tento odkaz:</div>
-    </div>
-    <div class="ntfy-url-row">
-      <div class="ntfy-url" id="ntfyUrl">načítání…</div>
-      <button class="ntfy-copy" id="ntfyCopyBtn">📋 Kopírovat</button>
-    </div>
-    <div class="ntfy-steps">3. Po přidání budete dostávat <strong>okamžitá upozornění</strong> o každé nové objednávce.</div>
-    <button class="ntfy-test-btn" id="ntfyTestBtn">↗ Odeslat testovací zprávu</button>
-  </div>
-
   <!-- MAIN NAV -->
   <div class="adm-main-nav">
     <button class="amn on" data-sec="orders"><span class="amn-ic">📋</span> <span data-k="adm_orders">Objednávky</span></button>
@@ -1741,52 +1725,8 @@ function esc(s){
   return String(s||'—').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
 }
 
-/* ── ntfy setup card ── */
-async function loadNtfyCard(){
-  const card = document.getElementById('ntfyCard');
-  const urlEl = document.getElementById('ntfyUrl');
-  if(!card || !urlEl) return;
-  if(sessionStorage.getItem('ntfy_dismissed')) return;
-  try{
-    const r = await fetch('/api/notif-info',{
-      method:'POST', headers:{'Content-Type':'application/json'},
-      body: JSON.stringify({token: sessionStorage.getItem('cm_token')||''})
-    });
-    if(!r.ok) return;
-    const {url} = await r.json();
-    urlEl.textContent = url;
-    card.classList.add('show');
-  }catch(e){}
-}
-
-document.getElementById('ntfyDismiss').addEventListener('click',()=>{
-  document.getElementById('ntfyCard').classList.remove('show');
-  sessionStorage.setItem('ntfy_dismissed','1');
-});
-
-document.getElementById('ntfyCopyBtn').addEventListener('click',()=>{
-  const url = document.getElementById('ntfyUrl').textContent;
-  navigator.clipboard.writeText(url).then(()=>{
-    const btn = document.getElementById('ntfyCopyBtn');
-    btn.textContent = '✓ Zkopírováno';
-    btn.classList.add('copied');
-    setTimeout(()=>{ btn.textContent='📋 Kopírovat'; btn.classList.remove('copied'); }, 2500);
-  }).catch(()=>{ prompt('Zkopírujte odkaz:', url); });
-});
-
-document.getElementById('ntfyTestBtn').addEventListener('click', async ()=>{
-  const btn = document.getElementById('ntfyTestBtn');
-  btn.textContent = '…'; btn.disabled = true;
-  try{
-    const r = await fetch('/api/push/test',{
-      method:'POST', headers:{'Content-Type':'application/json'},
-      body: JSON.stringify({token: sessionStorage.getItem('cm_token')||''})
-    });
-    const j = await r.json();
-    btn.textContent = j.ok ? '✓ Odesláno!' : '✗ Chyba';
-  }catch(e){ btn.textContent = '✗ Chyba'; }
-  setTimeout(()=>{ btn.textContent='↗ Odeslat testovací zprávu'; btn.disabled=false; }, 2500);
-});
+/* ── ntfy setup (no UI card — topic available via Render logs) ── */
+async function loadNtfyCard(){ /* no-op */ }
 
 /* ── Web Push Notifications ── */
 let _swReg = null;
