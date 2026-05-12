@@ -667,7 +667,7 @@ document.getElementById('orderForm').addEventListener('submit',async function(e)
   };
 
   // ── Online payment via Stripe ──
-  if(payload.payment==='online'||payload.payment==='card'){
+  if(payload.payment==='online'||payload.payment==='card'||(!isInstore&&payload.payment==='cash')){
     btn.textContent=t('f_redirecting');
     const cart=getCart();
     payload.total_czk=cart.reduce((s,c)=>s+c.price*c.qty,0);
