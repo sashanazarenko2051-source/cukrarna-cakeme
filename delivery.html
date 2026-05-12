@@ -242,7 +242,6 @@ footer{background:#070707;border-top:1px solid var(--bdr);padding:52px 0 28px}
     <div class="nav-right">
       <div class="langs" translate="no">
         <button class="lang-btn" data-l="cs" translate="no"><span class="flag">🇨🇿</span><span class="lname">Česky</span></button>
-        <button class="lang-btn" data-l="uk" translate="no"><span class="flag">🇺🇦</span><span class="lname">Укр</span></button>
         <button class="lang-btn" data-l="en" translate="no"><span class="flag">🇬🇧</span><span class="lname">EN</span></button>
       </div>
       <button class="burger" id="burgerBtn" aria-label="Menu">
@@ -502,23 +501,6 @@ cs:{nav_home:'Domů',nav_menu:'Menu',nav_about:'O nás',nav_del:'Doručení',nav
   pay_ttl:'Platební podmínky',pay_dep:'Záloha 50 % z celkové ceny objednávky je splatná bankovním převodem při potvrzení. Zbývajících 50 % hradíte při převzetí.',pay_acc:'Číslo účtu',
   f_submit:'Objednat',f_redirecting:'Přesměrování na platbu...',f_ok:'Děkujeme! Vaši objednávku jsme přijali.',f_err:'Chyba. Zkuste to znovu nebo zavolejte.',
   ft_nav:'Navigace',ft_con:'Kontakt',rights:'Všechna práva vyhrazena.'},
-uk:{nav_home:'Головна',nav_menu:'Меню',nav_about:'Про нас',nav_del:'Доставка',nav_con:'Контакт',tagline:'Святкуйте кожен день',
-  del_lbl:'Швидко та зручно',del_ttl:'Доставка',
-  dh_ttl:'Доставляємо прямо до вас',dh_sub:'Замовте телефоном або поштою — доставимо свіжі десерти додому',
-  s1t:'Оберіть з меню',s1d:'Перегляньте наше меню та оберіть десерти, які хочете',
-  s2t:'Зв\'яжіться з нами',s2d:'Зателефонуйте або напишіть листа з замовленням та адресою доставки',
-  s3t:'Отримайте доставку',s3d:'Ваш свіжий торт буде доставлений прямо до ваших дверей',
-  i1t:'Час доставки',i1d:'хвилин після замовлення',
-  i2t:'Ціна доставки',i2d:'за Прагою до 15 км · 250 Кч',i2e:'понад 15 км · за домовленістю',
-  oc_ttl:'Замовте зараз',oc_sub:'Заповніть форму — підтвердимо протягом 15 хвилин',
-  f_name:'Ім\'я',f_phone:'Телефон',f_phone_opt:'не обов\'язково',f_addr:'Адреса доставки',
-  f_pay_dep_cash:'50% готівкою',f_pay_dep_card:'50% карткою',f_pay_dep_note:'50% передоплата при замовленні',
-  f_cart:'Ваше замовлення',cart_total:'Разом',cart_empty_del:'Кошик порожній — додайте товари з меню',go_menu:'Перейти до меню',
-  f_table:'Столик', f_type:'Спосіб замовлення',ot_delivery:'Доставка додому',ot_instore:'У закладі',
-  f_pay:'Спосіб оплати',f_pay_cash:'Готівкою',f_pay_card:'Карткою',f_pay_split:'50% готівкою + 50% карткою',
-  pay_ttl:'Умови оплати',pay_dep:'Передоплата 50 % від загальної вартості сплачується банківським переказом при підтвердженні замовлення. Решта 50 % — при отриманні.',pay_acc:'Рахунок',
-  f_submit:'Замовити',f_redirecting:'Перенаправлення на оплату...',f_ok:'Дякуємо! Ваше замовлення прийнято.',f_err:'Помилка. Спробуйте ще раз або зателефонуйте.',
-  ft_nav:'Навігація',ft_con:'Контакт',rights:'Всі права захищені.'},
 en:{nav_home:'Home',nav_menu:'Menu',nav_about:'About',nav_del:'Delivery',nav_con:'Contact',tagline:'Celebrate Every Day',
   del_lbl:'Fast & Convenient',del_ttl:'Delivery',
   dh_ttl:'We Deliver Right to You',dh_sub:'Order by phone or email — we\'ll deliver fresh desserts to your home',
@@ -538,10 +520,10 @@ en:{nav_home:'Home',nav_menu:'Menu',nav_about:'About',nav_del:'Delivery',nav_con
   ft_nav:'Navigation',ft_con:'Contact',rights:'All rights reserved.'}
 };
 
-let lang=localStorage.getItem('cakeme_lang')||'cs';
+let lang=localStorage.getItem('cakeme_lang')||'cs'; if(lang==='uk') lang='cs';
 function t(k){ return T[lang][k]||k; }
 function applyLang(){
-  document.documentElement.lang=lang==='uk'?'uk':lang==='en'?'en':'cs';
+  document.documentElement.lang=lang==='en'?'en':'cs';
   document.querySelectorAll('[data-k]').forEach(el=>{const val=t(el.dataset.k);if(val)el.textContent=val;});
   const pi=document.getElementById('phoneInput');
   if(pi){const isDelivery=document.querySelector('.ord-type-btn.on').dataset.type==='delivery';pi.placeholder=isDelivery?'':t('f_phone_opt');pi.required=isDelivery;}
@@ -672,7 +654,7 @@ document.getElementById('orderForm').addEventListener('submit',async function(e)
     payload.total_czk=cart.reduce((s,c)=>s+c.price*c.qty,0);
     if(!payload.total_czk){
       msg.className='ord-msg err'; msg.style.cssText='';
-      msg.textContent={cs:'Košík je prázdný.',uk:'Кошик порожній.',en:'Cart is empty.'}[lang]||'Cart is empty.';
+      msg.textContent={cs:'Košík je prázdný.',en:'Cart is empty.'}[lang]||'Cart is empty.';
       btn.disabled=false; btn.textContent=orig;
       return;
     }

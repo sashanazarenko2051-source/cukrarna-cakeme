@@ -24,7 +24,7 @@
   <p id="msg">Ověřujeme platbu…</p>
 </div>
 <script>
-const lang = localStorage.getItem('cakeme_lang') || 'cs';
+const lang = localStorage.getItem('cakeme_lang')==='en' ? 'en' : 'cs';
 const T = {
   cs: {
     verifying: 'Ověřujeme platbu…',
@@ -36,17 +36,6 @@ const T = {
     fail_title: 'Platba nebyla potvrzena',
     fail_body: 'Zkuste obnovit stránku nebo nás kontaktujte.',
     retry: 'Zkusit znovu',
-  },
-  uk: {
-    verifying: 'Перевіряємо оплату…',
-    ok_icon: '🎂',
-    ok_title: 'Оплату прийнято!',
-    ok_body: 'Завдаток 50% успішно оплачено. Ми зв\'яжемося з вами найближчим часом для підтвердження замовлення.',
-    home: '← На головну',
-    fail_icon: '⚠️',
-    fail_title: 'Оплату не підтверджено',
-    fail_body: 'Спробуйте оновити сторінку або зв\'яжіться з нами.',
-    retry: 'Спробувати ще',
   },
   en: {
     verifying: 'Verifying payment…',

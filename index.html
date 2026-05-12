@@ -176,7 +176,6 @@ footer{background:#070707;border-top:1px solid var(--bdr);padding:52px 0 28px}
     <div class="nav-right">
       <div class="langs" translate="no">
         <button class="lang-btn" data-l="cs" translate="no"><span class="flag">🇨🇿</span><span class="lname">Česky</span></button>
-        <button class="lang-btn" data-l="uk" translate="no"><span class="flag">🇺🇦</span><span class="lname">Укр</span></button>
         <button class="lang-btn" data-l="en" translate="no"><span class="flag">🇬🇧</span><span class="lname">EN</span></button>
       </div>
       <button class="burger" id="burgerBtn" aria-label="Menu">
@@ -295,16 +294,15 @@ footer{background:#070707;border-top:1px solid var(--bdr);padding:52px 0 28px}
 <script>
 const T={
 cs:{nav_home:'Domů',nav_menu:'Menu',nav_about:'O nás',nav_del:'Doručení',nav_con:'Kontakt',tagline:'Oslavte každý den',hero_sub:'Prémiová cukrárna',btn_menu:'Prohlédnout menu',btn_del:'Objednat doručení',btn_call:'Zavolat',scroll:'Scroll',open:'Otevřeno',days:'Po — Ne',ft_nav:'Navigace',ft_con:'Kontakt',rights:'Všechna práva vyhrazena.'},
-uk:{nav_home:'Головна',nav_menu:'Меню',nav_about:'Про нас',nav_del:'Доставка',nav_con:'Контакт',tagline:'Святкуйте кожен день',hero_sub:'Преміальна кондитерська',btn_menu:'Переглянути меню',btn_del:'Замовити доставку',btn_call:'Зателефонувати',scroll:'Гортати',open:'Відкрито',days:'Пн — Нд',ft_nav:'Навігація',ft_con:'Контакт',rights:'Всі права захищені.'},
 en:{nav_home:'Home',nav_menu:'Menu',nav_about:'About',nav_del:'Delivery',nav_con:'Contact',tagline:'Celebrate Every Day',hero_sub:'Premium Patisserie',btn_menu:'View Menu',btn_del:'Order Delivery',btn_call:'Call Us',scroll:'Scroll',open:'Open',days:'Mon — Sun',ft_nav:'Navigation',ft_con:'Contact',rights:'All rights reserved.'}
 };
 
-let lang = localStorage.getItem('cakeme_lang') || 'cs';
+let lang = localStorage.getItem('cakeme_lang') || 'cs'; if(lang==='uk') lang='cs';
 
 function t(k){ return T[lang][k] || k; }
 
 function applyLang(){
-  document.documentElement.lang = lang==='uk'?'uk':lang==='en'?'en':'cs';
+  document.documentElement.lang = lang==='en'?'en':'cs';
   document.querySelectorAll('[data-k]').forEach(el=>{
     const val=t(el.dataset.k); if(val) el.textContent=val;
   });

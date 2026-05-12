@@ -209,7 +209,6 @@ footer{background:#070707;border-top:1px solid var(--bdr);padding:52px 0 28px}
     <div class="nav-right">
       <div class="langs" translate="no">
         <button class="lang-btn" data-l="cs" translate="no"><span class="flag">🇨🇿</span><span class="lname">Česky</span></button>
-        <button class="lang-btn" data-l="uk" translate="no"><span class="flag">🇺🇦</span><span class="lname">Укр</span></button>
         <button class="lang-btn" data-l="en" translate="no"><span class="flag">🇬🇧</span><span class="lname">EN</span></button>
       </div>
       <button class="cart-btn" id="cartBtn" title="Košík">
@@ -332,7 +331,6 @@ footer{background:#070707;border-top:1px solid var(--bdr);padding:52px 0 28px}
 <script>
 const T={
 cs:{nav_home:'Domů',nav_menu:'Menu',nav_about:'O nás',nav_del:'Doručení',nav_con:'Kontakt',tagline:'Oslavte každý den',menu_lbl:'Naše nabídka',menu_ttl:'Menu',t_all:'Vše',t_cakes:'Dorty',t_des:'Dezerty',t_drk:'Nápoje',t_fav:'Oblíbené',t_celeb:'Slavnostní dorty',celeb_h:'Slavnostní & narozeninové dorty',celeb_warn:'Objednávky přijímáme minimálně 14 dní předem',celeb_p1:'Připravíme dort přesně podle vašich přání — narozeniny, svatba, výročí nebo firemní akce. Zvolte design, chuť a velikost.',celeb_p2:'Pro objednávku nás prosím kontaktujte telefonicky nebo e-mailem.',cart_add:'Do košíku',cart_ttl:'Košík',cart_empty:'Košík je prázdný',cart_total:'Celkem',cart_go:'Objednat s doručením',ft_nav:'Navigace',ft_con:'Kontakt',rights:'Všechna práva vyhrazena.'},
-uk:{nav_home:'Головна',nav_menu:'Меню',nav_about:'Про нас',nav_del:'Доставка',nav_con:'Контакт',tagline:'Святкуйте кожен день',menu_lbl:'Наша пропозиція',menu_ttl:'Меню',t_all:'Все',t_cakes:'Торти',t_des:'Десерти',t_drk:'Напої',t_fav:'Улюблені',t_celeb:'Святкові торти',celeb_h:'Святкові та весільні торти',celeb_warn:'Замовлення приймаємо мінімум за 2 тижні',celeb_p1:'Приготуємо торт за вашими побажаннями — день народження, весілля, ювілей або корпоратив. Оберіть дизайн, смак та розмір.',celeb_p2:'Для замовлення зв\'яжіться з нами телефоном або поштою.',cart_add:'До кошика',cart_ttl:'Кошик',cart_empty:'Кошик порожній',cart_total:'Разом',cart_go:'Замовити з доставкою',ft_nav:'Навігація',ft_con:'Контакт',rights:'Всі права захищені.'},
 en:{nav_home:'Home',nav_menu:'Menu',nav_about:'About',nav_del:'Delivery',nav_con:'Contact',tagline:'Celebrate Every Day',menu_lbl:'Our Offerings',menu_ttl:'Menu',t_all:'All',t_cakes:'Cakes',t_des:'Desserts',t_drk:'Drinks',t_fav:'Favorites',t_celeb:'Celebration Cakes',celeb_h:'Wedding & Celebration Cakes',celeb_warn:'Orders accepted minimum 2 weeks in advance',celeb_p1:'We\'ll create a cake tailored to your wishes — birthdays, weddings, anniversaries or corporate events. Choose the design, flavour and size.',celeb_p2:'To place an order, please contact us by phone or email.',cart_add:'Add to Cart',cart_ttl:'Cart',cart_empty:'Your cart is empty',cart_total:'Total',cart_go:'Order with Delivery',ft_nav:'Navigation',ft_con:'Contact',rights:'All rights reserved.'}
 };
 
@@ -450,7 +448,7 @@ let ITEMS=[
    desc:{cs:'Ovocný nápoj',uk:'Фруктовий напій',en:'Fruit drink'}},
 ];
 
-let lang=localStorage.getItem('cakeme_lang')||'cs';
+let lang=localStorage.getItem('cakeme_lang')||'cs'; if(lang==='uk') lang='cs';
 let tab='all';
 const selectedSizes={};
 
@@ -465,7 +463,7 @@ function selectSize(gi,si){
 }
 
 function applyLang(){
-  document.documentElement.lang=lang==='uk'?'uk':lang==='en'?'en':'cs';
+  document.documentElement.lang=lang==='en'?'en':'cs';
   document.querySelectorAll('[data-k]').forEach(el=>{
     const val=t(el.dataset.k); if(val) el.textContent=val;
   });

@@ -155,7 +155,6 @@ footer{background:#070707;border-top:1px solid var(--bdr);padding:52px 0 28px}
     <div class="nav-right">
       <div class="langs" translate="no">
         <button class="lang-btn" data-l="cs" translate="no"><span class="flag">🇨🇿</span><span class="lname">Česky</span></button>
-        <button class="lang-btn" data-l="uk" translate="no"><span class="flag">🇺🇦</span><span class="lname">Укр</span></button>
         <button class="lang-btn" data-l="en" translate="no"><span class="flag">🇬🇧</span><span class="lname">EN</span></button>
       </div>
       <button class="burger" id="burgerBtn" aria-label="Menu">
@@ -276,15 +275,6 @@ cs:{nav_home:'Domů',nav_menu:'Menu',nav_about:'O nás',nav_del:'Doručení',nav
   f3t:'Individuální přístup',f3d:'Dorty na míru pro každou příležitost',
   f4t:'Rozvoz domů',f4d:'Doručíme přímo k vašim dveřím',
   ft_nav:'Navigace',ft_con:'Kontakt',rights:'Všechna práva vyhrazena.'},
-uk:{nav_home:'Головна',nav_menu:'Меню',nav_about:'Про нас',nav_del:'Доставка',nav_con:'Контакт',tagline:'Святкуйте кожен день',
-  ab_lbl:'Наша історія',ab_ttl:'Про нас',years:'Рік досвіду',
-  ab_p1:'CakeMe — преміальна кондитерська та кав\'ярня в серці Праги 10. Ми вважаємо, що кожен момент заслуговує бути відзначений найкращим десертом.',
-  ab_p2:'Наші торти та десерти виготовлені з найякісніших інгредієнтів, з любов\'ю та ретельністю, яку ви оціните з кожним шматочком.',
-  f1t:'Преміальні інгредієнти',f1d:'Свіжі продукти від місцевих постачальників',
-  f2t:'Ручна робота',f2d:'Кожен торт виготовлений з любов\'ю та турботою',
-  f3t:'Індивідуальний підхід',f3d:'Торти на замовлення для будь-якого приводу',
-  f4t:'Доставка додому',f4d:'Доставимо прямо до ваших дверей',
-  ft_nav:'Навігація',ft_con:'Контакт',rights:'Всі права захищені.'},
 en:{nav_home:'Home',nav_menu:'Menu',nav_about:'About',nav_del:'Delivery',nav_con:'Contact',tagline:'Celebrate Every Day',
   ab_lbl:'Our Story',ab_ttl:'About Us',years:'Year of Experience',
   ab_p1:'CakeMe is a premium patisserie and café in the heart of Praha 10. We believe every moment deserves to be celebrated with the finest pastry.',
@@ -296,10 +286,10 @@ en:{nav_home:'Home',nav_menu:'Menu',nav_about:'About',nav_del:'Delivery',nav_con
   ft_nav:'Navigation',ft_con:'Contact',rights:'All rights reserved.'}
 };
 
-let lang=localStorage.getItem('cakeme_lang')||'cs';
+let lang=localStorage.getItem('cakeme_lang')||'cs'; if(lang==='uk') lang='cs';
 function t(k){ return T[lang][k]||k; }
 function applyLang(){
-  document.documentElement.lang=lang==='uk'?'uk':lang==='en'?'en':'cs';
+  document.documentElement.lang=lang==='en'?'en':'cs';
   document.querySelectorAll('[data-k]').forEach(el=>{const val=t(el.dataset.k);if(val)el.textContent=val;});
   setTimeout(()=>{document.querySelectorAll('[data-k]').forEach(el=>{const val=t(el.dataset.k);if(val)el.textContent=val;});},100);
 }

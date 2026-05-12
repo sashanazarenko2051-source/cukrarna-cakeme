@@ -30,10 +30,9 @@
   </div>
 </div>
 <script>
-const lang = localStorage.getItem('cakeme_lang') || 'cs';
+const lang = localStorage.getItem('cakeme_lang')==='en' ? 'en' : 'cs';
 const T = {
   cs: { ico:'❌', title:'Platba zrušena', body:'Platba nebyla dokončena. Vaše objednávka nebyla potvrzena. Zkuste to znovu nebo vyberte jiný způsob platby.', retry:'← Zkusit znovu', home:'Hlavní stránka' },
-  uk: { ico:'❌', title:'Оплату скасовано', body:'Оплату не завершено. Ваше замовлення не підтверджено. Спробуйте ще раз або оберіть інший спосіб оплати.', retry:'← Спробувати знову', home:'Головна' },
   en: { ico:'❌', title:'Payment cancelled', body:'Your payment was not completed. Your order has not been confirmed. Please try again or choose a different payment method.', retry:'← Try again', home:'Home' }
 };
 const tx = T[lang] || T.cs;

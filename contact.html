@@ -153,7 +153,6 @@ footer{background:#070707;border-top:1px solid var(--bdr);padding:52px 0 28px}
     <div class="nav-right">
       <div class="langs" translate="no">
         <button class="lang-btn" data-l="cs" translate="no"><span class="flag">🇨🇿</span><span class="lname">Česky</span></button>
-        <button class="lang-btn" data-l="uk" translate="no"><span class="flag">🇺🇦</span><span class="lname">Укр</span></button>
         <button class="lang-btn" data-l="en" translate="no"><span class="flag">🇬🇧</span><span class="lname">EN</span></button>
       </div>
       <button class="burger" id="burgerBtn" aria-label="Menu">
@@ -318,20 +317,16 @@ cs:{nav_home:'Domů',nav_menu:'Menu',nav_about:'O nás',nav_del:'Doručení',nav
   ct_lbl:'Jak nás najít',ct_ttl:'Kontakt',ct_h:'Informace',
   addr_l:'Adresa',phone_l:'Telefon',phone_work:'pracovní',email_l:'E-mail',hrs_l:'Otevírací doba',mon_sun:'Pondělí — Neděle',
   ft_nav:'Navigace',ft_con:'Kontakt',rights:'Všechna práva vyhrazena.'},
-uk:{nav_home:'Головна',nav_menu:'Меню',nav_about:'Про нас',nav_del:'Доставка',nav_con:'Контакт',tagline:'Святкуйте кожен день',
-  ct_lbl:'Як нас знайти',ct_ttl:'Контакт',ct_h:'Інформація',
-  addr_l:'Адреса',phone_l:'Телефон',phone_work:'робочий',email_l:'E-mail',hrs_l:'Години роботи',mon_sun:'Понеділок — Неділя',
-  ft_nav:'Навігація',ft_con:'Контакт',rights:'Всі права захищені.'},
 en:{nav_home:'Home',nav_menu:'Menu',nav_about:'About',nav_del:'Delivery',nav_con:'Contact',tagline:'Celebrate Every Day',
   ct_lbl:'How to Find Us',ct_ttl:'Contact',ct_h:'Information',
   addr_l:'Address',phone_l:'Phone',phone_work:'work',email_l:'Email',hrs_l:'Opening Hours',mon_sun:'Monday — Sunday',
   ft_nav:'Navigation',ft_con:'Contact',rights:'All rights reserved.'}
 };
 
-let lang=localStorage.getItem('cakeme_lang')||'cs';
+let lang=localStorage.getItem('cakeme_lang')||'cs'; if(lang==='uk') lang='cs';
 function t(k){ return T[lang][k]||k; }
 function applyLang(){
-  document.documentElement.lang=lang==='uk'?'uk':lang==='en'?'en':'cs';
+  document.documentElement.lang=lang==='en'?'en':'cs';
   document.querySelectorAll('[data-k]').forEach(el=>{const val=t(el.dataset.k);if(val)el.textContent=val;});
   setTimeout(()=>{document.querySelectorAll('[data-k]').forEach(el=>{const val=t(el.dataset.k);if(val)el.textContent=val;});},100);
 }
