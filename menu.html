@@ -243,6 +243,7 @@ footer{background:#070707;border-top:1px solid var(--bdr);padding:52px 0 28px}
     <div class="m-tabs fi">
       <button class="m-tab on" data-tab="all"      data-k="t_all">Vše</button>
       <button class="m-tab"    data-tab="cakes"    data-k="t_cakes">Dorty</button>
+      <button class="m-tab"    data-tab="kolace"   data-k="t_kolace">Koláče</button>
       <button class="m-tab"    data-tab="desserts" data-k="t_des">Dezerty</button>
       <button class="m-tab"    data-tab="drinks"   data-k="t_drk">Nápoje</button>
       <button class="m-tab"    data-tab="fav"      data-k="t_fav">Oblíbené</button>
@@ -330,8 +331,8 @@ footer{background:#070707;border-top:1px solid var(--bdr);padding:52px 0 28px}
 
 <script>
 const T={
-cs:{nav_home:'Domů',nav_menu:'Menu',nav_about:'O nás',nav_del:'Doručení',nav_con:'Kontakt',tagline:'Oslavte každý den',menu_lbl:'Naše nabídka',menu_ttl:'Menu',t_all:'Vše',t_cakes:'Dorty',t_des:'Dezerty',t_drk:'Nápoje',t_fav:'Oblíbené',t_celeb:'Slavnostní dorty',celeb_h:'Slavnostní & narozeninové dorty',celeb_warn:'Objednávky přijímáme minimálně 14 dní předem',celeb_p1:'Připravíme dort přesně podle vašich přání — narozeniny, svatba, výročí nebo firemní akce. Zvolte design, chuť a velikost.',celeb_p2:'Pro objednávku nás prosím kontaktujte telefonicky nebo e-mailem.',cart_add:'Do košíku',cart_ttl:'Košík',cart_empty:'Košík je prázdný',cart_total:'Celkem',cart_go:'Objednat s doručením',ft_nav:'Navigace',ft_con:'Kontakt',rights:'Všechna práva vyhrazena.'},
-en:{nav_home:'Home',nav_menu:'Menu',nav_about:'About',nav_del:'Delivery',nav_con:'Contact',tagline:'Celebrate Every Day',menu_lbl:'Our Offerings',menu_ttl:'Menu',t_all:'All',t_cakes:'Cakes',t_des:'Desserts',t_drk:'Drinks',t_fav:'Favorites',t_celeb:'Celebration Cakes',celeb_h:'Wedding & Celebration Cakes',celeb_warn:'Orders accepted minimum 2 weeks in advance',celeb_p1:'We\'ll create a cake tailored to your wishes — birthdays, weddings, anniversaries or corporate events. Choose the design, flavour and size.',celeb_p2:'To place an order, please contact us by phone or email.',cart_add:'Add to Cart',cart_ttl:'Cart',cart_empty:'Your cart is empty',cart_total:'Total',cart_go:'Order with Delivery',ft_nav:'Navigation',ft_con:'Contact',rights:'All rights reserved.'}
+cs:{nav_home:'Domů',nav_menu:'Menu',nav_about:'O nás',nav_del:'Doručení',nav_con:'Kontakt',tagline:'Oslavte každý den',menu_lbl:'Naše nabídka',menu_ttl:'Menu',t_all:'Vše',t_cakes:'Dorty',t_kolace:'Koláče',t_des:'Dezerty',t_drk:'Nápoje',t_fav:'Oblíbené',t_celeb:'Slavnostní dorty',celeb_h:'Slavnostní & narozeninové dorty',celeb_warn:'Objednávky přijímáme minimálně 14 dní předem',celeb_p1:'Připravíme dort přesně podle vašich přání — narozeniny, svatba, výročí nebo firemní akce. Zvolte design, chuť a velikost.',celeb_p2:'Pro objednávku nás prosím kontaktujte telefonicky nebo e-mailem.',cart_add:'Do košíku',cart_ttl:'Košík',cart_empty:'Košík je prázdný',cart_total:'Celkem',cart_go:'Objednat s doručením',ft_nav:'Navigace',ft_con:'Kontakt',rights:'Všechna práva vyhrazena.'},
+en:{nav_home:'Home',nav_menu:'Menu',nav_about:'About',nav_del:'Delivery',nav_con:'Contact',tagline:'Celebrate Every Day',menu_lbl:'Our Offerings',menu_ttl:'Menu',t_all:'All',t_cakes:'Cakes',t_kolace:'Pastries',t_des:'Desserts',t_drk:'Drinks',t_fav:'Favorites',t_celeb:'Celebration Cakes',celeb_h:'Wedding & Celebration Cakes',celeb_warn:'Orders accepted minimum 2 weeks in advance',celeb_p1:'We\'ll create a cake tailored to your wishes — birthdays, weddings, anniversaries or corporate events. Choose the design, flavour and size.',celeb_p2:'To place an order, please contact us by phone or email.',cart_add:'Add to Cart',cart_ttl:'Cart',cart_empty:'Your cart is empty',cart_total:'Total',cart_go:'Order with Delivery',ft_nav:'Navigation',ft_con:'Contact',rights:'All rights reserved.'}
 };
 
 let ITEMS=[
@@ -339,7 +340,7 @@ let ITEMS=[
   {cat:'cakes',fav:true,sizes:[{label:'S 18cm',price:800},{label:'M 23cm',price:1200}],badge:'Bestseller',img:'https://imageproxy.wolt.com/assets/697228caf1232b338e039779',
    name:{cs:'Cheesecake',uk:'Чізкейк',en:'Cheesecake'},
    desc:{cs:'Tvaroh, zakysaná smetana, krémový sýr. Cena vč. krabice.',uk:'Сир, сметана, вершковий сир. Ціна вкл. коробку.',en:'Cottage cheese, sour cream, cream cheese. Price incl. box.'}},
-  {cat:'cakes',sizes:[{label:'M 23cm',price:950}],badge:'',img:'https://imageproxy.wolt.com/assets/697228caf1232b338e039778',
+  {cat:'kolace',sizes:[{label:'M 23cm',price:950}],badge:'',img:'https://imageproxy.wolt.com/assets/697228caf1232b338e039778',
    name:{cs:'Ořechový koláč',uk:'Горіховий пиріг',en:'Walnut Cake'},
    desc:{cs:'Linecké těsto, med, smetana, vlašské ořechy. Cena vč. krabice.',uk:'Пісочне тісто, мед, вершки, волоські горіхи. Ціна вкл. коробку.',en:'Shortcrust pastry, honey, cream, walnuts. Price incl. box.'}},
   {cat:'cakes',sizes:[{label:'XS 16cm',price:590},{label:'S 18cm',price:800},{label:'M 23cm',price:1200}],badge:'',img:'https://imageproxy.wolt.com/assets/697228caf1232b338e039772',
@@ -351,7 +352,7 @@ let ITEMS=[
   {cat:'cakes',fav:true,sizes:[{label:'M 23cm',price:1000}],badge:'',img:'https://imageproxy.wolt.com/assets/698343bca2c5decc0bfdcb6d',
    name:{cs:'Pavlova',uk:'Павлова',en:'Pavlova'},
    desc:{cs:'Lehký nadýchaný dezert ze křupavého sněhového korpusu s marshmallow vnitřkem. Cena vč. krabice.',uk:'Легкий повітряний десерт із хрусткого безе з серединкою як маршмелоу. Ціна вкл. коробку.',en:'Light airy dessert with crispy meringue and marshmallow centre. Price incl. box.'}},
-  {cat:'cakes',sizes:[{label:'M 23cm',price:950}],badge:'',img:'https://imageproxy.wolt.com/assets/69997daf3eb3341f036ea0ae',
+  {cat:'kolace',sizes:[{label:'M 23cm',price:950}],badge:'',img:'https://imageproxy.wolt.com/assets/69997daf3eb3341f036ea0ae',
    name:{cs:'Citronový koláč',uk:'Лимонний пиріг',en:'Lemon Cake'},
    desc:{cs:'Křehké máslové těsto, jemný citronový krém, sněhová vrstva zapečená dozlatova. Cena vč. krabice.',uk:'Крихке вершкове тісто, ніжний лимонний крем, запечений білковий шар. Ціна вкл. коробку.',en:'Crispy butter pastry, delicate lemon cream, golden meringue topping. Price incl. box.'}},
   {cat:'cakes',sizes:[{label:'XS 16cm',price:590},{label:'S 18cm',price:800},{label:'M 23cm',price:1200}],badge:'',img:'https://imageproxy.wolt.com/assets/69de33ac73316796ef90e4cb',

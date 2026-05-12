@@ -403,6 +403,7 @@ body{font-family:'Raleway',sans-serif;background:var(--bg0);color:var(--tx0)}
             <select id="fCat">
               <option value="desserts" data-k="adm_cat_desserts">Dezerty</option>
               <option value="cakes" data-k="adm_cat_cakes">Dorty</option>
+              <option value="kolace" data-k="adm_cat_kolace">Koláče</option>
               <option value="drinks" data-k="adm_cat_drinks">Nápoje</option>
             </select>
           </div>
@@ -480,6 +481,7 @@ body{font-family:'Raleway',sans-serif;background:var(--bg0);color:var(--tx0)}
         <div class="ci-filters">
           <button class="ci-flt on" data-mf="all" data-k="adm_filter_all">Vše</button>
           <button class="ci-flt" data-mf="cakes" data-k="adm_cat_cakes">Dorty</button>
+          <button class="ci-flt" data-mf="kolace" data-k="adm_cat_kolace">Koláče</button>
           <button class="ci-flt" data-mf="desserts" data-k="adm_cat_desserts">Dezerty</button>
           <button class="ci-flt" data-mf="drinks" data-k="adm_cat_drinks">Nápoje</button>
           <button class="ci-flt" data-mf="custom" data-k="adm_custom_only">Vlastní</button>
@@ -562,11 +564,11 @@ let analyticsPeriod = 0;
 
 const STATIC_ITEMS = [
   {cat:'cakes',sizes:[{label:'S 18cm',price:800},{label:'M 23cm',price:1200}],badge:'Bestseller',img:'https://imageproxy.wolt.com/assets/697228caf1232b338e039779',name:{cs:'Cheesecake',uk:'Чізкейк',en:'Cheesecake'},desc:{cs:'Tvaroh, zakysaná smetana, krémový sýr.',uk:'Сир, сметана, вершковий сир.',en:'Cottage cheese, sour cream, cream cheese.'}},
-  {cat:'cakes',sizes:[{label:'M 23cm',price:950}],badge:'',img:'https://imageproxy.wolt.com/assets/697228caf1232b338e039778',name:{cs:'Ořechový koláč',uk:'Горіховий пиріг',en:'Walnut Cake'},desc:{cs:'Linecké těsto, med, smetana, vlašské ořechy.',uk:'Пісочне тісто, мед, вершки, волоські горіхи.',en:'Shortcrust pastry, honey, cream, walnuts.'}},
+  {cat:'kolace',sizes:[{label:'M 23cm',price:950}],badge:'',img:'https://imageproxy.wolt.com/assets/697228caf1232b338e039778',name:{cs:'Ořechový koláč',uk:'Горіховий пиріг',en:'Walnut Cake'},desc:{cs:'Linecké těsto, med, smetana, vlašské ořechy.',uk:'Пісочне тісто, мед, вершки, волоські горіхи.',en:'Shortcrust pastry, honey, cream, walnuts.'}},
   {cat:'cakes',sizes:[{label:'XS 16cm',price:590},{label:'S 18cm',price:800},{label:'M 23cm',price:1200}],badge:'',img:'https://imageproxy.wolt.com/assets/697228caf1232b338e039772',name:{cs:'Ovocný světlý',uk:'Фруктовий торт',en:'Fruit Cake'},desc:{cs:'Tvaroh, mascarpone, smetana, jahody, maliny, borůvky.',uk:'Сир, маскарпоне, вершки, полуниця, малина, чорниця.',en:'Cottage cheese, mascarpone, cream, strawberries, raspberries, blueberries.'}},
   {cat:'cakes',sizes:[{label:'XS 16cm',price:590},{label:'S 18cm',price:800},{label:'M 23cm',price:1200}],badge:'',img:'https://imageproxy.wolt.com/assets/697f1db5789a4f50f68328fd',name:{cs:'Arašídový dort',uk:'Арахісовий торт',en:'Peanut Butter Cake'},desc:{cs:'Čokoládový piškot s krémem ze smetanového sýra a arašídového másla.',uk:'Шоколадний бісквіт з кремом зі вершкового сиру та арахісового масла.',en:'Chocolate sponge with cream cheese and peanut butter frosting.'}},
   {cat:'cakes',sizes:[{label:'M 23cm',price:1000}],badge:'',img:'https://imageproxy.wolt.com/assets/698343bca2c5decc0bfdcb6d',name:{cs:'Pavlova',uk:'Павлова',en:'Pavlova'},desc:{cs:'Křupavý sněhový korpus s marshmallow vnitřkem.',uk:'Хрустке безе з серединкою як маршмелоу.',en:'Crispy meringue with marshmallow centre.'}},
-  {cat:'cakes',sizes:[{label:'M 23cm',price:950}],badge:'',img:'https://imageproxy.wolt.com/assets/69997daf3eb3341f036ea0ae',name:{cs:'Citronový koláč',uk:'Лимонний пиріг',en:'Lemon Cake'},desc:{cs:'Křehké máslové těsto, jemný citronový krém, sněhová vrstva.',uk:'Крихке вершкове тісто, ніжний лимонний крем.',en:'Crispy butter pastry, delicate lemon cream, golden meringue.'}},
+  {cat:'kolace',sizes:[{label:'M 23cm',price:950}],badge:'',img:'https://imageproxy.wolt.com/assets/69997daf3eb3341f036ea0ae',name:{cs:'Citronový koláč',uk:'Лимонний пиріг',en:'Lemon Cake'},desc:{cs:'Křehké máslové těsto, jemný citronový krém, sněhová vrstva.',uk:'Крихке вершкове тісто, ніжний лимонний крем.',en:'Crispy butter pastry, delicate lemon cream, golden meringue.'}},
   {cat:'cakes',sizes:[{label:'XS 16cm',price:590},{label:'S 18cm',price:800},{label:'M 23cm',price:1200}],badge:'',img:'https://imageproxy.wolt.com/assets/69de33ac73316796ef90e4cb',name:{cs:'Citronový s malinami',uk:'Лимонний з малиною',en:'Lemon Raspberry Cake'},desc:{cs:'Citronový koláč s čerstvými malinami.',uk:'Лимонний пиріг зі свіжою малиною.',en:'Lemon cake with fresh raspberries.'}},
   {cat:'cakes',sizes:[{label:'XS 16cm',price:590},{label:'S 18cm',price:800},{label:'M 23cm',price:1200}],badge:'Nové',img:'https://imageproxy.wolt.com/assets/69f04c2c463746eef18c5ffd',name:{cs:'Mango-Maracuja',uk:'Манго-Маракуя',en:'Mango-Passionfruit'},desc:{cs:'Vanilkový piškot, mascarpone, tvaroh, smetana, kousky manga a maracuji.',uk:'Ванільний бісквіт, маскарпоне, сир, вершки, шматочки манго та маракуї.',en:'Vanilla sponge, mascarpone, cottage cheese, cream, mango & passionfruit.'}},
   {cat:'cakes',sizes:[{label:'XS 16cm',price:650},{label:'S 18cm',price:874},{label:'M 23cm',price:1300}],badge:'Nové',img:'https://imageproxy.wolt.com/assets/697228caf1232b338e039784',name:{cs:'Pistácie-Malina',uk:'Фісташка-малина',en:'Pistachio-Raspberry'},desc:{cs:'Jemný piškot s pistáciovou pěnou a čerstvými malinami.',uk:'Ніжний бісквіт з фісташковим мусом та свіжою малиною.',en:'Delicate sponge with pistachio mousse and fresh raspberries.'}},
@@ -620,7 +622,7 @@ const TA = {
     adm_img_remove:'✕ Odebrat obrázek', adm_card_prev:'Náhled karty',
     adm_cart_btn:'Do košíku', adm_add_btn:'+ Přidat',
     adm_custom_title:'Vlastní položky', adm_export:'↓ Exportovat JSON',
-    adm_cat_desserts:'Dezerty', adm_cat_cakes:'Dorty', adm_cat_drinks:'Nápoje',
+    adm_cat_desserts:'Dezerty', adm_cat_cakes:'Dorty', adm_cat_kolace:'Koláče', adm_cat_drinks:'Nápoje',
     adm_loading:'Načítání…', adm_no_custom:'Žádné vlastní položky',
     adm_conn_err:'Chyba připojení k serveru', adm_added_ok:'✓ Položka přidána do menu!',
     adm_server_err:'Chyba serveru', adm_no_connect:'Nelze se připojit k serveru',
@@ -662,7 +664,7 @@ const TA = {
     adm_img_remove:'✕ Remove image', adm_card_prev:'Card preview',
     adm_cart_btn:'Add to cart', adm_add_btn:'+ Add',
     adm_custom_title:'Custom items', adm_export:'↓ Export JSON',
-    adm_cat_desserts:'Desserts', adm_cat_cakes:'Cakes', adm_cat_drinks:'Drinks',
+    adm_cat_desserts:'Desserts', adm_cat_cakes:'Cakes', adm_cat_kolace:'Pastries', adm_cat_drinks:'Drinks',
     adm_loading:'Loading…', adm_no_custom:'No custom items',
     adm_conn_err:'Server connection error', adm_added_ok:'✓ Item added to menu!',
     adm_server_err:'Server error', adm_no_connect:'Cannot connect to server',
