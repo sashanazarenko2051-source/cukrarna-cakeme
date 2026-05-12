@@ -919,8 +919,8 @@ async function _pollNewOrders(){
   }catch(e){}
 }
 
-setInterval(_pollNewOrders, 20000);
-setTimeout(_pollNewOrders, 4000);
+setInterval(_pollNewOrders, 8000);
+setTimeout(_pollNewOrders, 3000);
 
 /* ── Main nav ── */
 document.querySelectorAll('.amn').forEach(btn => btn.addEventListener('click', ()=>{
