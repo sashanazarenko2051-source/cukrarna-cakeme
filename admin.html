@@ -127,9 +127,12 @@ body{font-family:'Raleway',sans-serif;background:var(--bg0);color:var(--tx0)}
 .add-msg.ok{color:#88cc88}
 .add-msg.err{color:#e08080}
 .sizes-list{display:flex;flex-direction:column;gap:6px;margin-bottom:8px}
-.size-row{display:flex;align-items:center;gap:8px;background:var(--bg3);border:1px solid var(--bdr);padding:8px 12px;font-size:.82rem}
-.size-row-lbl{flex:1;color:var(--tx0)}
-.size-row-price{color:var(--gold);font-weight:600;white-space:nowrap;margin-right:4px}
+.size-row{display:flex;align-items:center;gap:8px;background:var(--bg3);border:1px solid var(--bdr);padding:6px 10px;font-size:.82rem}
+.size-row-input-lbl{flex:1;background:transparent;border:none;border-bottom:1px solid var(--bdr);color:var(--tx0);padding:3px 4px;font:.82rem 'Raleway',sans-serif;outline:none;transition:.2s;min-width:0}
+.size-row-input-lbl:focus{border-bottom-color:var(--gold)}
+.size-row-input-price{width:64px;background:transparent;border:none;border-bottom:1px solid var(--bdr);color:var(--gold);padding:3px 4px;font:.82rem 'Raleway',sans-serif;font-weight:600;outline:none;transition:.2s;text-align:right}
+.size-row-input-price:focus{border-bottom-color:var(--gold)}
+.size-row-unit{color:var(--tx2);font-size:.75rem;white-space:nowrap}
 .size-row-del{background:transparent;border:none;color:var(--tx2);cursor:pointer;font-size:1.1rem;padding:0 4px;line-height:1;transition:.2s}
 .size-row-del:hover{color:#e08080}
 .size-add-row{display:grid;grid-template-columns:1fr 90px auto;gap:8px;align-items:end}
@@ -1159,8 +1162,9 @@ function renderSizesList(){
   if(!formSizes.length){ el.innerHTML=''; return; }
   el.innerHTML = formSizes.map((sz,i)=>`
     <div class="size-row">
-      <span class="size-row-lbl">${sz.label}</span>
-      <span class="size-row-price">${sz.price} Kč</span>
+      <input class="size-row-input-lbl" value="${sz.label.replace(/"/g,'&quot;')}" placeholder="Název" onchange="formSizes[${i}].label=this.value.trim()">
+      <input class="size-row-input-price" type="number" min="1" value="${sz.price}" placeholder="Kč" onchange="formSizes[${i}].price=parseInt(this.value)||formSizes[${i}].price">
+      <span class="size-row-unit">Kč</span>
       <button class="size-row-del" type="button" onclick="removeSize(${i})">×</button>
     </div>`).join('');
 }
