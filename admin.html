@@ -322,7 +322,6 @@ body{font-family:'Raleway',sans-serif;background:var(--bg0);color:var(--tx0)}
     <div class="adm-hdr-right">
       <div class="adm-langs">
         <button class="adm-lang on" data-al="cs">🇨🇿 CZ</button>
-        <button class="adm-lang" data-al="uk">🇺🇦 UA</button>
         <button class="adm-lang" data-al="en">🇬🇧 EN</button>
       </div>
       <button class="adm-btn" id="refreshBtn" data-k="adm_refresh">↻ Obnovit</button>
@@ -569,7 +568,7 @@ const STATIC_ITEMS = [
 ];
 
 /* ── i18n ── */
-let adminLang = localStorage.getItem('cm_admin_lang') || 'cs';
+let adminLang = localStorage.getItem('cm_admin_lang') || 'cs'; if(adminLang==='uk') adminLang='cs';
 
 const TA = {
   cs:{
@@ -613,48 +612,6 @@ const TA = {
     adm_an_items:'Pozice', adm_an_avg:'Průměr (Kč)',
     adm_an_product:'Produkt', adm_an_qty:'Počet', adm_an_rev:'Příjem', adm_an_share:'Podíl',
     adm_an_no_data:'Žádná data pro toto období.',
-  },
-  uk:{
-    adm_panel:'Адмін Панель', adm_login:'Увійти', adm_refresh:'↻ Оновити', adm_logout:'Вийти',
-    adm_orders:'Замовлення', adm_menu:'Меню',
-    adm_stat_new:'Нові', adm_stat_today:'Сьогодні', adm_stat_total:'Всього',
-    adm_filter_all:'Всі', adm_filter_new:'Нові', adm_filter_prog:'Прийняті', adm_filter_done:'Готові',
-    adm_filter_fav:'❤ Улюблені',
-    adm_clear_done:'Видалити готові',
-    adm_add_title:'Додати позицію до меню',
-    adm_cat_lbl:'Категорія *', adm_price_lbl:'Ціна * (напр. 133 Kč)',
-    adm_name_cs_lbl:'Назва CZ *', adm_name_uk_lbl:'Назва UA', adm_name_en_lbl:"Ім'я EN",
-    adm_badge_lbl:'Значок (Нове, Bestseller…)',
-    adm_desc_cs_lbl:'Опис CZ', adm_desc_uk_lbl:'Опис UA', adm_desc_en_lbl:'Опис EN',
-    adm_img_lbl:'Зображення', adm_img_click:'Натисніть або перетягніть файл',
-    adm_img_hint:'JPG, PNG, WebP · макс 3 МБ · стискається автоматично',
-    adm_img_remove:'✕ Видалити зображення', adm_card_prev:'Попередній перегляд',
-    adm_cart_btn:'До кошика', adm_add_btn:'+ Додати',
-    adm_custom_title:'Власні позиції', adm_export:'↓ Експорт JSON',
-    adm_cat_desserts:'Десерти', adm_cat_cakes:'Торти', adm_cat_drinks:'Напої',
-    adm_loading:'Завантаження…', adm_no_custom:'Немає власних позицій',
-    adm_conn_err:'Помилка підключення до сервера', adm_added_ok:'✓ Позицію додано до меню!',
-    adm_server_err:'Помилка сервера', adm_no_connect:'Неможливо підключитися до сервера',
-    adm_fill_req:'Заповніть назву та ціну *', adm_export_err:'Помилка експорту',
-    adm_no_orders:'Немає замовлень', adm_wrong_pwd:'Неправильний пароль', adm_rate_limit:'Забагато спроб. Спробуйте через 15 хвилин.',adm_login_err:'Помилка підключення.',
-    adm_img_big:'Файл завеликий (макс 3 МБ).', adm_session_exp:'Сесія закінчилась. Увійдіть знову.',
-    adm_del_order:'Видалити замовлення?', adm_no_done:'Немає завершених замовлень.',
-    adm_clear_confirm:'Видалити {n} завершених замовлень?', adm_del_item:'Видалити цю позицію з меню?',
-    adm_f_name:"Ім'я", adm_f_phone:'Телефон', adm_f_address:'Адреса',
-    adm_f_order:'Замовлення', adm_f_payment:'Оплата', adm_f_total:'Загальна сума',
-    adm_s_new:'Нова', adm_s_progress:'Прийнята', adm_s_done:'Готово', adm_s_paid:'✓ Оплачено 50%', adm_s_pending:'⏳ Очікує оплати',
-    adm_btn_new:'Нова', adm_btn_progress:'Прийнята', adm_btn_done:'✓ Готово', adm_btn_delete:'✕ Видалити',
-    adm_count:'{n} замовлень',
-    adm_all_items_title:'Всі позиції меню',
-    adm_edit_title:'Редагувати позицію', adm_save_btn:'✓ Зберегти зміни',
-    adm_cancel_edit:'✕ Скасувати', adm_saved_ok:'✓ Збережено!',
-    adm_custom_only:'Власні', adm_static_lbl:'База', adm_save_as_new:'зберегти як новий',
-    adm_analytics:'Аналітика',
-    adm_ap_7:'7 днів', adm_ap_30:'30 днів', adm_ap_90:'90 днів', adm_ap_all:'Всі',
-    adm_an_views:'Переглядів', adm_an_orders:'Замовлень', adm_an_revenue:'Дохід (Kč)',
-    adm_an_items:'Позицій', adm_an_avg:'Сер. чек (Kč)',
-    adm_an_product:'Товар', adm_an_qty:'Кількість', adm_an_rev:'Дохід', adm_an_share:'Частка',
-    adm_an_no_data:'Немає даних за цей період.',
   },
   en:{
     adm_panel:'Admin Panel', adm_login:'Login', adm_refresh:'↻ Refresh', adm_logout:'Logout',
