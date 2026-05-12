@@ -1162,11 +1162,15 @@ function renderSizesList(){
   if(!formSizes.length){ el.innerHTML=''; return; }
   el.innerHTML = formSizes.map((sz,i)=>`
     <div class="size-row">
-      <input class="size-row-input-lbl" value="${sz.label.replace(/"/g,'&quot;')}" placeholder="Název" onchange="formSizes[${i}].label=this.value.trim()">
-      <input class="size-row-input-price" type="number" min="1" value="${sz.price}" placeholder="Kč" onchange="formSizes[${i}].price=parseInt(this.value)||formSizes[${i}].price">
+      <input class="size-row-input-lbl" placeholder="Název" onchange="formSizes[${i}].label=this.value.trim()">
+      <input class="size-row-input-price" type="number" min="1" placeholder="Kč" onchange="formSizes[${i}].price=parseInt(this.value)||formSizes[${i}].price">
       <span class="size-row-unit">Kč</span>
       <button class="size-row-del" type="button" onclick="removeSize(${i})">×</button>
     </div>`).join('');
+  el.querySelectorAll('.size-row').forEach((row, i) => {
+    row.querySelector('.size-row-input-lbl').value   = formSizes[i].label || '';
+    row.querySelector('.size-row-input-price').value = formSizes[i].price || '';
+  });
 }
 
 function removeSize(i){
