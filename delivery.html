@@ -175,6 +175,10 @@ footer{background:#070707;border-top:1px solid var(--bdr);padding:52px 0 28px}
   .pay-row-lbl{min-width:76px}
 }
 
+@media(max-width:1100px){
+  .nav-links{gap:22px}
+  .nav-in{padding:0 20px}
+}
 /* ── RESPONSIVE ── */
 @media(max-width:1024px){
   .ft-grid{grid-template-columns:1fr 1fr}
@@ -532,7 +536,8 @@ function applyLang(){
   setTimeout(()=>{document.querySelectorAll('[data-k]').forEach(el=>{const val=t(el.dataset.k);if(val)el.textContent=val;});},100);
 }
 function initLangBtns(){document.querySelectorAll('[data-l]').forEach(b=>b.classList.toggle('on',b.dataset.l===lang));}
-window.addEventListener('scroll',()=>{document.getElementById('nav').classList.toggle('solid',window.scrollY>60);});
+document.getElementById('nav').classList.add('solid');
+window.addEventListener('scroll',()=>{document.getElementById('nav').classList.toggle('solid',window.scrollY>0);});
 document.getElementById('burgerBtn').addEventListener('click',()=>{document.getElementById('mobMenu').classList.add('open');document.body.style.overflow='hidden';});
 document.getElementById('mobClose').addEventListener('click',()=>{document.getElementById('mobMenu').classList.remove('open');document.body.style.overflow='';});
 document.querySelectorAll('.mob-lnk').forEach(a=>a.addEventListener('click',()=>{document.getElementById('mobMenu').classList.remove('open');document.body.style.overflow='';}));
@@ -700,3 +705,5 @@ initLangBtns();applyLang();initFI();
 </script>
 </body>
 </html>
+
+
