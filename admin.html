@@ -126,6 +126,17 @@ body{font-family:'Raleway',sans-serif;background:var(--bg0);color:var(--tx0)}
 .add-msg{text-align:center;font-size:.8rem;min-height:20px;padding:6px}
 .add-msg.ok{color:#88cc88}
 .add-msg.err{color:#e08080}
+.sizes-list{display:flex;flex-direction:column;gap:6px;margin-bottom:8px}
+.size-row{display:flex;align-items:center;gap:8px;background:var(--bg3);border:1px solid var(--bdr);padding:8px 12px;font-size:.82rem}
+.size-row-lbl{flex:1;color:var(--tx0)}
+.size-row-price{color:var(--gold);font-weight:600;white-space:nowrap;margin-right:4px}
+.size-row-del{background:transparent;border:none;color:var(--tx2);cursor:pointer;font-size:1.1rem;padding:0 4px;line-height:1;transition:.2s}
+.size-row-del:hover{color:#e08080}
+.size-add-row{display:grid;grid-template-columns:1fr 90px auto;gap:8px;align-items:end}
+.size-add-row input{background:var(--bg3);border:1px solid var(--bdr);color:var(--tx0);padding:9px 12px;font:.82rem 'Raleway',sans-serif;outline:none;transition:.25s;width:100%}
+.size-add-row input:focus{border-color:var(--gold)}
+.btn-add-size{background:transparent;border:1px solid var(--gold-d);color:var(--gold);padding:9px 14px;cursor:pointer;font:.72rem 'Raleway',sans-serif;letter-spacing:1px;white-space:nowrap;transition:.25s}
+.btn-add-size:hover{background:rgba(201,169,110,.1)}
 .ci-card{display:flex;align-items:center;gap:12px;padding:12px 0;border-bottom:1px solid var(--bdr)}
 .ci-card:last-child{border-bottom:none}
 .ci-thumb{width:48px;height:48px;object-fit:cover;flex-shrink:0;background:var(--bg3)}
@@ -403,6 +414,15 @@ body{font-family:'Raleway',sans-serif;background:var(--bg0);color:var(--tx0)}
             <input type="text" id="fDescCs" placeholder="Krátký popis česky">
             <input type="hidden" id="fDescUk">
             <input type="hidden" id="fDescEn">
+          </div>
+          <div class="mai-field full">
+            <label>Velikosti / Sizes <span style="font-weight:400;color:var(--tx2)">(nepovinné — pokud jsou nastaveny, pole Cena se ignoruje)</span></label>
+            <div class="sizes-list" id="sizesList"></div>
+            <div class="size-add-row">
+              <input type="text" id="fSizeLbl" placeholder="Malý (6 porcí) / Small">
+              <input type="text" id="fSizePrice" placeholder="350">
+              <button type="button" class="btn-add-size" id="addSizeBtn">+ Přidat</button>
+            </div>
           </div>
           <div class="mai-field full">
             <label data-k="adm_img_lbl">Obrázek</label>
@@ -1093,6 +1113,8 @@ function startEditStatic(idx){
   document.getElementById('editModeBanner').textContent = '✎ ' + (item.name?.cs || '') + ' → ' + t('adm_save_as_new');
   document.getElementById('editModeBanner').classList.add('show');
   document.getElementById('cancelEditBtn').classList.add('show');
+  formSizes = Array.isArray(item.sizes) ? item.sizes.map(sz=>({label:sz.label,price:sz.price})) : [];
+  renderSizesList();
   updateCardPreview();
   document.getElementById('formPanel').scrollIntoView({behavior:'smooth', block:'start'});
 }
@@ -1123,9 +1145,40 @@ function startEdit(item){
   document.getElementById('editModeBanner').textContent = '✎ ' + (item.name?.cs || '');
   document.getElementById('editModeBanner').classList.add('show');
   document.getElementById('cancelEditBtn').classList.add('show');
+  formSizes = Array.isArray(item.sizes) ? item.sizes.map(sz=>({label:sz.label,price:sz.price})) : [];
+  renderSizesList();
   updateCardPreview();
   document.getElementById('formPanel').scrollIntoView({behavior:'smooth', block:'start'});
 }
+
+/* ── Sizes ── */
+let formSizes = [];
+
+function renderSizesList(){
+  const el = document.getElementById('sizesList');
+  if(!formSizes.length){ el.innerHTML=''; return; }
+  el.innerHTML = formSizes.map((sz,i)=>`
+    <div class="size-row">
+      <span class="size-row-lbl">${sz.label}</span>
+      <span class="size-row-price">${sz.price} Kč</span>
+      <button class="size-row-del" type="button" onclick="removeSize(${i})">×</button>
+    </div>`).join('');
+}
+
+function removeSize(i){
+  formSizes.splice(i,1);
+  renderSizesList();
+}
+
+document.getElementById('addSizeBtn').addEventListener('click',()=>{
+  const lbl   = document.getElementById('fSizeLbl').value.trim();
+  const price = parseInt(document.getElementById('fSizePrice').value.trim());
+  if(!lbl || !price) return;
+  formSizes.push({label:lbl, price});
+  document.getElementById('fSizeLbl').value  = '';
+  document.getElementById('fSizePrice').value = '';
+  renderSizesList();
+});
 
 function cancelEdit(){
   editingId = null;
@@ -1135,6 +1188,7 @@ function cancelEdit(){
   document.getElementById('cancelEditBtn').classList.remove('show');
   ['fNameCs','fNameUk','fNameEn','fPrice','fBadge','fDescCs','fDescUk','fDescEn']
     .forEach(id=>{ const el=document.getElementById(id); if(el) el.value=''; });
+  formSizes = []; renderSizesList();
   resetImg(); updateCardPreview();
 }
 
@@ -1145,7 +1199,7 @@ document.getElementById('addItemBtn').addEventListener('click', async ()=>{
   const btn = document.getElementById('addItemBtn');
   const nameCs = document.getElementById('fNameCs').value.trim();
   const price  = document.getElementById('fPrice').value.trim();
-  if(!nameCs || !price){ showAddMsg(t('adm_fill_req'), 'err'); return; }
+  if(!nameCs || (!price && !formSizes.length)){ showAddMsg(t('adm_fill_req'), 'err'); return; }
   btn.disabled = true; btn.textContent = '…';
   const payload = {
     token:   sessionStorage.getItem('cm_token')||'',
@@ -1158,7 +1212,8 @@ document.getElementById('addItemBtn').addEventListener('click', async ()=>{
     img:     currentImgData,
     desc_cs: document.getElementById('fDescCs').value.trim(),
     desc_uk: document.getElementById('fDescUk').value.trim(),
-    desc_en: document.getElementById('fDescEn').value.trim()
+    desc_en: document.getElementById('fDescEn').value.trim(),
+    sizes:   formSizes
   };
   try{
     let r;

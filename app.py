@@ -174,6 +174,7 @@ async def api_menu_add(req: Request):
             'uk': (d.get('desc_uk') or '').strip() or (d.get('desc_cs') or '').strip(),
             'en': (d.get('desc_en') or '').strip() or (d.get('desc_cs') or '').strip(),
         },
+        'sizes': d.get('sizes', []),
     }
     with _get_pool().connection() as conn:
         conn.execute('INSERT INTO menu_items (id, data) VALUES (%s, %s)',
@@ -195,6 +196,8 @@ async def api_menu_patch(item_id: int, req: Request):
                 item[f] = (d[f] or '').strip()
         if 'favorite' in d:
             item['favorite'] = bool(d['favorite'])
+        if 'sizes' in d:
+            item['sizes'] = d['sizes'] if isinstance(d['sizes'], list) else []
         item.setdefault('name', {})
         item.setdefault('desc', {})
         for lng in ('cs', 'uk', 'en'):
