@@ -1,4 +1,4 @@
-import hashlib, hmac, json, os, secrets, time
+import base64, hashlib, hmac, json, os, secrets, time
 from collections import defaultdict
 import psycopg
 from psycopg.rows import dict_row
@@ -259,6 +259,119 @@ async def api_static_favs_set(req: Request):
         )
     return {'ok': True}
 
+# ── Web Push ─────────────────────────────────────────────────────────────────
+def _get_vapid_keys():
+    """Return (private_pem, public_b64url). Auto-generates on first call."""
+    with _get_pool().connection() as conn:
+        priv = conn.execute("SELECT value FROM settings WHERE key='vapid_private_key'").fetchone()
+        pub  = conn.execute("SELECT value FROM settings WHERE key='vapid_public_key'").fetchone()
+        if priv and pub:
+            return priv[0], pub[0]
+    # Generate new VAPID key pair (EC P-256)
+    from cryptography.hazmat.primitives.asymmetric import ec
+    from cryptography.hazmat.primitives import serialization
+    key = ec.generate_private_key(ec.SECP256R1())
+    priv_pem = key.private_bytes(
+        serialization.Encoding.PEM,
+        serialization.PrivateFormat.TraditionalOpenSSL,
+        serialization.NoEncryption()
+    ).decode()
+    pub_raw = key.public_key().public_bytes(
+        serialization.Encoding.X962,
+        serialization.PublicFormat.UncompressedPoint
+    )
+    pub_b64 = base64.urlsafe_b64encode(pub_raw).rstrip(b'=').decode()
+    with _get_pool().connection() as conn:
+        conn.execute(
+            "INSERT INTO settings(key,value) VALUES('vapid_private_key',%s) ON CONFLICT(key) DO UPDATE SET value=EXCLUDED.value",
+            (priv_pem,)
+        )
+        conn.execute(
+            "INSERT INTO settings(key,value) VALUES('vapid_public_key',%s) ON CONFLICT(key) DO UPDATE SET value=EXCLUDED.value",
+            (pub_b64,)
+        )
+    return priv_pem, pub_b64
+
+def _send_push_notifications(order: dict):
+    try:
+        from pywebpush import webpush, WebPushException
+        priv_pem, _ = _get_vapid_keys()
+        with _get_pool().connection() as conn:
+            row = conn.execute("SELECT value FROM settings WHERE key='push_subscriptions'").fetchone()
+            subs = _json.loads(row[0]) if row and row[0] else []
+        if not subs:
+            return
+        payload = _json.dumps({
+            'title': 'Nová objednávka! 🎂',
+            'body':  f"{order['name']} — {(order['order'] or '')[:80]}",
+            'url':   '/admin.html'
+        })
+        dead = []
+        for sub in subs:
+            try:
+                webpush(
+                    subscription_info=sub,
+                    data=payload,
+                    vapid_private_key=priv_pem,
+                    vapid_claims={'sub': 'mailto:cakeme.cukrarna@seznam.cz'}
+                )
+            except WebPushException as e:
+                if e.response is not None and e.response.status_code in (404, 410):
+                    dead.append(sub.get('endpoint'))
+            except Exception:
+                pass
+        if dead:
+            subs = [s for s in subs if s.get('endpoint') not in dead]
+            with _get_pool().connection() as conn:
+                conn.execute(
+                    "INSERT INTO settings(key,value) VALUES('push_subscriptions',%s) ON CONFLICT(key) DO UPDATE SET value=EXCLUDED.value",
+                    (_json.dumps(subs),)
+                )
+    except Exception:
+        pass
+
+@app.get('/api/push/vapid-key')
+def api_push_vapid_key():
+    _, pub = _get_vapid_keys()
+    return {'publicKey': pub}
+
+@app.post('/api/push/subscribe')
+async def api_push_subscribe(req: Request):
+    d = await req.json()
+    if not _verify_token(d.get('token')):
+        raise HTTPException(401, 'Unauthorized')
+    sub = d.get('subscription')
+    if not sub or not sub.get('endpoint'):
+        raise HTTPException(400, 'Bad subscription')
+    with _get_pool().connection() as conn:
+        row = conn.execute("SELECT value FROM settings WHERE key='push_subscriptions'").fetchone()
+        subs = _json.loads(row[0]) if row and row[0] else []
+        subs = [s for s in subs if s.get('endpoint') != sub['endpoint']]
+        subs.append(sub)
+        conn.execute(
+            "INSERT INTO settings(key,value) VALUES('push_subscriptions',%s) ON CONFLICT(key) DO UPDATE SET value=EXCLUDED.value",
+            (_json.dumps(subs),)
+        )
+    return {'ok': True}
+
+@app.post('/api/push/unsubscribe')
+async def api_push_unsubscribe(req: Request):
+    d = await req.json()
+    if not _verify_token(d.get('token')):
+        raise HTTPException(401, 'Unauthorized')
+    endpoint = d.get('endpoint')
+    if not endpoint:
+        raise HTTPException(400, 'Missing endpoint')
+    with _get_pool().connection() as conn:
+        row = conn.execute("SELECT value FROM settings WHERE key='push_subscriptions'").fetchone()
+        subs = _json.loads(row[0]) if row and row[0] else []
+        subs = [s for s in subs if s.get('endpoint') != endpoint]
+        conn.execute(
+            "INSERT INTO settings(key,value) VALUES('push_subscriptions',%s) ON CONFLICT(key) DO UPDATE SET value=EXCLUDED.value",
+            (_json.dumps(subs),)
+        )
+    return {'ok': True}
+
 # ── /api/categories ───────────────────────────────────────────────────────────
 @app.get('/api/categories')
 def api_categories_get():
@@ -302,6 +415,7 @@ async def api_order(req: Request):
              order['address'], order['order'], order['payment'],
              order['order_type'], order['status'])
         )
+    _send_push_notifications(order)
     return {'success': True}
 
 # ── /api/orders ───────────────────────────────────────────────────────────────

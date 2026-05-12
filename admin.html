@@ -51,6 +51,10 @@ body{font-family:'Raleway',sans-serif;background:var(--bg0);color:var(--tx0)}
 .adm-btn{background:transparent;border:1px solid var(--bdr);color:var(--tx2);padding:7px 14px;cursor:pointer;font:.7rem 'Raleway',sans-serif;letter-spacing:1px;text-transform:uppercase;transition:.25s}
 .adm-btn:hover{border-color:var(--gold);color:var(--gold)}
 .adm-btn.danger:hover{border-color:#e08080;color:#e08080}
+#pushBtn{font-size:1rem;padding:7px 10px;min-width:34px}
+#pushBtn.push-on{border-color:var(--gold);color:var(--gold)}
+#pushBtn.push-off{color:var(--tx2)}
+#pushBtn.push-denied{color:#e08080;border-color:#e08080;opacity:.7;cursor:not-allowed}
 
 /* Main nav */
 .adm-main-nav{display:flex;border-bottom:2px solid var(--bdr);background:var(--bg1)}
@@ -358,6 +362,7 @@ body{font-family:'Raleway',sans-serif;background:var(--bg0);color:var(--tx0)}
         <button class="adm-lang on" data-al="cs">🇨🇿 CZ</button>
         <button class="adm-lang" data-al="en">🇬🇧 EN</button>
       </div>
+      <button class="adm-btn" id="pushBtn" title="Notifikace o objednávkách">🔔</button>
       <button class="adm-btn" id="refreshBtn" data-k="adm_refresh">↻ Obnovit</button>
       <button class="adm-btn danger" id="logoutBtn" data-k="adm_logout">Odhlásit</button>
     </div>
@@ -787,6 +792,7 @@ function showPanel(){
   p.style.flexDirection = 'column';
   applyAdminLang();
   renderOrders();
+  _initPush();
 }
 
 document.getElementById('logoutBtn').addEventListener('click', ()=>{
@@ -1644,6 +1650,84 @@ function showAddMsg(text, type){
 function esc(s){
   return String(s||'—').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
 }
+
+/* ── Web Push Notifications ── */
+let _swReg = null;
+let _pushSub = null;
+
+function _b64ToUint8(b64){
+  const pad = b64 + '='.repeat((4 - b64.length % 4) % 4);
+  const raw = atob(pad.replace(/-/g,'+').replace(/_/g,'/'));
+  return Uint8Array.from([...raw].map(c=>c.charCodeAt(0)));
+}
+
+function _updatePushBtn(){
+  const btn = document.getElementById('pushBtn');
+  if(!btn) return;
+  if(!('serviceWorker' in navigator) || !('PushManager' in window)){
+    btn.style.display = 'none'; return;
+  }
+  if(Notification.permission === 'denied'){
+    btn.className = 'adm-btn push-denied';
+    btn.title = 'Notifikace zablokovány v prohlížeči';
+    btn.textContent = '🔕';
+    return;
+  }
+  if(_pushSub){
+    btn.className = 'adm-btn push-on';
+    btn.title = 'Notifikace jsou zapnuty — klikněte pro vypnutí';
+    btn.textContent = '🔔';
+  } else {
+    btn.className = 'adm-btn push-off';
+    btn.title = 'Zapnout notifikace o nových objednávkách';
+    btn.textContent = '🔕';
+  }
+}
+
+async function _initPush(){
+  if(!('serviceWorker' in navigator) || !('PushManager' in window)) return;
+  try{
+    _swReg = await navigator.serviceWorker.register('/sw.js');
+    _pushSub = await _swReg.pushManager.getSubscription();
+    _updatePushBtn();
+  }catch(e){ console.warn('SW init failed', e); }
+}
+
+async function _subscribePush(){
+  try{
+    const r = await fetch('/api/push/vapid-key');
+    const {publicKey} = await r.json();
+    _pushSub = await _swReg.pushManager.subscribe({
+      userVisibleOnly: true,
+      applicationServerKey: _b64ToUint8(publicKey)
+    });
+    await fetch('/api/push/subscribe',{
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({token: sessionStorage.getItem('cm_token')||'', subscription: _pushSub.toJSON()})
+    });
+    _updatePushBtn();
+  }catch(e){ console.warn('Push subscribe failed', e); _updatePushBtn(); }
+}
+
+async function _unsubscribePush(){
+  try{
+    const endpoint = _pushSub.endpoint;
+    await _pushSub.unsubscribe();
+    _pushSub = null;
+    await fetch('/api/push/unsubscribe',{
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({token: sessionStorage.getItem('cm_token')||'', endpoint})
+    });
+    _updatePushBtn();
+  }catch(e){ console.warn('Push unsubscribe failed', e); _updatePushBtn(); }
+}
+
+document.getElementById('pushBtn').addEventListener('click', async ()=>{
+  if(!('serviceWorker' in navigator) || !('PushManager' in window)) return;
+  if(Notification.permission === 'denied') return;
+  if(!_swReg) await _initPush();
+  if(_pushSub){ await _unsubscribePush(); } else { await _subscribePush(); }
+});
 </script>
 </body>
 </html>
