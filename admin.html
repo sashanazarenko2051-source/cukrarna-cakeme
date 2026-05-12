@@ -362,6 +362,7 @@ body{font-family:'Raleway',sans-serif;background:var(--bg0);color:var(--tx0)}
         <button class="adm-lang on" data-al="cs">🇨🇿 CZ</button>
         <button class="adm-lang" data-al="en">🇬🇧 EN</button>
       </div>
+      <button class="adm-btn" id="pushTestBtn" title="Otestovat notifikaci" style="display:none;font-size:.65rem;padding:5px 9px">Test</button>
       <button class="adm-btn" id="pushBtn" title="Notifikace o objednávkách">🔔</button>
       <button class="adm-btn" id="refreshBtn" data-k="adm_refresh">↻ Obnovit</button>
       <button class="adm-btn danger" id="logoutBtn" data-k="adm_logout">Odhlásit</button>
@@ -1663,26 +1664,47 @@ function _b64ToUint8(b64){
 
 function _updatePushBtn(){
   const btn = document.getElementById('pushBtn');
+  const testBtn = document.getElementById('pushTestBtn');
   if(!btn) return;
   if(!('serviceWorker' in navigator) || !('PushManager' in window)){
-    btn.style.display = 'none'; return;
+    btn.style.display = 'none';
+    if(testBtn) testBtn.style.display = 'none';
+    return;
   }
   if(Notification.permission === 'denied'){
     btn.className = 'adm-btn push-denied';
-    btn.title = 'Notifikace zablokovány v prohlížeči';
+    btn.title = 'Notifikace zablokovány v prohlížeči — povolte v nastavení prohlížeče';
     btn.textContent = '🔕';
+    if(testBtn) testBtn.style.display = 'none';
     return;
   }
   if(_pushSub){
     btn.className = 'adm-btn push-on';
-    btn.title = 'Notifikace jsou zapnuty — klikněte pro vypnutí';
+    btn.title = 'Notifikace zapnuty — klikněte pro vypnutí';
     btn.textContent = '🔔';
+    if(testBtn) testBtn.style.display = '';
   } else {
     btn.className = 'adm-btn push-off';
     btn.title = 'Zapnout notifikace o nových objednávkách';
     btn.textContent = '🔕';
+    if(testBtn) testBtn.style.display = 'none';
   }
 }
+
+document.getElementById('pushTestBtn').addEventListener('click', async ()=>{
+  const btn = document.getElementById('pushTestBtn');
+  btn.textContent = '…'; btn.disabled = true;
+  try{
+    const r = await fetch('/api/push/test',{
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({token: sessionStorage.getItem('cm_token')||''})
+    });
+    const j = await r.json();
+    if(j.ok){ btn.textContent = '✓'; }
+    else { btn.textContent = 'Err'; alert('Chyba: '+(j.error||'unknown')); }
+  }catch(e){ btn.textContent = 'Err'; }
+  setTimeout(()=>{ btn.textContent = 'Test'; btn.disabled = false; }, 2000);
+});
 
 async function _initPush(){
   if(!('serviceWorker' in navigator) || !('PushManager' in window)) return;
@@ -1694,19 +1716,33 @@ async function _initPush(){
 }
 
 async function _subscribePush(){
+  // Request permission first
+  const perm = await Notification.requestPermission();
+  if(perm !== 'granted'){ _updatePushBtn(); return; }
   try{
     const r = await fetch('/api/push/vapid-key');
+    if(!r.ok) throw new Error('vapid-key fetch failed: '+r.status);
     const {publicKey} = await r.json();
     _pushSub = await _swReg.pushManager.subscribe({
       userVisibleOnly: true,
       applicationServerKey: _b64ToUint8(publicKey)
     });
-    await fetch('/api/push/subscribe',{
+    const sr = await fetch('/api/push/subscribe',{
       method:'POST', headers:{'Content-Type':'application/json'},
       body: JSON.stringify({token: sessionStorage.getItem('cm_token')||'', subscription: _pushSub.toJSON()})
     });
+    if(!sr.ok) throw new Error('subscribe save failed: '+sr.status);
     _updatePushBtn();
-  }catch(e){ console.warn('Push subscribe failed', e); _updatePushBtn(); }
+    // Show in-browser test notification to confirm it works
+    await _swReg.showNotification('Notifikace zapnuty! 🔔', {
+      body: 'Budete dostávat upozornění o nových objednávkách.',
+      icon: '/favicon.svg', tag: 'cakeme-setup'
+    });
+  }catch(e){
+    console.error('Push subscribe failed', e);
+    alert('Chyba při zapínání notifikací: '+e.message);
+    _updatePushBtn();
+  }
 }
 
 async function _unsubscribePush(){

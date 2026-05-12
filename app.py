@@ -5,7 +5,7 @@ from psycopg.rows import dict_row
 from psycopg.types.json import Jsonb
 from psycopg_pool import ConnectionPool
 import stripe as _stripe
-from fastapi import FastAPI, HTTPException, Request
+from fastapi import BackgroundTasks, FastAPI, HTTPException, Request
 from fastapi.responses import FileResponse, JSONResponse
 
 app = FastAPI(docs_url=None, redoc_url=None)
@@ -292,20 +292,24 @@ def _get_vapid_keys():
         )
     return priv_pem, pub_b64
 
-def _send_push_notifications(order: dict):
+def _send_push_notifications(payload_dict: dict, subs: list = None):
+    import sys
     try:
         from pywebpush import webpush, WebPushException
+    except ImportError as e:
+        print(f'[PUSH] pywebpush not installed: {e}', file=sys.stderr)
+        return
+    try:
         priv_pem, _ = _get_vapid_keys()
-        with _get_pool().connection() as conn:
-            row = conn.execute("SELECT value FROM settings WHERE key='push_subscriptions'").fetchone()
-            subs = _json.loads(row[0]) if row and row[0] else []
+        if subs is None:
+            with _get_pool().connection() as conn:
+                row = conn.execute("SELECT value FROM settings WHERE key='push_subscriptions'").fetchone()
+                subs = _json.loads(row[0]) if row and row[0] else []
         if not subs:
+            print('[PUSH] No subscribers', file=sys.stderr)
             return
-        payload = _json.dumps({
-            'title': 'Nová objednávka! 🎂',
-            'body':  f"{order['name']} — {(order['order'] or '')[:80]}",
-            'url':   '/admin.html'
-        })
+        payload = _json.dumps(payload_dict)
+        print(f'[PUSH] Sending to {len(subs)} subscriber(s)', file=sys.stderr)
         dead = []
         for sub in subs:
             try:
@@ -316,10 +320,11 @@ def _send_push_notifications(order: dict):
                     vapid_claims={'sub': 'mailto:cakeme.cukrarna@seznam.cz'}
                 )
             except WebPushException as e:
+                print(f'[PUSH] WebPushException: {e} status={getattr(e.response,"status_code",None)}', file=sys.stderr)
                 if e.response is not None and e.response.status_code in (404, 410):
                     dead.append(sub.get('endpoint'))
-            except Exception:
-                pass
+            except Exception as e:
+                print(f'[PUSH] Error sending push: {e}', file=sys.stderr)
         if dead:
             subs = [s for s in subs if s.get('endpoint') not in dead]
             with _get_pool().connection() as conn:
@@ -327,8 +332,9 @@ def _send_push_notifications(order: dict):
                     "INSERT INTO settings(key,value) VALUES('push_subscriptions',%s) ON CONFLICT(key) DO UPDATE SET value=EXCLUDED.value",
                     (_json.dumps(subs),)
                 )
-    except Exception:
-        pass
+            print(f'[PUSH] Removed {len(dead)} dead subscription(s)', file=sys.stderr)
+    except Exception as e:
+        print(f'[PUSH] Fatal error: {e}', file=sys.stderr)
 
 @app.get('/api/push/vapid-key')
 def api_push_vapid_key():
@@ -372,6 +378,23 @@ async def api_push_unsubscribe(req: Request):
         )
     return {'ok': True}
 
+@app.post('/api/push/test')
+async def api_push_test(req: Request, bg: BackgroundTasks):
+    d = await req.json()
+    if not _verify_token(d.get('token')):
+        raise HTTPException(401, 'Unauthorized')
+    with _get_pool().connection() as conn:
+        row = conn.execute("SELECT value FROM settings WHERE key='push_subscriptions'").fetchone()
+        subs = _json.loads(row[0]) if row and row[0] else []
+    if not subs:
+        return {'ok': False, 'error': 'No subscribers'}
+    bg.add_task(_send_push_notifications, {
+        'title': 'Test notifikace ✅',
+        'body':  'Push notifikace fungují správně!',
+        'url':   '/admin.html'
+    }, subs)
+    return {'ok': True, 'subscribers': len(subs)}
+
 # ── /api/categories ───────────────────────────────────────────────────────────
 @app.get('/api/categories')
 def api_categories_get():
@@ -394,7 +417,7 @@ async def api_categories_set(req: Request):
 
 # ── /api/order ────────────────────────────────────────────────────────────────
 @app.post('/api/order')
-async def api_order(req: Request):
+async def api_order(req: Request, bg: BackgroundTasks):
     d = await req.json()
     order = {
         'id':         int(time.time() * 1000),
@@ -415,7 +438,11 @@ async def api_order(req: Request):
              order['address'], order['order'], order['payment'],
              order['order_type'], order['status'])
         )
-    _send_push_notifications(order)
+    bg.add_task(_send_push_notifications, {
+        'title': 'Nová objednávka! 🎂',
+        'body':  f"{order['name']} — {(order['order'] or '')[:80]}",
+        'url':   '/admin.html'
+    })
     return {'success': True}
 
 # ── /api/orders ───────────────────────────────────────────────────────────────
