@@ -259,6 +259,26 @@ async def api_static_favs_set(req: Request):
         )
     return {'ok': True}
 
+# ── /api/categories ───────────────────────────────────────────────────────────
+@app.get('/api/categories')
+def api_categories_get():
+    with _get_pool().connection() as conn:
+        row = conn.execute("SELECT value FROM settings WHERE key='custom_categories'").fetchone()
+        return {'categories': _json.loads(row[0]) if row and row[0] else []}
+
+@app.post('/api/categories')
+async def api_categories_set(req: Request):
+    d = await req.json()
+    if not _verify_token(d.get('token')):
+        raise HTTPException(401, 'Unauthorized')
+    cats = [{'id': c['id'], 'label': c['label']} for c in (d.get('categories') or []) if c.get('id') and c.get('label')]
+    with _get_pool().connection() as conn:
+        conn.execute(
+            "INSERT INTO settings(key,value) VALUES('custom_categories',%s) ON CONFLICT(key) DO UPDATE SET value=EXCLUDED.value",
+            (_json.dumps(cats),)
+        )
+    return {'ok': True}
+
 # ── /api/order ────────────────────────────────────────────────────────────────
 @app.post('/api/order')
 async def api_order(req: Request):

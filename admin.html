@@ -234,6 +234,18 @@ body{font-family:'Raleway',sans-serif;background:var(--bg0);color:var(--tx0)}
 .an-cat-fill-cakes{background:#c9a96e}
 .an-cat-fill-desserts{background:#9e7fc0}
 .an-cat-fill-drinks{background:#5b9bd5}
+/* ── CATEGORY MANAGER ── */
+.cat-mgr{margin-bottom:18px;padding:16px;background:var(--bg2);border:1px solid var(--bdr)}
+.cat-mgr-title{font-size:.68rem;letter-spacing:2px;text-transform:uppercase;color:var(--tx2);margin-bottom:12px}
+.cat-mgr-list{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px;min-height:24px}
+.cat-tag{display:flex;align-items:center;gap:5px;background:rgba(201,169,110,.08);border:1px solid var(--gold-d);padding:4px 10px;font-size:.7rem;color:var(--gold);letter-spacing:.5px}
+.cat-tag-del{background:transparent;border:none;color:var(--gold-d);cursor:pointer;font-size:.95rem;line-height:1;padding:0 2px;transition:.2s}
+.cat-tag-del:hover{color:#e08080}
+.cat-add-row{display:flex;gap:6px;align-items:center}
+.cat-add-row input{flex:1;background:var(--bg3);border:1px solid var(--bdr);color:var(--tx0);padding:7px 10px;font:.78rem 'Raleway',sans-serif;outline:none;transition:.2s;min-width:0}
+.cat-add-row input:focus{border-color:var(--gold)}
+.cat-add-btn{background:transparent;border:1px solid var(--gold-d);color:var(--gold);padding:7px 14px;cursor:pointer;font:.68rem 'Raleway',sans-serif;letter-spacing:1px;text-transform:uppercase;white-space:nowrap;transition:.2s}
+.cat-add-btn:hover{background:rgba(201,169,110,.12)}
 /* ── Tablet ── */
 @media(max-width:860px){
   .menu-admin-body{grid-template-columns:1fr;padding:20px}
@@ -405,6 +417,7 @@ body{font-family:'Raleway',sans-serif;background:var(--bg0);color:var(--tx0)}
               <option value="cakes" data-k="adm_cat_cakes">Dorty</option>
               <option value="kolace" data-k="adm_cat_kolace">Koláče</option>
               <option value="drinks" data-k="adm_cat_drinks">Nápoje</option>
+              <option value="doplnky" data-k="adm_cat_doplnky">Doplňky</option>
             </select>
           </div>
           <div class="mai-field">
@@ -475,6 +488,17 @@ body{font-family:'Raleway',sans-serif;background:var(--bg0);color:var(--tx0)}
       <!-- All items list -->
       <div class="menu-panel">
         <h3 data-k="adm_all_items_title">Všechny položky menu</h3>
+
+        <!-- Category manager -->
+        <div class="cat-mgr">
+          <div class="cat-mgr-title" data-k="adm_cat_mgr_title">Vlastní sekce / Categories</div>
+          <div class="cat-mgr-list" id="catMgrList"></div>
+          <div class="cat-add-row">
+            <input type="text" id="catAddInput" placeholder="Název sekce (např. Sezónní)">
+            <button type="button" class="cat-add-btn" id="catAddBtn" data-k="adm_cat_add_btn">+ Přidat sekci</button>
+          </div>
+        </div>
+
         <div class="menu-actions">
           <button class="btn-export" id="exportBtn" data-k="adm_export">↓ Exportovat JSON</button>
         </div>
@@ -484,6 +508,7 @@ body{font-family:'Raleway',sans-serif;background:var(--bg0);color:var(--tx0)}
           <button class="ci-flt" data-mf="kolace" data-k="adm_cat_kolace">Koláče</button>
           <button class="ci-flt" data-mf="desserts" data-k="adm_cat_desserts">Dezerty</button>
           <button class="ci-flt" data-mf="drinks" data-k="adm_cat_drinks">Nápoje</button>
+          <button class="ci-flt" data-mf="doplnky" data-k="adm_cat_doplnky">Doplňky</button>
           <button class="ci-flt" data-mf="custom" data-k="adm_custom_only">Vlastní</button>
           <button class="ci-flt" data-mf="fav" data-k="adm_filter_fav">❤ Улюблені</button>
         </div>
@@ -622,7 +647,7 @@ const TA = {
     adm_img_remove:'✕ Odebrat obrázek', adm_card_prev:'Náhled karty',
     adm_cart_btn:'Do košíku', adm_add_btn:'+ Přidat',
     adm_custom_title:'Vlastní položky', adm_export:'↓ Exportovat JSON',
-    adm_cat_desserts:'Dezerty', adm_cat_cakes:'Dorty', adm_cat_kolace:'Koláče', adm_cat_drinks:'Nápoje',
+    adm_cat_desserts:'Dezerty', adm_cat_cakes:'Dorty', adm_cat_kolace:'Koláče', adm_cat_drinks:'Nápoje', adm_cat_doplnky:'Doplňky',
     adm_loading:'Načítání…', adm_no_custom:'Žádné vlastní položky',
     adm_conn_err:'Chyba připojení k serveru', adm_added_ok:'✓ Položka přidána do menu!',
     adm_server_err:'Chyba serveru', adm_no_connect:'Nelze se připojit k serveru',
@@ -646,6 +671,8 @@ const TA = {
     adm_an_items:'Pozice', adm_an_avg:'Průměr (Kč)',
     adm_an_product:'Produkt', adm_an_qty:'Počet', adm_an_rev:'Příjem', adm_an_share:'Podíl',
     adm_an_no_data:'Žádná data pro toto období.',
+    adm_cat_mgr_title:'Vlastní sekce', adm_cat_add_btn:'+ Přidat sekci',
+    adm_cat_del_confirm:'Smazat tuto sekci? Položky v ní zůstanou.',
   },
   en:{
     adm_panel:'Admin Panel', adm_login:'Login', adm_refresh:'↻ Refresh', adm_logout:'Logout',
@@ -664,7 +691,7 @@ const TA = {
     adm_img_remove:'✕ Remove image', adm_card_prev:'Card preview',
     adm_cart_btn:'Add to cart', adm_add_btn:'+ Add',
     adm_custom_title:'Custom items', adm_export:'↓ Export JSON',
-    adm_cat_desserts:'Desserts', adm_cat_cakes:'Cakes', adm_cat_kolace:'Pastries', adm_cat_drinks:'Drinks',
+    adm_cat_desserts:'Desserts', adm_cat_cakes:'Cakes', adm_cat_kolace:'Pastries', adm_cat_drinks:'Drinks', adm_cat_doplnky:'Additions',
     adm_loading:'Loading…', adm_no_custom:'No custom items',
     adm_conn_err:'Server connection error', adm_added_ok:'✓ Item added to menu!',
     adm_server_err:'Server error', adm_no_connect:'Cannot connect to server',
@@ -688,6 +715,8 @@ const TA = {
     adm_an_items:'Items', adm_an_avg:'Avg. order (Kč)',
     adm_an_product:'Product', adm_an_qty:'Qty', adm_an_rev:'Revenue', adm_an_share:'Share',
     adm_an_no_data:'No data for this period.',
+    adm_cat_mgr_title:'Custom sections', adm_cat_add_btn:'+ Add section',
+    adm_cat_del_confirm:'Delete this section? Items in it will remain.',
   }
 };
 
@@ -804,7 +833,7 @@ document.querySelectorAll('.amn').forEach(btn => btn.addEventListener('click', (
   document.getElementById('secOrders').style.display    = activeSection==='orders'    ? '' : 'none';
   document.getElementById('secMenu').style.display      = activeSection==='menu'      ? '' : 'none';
   document.getElementById('secAnalytics').style.display = activeSection==='analytics' ? '' : 'none';
-  if(activeSection==='menu'){ Promise.all([loadStaticFavs(), loadHiddenStatics()]).then(()=>loadMenuItems()); }
+  if(activeSection==='menu'){ Promise.all([loadCategories(), loadStaticFavs(), loadHiddenStatics()]).then(()=>loadMenuItems()); }
   if(activeSection==='analytics') renderAnalytics();
 }));
 
@@ -1021,6 +1050,112 @@ function renderMenuItems(customItems){
     </div>`;
   }).join('');
 }
+
+/* ── Category manager ── */
+let customCategories = [];
+
+function slugify(str){
+  return str.toLowerCase().trim().replace(/\s+/g,'-').replace(/[^a-z0-9-]/g,'');
+}
+
+async function loadCategories(){
+  try{
+    const r = await fetch('/api/categories');
+    if(!r.ok) return;
+    const j = await r.json();
+    customCategories = j.categories || [];
+    renderCategoryManager();
+    rebuildCatSelect();
+    rebuildCatFilters();
+  }catch{}
+}
+
+async function saveCategories(){
+  try{
+    await fetch('/api/categories',{
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({token: sessionStorage.getItem('cm_token')||'', categories: customCategories})
+    });
+  }catch{}
+}
+
+function renderCategoryManager(){
+  const list = document.getElementById('catMgrList');
+  if(!list) return;
+  if(!customCategories.length){
+    list.innerHTML = '<span style="font-size:.72rem;color:var(--tx2);letter-spacing:.5px">—</span>';
+    return;
+  }
+  list.innerHTML = customCategories.map((cat,i)=>`
+    <span class="cat-tag">
+      ${esc(cat.label)}
+      <button class="cat-tag-del" data-ci="${i}" title="Smazat">×</button>
+    </span>
+  `).join('');
+  list.querySelectorAll('.cat-tag-del').forEach(btn=>btn.addEventListener('click',()=>{
+    const i = parseInt(btn.dataset.ci);
+    if(!confirm(t('adm_cat_del_confirm'))) return;
+    customCategories.splice(i,1);
+    saveCategories();
+    renderCategoryManager();
+    rebuildCatSelect();
+    rebuildCatFilters();
+  }));
+}
+
+function rebuildCatSelect(){
+  const sel = document.getElementById('fCat');
+  if(!sel) return;
+  // Remove previously injected custom options
+  sel.querySelectorAll('option[data-custom]').forEach(o=>o.remove());
+  customCategories.forEach(cat=>{
+    const o = document.createElement('option');
+    o.value = cat.id;
+    o.textContent = cat.label;
+    o.dataset.custom = '1';
+    sel.appendChild(o);
+  });
+}
+
+function rebuildCatFilters(){
+  const filters = document.querySelector('.ci-filters');
+  if(!filters) return;
+  // Remove previously injected custom filter buttons
+  filters.querySelectorAll('button[data-custom-cat]').forEach(b=>b.remove());
+  // Insert custom filter buttons before the last two buttons (custom / fav)
+  const favBtn = filters.querySelector('[data-mf="fav"]');
+  customCategories.forEach(cat=>{
+    const btn = document.createElement('button');
+    btn.className = 'ci-flt';
+    btn.dataset.mf = cat.id;
+    btn.dataset.customCat = '1';
+    btn.textContent = cat.label;
+    btn.addEventListener('click',()=>{
+      menuFilter = cat.id;
+      document.querySelectorAll('.ci-flt').forEach(b=>b.classList.toggle('on',b===btn));
+      if(cachedMenuItems!==null) renderMenuItems(cachedMenuItems);
+    });
+    filters.insertBefore(btn, favBtn);
+  });
+}
+
+document.getElementById('catAddBtn').addEventListener('click',()=>{
+  const input = document.getElementById('catAddInput');
+  const label = input.value.trim();
+  if(!label) return;
+  const id = 'c-' + (slugify(label) || Date.now());
+  if(customCategories.some(c=>c.id===id)){ input.value=''; return; }
+  customCategories.push({id, label});
+  input.value = '';
+  saveCategories();
+  renderCategoryManager();
+  rebuildCatSelect();
+  rebuildCatFilters();
+});
+
+document.getElementById('catAddInput').addEventListener('keydown', e=>{
+  if(e.key==='Enter') document.getElementById('catAddBtn').click();
+});
 
 document.querySelectorAll('.ci-flt').forEach(btn=>btn.addEventListener('click',()=>{
   menuFilter = btn.dataset.mf;

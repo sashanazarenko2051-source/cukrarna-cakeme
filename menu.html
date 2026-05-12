@@ -246,6 +246,7 @@ footer{background:#070707;border-top:1px solid var(--bdr);padding:52px 0 28px}
       <button class="m-tab"    data-tab="kolace"   data-k="t_kolace">Koláče</button>
       <button class="m-tab"    data-tab="desserts" data-k="t_des">Dezerty</button>
       <button class="m-tab"    data-tab="drinks"   data-k="t_drk">Nápoje</button>
+      <button class="m-tab"    data-tab="doplnky"  data-k="t_doplnky">Doplňky</button>
       <button class="m-tab"    data-tab="fav"      data-k="t_fav">Oblíbené</button>
       <button class="m-tab"    data-tab="celebration" data-k="t_celeb">Slavnostní dorty</button>
     </div>
@@ -331,8 +332,8 @@ footer{background:#070707;border-top:1px solid var(--bdr);padding:52px 0 28px}
 
 <script>
 const T={
-cs:{nav_home:'Domů',nav_menu:'Menu',nav_about:'O nás',nav_del:'Doručení',nav_con:'Kontakt',tagline:'Oslavte každý den',menu_lbl:'Naše nabídka',menu_ttl:'Menu',t_all:'Vše',t_cakes:'Dorty',t_kolace:'Koláče',t_des:'Dezerty',t_drk:'Nápoje',t_fav:'Oblíbené',t_celeb:'Slavnostní dorty',celeb_h:'Slavnostní & narozeninové dorty',celeb_warn:'Objednávky přijímáme minimálně 14 dní předem',celeb_p1:'Připravíme dort přesně podle vašich přání — narozeniny, svatba, výročí nebo firemní akce. Zvolte design, chuť a velikost.',celeb_p2:'Pro objednávku nás prosím kontaktujte telefonicky nebo e-mailem.',cart_add:'Do košíku',cart_ttl:'Košík',cart_empty:'Košík je prázdný',cart_total:'Celkem',cart_go:'Objednat s doručením',ft_nav:'Navigace',ft_con:'Kontakt',rights:'Všechna práva vyhrazena.'},
-en:{nav_home:'Home',nav_menu:'Menu',nav_about:'About',nav_del:'Delivery',nav_con:'Contact',tagline:'Celebrate Every Day',menu_lbl:'Our Offerings',menu_ttl:'Menu',t_all:'All',t_cakes:'Cakes',t_kolace:'Pastries',t_des:'Desserts',t_drk:'Drinks',t_fav:'Favorites',t_celeb:'Celebration Cakes',celeb_h:'Wedding & Celebration Cakes',celeb_warn:'Orders accepted minimum 2 weeks in advance',celeb_p1:'We\'ll create a cake tailored to your wishes — birthdays, weddings, anniversaries or corporate events. Choose the design, flavour and size.',celeb_p2:'To place an order, please contact us by phone or email.',cart_add:'Add to Cart',cart_ttl:'Cart',cart_empty:'Your cart is empty',cart_total:'Total',cart_go:'Order with Delivery',ft_nav:'Navigation',ft_con:'Contact',rights:'All rights reserved.'}
+cs:{nav_home:'Domů',nav_menu:'Menu',nav_about:'O nás',nav_del:'Doručení',nav_con:'Kontakt',tagline:'Oslavte každý den',menu_lbl:'Naše nabídka',menu_ttl:'Menu',t_all:'Vše',t_cakes:'Dorty',t_kolace:'Koláče',t_des:'Dezerty',t_drk:'Nápoje',t_doplnky:'Doplňky',t_fav:'Oblíbené',t_celeb:'Slavnostní dorty',celeb_h:'Slavnostní & narozeninové dorty',celeb_warn:'Objednávky přijímáme minimálně 14 dní předem',celeb_p1:'Připravíme dort přesně podle vašich přání — narozeniny, svatba, výročí nebo firemní akce. Zvolte design, chuť a velikost.',celeb_p2:'Pro objednávku nás prosím kontaktujte telefonicky nebo e-mailem.',cart_add:'Do košíku',cart_ttl:'Košík',cart_empty:'Košík je prázdný',cart_total:'Celkem',cart_go:'Objednat s doručením',ft_nav:'Navigace',ft_con:'Kontakt',rights:'Všechna práva vyhrazena.'},
+en:{nav_home:'Home',nav_menu:'Menu',nav_about:'About',nav_del:'Delivery',nav_con:'Contact',tagline:'Celebrate Every Day',menu_lbl:'Our Offerings',menu_ttl:'Menu',t_all:'All',t_cakes:'Cakes',t_kolace:'Pastries',t_des:'Desserts',t_drk:'Drinks',t_doplnky:'Additions',t_fav:'Favorites',t_celeb:'Celebration Cakes',celeb_h:'Wedding & Celebration Cakes',celeb_warn:'Orders accepted minimum 2 weeks in advance',celeb_p1:'We\'ll create a cake tailored to your wishes — birthdays, weddings, anniversaries or corporate events. Choose the design, flavour and size.',celeb_p2:'To place an order, please contact us by phone or email.',cart_add:'Add to Cart',cart_ttl:'Cart',cart_empty:'Your cart is empty',cart_total:'Total',cart_go:'Order with Delivery',ft_nav:'Navigation',ft_con:'Contact',rights:'All rights reserved.'}
 };
 
 let ITEMS=[
@@ -674,8 +675,8 @@ document.getElementById('cartBtn').addEventListener('click',()=>{document.getEle
 document.getElementById('cartClose').addEventListener('click',()=>{document.getElementById('cartPanel').classList.remove('open');});
 async function loadCustomMenu(){
   try{
-    const [mr,fr,hr]=await Promise.allSettled([
-      fetch('/api/menu'), fetch('/api/static-favs'), fetch('/api/hidden-statics')
+    const [mr,fr,hr,cr]=await Promise.allSettled([
+      fetch('/api/menu'), fetch('/api/static-favs'), fetch('/api/hidden-statics'), fetch('/api/categories')
     ]);
     if(mr.status!=='fulfilled'||!mr.value.ok) return;
     const custom=await mr.value.json();
@@ -692,6 +693,27 @@ async function loadCustomMenu(){
     const customNames=new Set(custom.map(i=>i.name?.cs).filter(Boolean));
     ITEMS.forEach(item=>{if(customNames.has(item.name?.cs)) item._hidden=true;});
     custom.forEach(item=>ITEMS.push({...item, fav:!!item.favorite}));
+    // Inject custom category tabs
+    if(cr.status==='fulfilled'&&cr.value.ok){
+      const {categories}=await cr.value.json();
+      if(categories&&categories.length){
+        const tabsEl=document.querySelector('.m-tabs');
+        const favTabEl=tabsEl.querySelector('[data-tab="fav"]');
+        categories.forEach(cat=>{
+          if(tabsEl.querySelector(`[data-tab="${cat.id}"]`)) return;
+          const btn=document.createElement('button');
+          btn.className='m-tab';
+          btn.dataset.tab=cat.id;
+          btn.textContent=cat.label;
+          btn.addEventListener('click',()=>{
+            tab=cat.id;
+            document.querySelectorAll('.m-tab').forEach(x=>x.classList.toggle('on',x===btn));
+            renderMenu();
+          });
+          tabsEl.insertBefore(btn, favTabEl);
+        });
+      }
+    }
   }catch(e){}
 }
 
