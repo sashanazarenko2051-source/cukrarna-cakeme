@@ -178,12 +178,6 @@ body{font-family:'Raleway',sans-serif;background:var(--bg0);color:var(--tx0)}
 .img-upload-preview{width:100%;max-height:320px;object-fit:contain;background:var(--bg2);display:none;border:1px solid var(--bdr);margin-top:8px}
 .img-reset-btn{display:none;width:100%;margin-top:6px;background:transparent;border:1px solid var(--bdr);color:var(--tx2);padding:6px;font:.65rem 'Raleway',sans-serif;cursor:pointer;transition:.2s;letter-spacing:.5px}
 .img-reset-btn:hover{border-color:#e08080;color:#e08080}
-.img-pos-wrap{margin-top:10px}
-.img-pos-wrap>span{font-size:.65rem;letter-spacing:1px;text-transform:uppercase;color:var(--tx2);display:block;margin-bottom:6px}
-.pos-grid{display:grid;grid-template-columns:repeat(3,30px);gap:4px}
-.pos-cell{width:30px;height:30px;background:var(--bg3);border:1px solid var(--bdr);border-radius:3px;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:13px;transition:.15s;line-height:1}
-.pos-cell:hover{border-color:var(--gold-d);background:var(--bg4,#2a2a2a)}
-.pos-cell.on{border-color:var(--gold);background:rgba(201,169,110,.18);color:var(--gold)}
 .qty-ctrl-lbl{display:flex;align-items:center;gap:8px;cursor:pointer;font-size:.78rem;color:var(--tx1);margin-top:2px}
 .qty-ctrl-lbl input[type=checkbox]{accent-color:var(--gold);width:15px;height:15px;cursor:pointer}
 
@@ -192,7 +186,7 @@ body{font-family:'Raleway',sans-serif;background:var(--bg0);color:var(--tx0)}
 .card-prev-lbl{font-size:.63rem;letter-spacing:2px;text-transform:uppercase;color:var(--tx2);margin-bottom:12px;display:block}
 .card-prev{background:var(--bg1);border:1px solid var(--bdr);overflow:hidden;max-width:260px;margin:0 auto}
 .cp-img-box{width:100%;height:148px;background:var(--bg3);display:flex;align-items:center;justify-content:center;font-size:2.4rem;position:relative;overflow:hidden}
-.cp-img-box img{width:100%;height:100%;object-fit:cover;position:absolute;inset:0;display:none}
+.cp-img-box img{width:100%;height:100%;object-fit:contain;position:absolute;inset:0;display:none;background:var(--bg2)}
 .cp-body{padding:14px}
 .cp-badge{display:none;background:var(--gold);color:var(--bg0);font:.58rem 'Raleway',sans-serif;letter-spacing:1.5px;text-transform:uppercase;padding:3px 8px;font-weight:700;margin-bottom:8px}
 .cp-name{font-family:'Playfair Display',serif;font-size:.98rem;color:var(--tx0);margin-bottom:5px}
@@ -490,10 +484,6 @@ body{font-family:'Raleway',sans-serif;background:var(--bg0);color:var(--tx0)}
             </div>
             <img class="img-upload-preview" id="imgUploadPreview" alt="" onerror="this.style.display='none';document.getElementById('uploadZone').style.display=''">
             <button type="button" class="img-reset-btn" id="imgResetBtn" data-k="adm_img_remove">✕ Odebrat obrázek</button>
-            <div class="img-pos-wrap" id="imgPosWrap" style="display:none">
-              <span data-k="adm_img_pos_lbl">Poloha obrázku</span>
-              <div class="pos-grid" id="posGrid"></div>
-            </div>
           </div>
         </div>
         <div class="sizes-section">
@@ -1378,14 +1368,12 @@ function startEditStatic(idx){
   document.getElementById('fDescUk').value = item.desc?.uk || '';
   document.getElementById('fDescEn').value = item.desc?.en || '';
   const _qc1 = document.getElementById('fQtyCtrl'); if(_qc1) _qc1.checked = !!item.qty_ctrl;
-  imgPos = item.img_pos || '50% 50%';
   if(item.img){
     currentImgData = item.img;
     const prev = document.getElementById('imgUploadPreview');
     prev.src = item.img; prev.style.display = 'block';
     document.getElementById('uploadZone').style.display = 'none';
     document.getElementById('imgResetBtn').style.display = 'block';
-    showImgPos(true);
   } else { resetImg(); }
   document.getElementById('formTitle').textContent = t('adm_edit_title');
   document.getElementById('addItemBtn').textContent = t('adm_save_btn');
@@ -1410,7 +1398,6 @@ function startEdit(item){
   document.getElementById('fDescUk').value     = item.desc?.uk || '';
   document.getElementById('fDescEn').value     = item.desc?.en || '';
   const _qc2 = document.getElementById('fQtyCtrl'); if(_qc2) _qc2.checked = !!item.qty_ctrl;
-  imgPos = item.img_pos || '50% 50%';
   const _imgSrc = item.img || STATIC_ITEMS.find(si=>
     si.name?.cs===item.name?.cs || si.name?.uk===item.name?.uk || si.name?.en===item.name?.en
   )?.img || '';
@@ -1420,7 +1407,6 @@ function startEdit(item){
     prev.src = _imgSrc; prev.style.display = 'block';
     document.getElementById('uploadZone').style.display = 'none';
     document.getElementById('imgResetBtn').style.display = 'block';
-    showImgPos(true);
   } else { resetImg(); }
   document.getElementById('formTitle').textContent = t('adm_edit_title');
   document.getElementById('addItemBtn').textContent = t('adm_save_btn');
@@ -1497,7 +1483,6 @@ function cancelEdit(){
   ['fNameCs','fNameUk','fNameEn','fPrice','fBadge','fDescCs','fDescUk','fDescEn']
     .forEach(id=>{ const el=document.getElementById(id); if(el) el.value=''; });
   const qc = document.getElementById('fQtyCtrl'); if(qc) qc.checked = false;
-  imgPos = '50% 50%';
   formSizes = []; renderSizesList();
   resetImg(); updateCardPreview();
 }
@@ -1520,7 +1505,6 @@ document.getElementById('addItemBtn').addEventListener('click', async ()=>{
     name_en: document.getElementById('fNameEn').value.trim(),
     badge:   document.getElementById('fBadge').value.trim(),
     img:      currentImgData,
-    img_pos:  imgPos,
     qty_ctrl: document.getElementById('fQtyCtrl')?.checked || false,
     desc_cs:  document.getElementById('fDescCs').value.trim(),
     desc_uk:  document.getElementById('fDescUk').value.trim(),
@@ -1686,33 +1670,6 @@ document.querySelectorAll('.ap-btn').forEach(btn=>btn.addEventListener('click',(
 
 /* ── Image upload & card preview ── */
 let currentImgData = '';
-let imgPos = '50% 50%';
-
-const POS_CELLS = [
-  {v:'0% 0%',  s:'↖'},{v:'50% 0%',  s:'↑'},{v:'100% 0%',  s:'↗'},
-  {v:'0% 50%', s:'←'},{v:'50% 50%', s:'·'},{v:'100% 50%', s:'→'},
-  {v:'0% 100%',s:'↙'},{v:'50% 100%',s:'↓'},{v:'100% 100%',s:'↘'},
-];
-
-function buildPosGrid(){
-  const grid = document.getElementById('posGrid');
-  if(!grid) return;
-  grid.innerHTML = POS_CELLS.map(p=>
-    `<button type="button" class="pos-cell${p.v===imgPos?' on':''}" data-v="${p.v}">${p.s}</button>`
-  ).join('');
-  grid.querySelectorAll('.pos-cell').forEach(btn=>{
-    btn.addEventListener('click',()=>{
-      imgPos = btn.dataset.v;
-      grid.querySelectorAll('.pos-cell').forEach(b=>b.classList.toggle('on',b===btn));
-      updateCardPreview();
-    });
-  });
-}
-
-function showImgPos(show){
-  const w = document.getElementById('imgPosWrap');
-  if(w){ w.style.display = show ? '' : 'none'; if(show) buildPosGrid(); }
-}
 
 const uploadZone  = document.getElementById('uploadZone');
 const fImgFile    = document.getElementById('fImgFile');
@@ -1747,7 +1704,6 @@ function loadImgFile(file){
       imgPrev.style.display = 'block';
       uploadZone.style.display = 'none';
       imgResetBtn.style.display = 'block';
-      showImgPos(true);
       updateCardPreview();
     };
     img.src = ev.target.result;
@@ -1757,11 +1713,9 @@ function loadImgFile(file){
 
 function resetImg(){
   currentImgData = ''; fImgFile.value = '';
-  imgPos = '50% 50%';
   imgPrev.style.display = 'none';
   imgResetBtn.style.display = 'none';
   uploadZone.style.display = '';
-  showImgPos(false);
   updateCardPreview();
 }
 
@@ -1796,7 +1750,7 @@ function updateCardPreview(){
   }
   const cpImg = document.getElementById('cpImg');
   const cpPl  = document.getElementById('cpImgPlaceholder');
-  if(currentImgData){ cpImg.src = currentImgData; cpImg.style.display = 'block'; cpImg.style.objectPosition = imgPos; cpPl.style.display = 'none'; }
+  if(currentImgData){ cpImg.src = currentImgData; cpImg.style.display = 'block'; cpPl.style.display = 'none'; }
   else { cpImg.style.display = 'none'; cpPl.style.display = ''; }
 }
 

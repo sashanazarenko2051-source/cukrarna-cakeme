@@ -70,9 +70,9 @@ section{padding:96px 0}
 .m-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(272px,1fr));gap:24px}
 .m-card{background:var(--bg3);border:1px solid var(--bdr);overflow:hidden;transition:.3s;position:relative}
 .m-card:hover{border-color:var(--gold-d);transform:translateY(-5px);box-shadow:0 20px 44px rgba(0,0,0,.5)}
-.m-img{width:100%;height:210px;display:flex;align-items:center;justify-content:center;font-size:3.4rem;position:relative;overflow:hidden;background:#1a1a1a}
-.m-img img{width:100%;height:100%;object-fit:cover;display:block;transition:transform .4s ease}
-.m-card:hover .m-img img{transform:scale(1.06)}
+.m-img{width:100%;height:210px;display:flex;align-items:center;justify-content:center;font-size:3.4rem;position:relative;overflow:hidden;background:#111}
+.m-img img{width:100%;height:100%;object-fit:contain;display:block;transition:transform .4s ease}
+.m-card:hover .m-img img{transform:scale(1.04)}
 .m-badge{position:absolute;top:14px;right:14px;background:var(--gold);color:var(--bg0);font:.62rem 'Raleway',sans-serif;letter-spacing:1.5px;text-transform:uppercase;padding:4px 10px;font-weight:700}
 .m-body{padding:20px}
 .m-name{font-family:'Playfair Display',serif;font-size:1.18rem;color:var(--tx0);margin-bottom:7px}
@@ -621,10 +621,9 @@ function renderMenu(){
     if(item.sizes && item.sizes.length){
       const si=defSi(item);
       const curSz=item.sizes[si];
-      const ipos0=item.img_pos||'center';
       return `<div class="m-card fi">
       <div class="m-img">
-        ${item.img?`<img src="${item.img}" alt="${name}" loading="lazy" onerror="this.style.display='none'" style="object-position:${ipos0}">`:''}
+        ${item.img?`<img src="${item.img}" alt="${name}" loading="lazy" onerror="this.style.display='none'">`:''}
         ${item.badge?`<span class="m-badge">${item.badge}</span>`:''}
       </div>
       <div class="m-body">
@@ -640,11 +639,10 @@ function renderMenu(){
       </div>
     </div>`;
     }
-    if(item.qty_ctrl || item.cat==='desserts'){
-      const ipos=item.img_pos||'center';
+    if(item.qty_ctrl === true || (item.cat === 'desserts' && item.qty_ctrl !== false)){
       return `<div class="m-card fi">
         <div class="m-img">
-          ${item.img?`<img src="${item.img}" alt="${name}" loading="lazy" onerror="this.style.display='none'" style="object-position:${ipos}">`:''}
+          ${item.img?`<img src="${item.img}" alt="${name}" loading="lazy" onerror="this.style.display='none'">`:''}
           ${item.badge?`<span class="m-badge">${item.badge}</span>`:''}
         </div>
         <div class="m-body">
@@ -663,10 +661,9 @@ function renderMenu(){
         </div>
       </div>`;
     }
-    const ipos1=item.img_pos||'center';
     return `<div class="m-card fi">
       <div class="m-img">
-        ${item.img?`<img src="${item.img}" alt="${name}" loading="lazy" onerror="this.style.display='none'" style="object-position:${ipos1}">`:''}
+        ${item.img?`<img src="${item.img}" alt="${name}" loading="lazy" onerror="this.style.display='none'">`:''}
         ${item.badge?`<span class="m-badge">${item.badge}</span>`:''}
       </div>
       <div class="m-body">
