@@ -81,6 +81,13 @@ section{padding:96px 0}
 .m-price{font-family:'Playfair Display',serif;font-size:1.25rem;color:var(--gold)}
 .btn-ord{background:transparent;border:1px solid var(--gold-d);color:var(--gold);padding:8px 18px;font:.72rem 'Raleway',sans-serif;letter-spacing:1.5px;text-transform:uppercase;cursor:pointer;transition:.25s}
 .btn-ord:hover{background:var(--gold);color:var(--bg0)}
+.m-ft-des{display:flex;flex-direction:column;gap:10px;margin-top:14px}
+.des-qty-row{display:flex;align-items:center;gap:8px}
+.des-qty-lbl{font-size:.7rem;color:#888;letter-spacing:.5px;text-transform:uppercase;flex:1;white-space:nowrap}
+.dq-btn{width:28px;height:28px;border:1px solid var(--gold-d);background:transparent;color:var(--gold);font-size:1.15rem;cursor:pointer;border-radius:3px;line-height:1;transition:.2s;display:inline-flex;align-items:center;justify-content:center}
+.dq-btn:hover{background:var(--gold);color:var(--bg0)}
+.dq-num{min-width:22px;text-align:center;font-size:.9rem;color:#fff}
+.btn-ord-full{width:100%;padding:9px 0;text-align:center}
 .m-sizes{display:flex;gap:7px;flex-wrap:wrap;margin-bottom:14px}
 .sz-btn{background:transparent;border:1px solid var(--bdr);color:var(--tx2);padding:5px 11px;cursor:pointer;font:.67rem 'Raleway',sans-serif;letter-spacing:.8px;transition:.2s;min-width:54px;line-height:1.3}
 .sz-btn:hover{border-color:var(--gold);color:var(--gold)}
@@ -338,8 +345,8 @@ footer{background:#070707;border-top:1px solid var(--bdr);padding:52px 0 28px}
 
 <script>
 const T={
-cs:{nav_home:'Domů',nav_menu:'Menu',nav_about:'O nás',nav_del:'Doručení',nav_con:'Kontakt',tagline:'Oslavte každý den',menu_lbl:'Naše nabídka',menu_ttl:'Menu',t_all:'Vše',t_cakes:'Dorty',t_kolace:'Koláče',t_des:'Dezerty',t_drk:'Nápoje',t_doplnky:'Doplňky',t_fav:'Oblíbené',t_celeb:'Slavnostní dorty',celeb_h:'Slavnostní & narozeninové dorty',celeb_warn:'Objednávky přijímáme minimálně 14 dní předem',celeb_p1:'Připravíme dort přesně podle vašich přání — narozeniny, svatba, výročí nebo firemní akce. Zvolte design, chuť a velikost.',celeb_p2:'Pro objednávku nás prosím kontaktujte telefonicky nebo e-mailem.',cart_add:'Do košíku',cart_ttl:'Košík',cart_empty:'Košík je prázdný',cart_total:'Celkem',cart_go:'Objednat s doručením',ft_nav:'Navigace',ft_con:'Kontakt',rights:'Všechna práva vyhrazena.'},
-en:{nav_home:'Home',nav_menu:'Menu',nav_about:'About',nav_del:'Delivery',nav_con:'Contact',tagline:'Celebrate Every Day',menu_lbl:'Our Offerings',menu_ttl:'Menu',t_all:'All',t_cakes:'Cakes',t_kolace:'Pastries',t_des:'Desserts',t_drk:'Drinks',t_doplnky:'Additions',t_fav:'Favorites',t_celeb:'Celebration Cakes',celeb_h:'Wedding & Celebration Cakes',celeb_warn:'Orders accepted minimum 2 weeks in advance',celeb_p1:'We\'ll create a cake tailored to your wishes — birthdays, weddings, anniversaries or corporate events. Choose the design, flavour and size.',celeb_p2:'To place an order, please contact us by phone or email.',cart_add:'Add to Cart',cart_ttl:'Cart',cart_empty:'Your cart is empty',cart_total:'Total',cart_go:'Order with Delivery',ft_nav:'Navigation',ft_con:'Contact',rights:'All rights reserved.'}
+cs:{nav_home:'Domů',nav_menu:'Menu',nav_about:'O nás',nav_del:'Doručení',nav_con:'Kontakt',tagline:'Oslavte každý den',menu_lbl:'Naše nabídka',menu_ttl:'Menu',t_all:'Vše',t_cakes:'Dorty',t_kolace:'Koláče',t_des:'Dezerty',t_drk:'Nápoje',t_doplnky:'Doplňky',t_fav:'Oblíbené',t_celeb:'Slavnostní dorty',celeb_h:'Slavnostní & narozeninové dorty',celeb_warn:'Objednávky přijímáme minimálně 14 dní předem',celeb_p1:'Připravíme dort přesně podle vašich přání — narozeniny, svatba, výročí nebo firemní akce. Zvolte design, chuť a velikost.',celeb_p2:'Pro objednávku nás prosím kontaktujte telefonicky nebo e-mailem.',cart_add:'Do košíku',cart_ttl:'Košík',cart_empty:'Košík je prázdný',cart_total:'Celkem',cart_go:'Objednat s doručením',ft_nav:'Navigace',ft_con:'Kontakt',rights:'Všechna práva vyhrazena.',t_pcs:'Počet kusů'},
+en:{nav_home:'Home',nav_menu:'Menu',nav_about:'About',nav_del:'Delivery',nav_con:'Contact',tagline:'Celebrate Every Day',menu_lbl:'Our Offerings',menu_ttl:'Menu',t_all:'All',t_cakes:'Cakes',t_kolace:'Pastries',t_des:'Desserts',t_drk:'Drinks',t_doplnky:'Additions',t_fav:'Favorites',t_celeb:'Celebration Cakes',celeb_h:'Wedding & Celebration Cakes',celeb_warn:'Orders accepted minimum 2 weeks in advance',celeb_p1:'We\'ll create a cake tailored to your wishes — birthdays, weddings, anniversaries or corporate events. Choose the design, flavour and size.',celeb_p2:'To place an order, please contact us by phone or email.',cart_add:'Add to Cart',cart_ttl:'Cart',cart_empty:'Your cart is empty',cart_total:'Total',cart_go:'Order with Delivery',ft_nav:'Navigation',ft_con:'Contact',rights:'All rights reserved.',t_pcs:'Pieces'}
 };
 
 let ITEMS=[
@@ -511,6 +518,27 @@ function addToCart(gi){
   document.getElementById('cartPanel').classList.add('open');
 }
 
+const cardQty={};
+function desQty(gi,delta){
+  if(!cardQty[gi]) cardQty[gi]=1;
+  cardQty[gi]=Math.max(1,cardQty[gi]+delta);
+  const el=document.getElementById('dq-'+gi);
+  if(el) el.textContent=cardQty[gi];
+}
+function addToCartN(gi){
+  const item=ITEMS[gi];
+  const qty=cardQty[gi]||1;
+  const price=parseInt(item.price);
+  const id=''+gi;
+  let cart=getCart();
+  const found=cart.find(c=>c.id===id);
+  if(found) found.qty+=qty;
+  else cart.push({id,gi,names:item.name,price,sizeLabel:'',qty});
+  saveCart(cart);
+  updateCartUI();
+  document.getElementById('cartPanel').classList.add('open');
+}
+
 function changeQty(id,delta){
   let cart=getCart();
   const it=cart.find(c=>c.id===id);
@@ -610,6 +638,28 @@ function renderMenu(){
         </div>
       </div>
     </div>`;
+    }
+    if(item.cat==='desserts'){
+      return `<div class="m-card fi">
+        <div class="m-img">
+          ${item.img?`<img src="${item.img}" alt="${name}" loading="lazy" onerror="this.style.display='none'">`:''}
+          ${item.badge?`<span class="m-badge">${item.badge}</span>`:''}
+        </div>
+        <div class="m-body">
+          <h3 class="m-name">${name}</h3>
+          <p class="m-desc">${desc}</p>
+          <div class="m-ft-des">
+            <div class="des-qty-row">
+              <span class="des-qty-lbl">${t('t_pcs')}</span>
+              <button class="dq-btn" onclick="desQty(${gi},-1)">−</button>
+              <span class="dq-num" id="dq-${gi}">1</span>
+              <button class="dq-btn" onclick="desQty(${gi},1)">+</button>
+              <span class="m-price">${item.price}</span>
+            </div>
+            <button class="btn-ord btn-ord-full" onclick="addToCartN(${gi})">${t('cart_add')}</button>
+          </div>
+        </div>
+      </div>`;
     }
     return `<div class="m-card fi">
       <div class="m-img">
