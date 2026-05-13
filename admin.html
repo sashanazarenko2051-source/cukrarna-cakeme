@@ -178,6 +178,9 @@ body{font-family:'Raleway',sans-serif;background:var(--bg0);color:var(--tx0)}
 .img-upload-preview{width:100%;max-height:320px;object-fit:contain;background:var(--bg2);display:none;border:1px solid var(--bdr);margin-top:8px}
 .img-reset-btn{display:none;width:100%;margin-top:6px;background:transparent;border:1px solid var(--bdr);color:var(--tx2);padding:6px;font:.65rem 'Raleway',sans-serif;cursor:pointer;transition:.2s;letter-spacing:.5px}
 .img-reset-btn:hover{border-color:#e08080;color:#e08080}
+.img-rotate-row{display:none;gap:6px;margin-top:6px}
+.img-rotate-btn{flex:1;background:transparent;border:1px solid var(--bdr);color:var(--tx1);padding:6px 0;font-size:1.2rem;cursor:pointer;transition:.2s;line-height:1}
+.img-rotate-btn:hover{border-color:var(--gold-d);color:var(--gold)}
 .qty-ctrl-lbl{display:flex;align-items:center;gap:8px;cursor:pointer;font-size:.78rem;color:var(--tx1);margin-top:2px}
 .qty-ctrl-lbl input[type=checkbox]{accent-color:var(--gold);width:15px;height:15px;cursor:pointer}
 
@@ -484,6 +487,10 @@ body{font-family:'Raleway',sans-serif;background:var(--bg0);color:var(--tx0)}
             </div>
             <img class="img-upload-preview" id="imgUploadPreview" alt="" onerror="this.style.display='none';document.getElementById('uploadZone').style.display=''">
             <button type="button" class="img-reset-btn" id="imgResetBtn" data-k="adm_img_remove">✕ Odebrat obrázek</button>
+            <div class="img-rotate-row" id="imgRotateRow">
+              <button type="button" class="img-rotate-btn" id="rotateLeftBtn" title="Otočit doleva">↺</button>
+              <button type="button" class="img-rotate-btn" id="rotateRightBtn" title="Otočit doprava">↻</button>
+            </div>
           </div>
         </div>
         <div class="sizes-section">
@@ -1670,6 +1677,26 @@ document.querySelectorAll('.ap-btn').forEach(btn=>btn.addEventListener('click',(
 
 /* ── Image upload & card preview ── */
 let currentImgData = '';
+let _origImg = null;
+let _currentRot = 0;
+
+function _applyRotation(){
+  if(!_origImg) return;
+  const swap = _currentRot === 90 || _currentRot === 270;
+  const ow = _origImg.width, oh = _origImg.height;
+  let cw = swap ? oh : ow, ch = swap ? ow : oh;
+  const MAX = 900, scale = Math.min(1, MAX/cw, MAX/ch);
+  cw = Math.round(cw*scale); ch = Math.round(ch*scale);
+  const canvas = document.createElement('canvas');
+  canvas.width = cw; canvas.height = ch;
+  const ctx = canvas.getContext('2d');
+  ctx.translate(cw/2, ch/2);
+  ctx.rotate(_currentRot * Math.PI/180);
+  ctx.drawImage(_origImg, -ow*scale/2, -oh*scale/2, ow*scale, oh*scale);
+  currentImgData = canvas.toDataURL('image/jpeg', 0.82);
+  imgPrev.src = currentImgData;
+  updateCardPreview();
+}
 
 const uploadZone  = document.getElementById('uploadZone');
 const fImgFile    = document.getElementById('fImgFile');
@@ -1686,6 +1713,8 @@ uploadZone.addEventListener('drop', e => {
 });
 fImgFile.addEventListener('change', function(){ if(this.files[0]) loadImgFile(this.files[0]); });
 imgResetBtn.addEventListener('click', resetImg);
+document.getElementById('rotateLeftBtn').addEventListener('click', ()=>{ _currentRot=(_currentRot-90+360)%360; _applyRotation(); });
+document.getElementById('rotateRightBtn').addEventListener('click', ()=>{ _currentRot=(_currentRot+90)%360; _applyRotation(); });
 
 function loadImgFile(file){
   if(file.size > 3*1024*1024){ alert(t('adm_img_big')); return; }
@@ -1693,18 +1722,12 @@ function loadImgFile(file){
   reader.onload = ev => {
     const img = new Image();
     img.onload = () => {
-      const canvas = document.createElement('canvas');
-      let w = img.width, h = img.height, MAX = 900;
-      if(w > MAX){ h = Math.round(h*MAX/w); w = MAX; }
-      if(h > MAX){ w = Math.round(w*MAX/h); h = MAX; }
-      canvas.width = w; canvas.height = h;
-      canvas.getContext('2d').drawImage(img, 0, 0, w, h);
-      currentImgData = canvas.toDataURL('image/jpeg', 0.82);
-      imgPrev.src = currentImgData;
+      _origImg = img; _currentRot = 0;
+      _applyRotation();
       imgPrev.style.display = 'block';
       uploadZone.style.display = 'none';
       imgResetBtn.style.display = 'block';
-      updateCardPreview();
+      document.getElementById('imgRotateRow').style.display = 'flex';
     };
     img.src = ev.target.result;
   };
@@ -1713,8 +1736,10 @@ function loadImgFile(file){
 
 function resetImg(){
   currentImgData = ''; fImgFile.value = '';
+  _origImg = null; _currentRot = 0;
   imgPrev.style.display = 'none';
   imgResetBtn.style.display = 'none';
+  document.getElementById('imgRotateRow').style.display = 'none';
   uploadZone.style.display = '';
   updateCardPreview();
 }
