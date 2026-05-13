@@ -621,9 +621,10 @@ function renderMenu(){
     if(item.sizes && item.sizes.length){
       const si=defSi(item);
       const curSz=item.sizes[si];
+      const ipos0=item.img_pos||'center';
       return `<div class="m-card fi">
       <div class="m-img">
-        ${item.img?`<img src="${item.img}" alt="${name}" loading="lazy" onerror="this.style.display='none'">`:''}
+        ${item.img?`<img src="${item.img}" alt="${name}" loading="lazy" onerror="this.style.display='none'" style="object-position:${ipos0}">`:''}
         ${item.badge?`<span class="m-badge">${item.badge}</span>`:''}
       </div>
       <div class="m-body">
@@ -639,10 +640,11 @@ function renderMenu(){
       </div>
     </div>`;
     }
-    if(item.cat==='desserts'){
+    if(item.qty_ctrl || item.cat==='desserts'){
+      const ipos=item.img_pos||'center';
       return `<div class="m-card fi">
         <div class="m-img">
-          ${item.img?`<img src="${item.img}" alt="${name}" loading="lazy" onerror="this.style.display='none'">`:''}
+          ${item.img?`<img src="${item.img}" alt="${name}" loading="lazy" onerror="this.style.display='none'" style="object-position:${ipos}">`:''}
           ${item.badge?`<span class="m-badge">${item.badge}</span>`:''}
         </div>
         <div class="m-body">
@@ -661,9 +663,10 @@ function renderMenu(){
         </div>
       </div>`;
     }
+    const ipos1=item.img_pos||'center';
     return `<div class="m-card fi">
       <div class="m-img">
-        ${item.img?`<img src="${item.img}" alt="${name}" loading="lazy" onerror="this.style.display='none'">`:''}
+        ${item.img?`<img src="${item.img}" alt="${name}" loading="lazy" onerror="this.style.display='none'" style="object-position:${ipos1}">`:''}
         ${item.badge?`<span class="m-badge">${item.badge}</span>`:''}
       </div>
       <div class="m-body">

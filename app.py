@@ -174,7 +174,9 @@ async def api_menu_add(req: Request):
             'uk': (d.get('desc_uk') or '').strip() or (d.get('desc_cs') or '').strip(),
             'en': (d.get('desc_en') or '').strip() or (d.get('desc_cs') or '').strip(),
         },
-        'sizes': [s for s in d.get('sizes', []) if s.get('label') and s.get('price')],
+        'sizes':    [s for s in d.get('sizes', []) if s.get('label') and s.get('price')],
+        'qty_ctrl': bool(d.get('qty_ctrl', False)),
+        'img_pos':  (d.get('img_pos') or '').strip(),
     }
     with _get_pool().connection() as conn:
         conn.execute('INSERT INTO menu_items (id, data) VALUES (%s, %s)',
@@ -196,6 +198,10 @@ async def api_menu_patch(item_id: int, req: Request):
                 item[f] = (d[f] or '').strip()
         if 'favorite' in d:
             item['favorite'] = bool(d['favorite'])
+        if 'qty_ctrl' in d:
+            item['qty_ctrl'] = bool(d['qty_ctrl'])
+        if 'img_pos' in d:
+            item['img_pos'] = (d['img_pos'] or '').strip()
         if 'sizes' in d:
             raw = d['sizes'] if isinstance(d['sizes'], list) else []
             item['sizes'] = [s for s in raw if s.get('label') and s.get('price')]
