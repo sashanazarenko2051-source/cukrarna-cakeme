@@ -752,8 +752,19 @@ async function loadCustomMenu(){
       ITEMS.forEach((item,i)=>{if(hiddenSet.has(i)) item._hidden=true;});
     }
     const customNames=new Set(custom.map(i=>i.name?.cs).filter(Boolean));
-    ITEMS.forEach(item=>{if(customNames.has(item.name?.cs)) item._hidden=true;});
-    custom.forEach(item=>ITEMS.push({...item, fav:!!item.favorite}));
+    const staticQtyCtrl={};
+    ITEMS.forEach(item=>{
+      if(customNames.has(item.name?.cs)){
+        if(item.qty_ctrl===false) staticQtyCtrl[item.name.cs]=false;
+        item._hidden=true;
+      }
+    });
+    custom.forEach(item=>{
+      const merged={...item,fav:!!item.favorite};
+      if((item.qty_ctrl===undefined||item.qty_ctrl===null) && staticQtyCtrl[item.name?.cs]===false)
+        merged.qty_ctrl=false;
+      ITEMS.push(merged);
+    });
     // Inject custom category tabs
     if(cr.status==='fulfilled'&&cr.value.ok){
       const {categories}=await cr.value.json();
