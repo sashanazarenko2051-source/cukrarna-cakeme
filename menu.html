@@ -379,7 +379,7 @@ let ITEMS=[
    name:{cs:'Pistácie-Malina',uk:'Фісташка-малина',en:'Pistachio-Raspberry'},
    desc:{cs:'Jemný piškot s pistáciovou pěnou a čerstvými malinami. Cena vč. krabice.',uk:'Ніжний бісквіт з фісташковим мусом та свіжою малиною. Ціна вкл. коробку.',en:'Delicate sponge with pistachio mousse and fresh raspberries. Price incl. box.'}},
   // DEZERTY
-  {cat:'desserts',price:'97 Kč',badge:'',img:'https://imageproxy.wolt.com/assets/697228caf1232b338e039780',
+  {cat:'desserts',qty_ctrl:false,price:'97 Kč',badge:'',img:'https://imageproxy.wolt.com/assets/697228caf1232b338e039780',
    name:{cs:'Tři čokolády',uk:'Три шоколади',en:'Three Chocolates'},
    desc:{cs:'1 ks. Tři vrstvy čokoládové pěny — bílá, mléčná a hořká čokoláda',uk:'1 шт. Три шари шоколадного мусу — білий, молочний та гіркий шоколад',en:'1 pc. Three layers of chocolate mousse — white, milk and dark chocolate'}},
   {cat:'desserts',price:'97 Kč',badge:'',img:'https://imageproxy.wolt.com/assets/697992ef72674ce89f7a8f71',
@@ -520,14 +520,14 @@ function addToCart(gi){
 
 const cardQty={};
 function desQty(gi,delta){
-  if(!cardQty[gi]) cardQty[gi]=1;
-  cardQty[gi]=Math.max(1,cardQty[gi]+delta);
+  if(!cardQty[gi]) cardQty[gi]=5;
+  cardQty[gi]=Math.max(5,cardQty[gi]+delta);
   const el=document.getElementById('dq-'+gi);
   if(el) el.textContent=cardQty[gi];
 }
 function addToCartN(gi){
   const item=ITEMS[gi];
-  const qty=cardQty[gi]||1;
+  const qty=cardQty[gi]||5;
   const price=parseInt(item.price);
   const id=''+gi;
   let cart=getCart();
@@ -652,7 +652,7 @@ function renderMenu(){
             <div class="des-qty-row">
               <span class="des-qty-lbl">${t('t_pcs')}</span>
               <button class="dq-btn" onclick="desQty(${gi},-1)">−</button>
-              <span class="dq-num" id="dq-${gi}">1</span>
+              <span class="dq-num" id="dq-${gi}">5</span>
               <button class="dq-btn" onclick="desQty(${gi},1)">+</button>
               <span class="m-price">${item.price}</span>
             </div>
