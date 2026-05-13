@@ -614,6 +614,8 @@ function renderMenu(){
   else if(tab==='all') list=ITEMS.filter(i=>!i._hidden&&i.cat!=='drinks');
   else if(tab!=='drinks') list=ITEMS.filter(i=>i.cat===tab&&!i._hidden);
   else list=[];
+  const _seenImgs=new Set();
+  list=list.filter(i=>{if(!i.img) return true; if(_seenImgs.has(i.img)) return false; _seenImgs.add(i.img); return true;});
   grid.innerHTML=list.map((item)=>{
     const gi=ITEMS.indexOf(item);
     const name=item.name[lang]||item.name.cs;
