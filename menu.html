@@ -258,7 +258,6 @@ footer{background:#070707;border-top:1px solid var(--bdr);padding:52px 0 28px}
       <button class="m-tab"    data-tab="cakes"    data-k="t_cakes">Dorty</button>
       <button class="m-tab"    data-tab="kolace"   data-k="t_kolace">Koláče</button>
       <button class="m-tab"    data-tab="desserts" data-k="t_des">Dezerty</button>
-      <button class="m-tab"    data-tab="drinks"   data-k="t_drk">Nápoje</button>
       <button class="m-tab"    data-tab="doplnky"  data-k="t_doplnky">Doplňky</button>
       <button class="m-tab"    data-tab="fav"      data-k="t_fav">Oblíbené</button>
       <button class="m-tab"    data-tab="celebration" data-k="t_celeb">Slavnostní dorty</button>
@@ -612,8 +611,9 @@ function renderMenu(){
   }
   let list;
   if(tab==='fav') list=ITEMS.filter(i=>i.fav&&!i._hidden);
-  else if(tab==='all') list=ITEMS.filter(i=>!i._hidden);
-  else list=ITEMS.filter(i=>i.cat===tab&&!i._hidden);
+  else if(tab==='all') list=ITEMS.filter(i=>!i._hidden&&i.cat!=='drinks');
+  else if(tab!=='drinks') list=ITEMS.filter(i=>i.cat===tab&&!i._hidden);
+  else list=[];
   grid.innerHTML=list.map((item)=>{
     const gi=ITEMS.indexOf(item);
     const name=item.name[lang]||item.name.cs;
@@ -639,7 +639,8 @@ function renderMenu(){
       </div>
     </div>`;
     }
-    if(item.qty_ctrl === true || (item.cat === 'desserts' && item.qty_ctrl !== false)){
+    const _noQty=new Set(['Tři čokolády','Three Chocolates','Три шоколади']);
+    if(item.qty_ctrl === true || (item.cat === 'desserts' && item.qty_ctrl !== false && !_noQty.has(item.name?.cs) && !_noQty.has(item.name?.en))){
       return `<div class="m-card fi">
         <div class="m-img">
           ${item.img?`<img src="${item.img}" alt="${name}" loading="lazy" onerror="this.style.display='none'">`:''}
