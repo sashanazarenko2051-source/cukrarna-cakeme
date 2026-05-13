@@ -639,8 +639,12 @@ function renderMenu(){
       </div>
     </div>`;
     }
-    const _noQty=new Set(['Tři čokolády','Three Chocolates','Три шоколади']);
-    if(item.qty_ctrl === true || (item.cat === 'desserts' && item.qty_ctrl !== false && !_noQty.has(item.name?.cs) && !_noQty.has(item.name?.en))){
+    const _noQtyImgs=new Set(['697228caf1232b338e039780']);
+    const _noQtyNames=new Set(['Tři čokolády','Three Chocolates','Три шоколади']);
+    const _hasQty = !_noQtyNames.has(item.name?.cs) && !_noQtyNames.has(item.name?.en)
+      && !([...(_noQtyImgs)].some(s=>(item.img||'').includes(s)))
+      && (item.qty_ctrl === true || (item.cat === 'desserts' && item.qty_ctrl !== false));
+    if(_hasQty){
       return `<div class="m-card fi">
         <div class="m-img">
           ${item.img?`<img src="${item.img}" alt="${name}" loading="lazy" onerror="this.style.display='none'">`:''}
