@@ -1108,7 +1108,7 @@ function renderMenuItems(customItems){
   const staticSrcIdxSet = new Set((customItems||[]).map(i=>i.static_src_idx).filter(v=>v!=null));
   const all = [
     ...STATIC_ITEMS.map((i, idx)=>({...i, _static:true, _staticIdx:idx}))
-      .filter(i=>!hiddenStatics.has(i._staticIdx) && !customNames.has(i.name?.cs) && !staticSrcIdxSet.has(idx)),
+      .filter(i=>!hiddenStatics.has(i._staticIdx) && !customNames.has(i.name?.cs) && !staticSrcIdxSet.has(i._staticIdx)),
     ...(customItems||[]).map(i=>({...i, _custom:true}))
   ];
   let filtered = menuFilter==='custom' ? all.filter(i=>i._custom)
