@@ -614,9 +614,8 @@ function renderMenu(){
   else if(tab==='all') list=ITEMS.filter(i=>!i._hidden&&i.cat!=='drinks');
   else if(tab!=='drinks') list=ITEMS.filter(i=>i.cat===tab&&!i._hidden);
   else list=[];
-  const _imgWinners=new Map();
-  list.forEach(i=>{if(!i.img) return; const prev=_imgWinners.get(i.img); if(!prev||(i.id&&!prev.id)) _imgWinners.set(i.img,i);});
-  list=list.filter(i=>!i.img||_imgWinners.get(i.img)===i);
+  const _customImgSet=new Set(list.filter(i=>i.id).map(i=>i.img).filter(Boolean));
+  list=list.filter(i=>!i.img||i.id||!_customImgSet.has(i.img));
   grid.innerHTML=list.map((item)=>{
     const gi=ITEMS.indexOf(item);
     const name=item.name[lang]||item.name.cs;

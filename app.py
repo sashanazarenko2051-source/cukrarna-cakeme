@@ -175,7 +175,7 @@ async def api_menu_add(req: Request):
             'en': (d.get('desc_en') or '').strip() or (d.get('desc_cs') or '').strip(),
         },
         'sizes':    [s for s in d.get('sizes', []) if s.get('label') and s.get('price')],
-        'qty_ctrl': bool(d.get('qty_ctrl', False)),
+        'qty_ctrl': True if d.get('qty_ctrl') is True else None,
         'img_pos':  (d.get('img_pos') or '').strip(),
         'static_src_idx': int(d['static_src_idx']) if d.get('static_src_idx') is not None else None,
     }
@@ -200,7 +200,8 @@ async def api_menu_patch(item_id: int, req: Request):
         if 'favorite' in d:
             item['favorite'] = bool(d['favorite'])
         if 'qty_ctrl' in d:
-            item['qty_ctrl'] = bool(d['qty_ctrl'])
+            val = d['qty_ctrl']
+            item['qty_ctrl'] = True if val is True else (False if val is False else None)
         if 'img_pos' in d:
             item['img_pos'] = (d['img_pos'] or '').strip()
         if 'sizes' in d:

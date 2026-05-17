@@ -1105,9 +1105,10 @@ async function loadMenuItems(){
 function renderMenuItems(customItems){
   const el = document.getElementById('customItemsList');
   const customNames = new Set((customItems||[]).map(i=>i.name?.cs).filter(Boolean));
+  const staticSrcIdxSet = new Set((customItems||[]).map(i=>i.static_src_idx).filter(v=>v!=null));
   const all = [
     ...STATIC_ITEMS.map((i, idx)=>({...i, _static:true, _staticIdx:idx}))
-      .filter(i=>!hiddenStatics.has(i._staticIdx) && !customNames.has(i.name?.cs)),
+      .filter(i=>!hiddenStatics.has(i._staticIdx) && !customNames.has(i.name?.cs) && !staticSrcIdxSet.has(idx)),
     ...(customItems||[]).map(i=>({...i, _custom:true}))
   ];
   let filtered = menuFilter==='custom' ? all.filter(i=>i._custom)
@@ -1381,6 +1382,7 @@ function startEditStatic(idx){
 
 function startEdit(item){
   editingId = item.id;
+  _staticSrcIdx = null;
   document.getElementById('fCat').value        = item.cat || 'desserts';
   document.getElementById('fPrice').value      = item.price || '';
   document.getElementById('fNameCs').value     = item.name?.cs || '';
@@ -1493,7 +1495,7 @@ document.getElementById('addItemBtn').addEventListener('click', async ()=>{
     name_en: document.getElementById('fNameEn').value.trim(),
     badge:   document.getElementById('fBadge').value.trim(),
     img:      currentImgData,
-    qty_ctrl: document.getElementById('fQtyCtrl')?.checked || false,
+    qty_ctrl: document.getElementById('fQtyCtrl')?.checked ? true : null,
     desc_cs:  document.getElementById('fDescCs').value.trim(),
     desc_uk:  document.getElementById('fDescUk').value.trim(),
     desc_en:  document.getElementById('fDescEn').value.trim(),
