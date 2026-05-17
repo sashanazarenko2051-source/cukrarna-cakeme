@@ -215,6 +215,8 @@ body{font-family:'Raleway',sans-serif;background:var(--bg0);color:var(--tx0)}
 .ci-static-badge{font-size:.58rem;color:var(--tx2);letter-spacing:.8px;text-transform:uppercase;border:1px solid var(--bdr);padding:2px 6px;white-space:nowrap;flex-shrink:0}
 .ci-edit{background:transparent;border:1px solid transparent;color:var(--tx2);width:28px;height:28px;cursor:pointer;font-size:1rem;transition:.2s;flex-shrink:0;display:flex;align-items:center;justify-content:center}
 .ci-edit:hover{border-color:var(--gold-d);color:var(--gold)}
+.ci-copy{background:transparent;border:1px solid transparent;color:var(--tx2);width:28px;height:28px;cursor:pointer;font-size:.85rem;transition:.2s;flex-shrink:0;display:flex;align-items:center;justify-content:center}
+.ci-copy:hover{border-color:#6aab6a;color:#8fcc8f}
 .ci-ks{background:transparent;border:1px solid transparent;color:var(--tx2);width:30px;height:30px;cursor:pointer;font-size:.62rem;letter-spacing:.5px;font-family:'Raleway',sans-serif;font-weight:700;text-transform:uppercase;transition:.2s;flex-shrink:0;display:flex;align-items:center;justify-content:center}
 .ci-ks:hover{border-color:var(--gold-d);color:var(--gold)}
 .ci-ks.on{color:var(--gold);border-color:var(--gold)}
@@ -700,7 +702,8 @@ const TA = {
     adm_all_items_title:'Všechny položky menu',
     adm_edit_title:'Upravit položku', adm_save_btn:'✓ Uložit změny',
     adm_cancel_edit:'✕ Zrušit úpravy', adm_saved_ok:'✓ Uloženo!',
-    adm_custom_only:'Vlastní', adm_static_lbl:'Základ', adm_save_as_new:'uložit jako novou',
+    adm_custom_only:'Vlastní', adm_static_lbl:'Základ', adm_save_as_new:'nahradit originál',
+    adm_copy_item:'Přidat jako nový (originál zůstane)', adm_copy_as_new:'přidat jako nový',
     adm_analytics:'Analytika',
     adm_ap_7:'7 dní', adm_ap_30:'30 dní', adm_ap_90:'90 dní', adm_ap_all:'Vše',
     adm_an_views:'Zobrazení', adm_an_orders:'Objednávky', adm_an_revenue:'Příjem (Kč)',
@@ -744,7 +747,8 @@ const TA = {
     adm_all_items_title:'All menu items',
     adm_edit_title:'Edit item', adm_save_btn:'✓ Save changes',
     adm_cancel_edit:'✕ Cancel editing', adm_saved_ok:'✓ Saved!',
-    adm_custom_only:'Custom', adm_static_lbl:'Base', adm_save_as_new:'save as new',
+    adm_custom_only:'Custom', adm_static_lbl:'Base', adm_save_as_new:'replace original',
+    adm_copy_item:'Add as new (original stays)', adm_copy_as_new:'add as new',
     adm_analytics:'Analytics',
     adm_ap_7:'7 days', adm_ap_30:'30 days', adm_ap_90:'90 days', adm_ap_all:'All',
     adm_an_views:'Views', adm_an_orders:'Orders', adm_an_revenue:'Revenue (Kč)',
@@ -1133,7 +1137,8 @@ function renderMenuItems(customItems){
       : `<div class="ci-btns">
            <span class="ci-static-badge">${t('adm_static_lbl')}</span>
            <button class="ci-fav${staticFavs.has(item._staticIdx)?' on':''}" onclick="toggleStaticFav(${item._staticIdx})" title="❤">❤</button>
-           <button class="ci-edit" onclick="startEditStatic(${item._staticIdx})" title="✎">✎</button>
+           <button class="ci-copy" onclick="duplicateStatic(${item._staticIdx})" title="${t('adm_copy_item')}">⊕</button>
+           <button class="ci-edit" onclick="startEditStatic(${item._staticIdx})" title="✎ ${t('adm_save_as_new')}">✎</button>
            <button class="ci-del" onclick="hideStatic(${item._staticIdx})" title="✕">✕</button>
          </div>`;
     return `<div class="ci-card">
@@ -1372,6 +1377,33 @@ function startEditStatic(idx){
   document.getElementById('formTitle').textContent = t('adm_edit_title');
   document.getElementById('addItemBtn').textContent = t('adm_save_btn');
   document.getElementById('editModeBanner').textContent = '✎ ' + (item.name?.cs || '') + ' → ' + t('adm_save_as_new');
+  document.getElementById('editModeBanner').classList.add('show');
+  document.getElementById('cancelEditBtn').classList.add('show');
+  formSizes = Array.isArray(item.sizes) ? item.sizes.map(sz=>({label:sz.label,price:sz.price})) : [];
+  renderSizesList();
+  updateCardPreview();
+  document.getElementById('formPanel').scrollIntoView({behavior:'smooth', block:'start'});
+}
+
+function duplicateStatic(idx){
+  const item = STATIC_ITEMS[idx];
+  if(!item) return;
+  editingId = null;
+  _staticSrcIdx = null;
+  document.getElementById('fCat').value    = item.cat || 'desserts';
+  document.getElementById('fPrice').value  = itemPrice(item);
+  document.getElementById('fNameCs').value = (item.name?.cs || '') + ' (kopie)';
+  document.getElementById('fNameUk').value = (item.name?.uk || '') + ' (копія)';
+  document.getElementById('fNameEn').value = (item.name?.en || '') + ' (copy)';
+  document.getElementById('fBadge').value  = item.badge || '';
+  document.getElementById('fDescCs').value = item.desc?.cs || '';
+  document.getElementById('fDescUk').value = item.desc?.uk || '';
+  document.getElementById('fDescEn').value = item.desc?.en || '';
+  const _qc3 = document.getElementById('fQtyCtrl'); if(_qc3) _qc3.checked = !!item.qty_ctrl;
+  if(item.img){ _loadImgForEdit(item.img); } else { resetImg(); }
+  document.getElementById('formTitle').textContent = t('adm_add_title');
+  document.getElementById('addItemBtn').textContent = t('adm_save_btn');
+  document.getElementById('editModeBanner').textContent = '⊕ ' + (item.name?.cs || '') + ' → ' + t('adm_copy_as_new');
   document.getElementById('editModeBanner').classList.add('show');
   document.getElementById('cancelEditBtn').classList.add('show');
   formSizes = Array.isArray(item.sizes) ? item.sizes.map(sz=>({label:sz.label,price:sz.price})) : [];
