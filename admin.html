@@ -616,6 +616,7 @@ let staticFavs = new Set();
 let hiddenStatics = new Set();
 let ordersCache = [];
 let editingId = null;
+let _staticSrcIdx = null;
 let menuFilter = 'all';
 let analyticsPeriod = 0;
 
@@ -1354,8 +1355,8 @@ function startEditById(id){
 function startEditStatic(idx){
   const item = STATIC_ITEMS[idx];
   if(!item) return;
-  // editingId stays null → Save will POST as new custom item (copy of static base)
   editingId = null;
+  _staticSrcIdx = idx;
   document.getElementById('fCat').value    = item.cat || 'desserts';
   document.getElementById('fPrice').value  = itemPrice(item);
   document.getElementById('fNameCs').value = item.name?.cs || '';
@@ -1462,6 +1463,7 @@ document.getElementById('addSizeBtn').addEventListener('click',()=>{
 
 function cancelEdit(){
   editingId = null;
+  _staticSrcIdx = null;
   document.getElementById('formTitle').textContent = t('adm_add_title');
   document.getElementById('addItemBtn').textContent = t('adm_add_btn');
   document.getElementById('editModeBanner').classList.remove('show');
@@ -1495,7 +1497,8 @@ document.getElementById('addItemBtn').addEventListener('click', async ()=>{
     desc_cs:  document.getElementById('fDescCs').value.trim(),
     desc_uk:  document.getElementById('fDescUk').value.trim(),
     desc_en:  document.getElementById('fDescEn').value.trim(),
-    sizes:    formSizes
+    sizes:    formSizes,
+    static_src_idx: _staticSrcIdx
   };
   try{
     let r;

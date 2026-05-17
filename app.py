@@ -177,6 +177,7 @@ async def api_menu_add(req: Request):
         'sizes':    [s for s in d.get('sizes', []) if s.get('label') and s.get('price')],
         'qty_ctrl': bool(d.get('qty_ctrl', False)),
         'img_pos':  (d.get('img_pos') or '').strip(),
+        'static_src_idx': int(d['static_src_idx']) if d.get('static_src_idx') is not None else None,
     }
     with _get_pool().connection() as conn:
         conn.execute('INSERT INTO menu_items (id, data) VALUES (%s, %s)',

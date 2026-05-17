@@ -614,8 +614,9 @@ function renderMenu(){
   else if(tab==='all') list=ITEMS.filter(i=>!i._hidden&&i.cat!=='drinks');
   else if(tab!=='drinks') list=ITEMS.filter(i=>i.cat===tab&&!i._hidden);
   else list=[];
-  const _seenImgs=new Set();
-  list=list.filter(i=>{if(!i.img) return true; if(_seenImgs.has(i.img)) return false; _seenImgs.add(i.img); return true;});
+  const _imgWinners=new Map();
+  list.forEach(i=>{if(!i.img) return; const prev=_imgWinners.get(i.img); if(!prev||(i.id&&!prev.id)) _imgWinners.set(i.img,i);});
+  list=list.filter(i=>!i.img||_imgWinners.get(i.img)===i);
   grid.innerHTML=list.map((item)=>{
     const gi=ITEMS.indexOf(item);
     const name=item.name[lang]||item.name.cs;
@@ -759,10 +760,11 @@ async function loadCustomMenu(){
       ITEMS.forEach((item,i)=>{if(hiddenSet.has(i)) item._hidden=true;});
     }
     const customNames=new Set(custom.map(i=>i.name?.cs).filter(Boolean));
+    const staticSrcIdxSet=new Set(custom.map(i=>i.static_src_idx).filter(v=>v!=null));
     const staticQtyCtrl={};
-    ITEMS.forEach(item=>{
-      if(customNames.has(item.name?.cs)){
-        if(item.qty_ctrl===false) staticQtyCtrl[item.name.cs]=false;
+    ITEMS.forEach((item,i)=>{
+      if(customNames.has(item.name?.cs) || staticSrcIdxSet.has(i)){
+        if(item.qty_ctrl===false) staticQtyCtrl[item.name?.cs]=false;
         item._hidden=true;
       }
     });
