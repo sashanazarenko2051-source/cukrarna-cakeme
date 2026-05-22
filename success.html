@@ -1,6 +1,9 @@
 <!DOCTYPE html>
 <html lang="cs">
 <head>
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=AW-18157915834"></script>
+<script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js',new Date());gtag('config','AW-18157915834');</script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Platba úspěšná — CakeMe</title>
@@ -56,6 +59,7 @@ const sessionId = params.get('session_id');
 const orderId   = params.get('order_id');
 
 function showOk(){
+  gtag('event','conversion',{'send_to':'AW-18157915834/UjMcCJXw37EcELqdr9JD','transaction_id':orderId||''});
   document.getElementById('card').innerHTML = `
     <div class="icon">${tx.ok_icon}</div>
     <h1>${tx.ok_title}</h1>
