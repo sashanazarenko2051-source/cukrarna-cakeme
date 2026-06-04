@@ -385,10 +385,16 @@ input[type="date"]::-webkit-calendar-picker-indicator:hover{opacity:1}
           <label data-k="f_addr">Adresa doručení</label>
           <input type="text" name="address">
         </div>
-        <div class="ord-field full">
+        <div class="ord-field">
           <label data-k="f_date">Datum doručení / převzetí</label>
           <input type="date" name="delivery_date" id="deliveryDate" required>
-          <span class="date-note" data-k="f_date_note">Objednávky na dorty přijímáme nejméně 24 hodin předem</span>
+        </div>
+        <div class="ord-field">
+          <label data-k="f_time">Čas doručení / převzetí</label>
+          <input type="time" name="delivery_time" id="deliveryTime" required min="09:00" max="20:00">
+        </div>
+        <div class="ord-field full" style="margin-top:-10px">
+          <span class="date-note" data-k="f_date_note">Objednávky na dorty přijímáme nejméně 24 hodin předem · pracovní hodiny 09:00–20:00</span>
         </div>
         <div class="ord-field full">
           <label data-k="f_cart">Vaše objednávka</label>
@@ -509,7 +515,7 @@ cs:{nav_home:'Domů',nav_menu:'Menu',nav_about:'O nás',nav_del:'Doručení',nav
   i2t:'Cena doručení',i2d:'mimo Prahu do 15 km · 250 Kč',i2e:'nad 15 km · dle dohody',
   oc_ttl:'Objednejte nyní',oc_sub:'Vyplňte formulář — potvrdíme do 15 minut',
   f_name:'Jméno',f_phone:'Telefon',f_phone_opt:'nepovinné',f_addr:'Adresa doručení',
-  f_date:'Datum doručení / převzetí',f_date_note:'Objednávky na dorty přijímáme nejméně 24 hodin předem',
+  f_date:'Datum doručení / převzetí',f_time:'Čas doručení / převzetí',f_date_note:'Objednávky na dorty přijímáme nejméně 24 hodin předem · pracovní hodiny 09:00–20:00',
   f_pay_dep_cash:'50 % hotově',f_pay_dep_card:'50 % kartou',f_pay_dep_note:'50% záloha při objednávce',
   f_cart:'Vaše objednávka',cart_total:'Celkem',cart_empty_del:'Košík je prázdný — přidejte zboží z menu',go_menu:'Přejít na menu',
   f_table:'Stůl', f_type:'Způsob objednávky',ot_delivery:'Doručení domů',ot_instore:'Osobní odběr',
@@ -527,7 +533,7 @@ en:{nav_home:'Home',nav_menu:'Menu',nav_about:'About',nav_del:'Delivery',nav_con
   i2t:'Delivery Price',i2d:'outside Prague up to 15 km · 250 CZK',i2e:'over 15 km · by arrangement',
   oc_ttl:'Order Now',oc_sub:'Fill in the form — we\'ll confirm within 15 minutes',
   f_name:'Name',f_phone:'Phone',f_phone_opt:'optional',f_addr:'Delivery Address',
-  f_date:'Delivery / Pickup Date',f_date_note:'Cake orders require at least 24 hours notice',
+  f_date:'Delivery / Pickup Date',f_time:'Delivery / Pickup Time',f_date_note:'Cake orders require at least 24 hours notice · working hours 09:00–20:00',
   f_pay_dep_cash:'50% cash',f_pay_dep_card:'50% card',f_pay_dep_note:'50% prepayment upon ordering',
   f_cart:'Your Order',cart_total:'Total',cart_empty_del:'Cart is empty — add items from the menu',go_menu:'Go to Menu',
   f_table:'Table', f_type:'Order type',ot_delivery:'Home Delivery',ot_instore:'In-store Pickup',
@@ -665,6 +671,7 @@ document.getElementById('orderForm').addEventListener('submit',async function(e)
     payment:       document.getElementById('paymentHidden').value,
     order_type:    document.getElementById('orderTypeInput').value,
     delivery_date: document.getElementById('deliveryDate').value,
+    delivery_time: document.getElementById('deliveryTime').value,
   };
 
   // ── Online payment via Stripe ──
@@ -715,12 +722,13 @@ document.getElementById('orderForm').addEventListener('submit',async function(e)
   }
   btn.disabled=false; btn.textContent=orig;
 });
-// Set min date to tomorrow
+// Set min date to tomorrow, default time 12:00
 (function(){
   const d=new Date(); d.setDate(d.getDate()+1);
   const iso=d.toISOString().split('T')[0];
   document.getElementById('deliveryDate').min=iso;
   document.getElementById('deliveryDate').value=iso;
+  document.getElementById('deliveryTime').value='12:00';
 })();
 initLangBtns();applyLang();initFI();
 </script>
