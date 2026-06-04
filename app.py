@@ -81,6 +81,7 @@ def _init_tables():
                 address TEXT, ord TEXT, payment TEXT, order_type TEXT,
                 status TEXT DEFAULT 'new'
             )""")
+        conn.execute("ALTER TABLE orders ADD COLUMN IF NOT EXISTS delivery_date TEXT DEFAULT ''")
         conn.execute("""
             CREATE TABLE IF NOT EXISTS menu_items (
                 id BIGINT PRIMARY KEY, data JSONB NOT NULL
@@ -429,7 +430,9 @@ def _send_ntfy(order: dict):
         name  = (order.get('name') or '').strip()
         items = (order.get('order') or '').strip()[:120]
         phone = (order.get('phone') or '').strip()
-        body  = f"{name} | {phone}\n{items}".strip().encode('utf-8')
+        date  = (order.get('delivery_date') or '').strip()
+        date_line = f"\nDatum: {date}" if date else ''
+        body  = f"{name} | {phone}{date_line}\n{items}".strip().encode('utf-8')
         req   = urllib.request.Request(
             f'https://ntfy.sh/{topic}',
             data=body,
@@ -479,23 +482,24 @@ async def api_categories_set(req: Request):
 async def api_order(req: Request, bg: BackgroundTasks):
     d = await req.json()
     order = {
-        'id':         int(time.time() * 1000),
-        'ts':         time.strftime('%Y-%m-%dT%H:%M:%SZ', time.gmtime()),
-        'name':       (d.get('name')       or '').strip(),
-        'phone':      (d.get('phone')      or '').strip(),
-        'address':    (d.get('address')    or '').strip(),
-        'order':      (d.get('order')      or '').strip(),
-        'payment':    (d.get('payment')    or '').strip(),
-        'order_type': (d.get('order_type') or '').strip(),
-        'status':     'new',
+        'id':            int(time.time() * 1000),
+        'ts':            time.strftime('%Y-%m-%dT%H:%M:%SZ', time.gmtime()),
+        'name':          (d.get('name')          or '').strip(),
+        'phone':         (d.get('phone')         or '').strip(),
+        'address':       (d.get('address')       or '').strip(),
+        'order':         (d.get('order')         or '').strip(),
+        'payment':       (d.get('payment')       or '').strip(),
+        'order_type':    (d.get('order_type')    or '').strip(),
+        'delivery_date': (d.get('delivery_date') or '').strip(),
+        'status':        'new',
     }
     with _get_pool().connection() as conn:
         conn.execute(
-            'INSERT INTO orders (id,ts,name,phone,address,ord,payment,order_type,status)'
-            ' VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s)',
+            'INSERT INTO orders (id,ts,name,phone,address,ord,payment,order_type,delivery_date,status)'
+            ' VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)',
             (order['id'], order['ts'], order['name'], order['phone'],
              order['address'], order['order'], order['payment'],
-             order['order_type'], order['status'])
+             order['order_type'], order['delivery_date'], order['status'])
         )
     bg.add_task(_send_ntfy, order)
     bg.add_task(_send_push_notifications, {
@@ -515,7 +519,7 @@ async def api_orders(req: Request):
         with conn.cursor(row_factory=dict_row) as cur:
             cur.execute(
                 'SELECT id,ts,name,phone,address,ord AS "order",'
-                'payment,order_type,status FROM orders ORDER BY id DESC'
+                'payment,order_type,delivery_date,status FROM orders ORDER BY id DESC'
             )
             rows = cur.fetchall()
     return rows
@@ -557,21 +561,22 @@ async def api_create_checkout(req: Request):
     ts = time.strftime('%Y-%m-%dT%H:%M:%SZ', time.gmtime())
     order = {
         'id': order_id, 'ts': ts,
-        'name':       (d.get('name')       or '').strip(),
-        'phone':      (d.get('phone')      or '').strip(),
-        'address':    (d.get('address')    or '').strip(),
-        'order':      (d.get('order')      or '').strip(),
-        'payment':    'online',
-        'order_type': (d.get('order_type') or '').strip(),
-        'status':     'pending_payment',
+        'name':          (d.get('name')          or '').strip(),
+        'phone':         (d.get('phone')         or '').strip(),
+        'address':       (d.get('address')       or '').strip(),
+        'order':         (d.get('order')         or '').strip(),
+        'payment':       'online',
+        'order_type':    (d.get('order_type')    or '').strip(),
+        'delivery_date': (d.get('delivery_date') or '').strip(),
+        'status':        'pending_payment',
     }
     with _get_pool().connection() as conn:
         conn.execute(
-            'INSERT INTO orders (id,ts,name,phone,address,ord,payment,order_type,status)'
-            ' VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s)',
+            'INSERT INTO orders (id,ts,name,phone,address,ord,payment,order_type,delivery_date,status)'
+            ' VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)',
             (order['id'], order['ts'], order['name'], order['phone'],
              order['address'], order['order'], order['payment'],
-             order['order_type'], order['status'])
+             order['order_type'], order['delivery_date'], order['status'])
         )
 
     host   = req.headers.get('X-Forwarded-Host') or req.headers.get('host', '')
