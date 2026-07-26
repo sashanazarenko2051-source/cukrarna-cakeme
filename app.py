@@ -134,16 +134,21 @@ async def _http_err(req, exc):
 # ── /api/auth ─────────────────────────────────────────────────────────────────
 @app.post('/api/auth')
 async def api_auth(req: Request):
-    ip  = _get_ip(req)
+    ip = _get_ip(req)
+    d  = await req.json()
     now = time.time()
-    _fail_log[ip] = [t for t in _fail_log[ip] if now - t < 900]
-    if len(_fail_log[ip]) >= 5:
+    attempts = [t for t in _fail_log.get(ip, []) if now - t < 900]
+    if attempts:
+        _fail_log[ip] = attempts
+    elif ip in _fail_log:
+        del _fail_log[ip]
+    if len(attempts) >= 5:
         raise HTTPException(429, 'Too many attempts. Try again in 15 minutes.')
-    d = await req.json()
     if d.get('pass') == ADMIN_PASS:
         return {'token': _make_token()}
-    _fail_log[ip].append(now)
-    raise HTTPException(401, {'error': 'Invalid password', 'remaining': 5 - len(_fail_log[ip])})
+    attempts.append(now)
+    _fail_log[ip] = attempts
+    raise HTTPException(401, {'error': 'Invalid password', 'remaining': 5 - len(attempts)})
 
 # ── /api/menu ─────────────────────────────────────────────────────────────────
 @app.get('/api/menu')
@@ -724,10 +729,11 @@ def _cancel():
 
 @app.get('/{path:path}')
 def _static(path: str):
-    if path in _BLOCKED or path.startswith('.'):
+    norm = os.path.normpath(path).replace(os.sep, '/')
+    if norm.startswith('..') or os.path.isabs(norm) or norm in _BLOCKED or norm.startswith('.'):
         raise HTTPException(404)
-    if os.path.isfile(path):
-        if path.endswith('.html') and path not in _NO_TRACK:
+    if os.path.isfile(norm):
+        if norm.endswith('.html') and norm not in _NO_TRACK:
             _inc_pageviews()
-        return FileResponse(path)
+        return FileResponse(norm)
     raise HTTPException(404)

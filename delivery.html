@@ -549,7 +549,8 @@ function applyLang(){
   document.documentElement.lang=lang==='en'?'en':'cs';
   document.querySelectorAll('[data-k]').forEach(el=>{const val=t(el.dataset.k);if(val)el.textContent=val;});
   const pi=document.getElementById('phoneInput');
-  if(pi){const isDelivery=document.querySelector('.ord-type-btn.on').dataset.type==='delivery';pi.placeholder=isDelivery?'':t('f_phone_opt');pi.required=isDelivery;}
+  if(pi){const isDelivery=document.querySelector('.ord-type-btn.on').dataset.type==='delivery';pi.placeholder=isDelivery?'':t('f_phone_opt');pi.required=isDelivery;
+    document.getElementById('orderTypeInput').value=isDelivery?t('ot_delivery'):t('ot_instore');}
   updatePaymentLabels();
   renderCartDel();
   setTimeout(()=>{document.querySelectorAll('[data-k]').forEach(el=>{const val=t(el.dataset.k);if(val)el.textContent=val;});},100);
