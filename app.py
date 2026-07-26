@@ -452,6 +452,39 @@ def _send_ntfy(order: dict):
     except Exception as e:
         print(f'[NTFY] Error: {e}', file=sys.stderr)
 
+def _send_telegram(order: dict):
+    import sys, urllib.request, urllib.parse, urllib.error
+    token   = os.environ.get('TELEGRAM_TOKEN', '')
+    chat_id = os.environ.get('TELEGRAM_CHAT_ID', '')
+    if not token or not chat_id:
+        return
+    try:
+        name  = (order.get('name') or '').strip()
+        phone = (order.get('phone') or '').strip()
+        items = (order.get('order') or '').strip()
+        date  = (order.get('delivery_date') or '').strip()
+        time_ = (order.get('delivery_time') or '').strip()
+        dt    = f"{date} {time_}".strip()
+        lines = ['🎂 Nová objednávka! Cukrárna CakeMe', f'Jméno: {name}', f'Telefon: {phone}']
+        if dt:
+            lines.append(f'Datum: {dt}')
+        if items:
+            lines.append(f'Objednávka: {items}')
+        if order.get('address'):
+            lines.append(f"Adresa: {order['address']}")
+        if order.get('payment'):
+            lines.append(f"Platba: {order['payment']}")
+        text = '\n'.join(lines)
+        body = urllib.parse.urlencode({'chat_id': chat_id, 'text': text}).encode()
+        req  = urllib.request.Request(
+            f'https://api.telegram.org/bot{token}/sendMessage',
+            data=body, method='POST'
+        )
+        urllib.request.urlopen(req, timeout=8)
+        print(f'[TG] Sent for order: {name}', file=sys.stderr)
+    except Exception as e:
+        print(f'[TG] Error: {e}', file=sys.stderr)
+
 @app.post('/api/notif-info')
 async def api_notif_info(req: Request):
     d = await req.json()
@@ -506,6 +539,7 @@ async def api_order(req: Request, bg: BackgroundTasks):
              order['order_type'], order['delivery_date'], order['delivery_time'], order['status'])
         )
     bg.add_task(_send_ntfy, order)
+    bg.add_task(_send_telegram, order)
     bg.add_task(_send_push_notifications, {
         'title': 'Nová objednávka! 🎂',
         'body':  f"{order['name']} — {(order['order'] or '')[:80]}",
@@ -611,7 +645,7 @@ async def api_create_checkout(req: Request):
 
 # ── /api/verify-payment ───────────────────────────────────────────────────────
 @app.get('/api/verify-payment')
-async def api_verify_payment(session_id: str, order_id: int):
+async def api_verify_payment(session_id: str, order_id: int, bg: BackgroundTasks):
     if not STRIPE_SECRET_KEY:
         raise HTTPException(503, 'Stripe not configured')
     try:
@@ -621,10 +655,17 @@ async def api_verify_payment(session_id: str, order_id: int):
     if (session.payment_status == 'paid'
             and str(session.metadata.get('order_id')) == str(order_id)):
         with _get_pool().connection() as conn:
-            conn.execute(
-                'UPDATE orders SET status=%s WHERE id=%s AND status=%s',
-                ('paid', order_id, 'pending_payment')
-            )
+            with conn.cursor(row_factory=dict_row) as cur:
+                cur.execute(
+                    'UPDATE orders SET status=%s WHERE id=%s AND status=%s'
+                    ' RETURNING id,ts,name,phone,address,ord AS "order",'
+                    'payment,order_type,delivery_date,delivery_time',
+                    ('paid', order_id, 'pending_payment')
+                )
+                row = cur.fetchone()
+        if row:
+            bg.add_task(_send_ntfy, row)
+            bg.add_task(_send_telegram, row)
         return {'paid': True}
     return {'paid': False}
 
