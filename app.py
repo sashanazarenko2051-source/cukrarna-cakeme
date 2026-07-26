@@ -454,9 +454,9 @@ def _send_ntfy(order: dict):
 
 def _send_telegram(order: dict):
     import sys, urllib.request, urllib.parse, urllib.error
-    token   = os.environ.get('TELEGRAM_TOKEN', '')
-    chat_id = os.environ.get('TELEGRAM_CHAT_ID', '')
-    if not token or not chat_id:
+    token    = os.environ.get('TELEGRAM_TOKEN', '')
+    chat_ids = [c.strip() for c in os.environ.get('TELEGRAM_CHAT_ID', '').split(',') if c.strip()]
+    if not token or not chat_ids:
         return
     try:
         name  = (order.get('name') or '').strip()
@@ -475,12 +475,13 @@ def _send_telegram(order: dict):
         if order.get('payment'):
             lines.append(f"Platba: {order['payment']}")
         text = '\n'.join(lines)
-        body = urllib.parse.urlencode({'chat_id': chat_id, 'text': text}).encode()
-        req  = urllib.request.Request(
-            f'https://api.telegram.org/bot{token}/sendMessage',
-            data=body, method='POST'
-        )
-        urllib.request.urlopen(req, timeout=8)
+        for chat_id in chat_ids:
+            body = urllib.parse.urlencode({'chat_id': chat_id, 'text': text}).encode()
+            req  = urllib.request.Request(
+                f'https://api.telegram.org/bot{token}/sendMessage',
+                data=body, method='POST'
+            )
+            urllib.request.urlopen(req, timeout=8)
         print(f'[TG] Sent for order: {name}', file=sys.stderr)
     except Exception as e:
         print(f'[TG] Error: {e}', file=sys.stderr)
