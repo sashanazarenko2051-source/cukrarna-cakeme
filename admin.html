@@ -472,6 +472,10 @@ body{font-family:'Raleway',sans-serif;background:var(--bg0);color:var(--tx0)}
               <span data-k="adm_qty_ctrl_hint">Zobrazit výběr počtu kusů (+/−) na kartě v menu</span>
             </label>
           </div>
+          <div class="mai-field">
+            <label data-k="adm_qty_min_lbl">Minimální počet kusů</label>
+            <input type="number" id="fQtyMin" min="1" max="999" step="1" placeholder="5">
+          </div>
           <div class="mai-field full">
             <label data-k="adm_desc_cs_lbl">Popis CZ</label>
             <input type="text" id="fDescCs" placeholder="Krátký popis česky">
@@ -685,6 +689,7 @@ const TA = {
     adm_name_cs_lbl:'Název CZ *', adm_name_uk_lbl:'Назва UA', adm_name_en_lbl:'Name EN',
     adm_badge_lbl:'Badge (Nové, Bestseller…)',
     adm_qty_ctrl_lbl:'Výběr množství', adm_qty_ctrl_hint:'Počet kusů (+/−) na kartě',
+    adm_qty_min_lbl:'Minimální počet kusů',
     adm_img_pos_lbl:'Poloha obrázku',
     adm_desc_cs_lbl:'Popis CZ', adm_desc_uk_lbl:'Опис UA', adm_desc_en_lbl:'Description EN',
     adm_img_lbl:'Obrázek', adm_img_click:'Klikněte nebo přetáhněte soubor',
@@ -732,6 +737,7 @@ const TA = {
     adm_cat_lbl:'Category *', adm_price_lbl:'Price * (e.g. 133 Kč)',
     adm_name_cs_lbl:'Name CZ *', adm_name_uk_lbl:'Name UA', adm_name_en_lbl:'Name EN',
     adm_badge_lbl:'Badge (New, Bestseller…)',
+    adm_qty_min_lbl:'Minimum quantity',
     adm_desc_cs_lbl:'Description CZ', adm_desc_uk_lbl:'Description UA', adm_desc_en_lbl:'Description EN',
     adm_img_lbl:'Image', adm_img_click:'Click or drag a file here',
     adm_img_hint:'JPG, PNG, WebP · max 3 MB · auto-compressed',
@@ -1383,6 +1389,7 @@ function startEditStatic(idx){
   document.getElementById('fDescUk').value = item.desc?.uk || '';
   document.getElementById('fDescEn').value = item.desc?.en || '';
   const _qc1 = document.getElementById('fQtyCtrl'); if(_qc1) _qc1.checked = !!item.qty_ctrl;
+  const _qm1 = document.getElementById('fQtyMin'); if(_qm1) _qm1.value = item.qty_min || 5;
   if(item.img){ _loadImgForEdit(item.img); } else { resetImg(); }
   document.getElementById('formTitle').textContent = t('adm_edit_title');
   document.getElementById('addItemBtn').textContent = t('adm_save_btn');
@@ -1410,6 +1417,7 @@ function duplicateStatic(idx){
   document.getElementById('fDescUk').value = item.desc?.uk || '';
   document.getElementById('fDescEn').value = item.desc?.en || '';
   const _qc3 = document.getElementById('fQtyCtrl'); if(_qc3) _qc3.checked = !!item.qty_ctrl;
+  const _qm3 = document.getElementById('fQtyMin'); if(_qm3) _qm3.value = item.qty_min || 5;
   if(item.img){ _loadImgForEdit(item.img); } else { resetImg(); }
   document.getElementById('formTitle').textContent = t('adm_add_title');
   document.getElementById('addItemBtn').textContent = t('adm_save_btn');
@@ -1435,6 +1443,7 @@ function startEdit(item){
   document.getElementById('fDescUk').value     = item.desc?.uk || '';
   document.getElementById('fDescEn').value     = item.desc?.en || '';
   const _qc2 = document.getElementById('fQtyCtrl'); if(_qc2) _qc2.checked = !!item.qty_ctrl;
+  const _qm2 = document.getElementById('fQtyMin'); if(_qm2) _qm2.value = item.qty_min || 5;
   const _imgSrc = item.img || STATIC_ITEMS.find(si=>
     si.name?.cs===item.name?.cs || si.name?.uk===item.name?.uk || si.name?.en===item.name?.en
   )?.img || '';
@@ -1515,6 +1524,7 @@ function cancelEdit(){
   ['fNameCs','fNameUk','fNameEn','fPrice','fBadge','fDescCs','fDescUk','fDescEn']
     .forEach(id=>{ const el=document.getElementById(id); if(el) el.value=''; });
   const qc = document.getElementById('fQtyCtrl'); if(qc) qc.checked = false;
+  const qm = document.getElementById('fQtyMin'); if(qm) qm.value = '';
   formSizes = []; renderSizesList();
   resetImg(); updateCardPreview();
 }
@@ -1538,6 +1548,7 @@ document.getElementById('addItemBtn').addEventListener('click', async ()=>{
     badge:   document.getElementById('fBadge').value.trim(),
     img:      currentImgData,
     qty_ctrl: document.getElementById('fQtyCtrl')?.checked ? true : null,
+    qty_min:  parseInt(document.getElementById('fQtyMin')?.value) || 5,
     desc_cs:  document.getElementById('fDescCs').value.trim(),
     desc_uk:  document.getElementById('fDescUk').value.trim(),
     desc_en:  document.getElementById('fDescEn').value.trim(),

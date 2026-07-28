@@ -183,6 +183,7 @@ async def api_menu_add(req: Request):
         },
         'sizes':    [s for s in d.get('sizes', []) if s.get('label') and s.get('price')],
         'qty_ctrl': True if d.get('qty_ctrl') is True else None,
+        'qty_min':  max(1, min(999, int(d['qty_min']))) if str(d.get('qty_min') or '').strip().isdigit() else 5,
         'img_pos':  (d.get('img_pos') or '').strip(),
         'static_src_idx': int(d['static_src_idx']) if d.get('static_src_idx') is not None else None,
     }
@@ -209,6 +210,9 @@ async def api_menu_patch(item_id: int, req: Request):
         if 'qty_ctrl' in d:
             val = d['qty_ctrl']
             item['qty_ctrl'] = True if val is True else (False if val is False else None)
+        if 'qty_min' in d:
+            raw = str(d['qty_min'] or '').strip()
+            item['qty_min'] = max(1, min(999, int(raw))) if raw.isdigit() else 5
         if 'img_pos' in d:
             item['img_pos'] = (d['img_pos'] or '').strip()
         if 'sizes' in d:

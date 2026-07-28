@@ -522,14 +522,15 @@ function addToCart(gi){
 
 const cardQty={};
 function desQty(gi,delta){
-  if(!cardQty[gi]) cardQty[gi]=5;
-  cardQty[gi]=Math.max(5,cardQty[gi]+delta);
+  const min=ITEMS[gi]?.qty_min||5;
+  if(!cardQty[gi]) cardQty[gi]=min;
+  cardQty[gi]=Math.max(min,cardQty[gi]+delta);
   const el=document.getElementById('dq-'+gi);
   if(el) el.textContent=cardQty[gi];
 }
 function addToCartN(gi){
   const item=ITEMS[gi];
-  const qty=cardQty[gi]||5;
+  const qty=cardQty[gi]||item.qty_min||5;
   const price=parseInt(item.price);
   const id=''+gi;
   let cart=getCart();
@@ -662,7 +663,7 @@ function renderMenu(){
             <div class="des-qty-row">
               <span class="des-qty-lbl">${t('t_pcs')}</span>
               <button class="dq-btn" onclick="desQty(${gi},-1)">−</button>
-              <span class="dq-num" id="dq-${gi}">5</span>
+              <span class="dq-num" id="dq-${gi}">${item.qty_min||5}</span>
               <button class="dq-btn" onclick="desQty(${gi},1)">+</button>
               <span class="m-price">${item.price}</span>
             </div>
