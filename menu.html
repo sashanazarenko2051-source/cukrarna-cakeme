@@ -97,6 +97,24 @@ section{padding:96px 0}
 .sz-btn.on{border-color:var(--gold);color:var(--gold);background:rgba(201,169,110,.12)}
 .sz-lbl{display:block;font-weight:700;font-size:.68rem}
 .sz-price{display:block;font-size:.6rem;opacity:.78;margin-top:1px}
+.pop-wrap{margin-bottom:44px}
+.pop-hd{display:flex;align-items:center;gap:16px;margin-bottom:18px}
+.pop-hd::after{content:'';flex:1;height:1px;background:var(--bdr)}
+.pop-ttl{font-size:.72rem;letter-spacing:3px;color:var(--gold);text-transform:uppercase;white-space:nowrap}
+.pop-row{display:grid;grid-auto-flow:column;grid-auto-columns:210px;gap:16px;overflow-x:auto;padding-bottom:10px;scroll-snap-type:x mandatory;-webkit-overflow-scrolling:touch}
+.pop-row::-webkit-scrollbar{height:3px}
+.pop-row::-webkit-scrollbar-thumb{background:var(--gold-d);border-radius:2px}
+.pop-card{background:var(--bg3);border:1px solid var(--bdr);display:flex;flex-direction:column;scroll-snap-align:start;transition:border-color .3s}
+.pop-card:hover{border-color:var(--gold-d)}
+.pop-img{height:140px;position:relative;overflow:hidden;background:#111}
+.pop-img img{width:100%;height:100%;object-fit:contain;display:block}
+.pop-img .m-badge{top:10px;right:10px}
+.pop-rank{position:absolute;top:10px;left:10px;width:26px;height:26px;border:1px solid var(--gold);background:rgba(10,10,10,.75);color:var(--gold);font:700 .72rem 'Raleway',sans-serif;display:flex;align-items:center;justify-content:center}
+.pop-body{padding:12px 14px 14px;display:flex;flex-direction:column;gap:10px;flex:1}
+.pop-name{font-family:'Playfair Display',serif;font-size:1rem;color:var(--tx0);line-height:1.3}
+.pop-ft{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-top:auto}
+.pop-price{font-family:'Playfair Display',serif;font-size:1rem;color:var(--gold);white-space:nowrap}
+.pop-add{padding:6px 10px;font-size:.6rem;letter-spacing:1px;white-space:nowrap}
 .celeb-card{grid-column:1/-1;background:var(--bg3);border:1px solid var(--bdr);padding:52px 40px;text-align:center;max-width:700px;margin:0 auto;position:relative;overflow:hidden}
 .celeb-card::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse at center,rgba(201,169,110,.05) 0%,transparent 70%);pointer-events:none}
 .celeb-h{font-family:'Playfair Display',serif;font-size:1.9rem;color:var(--tx0);font-weight:400;margin-bottom:0}
@@ -181,6 +199,10 @@ footer{background:#070707;border-top:1px solid var(--bdr);padding:52px 0 28px}
   .m-grid{grid-template-columns:1fr 1fr;gap:14px}
   .m-img{height:160px}
   .m-body{padding:14px}
+  .pop-wrap{margin-bottom:30px}
+  .pop-row{grid-auto-columns:165px;gap:12px}
+  .pop-img{height:120px}
+  .pop-name{font-size:.9rem}
   .m-name{font-size:1rem}
   .sz-btn{min-width:44px;padding:6px 8px;font-size:.62rem}
   .sz-lbl{font-size:.62rem}
@@ -255,6 +277,10 @@ footer{background:#070707;border-top:1px solid var(--bdr);padding:52px 0 28px}
       <span class="sec-lbl" data-k="menu_lbl">Naše nabídka</span>
       <h2 class="sec-ttl" data-k="menu_ttl">Menu</h2>
       <div class="sec-div"></div>
+    </div>
+    <div class="pop-wrap" id="popWrap" style="display:none">
+      <div class="pop-hd"><span class="pop-ttl" data-k="pop_ttl">Nejčastěji objednávané</span></div>
+      <div class="pop-row" id="popRow"></div>
     </div>
     <div class="m-tabs fi">
       <button class="m-tab on" data-tab="all"      data-k="t_all">Vše</button>
@@ -347,8 +373,8 @@ footer{background:#070707;border-top:1px solid var(--bdr);padding:52px 0 28px}
 
 <script>
 const T={
-cs:{nav_home:'Domů',nav_menu:'Menu',nav_about:'O nás',nav_del:'Doručení',nav_con:'Kontakt',tagline:'Oslavte každý den',menu_lbl:'Naše nabídka',menu_ttl:'Menu',t_all:'Vše',t_cakes:'Dorty',t_kolace:'Koláče',t_des:'Dezerty',t_drk:'Nápoje',t_doplnky:'Doplňky',t_fav:'Oblíbené',t_celeb:'Slavnostní dorty',celeb_h:'Slavnostní & narozeninové dorty',celeb_warn:'Objednávky přijímáme minimálně 14 dní předem',celeb_p1:'Připravíme dort přesně podle vašich přání — narozeniny, svatba, výročí nebo firemní akce. Zvolte design, chuť a velikost.',celeb_p2:'Pro objednávku nás prosím kontaktujte telefonicky nebo e-mailem.',cart_add:'Do košíku',cart_ttl:'Košík',cart_empty:'Košík je prázdný',cart_total:'Celkem',cart_go:'Objednat s doručením',ft_nav:'Navigace',ft_con:'Kontakt',rights:'Všechna práva vyhrazena.',t_pcs:'Počet kusů'},
-en:{nav_home:'Home',nav_menu:'Menu',nav_about:'About',nav_del:'Delivery',nav_con:'Contact',tagline:'Celebrate Every Day',menu_lbl:'Our Offerings',menu_ttl:'Menu',t_all:'All',t_cakes:'Cakes',t_kolace:'Pastries',t_des:'Desserts',t_drk:'Drinks',t_doplnky:'Additions',t_fav:'Favorites',t_celeb:'Celebration Cakes',celeb_h:'Wedding & Celebration Cakes',celeb_warn:'Orders accepted minimum 2 weeks in advance',celeb_p1:'We\'ll create a cake tailored to your wishes — birthdays, weddings, anniversaries or corporate events. Choose the design, flavour and size.',celeb_p2:'To place an order, please contact us by phone or email.',cart_add:'Add to Cart',cart_ttl:'Cart',cart_empty:'Your cart is empty',cart_total:'Total',cart_go:'Order with Delivery',ft_nav:'Navigation',ft_con:'Contact',rights:'All rights reserved.',t_pcs:'Pieces'}
+cs:{nav_home:'Domů',nav_menu:'Menu',nav_about:'O nás',nav_del:'Doručení',nav_con:'Kontakt',tagline:'Oslavte každý den',menu_lbl:'Naše nabídka',menu_ttl:'Menu',t_all:'Vše',t_cakes:'Dorty',t_kolace:'Koláče',t_des:'Dezerty',t_drk:'Nápoje',t_doplnky:'Doplňky',t_fav:'Oblíbené',t_celeb:'Slavnostní dorty',celeb_h:'Slavnostní & narozeninové dorty',celeb_warn:'Objednávky přijímáme minimálně 14 dní předem',celeb_p1:'Připravíme dort přesně podle vašich přání — narozeniny, svatba, výročí nebo firemní akce. Zvolte design, chuť a velikost.',celeb_p2:'Pro objednávku nás prosím kontaktujte telefonicky nebo e-mailem.',cart_add:'Do košíku',cart_ttl:'Košík',cart_empty:'Košík je prázdný',cart_total:'Celkem',cart_go:'Objednat s doručením',ft_nav:'Navigace',ft_con:'Kontakt',rights:'Všechna práva vyhrazena.',t_pcs:'Počet kusů',pop_ttl:'Nejčastěji objednávané',pop_from:'od'},
+en:{nav_home:'Home',nav_menu:'Menu',nav_about:'About',nav_del:'Delivery',nav_con:'Contact',tagline:'Celebrate Every Day',menu_lbl:'Our Offerings',menu_ttl:'Menu',t_all:'All',t_cakes:'Cakes',t_kolace:'Pastries',t_des:'Desserts',t_drk:'Drinks',t_doplnky:'Additions',t_fav:'Favorites',t_celeb:'Celebration Cakes',celeb_h:'Wedding & Celebration Cakes',celeb_warn:'Orders accepted minimum 2 weeks in advance',celeb_p1:'We\'ll create a cake tailored to your wishes — birthdays, weddings, anniversaries or corporate events. Choose the design, flavour and size.',celeb_p2:'To place an order, please contact us by phone or email.',cart_add:'Add to Cart',cart_ttl:'Cart',cart_empty:'Your cart is empty',cart_total:'Total',cart_go:'Order with Delivery',ft_nav:'Navigation',ft_con:'Contact',rights:'All rights reserved.',t_pcs:'Pieces',pop_ttl:'Most ordered',pop_from:'from'}
 };
 
 let ITEMS=[
@@ -468,9 +494,89 @@ let ITEMS=[
    desc:{cs:'Ovocný nápoj',uk:'Фруктовий напій',en:'Fruit drink'}},
 ];
 
+ITEMS.forEach((item,i)=>{item._key='s:'+i;});
+
 let lang=localStorage.getItem('cakeme_lang')||'cs'; if(lang==='uk') lang='cs';
 let tab='all';
 const selectedSizes={};
+
+// Order of items/tabs and the "most ordered" strip, set in the admin panel
+let LAYOUT={order:[],cats:[],popular:{mode:'auto',count:8,pinned:[]}};
+let POPULAR=[];
+
+function itemRank(item){
+  const o=LAYOUT.order;
+  let i=o.indexOf(item._key);
+  // An edited copy of a built-in item keeps the original's position
+  if(i<0&&item.static_src_idx!=null) i=o.indexOf('s:'+item.static_src_idx);
+  return i<0?o.length+ITEMS.indexOf(item):i;
+}
+function byRank(a,b){return itemRank(a)-itemRank(b);}
+
+function itemHasQty(item){
+  const _noQtyImgs=new Set(['697228caf1232b338e039780']);
+  const _noQtyNames=new Set(['Tři čokolády','Three Chocolates','Три шоколади']);
+  return !_noQtyNames.has(item.name?.cs) && !_noQtyNames.has(item.name?.en)
+    && !([...(_noQtyImgs)].some(s=>(item.img||'').includes(s)))
+    && (item.qty_ctrl === true || (item.cat === 'desserts' && item.qty_ctrl !== false));
+}
+
+function popularItems(){
+  const p=LAYOUT.popular||{};
+  if(p.mode==='off') return [];
+  const visible=ITEMS.filter(i=>!i._hidden);
+  const out=[];
+  const add=it=>{if(it&&!out.includes(it)) out.push(it);};
+  (p.pinned||[]).forEach(k=>add(visible.find(i=>i._key===k||(i.static_src_idx!=null&&'s:'+i.static_src_idx===k))));
+  if(p.mode==='auto'){
+    POPULAR.forEach(({name})=>add(visible.find(i=>i.name?.cs===name||i.name?.en===name||i.name?.uk===name)));
+    if(!out.length) visible.filter(i=>i.fav).sort(byRank).forEach(add);
+  }
+  return out.slice(0,p.count||8);
+}
+
+function renderPopular(){
+  const wrap=document.getElementById('popWrap');
+  const list=popularItems();
+  wrap.style.display=list.length?'':'none';
+  document.getElementById('popRow').innerHTML=list.map((item,n)=>{
+    const gi=ITEMS.indexOf(item);
+    const name=item.name[lang]||item.name.cs;
+    let price=item.price||'';
+    if(item.sizes&&item.sizes.length){
+      const min=Math.min(...item.sizes.map(s=>s.price));
+      price=(item.sizes.length>1?t('pop_from')+' ':'')+min+' Kč';
+    }
+    const add=itemHasQty(item)?`addToCartN(${gi})`:`addToCart(${gi})`;
+    return `<div class="pop-card">
+      <div class="pop-img">
+        ${item.img?`<img src="${item.img}" alt="${name}" loading="lazy" onerror="this.style.display='none'">`:''}
+        <span class="pop-rank">${n+1}</span>
+        ${item.badge?`<span class="m-badge">${item.badge}</span>`:''}
+      </div>
+      <div class="pop-body">
+        <div class="pop-name">${name}</div>
+        <div class="pop-ft">
+          <span class="pop-price">${price}</span>
+          <button class="btn-ord pop-add" onclick="${add}">${t('cart_add')}</button>
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function applyTabOrder(){
+  const tabsEl=document.querySelector('.m-tabs');
+  const btns=[...tabsEl.querySelectorAll('.m-tab')];
+  const rank=b=>{const i=LAYOUT.cats.indexOf(b.dataset.tab);return i<0?LAYOUT.cats.length+btns.indexOf(b):i;};
+  btns.sort((a,b)=>rank(a)-rank(b)).forEach(b=>tabsEl.appendChild(b));
+  // The first tab is the one people see when they open the menu
+  const first=tabsEl.querySelector('.m-tab');
+  if(first){
+    tab=first.dataset.tab;
+    btns.forEach(b=>b.classList.toggle('on',b===first));
+  }
+}
 
 function t(k){ return T[lang][k]||k; }
 
@@ -488,6 +594,7 @@ function applyLang(){
     const val=t(el.dataset.k); if(val) el.textContent=val;
   });
   renderMenu();
+  renderPopular();
   updateCartUI();
   setTimeout(()=>{
     document.querySelectorAll('[data-k]').forEach(el=>{
@@ -619,7 +726,7 @@ function renderMenu(){
   else if(tab!=='drinks') list=ITEMS.filter(i=>i.cat===tab&&!i._hidden);
   else list=[];
   const _customImgSet=new Set(list.filter(i=>i.id).map(i=>i.img).filter(Boolean));
-  list=list.filter(i=>!i.img||i.id||!_customImgSet.has(i.img));
+  list=list.filter(i=>!i.img||i.id||!_customImgSet.has(i.img)).sort(byRank);
   grid.innerHTML=list.map((item)=>{
     const gi=ITEMS.indexOf(item);
     const name=item.name[lang]||item.name.cs;
@@ -645,12 +752,7 @@ function renderMenu(){
       </div>
     </div>`;
     }
-    const _noQtyImgs=new Set(['697228caf1232b338e039780']);
-    const _noQtyNames=new Set(['Tři čokolády','Three Chocolates','Три шоколади']);
-    const _hasQty = !_noQtyNames.has(item.name?.cs) && !_noQtyNames.has(item.name?.en)
-      && !([...(_noQtyImgs)].some(s=>(item.img||'').includes(s)))
-      && (item.qty_ctrl === true || (item.cat === 'desserts' && item.qty_ctrl !== false));
-    if(_hasQty){
+    if(itemHasQty(item)){
       return `<div class="m-card fi">
         <div class="m-img">
           ${item.img?`<img src="${item.img}" alt="${name}" loading="lazy" onerror="this.style.display='none'">`:''}
@@ -747,9 +849,12 @@ document.getElementById('cartBtn').addEventListener('click',()=>{document.getEle
 document.getElementById('cartClose').addEventListener('click',()=>{document.getElementById('cartPanel').classList.remove('open');});
 async function loadCustomMenu(){
   try{
-    const [mr,fr,hr,cr]=await Promise.allSettled([
-      fetch('/api/menu'), fetch('/api/static-favs'), fetch('/api/hidden-statics'), fetch('/api/categories')
+    const [mr,fr,hr,cr,lr,pr]=await Promise.allSettled([
+      fetch('/api/menu'), fetch('/api/static-favs'), fetch('/api/hidden-statics'), fetch('/api/categories'),
+      fetch('/api/menu-layout'), fetch('/api/popular')
     ]);
+    if(lr.status==='fulfilled'&&lr.value.ok) LAYOUT=await lr.value.json();
+    if(pr.status==='fulfilled'&&pr.value.ok) POPULAR=(await pr.value.json()).items||[];
     if(mr.status!=='fulfilled'||!mr.value.ok) return;
     const custom=await mr.value.json();
     if(fr.status==='fulfilled'&&fr.value.ok){
@@ -772,7 +877,7 @@ async function loadCustomMenu(){
       }
     });
     custom.forEach(item=>{
-      const merged={...item,fav:!!item.favorite};
+      const merged={...item,fav:!!item.favorite,_key:'c:'+item.id};
       if((item.qty_ctrl===undefined||item.qty_ctrl===null) && staticQtyCtrl[item.name?.cs]===false)
         merged.qty_ctrl=false;
       ITEMS.push(merged);
@@ -799,6 +904,7 @@ async function loadCustomMenu(){
       }
     }
   }catch(e){}
+  applyTabOrder();
 }
 
 (async()=>{

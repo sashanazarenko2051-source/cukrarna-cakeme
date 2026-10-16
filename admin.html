@@ -276,8 +276,37 @@ body{font-family:'Raleway',sans-serif;background:var(--bg0);color:var(--tx0)}
 .cat-add-row input:focus{border-color:var(--gold)}
 .cat-add-btn{background:transparent;border:1px solid var(--gold-d);color:var(--gold);padding:7px 14px;cursor:pointer;font:.68rem 'Raleway',sans-serif;letter-spacing:1px;text-transform:uppercase;white-space:nowrap;transition:.2s}
 .cat-add-btn:hover{background:rgba(201,169,110,.12)}
+/* ── Order on the website ── */
+.ci-move{display:flex;flex-direction:column;gap:1px;flex-shrink:0}
+.ci-move button{background:transparent;border:1px solid transparent;color:var(--tx2);width:24px;height:20px;cursor:pointer;font-size:.62rem;line-height:1;transition:.2s}
+.ci-move button:hover{border-color:var(--gold-d);color:var(--gold)}
+.ci-move button:disabled{opacity:.2;cursor:default;border-color:transparent;color:var(--tx2)}
+.ci-card[draggable=true]{cursor:grab}
+.ci-card.dragging{opacity:.35}
+.ci-card.drag-over{box-shadow:inset 0 2px 0 var(--gold)}
+.ci-pin{background:transparent;border:1px solid transparent;width:28px;height:28px;cursor:pointer;font-size:.85rem;transition:.2s;flex-shrink:0;display:flex;align-items:center;justify-content:center;filter:grayscale(1);opacity:.4}
+.ci-pin:hover{opacity:.8}
+.ci-pin.on{filter:none;opacity:1;border-color:var(--gold-d)}
+.lay-grid{display:grid;grid-template-columns:1fr 1fr;gap:28px}
+.lay-hint{font-size:.72rem;color:var(--tx2);margin:-4px 0 12px;line-height:1.55}
+.lay-row{display:flex;align-items:center;gap:10px;padding:7px 10px;border:1px solid var(--bdr);background:var(--bg3);margin-bottom:4px;font-size:.8rem;color:var(--tx0)}
+.lay-num{color:var(--gold);min-width:18px;font-weight:700;font-size:.75rem}
+.lay-name{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.lay-tag{font-size:.56rem;letter-spacing:.8px;text-transform:uppercase;color:var(--gold);border:1px solid var(--gold-d);padding:2px 6px;white-space:nowrap}
+.lay-tag.muted{color:var(--tx2);border-color:var(--bdr)}
+.lay-btn{background:transparent;border:1px solid var(--bdr);color:var(--tx2);width:26px;height:26px;cursor:pointer;font-size:.7rem;transition:.2s;flex-shrink:0}
+.lay-btn:hover{border-color:var(--gold);color:var(--gold)}
+.lay-btn:disabled{opacity:.2;cursor:default;border-color:var(--bdr);color:var(--tx2)}
+.lay-ctrls{display:flex;gap:12px;align-items:center;margin-bottom:12px;flex-wrap:wrap}
+.lay-ctrls select,.lay-ctrls input{background:var(--bg3);border:1px solid var(--bdr);color:var(--tx0);padding:7px 10px;font:.78rem 'Raleway',sans-serif;outline:none}
+.lay-ctrls input{width:64px}
+.lay-ctrls label{font-size:.72rem;color:var(--tx2);display:flex;align-items:center;gap:6px}
+.lay-empty{font-size:.75rem;color:var(--tx2);padding:8px 0}
+.lay-saved{font-size:.7rem;color:#8fcc8f;opacity:0;transition:opacity .3s;margin-left:10px;font-family:'Raleway',sans-serif;letter-spacing:.5px}
+.lay-saved.on{opacity:1}
 /* ── Tablet ── */
 @media(max-width:860px){
+  .lay-grid{grid-template-columns:1fr}
   .menu-admin-body{grid-template-columns:1fr;padding:20px}
   .mai-grid{grid-template-columns:1fr}
   .oc-body{grid-template-columns:1fr}
@@ -437,6 +466,31 @@ body{font-family:'Raleway',sans-serif;background:var(--bg0);color:var(--tx0)}
   <div id="secMenu" style="display:none">
     <div class="menu-admin-body">
 
+      <!-- Order of sections and the "most ordered" strip on the website -->
+      <div class="menu-panel" style="grid-column:1/-1">
+        <h3><span data-k="adm_lay_title">Pořadí na webu</span><span class="lay-saved" id="laySaved"></span></h3>
+        <div class="lay-grid">
+          <div>
+            <div class="cat-mgr-title" data-k="adm_lay_tabs">Pořadí sekcí v menu</div>
+            <p class="lay-hint" data-k="adm_lay_tabs_hint">První sekce se zákazníkovi otevře hned po vstupu do menu.</p>
+            <div id="tabOrderList"></div>
+          </div>
+          <div>
+            <div class="cat-mgr-title" data-k="adm_lay_pop">Nejčastěji objednávané</div>
+            <p class="lay-hint" data-k="adm_lay_pop_hint">Pás karet nad menu. 📌 u položky ji připne na začátek — tak můžete propagovat, co potřebujete prodat. Ostatní místa se doplní podle objednávek za 90 dní.</p>
+            <div class="lay-ctrls">
+              <select id="popMode">
+                <option value="auto" data-k="adm_pop_auto">Připnuté + podle objednávek</option>
+                <option value="manual" data-k="adm_pop_manual">Jen připnuté</option>
+                <option value="off" data-k="adm_pop_off">Nezobrazovat</option>
+              </select>
+              <label><span data-k="adm_pop_count">Počet karet</span> <input type="number" id="popCount" min="1" max="24" step="1"></label>
+            </div>
+            <div id="popPreview"></div>
+          </div>
+        </div>
+      </div>
+
       <!-- Add/Edit form -->
       <div class="menu-panel" id="formPanel">
         <h3 id="formTitle" data-k="adm_add_title">Přidat položku do menu</h3>
@@ -557,6 +611,7 @@ body{font-family:'Raleway',sans-serif;background:var(--bg0);color:var(--tx0)}
           <button class="ci-flt" data-mf="custom" data-k="adm_custom_only">Vlastní</button>
           <button class="ci-flt" data-mf="fav" data-k="adm_filter_fav">❤ Улюблені</button>
         </div>
+        <p class="lay-hint" data-k="adm_drag_hint">Pořadí položek: táhněte myší nebo použijte šipky ⤒ ▲ ▼. Stejné pořadí uvidí zákazníci.</p>
         <div class="ci-list-wrap" style="max-height:600px">
           <div id="customItemsList"><p class="no-custom">Načítání…</p></div>
         </div>
@@ -725,6 +780,18 @@ const TA = {
     adm_an_no_data:'Žádná data pro toto období.',
     adm_cat_mgr_title:'Vlastní sekce', adm_cat_add_btn:'+ Přidat sekci',
     adm_cat_del_confirm:'Smazat tuto sekci? Položky v ní zůstanou.',
+    adm_lay_title:'Pořadí na webu', adm_lay_tabs:'Pořadí sekcí v menu',
+    adm_lay_tabs_hint:'První sekce se zákazníkovi otevře hned po vstupu do menu.',
+    adm_lay_pop:'Nejčastěji objednávané',
+    adm_lay_pop_hint:'Pás karet nad menu. 📌 u položky ji připne na začátek — tak můžete propagovat, co potřebujete prodat. Ostatní místa se doplní podle objednávek za 90 dní.',
+    adm_pop_auto:'Připnuté + podle objednávek', adm_pop_manual:'Jen připnuté', adm_pop_off:'Nezobrazovat',
+    adm_pop_count:'Počet karet', adm_pop_pinned:'Připnuto', adm_pop_by_orders:'{n}× objednáno', adm_pop_fav:'Oblíbené',
+    adm_pop_empty:'Zatím nic — připněte položky 📌 v seznamu níže.', adm_pop_hidden:'Pás se na webu nezobrazuje.',
+    adm_pin:'Připnout do „Nejčastěji objednávané“', adm_first_tab:'otevře se první',
+    adm_move_top:'Na začátek', adm_move_up:'Výš', adm_move_down:'Níž', adm_unpin:'Odepnout',
+    adm_drag_hint:'Pořadí položek: táhněte myší nebo použijte šipky ⤒ ▲ ▼. Stejné pořadí uvidí zákazníci.',
+    adm_lay_saved:'✓ Uloženo', adm_lay_err:'Neuloženo — zkuste znovu',
+    adm_tab_all:'Vše', adm_tab_fav:'Oblíbené', adm_tab_celeb:'Slavnostní dorty',
   },
   en:{
     adm_panel:'Admin Panel', adm_login:'Login', adm_refresh:'↻ Refresh', adm_logout:'Logout',
@@ -772,6 +839,18 @@ const TA = {
     adm_an_no_data:'No data for this period.',
     adm_cat_mgr_title:'Custom sections', adm_cat_add_btn:'+ Add section',
     adm_cat_del_confirm:'Delete this section? Items in it will remain.',
+    adm_lay_title:'Order on the website', adm_lay_tabs:'Menu section order',
+    adm_lay_tabs_hint:'The first section opens as soon as a customer enters the menu.',
+    adm_lay_pop:'Most ordered',
+    adm_lay_pop_hint:'A strip of cards above the menu. 📌 on an item pins it to the front — use it to promote what you need to sell. Remaining spots are filled from the last 90 days of orders.',
+    adm_pop_auto:'Pinned + by orders', adm_pop_manual:'Pinned only', adm_pop_off:'Hidden',
+    adm_pop_count:'Number of cards', adm_pop_pinned:'Pinned', adm_pop_by_orders:'ordered {n}×', adm_pop_fav:'Favorite',
+    adm_pop_empty:'Nothing yet — pin items with 📌 in the list below.', adm_pop_hidden:'The strip is hidden on the website.',
+    adm_pin:'Pin to “Most ordered”', adm_first_tab:'opens first',
+    adm_move_top:'To the top', adm_move_up:'Up', adm_move_down:'Down', adm_unpin:'Unpin',
+    adm_drag_hint:'Item order: drag with the mouse or use the arrows ⤒ ▲ ▼. Customers see the same order.',
+    adm_lay_saved:'✓ Saved', adm_lay_err:'Not saved — try again',
+    adm_tab_all:'All', adm_tab_fav:'Favorites', adm_tab_celeb:'Celebration cakes',
   }
 };
 
@@ -946,7 +1025,7 @@ document.querySelectorAll('.amn').forEach(btn => btn.addEventListener('click', (
   document.getElementById('secOrders').style.display    = activeSection==='orders'    ? '' : 'none';
   document.getElementById('secMenu').style.display      = activeSection==='menu'      ? '' : 'none';
   document.getElementById('secAnalytics').style.display = activeSection==='analytics' ? '' : 'none';
-  if(activeSection==='menu'){ Promise.all([loadCategories(), loadStaticFavs(), loadHiddenStatics()]).then(()=>loadMenuItems()); }
+  if(activeSection==='menu'){ Promise.all([loadCategories(), loadStaticFavs(), loadHiddenStatics(), loadMenuLayout()]).then(()=>loadMenuItems()); }
   if(activeSection==='analytics') renderAnalytics();
 }));
 
@@ -1122,8 +1201,24 @@ async function loadMenuItems(){
   }
 }
 
-function renderMenuItems(customItems){
-  const el = document.getElementById('customItemsList');
+/* ── Order on the website (item order, section order, "most ordered" strip) ── */
+// Item keys match menu.html: 's:<static index>' or 'c:<custom id>'
+let menuLayout = {order:[], cats:[], popular:{mode:'auto', count:8, pinned:[]}};
+let popularStats = [];
+let _allKeys = [];      // every visible item, in website order
+let _visibleKeys = [];  // items shown under the current filter
+let _allItemsByKey = {};
+
+function itemKey(item){ return item._custom ? 'c:'+item.id : 's:'+item._staticIdx; }
+
+function itemRank(item, idx){
+  const o = menuLayout.order;
+  let i = o.indexOf(itemKey(item));
+  if(i<0 && item.static_src_idx!=null) i = o.indexOf('s:'+item.static_src_idx);
+  return i<0 ? o.length+idx : i;
+}
+
+function buildAllItems(customItems){
   const customNames = new Set((customItems||[]).map(i=>i.name?.cs).filter(Boolean));
   const staticSrcIdxSet = new Set((customItems||[]).map(i=>i.static_src_idx).filter(v=>v!=null));
   const all = [
@@ -1131,12 +1226,224 @@ function renderMenuItems(customItems){
       .filter(i=>!hiddenStatics.has(i._staticIdx) && !customNames.has(i.name?.cs) && !staticSrcIdxSet.has(i._staticIdx)),
     ...(customItems||[]).map(i=>({...i, _custom:true}))
   ];
+  const ranks = new Map(all.map((it, idx)=>[it, itemRank(it, idx)]));
+  return all.sort((a,b)=>ranks.get(a)-ranks.get(b));
+}
+
+async function loadMenuLayout(){
+  try{
+    const [lr, pr] = await Promise.all([fetch('/api/menu-layout'), fetch('/api/popular')]);
+    if(lr.ok) menuLayout = await lr.json();
+    if(pr.ok) popularStats = (await pr.json()).items || [];
+  }catch{}
+}
+
+let _laySaveTimer = null;
+function saveMenuLayout(){
+  clearTimeout(_laySaveTimer);
+  _laySaveTimer = setTimeout(async ()=>{
+    const flag = document.getElementById('laySaved');
+    try{
+      const r = await fetch('/api/menu-layout', {
+        method:'POST', headers:{'Content-Type':'application/json'},
+        body: JSON.stringify({token: sessionStorage.getItem('cm_token')||'', ...menuLayout})
+      });
+      if(r.status===401){ handleExpired(); return; }
+      flag.textContent = r.ok ? t('adm_lay_saved') : t('adm_lay_err');
+    }catch{
+      flag.textContent = t('adm_lay_err');
+    }
+    flag.classList.add('on');
+    setTimeout(()=>flag.classList.remove('on'), 1800);
+  }, 400);
+}
+
+function _placeKey(key, targetKey, after){
+  const full = _allKeys.filter(k=>k!==key);
+  const idx = full.indexOf(targetKey);
+  if(idx<0) return;
+  full.splice(after ? idx+1 : idx, 0, key);
+  menuLayout.order = full;
+  saveMenuLayout();
+  renderMenuItems(cachedMenuItems);
+}
+
+function moveItem(key, dir){
+  const i = _visibleKeys.indexOf(key);
+  if(dir==='top'){
+    if(i>0) _placeKey(key, _visibleKeys[0], false);
+    return;
+  }
+  const j = i+dir;
+  if(i<0 || j<0 || j>=_visibleKeys.length) return;
+  _placeKey(key, _visibleKeys[j], dir>0);
+}
+
+function togglePin(key){
+  const p = menuLayout.popular;
+  p.pinned = p.pinned.includes(key) ? p.pinned.filter(k=>k!==key) : [...p.pinned, key];
+  saveMenuLayout();
+  renderMenuItems(cachedMenuItems);
+}
+
+function movePin(key, dir){
+  const pins = menuLayout.popular.pinned;
+  const i = pins.indexOf(key), j = i+dir;
+  if(i<0 || j<0 || j>=pins.length) return;
+  [pins[i], pins[j]] = [pins[j], pins[i]];
+  saveMenuLayout();
+  renderPopularPreview();
+}
+
+let _dragKey = null;
+function _bindDrag(el){
+  el.querySelectorAll('.ci-card[data-key]').forEach(card=>{
+    card.addEventListener('dragstart', e=>{
+      _dragKey = card.dataset.key;
+      card.classList.add('dragging');
+      e.dataTransfer.effectAllowed = 'move';
+      e.dataTransfer.setData('text/plain', _dragKey);
+    });
+    card.addEventListener('dragend', ()=>{
+      _dragKey = null;
+      el.querySelectorAll('.ci-card').forEach(c=>c.classList.remove('dragging','drag-over'));
+    });
+    card.addEventListener('dragover', e=>{
+      if(!_dragKey || _dragKey===card.dataset.key) return;
+      e.preventDefault();
+      card.classList.add('drag-over');
+    });
+    card.addEventListener('dragleave', ()=>card.classList.remove('drag-over'));
+    card.addEventListener('drop', e=>{
+      e.preventDefault();
+      const key = _dragKey, target = card.dataset.key;
+      if(!key || key===target) return;
+      // Dragging down drops after the target, dragging up drops before it
+      _placeKey(key, target, _allKeys.indexOf(key) < _allKeys.indexOf(target));
+    });
+  });
+}
+
+const BUILTIN_TABS = [
+  {id:'all', k:'adm_tab_all'}, {id:'cakes', k:'adm_cat_cakes'}, {id:'kolace', k:'adm_cat_kolace'},
+  {id:'desserts', k:'adm_cat_desserts'}, {id:'doplnky', k:'adm_cat_doplnky'},
+  {id:'fav', k:'adm_tab_fav'}, {id:'celebration', k:'adm_tab_celeb'},
+];
+
+function _orderedTabs(){
+  // Same default order as menu.html: custom sections sit before "Oblíbené"
+  const favAt = BUILTIN_TABS.findIndex(b=>b.id==='fav');
+  const tabs = [
+    ...BUILTIN_TABS.slice(0, favAt).map(b=>({id:b.id, label:t(b.k)})),
+    ...customCategories.map(c=>({id:c.id, label:c.label})),
+    ...BUILTIN_TABS.slice(favAt).map(b=>({id:b.id, label:t(b.k)})),
+  ];
+  const cats = menuLayout.cats;
+  const rank = (tb, i)=>{ const r = cats.indexOf(tb.id); return r<0 ? cats.length+i : r; };
+  return tabs.map((tb, i)=>({tb, r:rank(tb, i)})).sort((a,b)=>a.r-b.r).map(x=>x.tb);
+}
+
+function moveTab(id, dir){
+  const ids = _orderedTabs().map(tb=>tb.id);
+  const i = ids.indexOf(id), j = i+dir;
+  if(i<0 || j<0 || j>=ids.length) return;
+  [ids[i], ids[j]] = [ids[j], ids[i]];
+  menuLayout.cats = ids;
+  saveMenuLayout();
+  renderTabOrder();
+}
+
+function renderTabOrder(){
+  const el = document.getElementById('tabOrderList');
+  if(!el) return;
+  const tabs = _orderedTabs();
+  el.innerHTML = tabs.map((tb, i)=>`<div class="lay-row">
+      <span class="lay-num">${i+1}</span>
+      <span class="lay-name">${esc(tb.label)}</span>
+      ${i===0?`<span class="lay-tag">${t('adm_first_tab')}</span>`:''}
+      <button class="lay-btn" onclick="moveTab('${esc(tb.id)}',-1)" title="${t('adm_move_up')}" ${i===0?'disabled':''}>▲</button>
+      <button class="lay-btn" onclick="moveTab('${esc(tb.id)}',1)" title="${t('adm_move_down')}" ${i===tabs.length-1?'disabled':''}>▼</button>
+    </div>`).join('');
+}
+
+function _popularList(){
+  // Mirrors popularItems() in menu.html
+  const p = menuLayout.popular;
+  const all = Object.values(_allItemsByKey);
+  const out = [];
+  const add = (it, why)=>{ if(it && !out.some(o=>o.it===it)) out.push({it, why}); };
+  p.pinned.forEach(k=>add(_allItemsByKey[k] || all.find(i=>i.static_src_idx!=null && 's:'+i.static_src_idx===k), 'pin'));
+  if(p.mode==='auto'){
+    popularStats.forEach(s=>add(all.find(i=>i.name?.cs===s.name||i.name?.en===s.name||i.name?.uk===s.name), s.qty));
+    if(!out.length) _allKeys.map(k=>_allItemsByKey[k])
+      .filter(i=>i._custom ? !!i.favorite : staticFavs.has(i._staticIdx)).forEach(i=>add(i, 'fav'));
+  }
+  return out.slice(0, p.count||8);
+}
+
+function renderPopularPreview(){
+  const el = document.getElementById('popPreview');
+  if(!el) return;
+  const p = menuLayout.popular;
+  document.getElementById('popMode').value = p.mode;
+  document.getElementById('popCount').value = p.count;
+  if(p.mode==='off'){ el.innerHTML = `<p class="lay-empty">${t('adm_pop_hidden')}</p>`; return; }
+  const list = _popularList();
+  if(!list.length){ el.innerHTML = `<p class="lay-empty">${t('adm_pop_empty')}</p>`; return; }
+  el.innerHTML = list.map(({it, why}, i)=>{
+    const key = itemKey(it);
+    const pinKey = p.pinned.includes(key) ? key : (it.static_src_idx!=null ? 's:'+it.static_src_idx : key);
+    const pinIdx = p.pinned.indexOf(pinKey);
+    const tag = why==='pin' ? `<span class="lay-tag">📌 ${t('adm_pop_pinned')}</span>`
+      : why==='fav' ? `<span class="lay-tag muted">❤ ${t('adm_pop_fav')}</span>`
+      : `<span class="lay-tag muted">${t('adm_pop_by_orders', {n: why})}</span>`;
+    const ctrls = why==='pin'
+      ? `<button class="lay-btn" onclick="movePin('${pinKey}',-1)" title="${t('adm_move_up')}" ${pinIdx===0?'disabled':''}>▲</button>
+         <button class="lay-btn" onclick="movePin('${pinKey}',1)" title="${t('adm_move_down')}" ${pinIdx===p.pinned.length-1?'disabled':''}>▼</button>
+         <button class="lay-btn" onclick="togglePin('${pinKey}')" title="${t('adm_unpin')}">✕</button>`
+      : `<button class="lay-btn" onclick="togglePin('${key}')" title="${t('adm_pin')}">📌</button>`;
+    return `<div class="lay-row">
+      <span class="lay-num">${i+1}</span>
+      <span class="lay-name">${esc(it.name?.[adminLang] || it.name?.cs || '')}</span>
+      ${tag}${ctrls}
+    </div>`;
+  }).join('');
+}
+
+document.getElementById('popMode').addEventListener('change', e=>{
+  menuLayout.popular.mode = e.target.value;
+  saveMenuLayout();
+  renderPopularPreview();
+});
+document.getElementById('popCount').addEventListener('change', e=>{
+  menuLayout.popular.count = Math.max(1, Math.min(24, parseInt(e.target.value)||8));
+  saveMenuLayout();
+  renderPopularPreview();
+});
+
+function renderMenuItems(customItems){
+  const el = document.getElementById('customItemsList');
+  const all = buildAllItems(customItems);
+  _allKeys = all.map(itemKey);
+  _allItemsByKey = Object.fromEntries(all.map(i=>[itemKey(i), i]));
+  renderTabOrder();
+  renderPopularPreview();
   let filtered = menuFilter==='custom' ? all.filter(i=>i._custom)
     : menuFilter==='fav' ? all.filter(i=>i._custom?!!i.favorite:staticFavs.has(i._staticIdx))
     : menuFilter==='all' ? all
     : all.filter(i=>i.cat===menuFilter);
+  _visibleKeys = filtered.map(itemKey);
   if(!filtered.length){ el.innerHTML=`<p class="no-custom">${t('adm_no_custom')}</p>`; return; }
-  el.innerHTML = filtered.map(item=>{
+  const pinned = new Set(menuLayout.popular.pinned);
+  el.innerHTML = filtered.map((item, pos)=>{
+    const key = itemKey(item);
+    const isPinned = pinned.has(key) || (item.static_src_idx!=null && pinned.has('s:'+item.static_src_idx));
+    const pinBtn = `<button class="ci-pin${isPinned?' on':''}" onclick="togglePin('${isPinned && !pinned.has(key) ? 's:'+item.static_src_idx : key}')" title="${t('adm_pin')}">📌</button>`;
+    const moveBtns = `<div class="ci-move">
+        <button onclick="moveItem('${key}','top')" title="${t('adm_move_top')}" ${pos===0?'disabled':''}>⤒</button>
+        <button onclick="moveItem('${key}',-1)" title="${t('adm_move_up')}" ${pos===0?'disabled':''}>▲</button>
+        <button onclick="moveItem('${key}',1)" title="${t('adm_move_down')}" ${pos===filtered.length-1?'disabled':''}>▼</button>
+      </div>`;
     const name = item.name?.[adminLang] || item.name?.cs || '';
     const price = itemPrice(item);
     const thumb = item.img
@@ -1145,6 +1452,7 @@ function renderMenuItems(customItems){
     const qc = !!item.qty_ctrl;
     const actions = item._custom
       ? `<div class="ci-btns">
+           ${pinBtn}
            <button class="ci-ks${qc?' on':''}" onclick="toggleQtyCtrl(${item.id},${qc})" title="Počet kusů">1ks</button>
            <button class="ci-fav${item.favorite?' on':''}" onclick="toggleFav(${item.id},${!!item.favorite})" title="❤">❤</button>
            <button class="ci-edit" onclick="startEditById(${item.id})" title="✎">✎</button>
@@ -1152,12 +1460,14 @@ function renderMenuItems(customItems){
          </div>`
       : `<div class="ci-btns">
            <span class="ci-static-badge">${t('adm_static_lbl')}</span>
+           ${pinBtn}
            <button class="ci-fav${staticFavs.has(item._staticIdx)?' on':''}" onclick="toggleStaticFav(${item._staticIdx})" title="❤">❤</button>
            <button class="ci-copy" onclick="duplicateStatic(${item._staticIdx})" title="${t('adm_copy_item')}">⊕</button>
            <button class="ci-edit" onclick="startEditStatic(${item._staticIdx})" title="✎ ${t('adm_save_as_new')}">✎</button>
            <button class="ci-del" onclick="hideStatic(${item._staticIdx})" title="✕">✕</button>
          </div>`;
-    return `<div class="ci-card">
+    return `<div class="ci-card" draggable="true" data-key="${key}">
+      ${moveBtns}
       ${thumb}
       <div class="ci-info"><div style="min-width:0">
         <div class="ci-name">${esc(name)}</div>
@@ -1167,6 +1477,7 @@ function renderMenuItems(customItems){
       ${actions}
     </div>`;
   }).join('');
+  _bindDrag(el);
 }
 
 /* ── Category manager ── */
@@ -1200,6 +1511,7 @@ async function saveCategories(){
 function renderCategoryManager(){
   const list = document.getElementById('catMgrList');
   if(!list) return;
+  renderTabOrder();
   if(!customCategories.length){
     list.innerHTML = '<span style="font-size:.72rem;color:var(--tx2);letter-spacing:.5px">—</span>';
     return;

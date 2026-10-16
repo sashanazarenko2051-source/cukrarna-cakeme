@@ -1,4 +1,4 @@
-import base64, hashlib, hmac, json, os, secrets, time
+import base64, hashlib, hmac, json, os, re, secrets, time
 from collections import defaultdict
 import psycopg
 from psycopg.rows import dict_row
@@ -522,6 +522,75 @@ async def api_categories_set(req: Request):
             (_json.dumps(cats),)
         )
     return {'ok': True}
+
+# ── /api/menu-layout ──────────────────────────────────────────────────────────
+# Item keys: 's:<static index>' for items built into menu.html, 'c:<id>' for DB items.
+_POPULAR_MODES = ('auto', 'manual', 'off')
+
+def _clean_keys(raw, limit):
+    out = []
+    for k in (raw if isinstance(raw, list) else [])[:limit]:
+        k = str(k).strip()[:64]
+        if k and k not in out:
+            out.append(k)
+    return out
+
+def _default_layout():
+    return {'order': [], 'cats': [], 'popular': {'mode': 'auto', 'count': 8, 'pinned': []}}
+
+@app.get('/api/menu-layout')
+def api_menu_layout_get():
+    with _get_pool().connection() as conn:
+        row = conn.execute("SELECT value FROM settings WHERE key='menu_layout'").fetchone()
+    layout = _default_layout()
+    if row and row[0]:
+        saved = _json.loads(row[0])
+        layout.update({k: v for k, v in saved.items() if k in ('order', 'cats')})
+        layout['popular'].update(saved.get('popular') or {})
+    return layout
+
+@app.post('/api/menu-layout')
+async def api_menu_layout_set(req: Request):
+    d = await req.json()
+    if not _verify_token(d.get('token')):
+        raise HTTPException(401, 'Unauthorized')
+    pop = d.get('popular') or {}
+    mode = pop.get('mode') if pop.get('mode') in _POPULAR_MODES else 'auto'
+    try:
+        count = max(1, min(24, int(pop.get('count') or 8)))
+    except (TypeError, ValueError):
+        count = 8
+    layout = {
+        'order': _clean_keys(d.get('order'), 2000),
+        'cats':  _clean_keys(d.get('cats'), 100),
+        'popular': {'mode': mode, 'count': count, 'pinned': _clean_keys(pop.get('pinned'), 24)},
+    }
+    with _get_pool().connection() as conn:
+        conn.execute(
+            "INSERT INTO settings(key,value) VALUES('menu_layout',%s) ON CONFLICT(key) DO UPDATE SET value=EXCLUDED.value",
+            (_json.dumps(layout),)
+        )
+    return {'ok': True}
+
+# ── /api/popular ──────────────────────────────────────────────────────────────
+# Public: only item names and ordered quantities from the last 90 days, no customer data.
+_ORDER_LINE_RE = re.compile(r'^(.+?)(?:\s+\([^)]*\))?\s+x(\d+)(?:\s+\(\d[\d\s]*Kč\))?$')
+
+@app.get('/api/popular')
+def api_popular():
+    cutoff = time.strftime('%Y-%m-%dT%H:%M:%SZ', time.gmtime(time.time() - 90 * 86400))
+    with _get_pool().connection() as conn:
+        rows = conn.execute(
+            "SELECT ord FROM orders WHERE ts >= %s AND status <> 'pending_payment'", (cutoff,)
+        ).fetchall()
+    counts = defaultdict(int)
+    for (ord_text,) in rows:
+        for part in (ord_text or '').split('|')[0].split(','):
+            m = _ORDER_LINE_RE.match(part.strip())
+            if m:
+                counts[m.group(1).strip()] += int(m.group(2))
+    top = sorted(counts.items(), key=lambda kv: -kv[1])[:50]
+    return {'items': [{'name': n, 'qty': q} for n, q in top]}
 
 # ── /api/order ────────────────────────────────────────────────────────────────
 @app.post('/api/order')
