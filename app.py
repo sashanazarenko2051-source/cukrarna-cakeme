@@ -6,13 +6,15 @@ from psycopg.types.json import Jsonb
 from psycopg_pool import ConnectionPool
 import stripe as _stripe
 from fastapi import BackgroundTasks, FastAPI, HTTPException, Request
-from fastapi.responses import FileResponse, JSONResponse
+from fastapi.responses import FileResponse, JSONResponse, Response
 
 app = FastAPI(docs_url=None, redoc_url=None)
 
 DATABASE_URL        = os.environ.get('DATABASE_URL', '')
 ADMIN_PASS          = os.environ.get('ADMIN_PASS', 'Tort@Praha51')
-SECRET_KEY          = os.environ.get('SECRET_KEY', secrets.token_hex(32))
+# Without the env var the key is kept in the DB (see _init_tables), so admin
+# sessions survive restarts and redeploys instead of expiring each time.
+SECRET_KEY          = os.environ.get('SECRET_KEY', '') or secrets.token_hex(32)
 STRIPE_SECRET_KEY   = os.environ.get('STRIPE_SECRET_KEY', '')
 STRIPE_PUB_KEY      = os.environ.get('STRIPE_PUBLISHABLE_KEY', '')
 TOKEN_TTL           = 12 * 3600
@@ -74,6 +76,7 @@ _STATIC_IMG_BY_NAME = {
 }
 
 def _init_tables():
+    global SECRET_KEY
     with _pool.connection() as conn:
         conn.execute("""
             CREATE TABLE IF NOT EXISTS orders (
@@ -91,6 +94,10 @@ def _init_tables():
             CREATE TABLE IF NOT EXISTS settings (
                 key VARCHAR(100) PRIMARY KEY, value TEXT NOT NULL DEFAULT ''
             )""")
+        if not os.environ.get('SECRET_KEY'):
+            conn.execute("INSERT INTO settings(key,value) VALUES('secret_key',%s) ON CONFLICT(key) DO NOTHING",
+                         (secrets.token_hex(32),))
+            SECRET_KEY = conn.execute("SELECT value FROM settings WHERE key='secret_key'").fetchone()[0]
         # Backfill missing images for custom items that match a known static item
         rows = conn.execute("SELECT id, data FROM menu_items WHERE data->>'img' = '' OR data->>'img' IS NULL").fetchall()
         for row in rows:
@@ -119,7 +126,9 @@ async def _sec(req: Request, call_next):
         'X-XSS-Protection':       '1; mode=block',
         'Referrer-Policy':        'strict-origin-when-cross-origin',
     })
-    if req.url.path.startswith('/api/'):
+    if req.url.path.startswith('/api/menu-img/'):
+        pass  # set by the endpoint: long-lived, the URL changes when the photo does
+    elif req.url.path.startswith('/api/'):
         resp.headers['Cache-Control'] = 'no-store'
     elif 'text/html' in resp.headers.get('content-type', ''):
         resp.headers['Cache-Control'] = 'no-cache, must-revalidate'
@@ -144,18 +153,50 @@ async def api_auth(req: Request):
         del _fail_log[ip]
     if len(attempts) >= 5:
         raise HTTPException(429, 'Too many attempts. Try again in 15 minutes.')
-    if d.get('pass') == ADMIN_PASS:
+    if hmac.compare_digest(str(d.get('pass') or ''), ADMIN_PASS):
         return {'token': _make_token()}
     attempts.append(now)
     _fail_log[ip] = attempts
     raise HTTPException(401, {'error': 'Invalid password', 'remaining': 5 - len(attempts)})
 
 # ── /api/menu ─────────────────────────────────────────────────────────────────
+# Photos uploaded in the admin are stored in the item as data: URIs. The menu
+# returns a short URL for them instead, so the page doesn't download every photo
+# inside one 5 MB JSON; ?v=<hash> changes whenever the photo changes.
+_IMG_URL_RE = re.compile(r'^/api/menu-img/(\d+)')
+
+def _public_item(item):
+    img = item.get('img') or ''
+    if not img.startswith('data:'):
+        return item
+    v = hashlib.sha1(img.encode()).hexdigest()[:10]
+    return {**item, 'img': f"/api/menu-img/{item['id']}?v={v}"}
+
+def _resolve_img(conn, img):
+    """Turn a /api/menu-img/<id> URL sent back by the admin form into the stored photo."""
+    m = _IMG_URL_RE.match(img or '')
+    if not m:
+        return (img or '').strip()
+    row = conn.execute('SELECT data FROM menu_items WHERE id=%s', (int(m.group(1)),)).fetchone()
+    return (row[0].get('img') or '') if row else ''
+
 @app.get('/api/menu')
-def api_menu_get():
+def api_menu_get(full: int = 0):
     with _get_pool().connection() as conn:
         rows = conn.execute('SELECT data FROM menu_items ORDER BY id ASC').fetchall()
-    return [r[0] for r in rows]
+    # full=1 keeps the photos inline (used by the admin JSON export / backup)
+    return [r[0] if full else _public_item(r[0]) for r in rows]
+
+@app.get('/api/menu-img/{item_id}')
+def api_menu_img(item_id: int):
+    with _get_pool().connection() as conn:
+        row = conn.execute('SELECT data FROM menu_items WHERE id=%s', (item_id,)).fetchone()
+    img = (row[0].get('img') or '') if row else ''
+    m = re.match(r'^data:(image/[\w.+-]+);base64,(.*)$', img, re.S)
+    if not m:
+        raise HTTPException(404)
+    return Response(base64.b64decode(m.group(2)), media_type=m.group(1),
+                    headers={'Cache-Control': 'public, max-age=31536000, immutable'})
 
 @app.post('/api/menu')
 async def api_menu_add(req: Request):
@@ -170,7 +211,7 @@ async def api_menu_add(req: Request):
         'cat':   d.get('cat', 'desserts'),
         'price': (d.get('price')   or '').strip(),
         'badge': (d.get('badge')   or '').strip(),
-        'img':   (d.get('img')     or '').strip(),
+        'img':   '',
         'name': {
             'cs': name_cs,
             'uk': (d.get('name_uk') or '').strip() or name_cs,
@@ -189,9 +230,10 @@ async def api_menu_add(req: Request):
         'static_src_idx': int(d['static_src_idx']) if d.get('static_src_idx') is not None else None,
     }
     with _get_pool().connection() as conn:
+        item['img'] = _resolve_img(conn, d.get('img'))
         conn.execute('INSERT INTO menu_items (id, data) VALUES (%s, %s)',
                      (item['id'], Jsonb(item)))
-    return {'ok': True, 'item': item}
+    return {'ok': True, 'item': _public_item(item)}
 
 @app.patch('/api/menu/{item_id}')
 async def api_menu_patch(item_id: int, req: Request):
@@ -203,9 +245,11 @@ async def api_menu_patch(item_id: int, req: Request):
         if not row:
             raise HTTPException(404, 'Not found')
         item = dict(row[0])
-        for f in ('price', 'badge', 'img', 'cat'):
+        for f in ('price', 'badge', 'cat'):
             if f in d:
                 item[f] = (d[f] or '').strip()
+        if 'img' in d:
+            item['img'] = _resolve_img(conn, d['img'])
         if 'favorite' in d:
             item['favorite'] = bool(d['favorite'])
         if 'qty_ctrl' in d:
@@ -229,7 +273,7 @@ async def api_menu_patch(item_id: int, req: Request):
             if f'desc_{lng}' in d:
                 item['desc'][lng] = (d[f'desc_{lng}'] or '').strip()
         conn.execute('UPDATE menu_items SET data=%s WHERE id=%s', (Jsonb(item), item_id))
-    return {'ok': True, 'item': item}
+    return {'ok': True, 'item': _public_item(item)}
 
 @app.delete('/api/menu/{item_id}')
 async def api_menu_del(item_id: int, req: Request):
@@ -486,17 +530,22 @@ def _send_telegram(order: dict):
             lines.append(f"Adresa: {order['address']}")
         if order.get('payment'):
             lines.append(f"Platba: {order['payment']}")
-        text = '\n'.join(lines)
-        for chat_id in chat_ids:
+        text = '\n'.join(lines)[:4000]  # Telegram rejects messages over 4096 chars
+    except Exception as e:
+        print(f'[TG] Error: {e}', file=sys.stderr)
+        return
+    # One failing chat (bot blocked, wrong id) must not stop the others
+    for chat_id in chat_ids:
+        try:
             body = urllib.parse.urlencode({'chat_id': chat_id, 'text': text}).encode()
             req  = urllib.request.Request(
                 f'https://api.telegram.org/bot{token}/sendMessage',
                 data=body, method='POST'
             )
             urllib.request.urlopen(req, timeout=8)
-        print(f'[TG] Sent for order: {name}', file=sys.stderr)
-    except Exception as e:
-        print(f'[TG] Error: {e}', file=sys.stderr)
+            print(f'[TG] Sent to {chat_id} for order: {name}', file=sys.stderr)
+        except Exception as e:
+            print(f'[TG] Error for chat {chat_id}: {e}', file=sys.stderr)
 
 @app.post('/api/notif-info')
 async def api_notif_info(req: Request):
@@ -621,6 +670,15 @@ def api_popular():
     return {'items': [{'name': n, 'qty': q} for n, q in top]}
 
 # ── /api/order ────────────────────────────────────────────────────────────────
+# Orders come from a public form: cap field sizes so nobody can push megabytes
+# into the DB and the Telegram/ntfy notifications.
+_ORDER_LIMITS = {'name': 120, 'phone': 40, 'address': 400, 'order': 4000, 'payment': 60,
+                 'order_type': 40, 'delivery_date': 20, 'delivery_time': 20}
+
+def _clip_order(order):
+    for k, limit in _ORDER_LIMITS.items():
+        order[k] = str(order.get(k) or '')[:limit]
+
 @app.post('/api/order')
 async def api_order(req: Request, bg: BackgroundTasks):
     d = await req.json()
@@ -637,6 +695,7 @@ async def api_order(req: Request, bg: BackgroundTasks):
         'delivery_time': (d.get('delivery_time') or '').strip(),
         'status':        'new',
     }
+    _clip_order(order)
     with _get_pool().connection() as conn:
         conn.execute(
             'INSERT INTO orders (id,ts,name,phone,address,ord,payment,order_type,delivery_date,delivery_time,status)'
@@ -716,6 +775,7 @@ async def api_create_checkout(req: Request):
         'delivery_time': (d.get('delivery_time') or '').strip(),
         'status':        'pending_payment',
     }
+    _clip_order(order)
     with _get_pool().connection() as conn:
         conn.execute(
             'INSERT INTO orders (id,ts,name,phone,address,ord,payment,order_type,delivery_date,delivery_time,status)'
@@ -773,6 +833,11 @@ async def api_verify_payment(session_id: str, order_id: int, bg: BackgroundTasks
         if row:
             bg.add_task(_send_ntfy, row)
             bg.add_task(_send_telegram, row)
+            bg.add_task(_send_push_notifications, {
+                'title': 'Nová objednávka (zaplaceno) 🎂',
+                'body':  f"{row['name']} — {(row['order'] or '')[:80]}",
+                'url':   '/admin.html'
+            })
         return {'paid': True}
     return {'paid': False}
 
@@ -828,10 +893,16 @@ def _success():
 def _cancel():
     return FileResponse('cancel.html')
 
+# Only website assets are served; anything else in the app folder (code, __pycache__,
+# config files) stays private even if it isn't listed in _BLOCKED.
+_STATIC_EXT = {'.html', '.js', '.css', '.svg', '.webp', '.png', '.jpg', '.jpeg', '.gif', '.ico', '.woff', '.woff2'}
+
 @app.get('/{path:path}')
 def _static(path: str):
     norm = os.path.normpath(path).replace(os.sep, '/')
-    if norm.startswith('..') or os.path.isabs(norm) or norm in _BLOCKED or norm.startswith('.'):
+    if (norm.startswith('..') or os.path.isabs(norm) or norm in _BLOCKED
+            or any(part.startswith(('.', '_')) for part in norm.split('/'))
+            or os.path.splitext(norm)[1].lower() not in _STATIC_EXT):
         raise HTTPException(404)
     if os.path.isfile(norm):
         if norm.endswith('.html') and norm not in _NO_TRACK:

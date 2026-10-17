@@ -2224,7 +2224,7 @@ async function deleteMenuItem(id){
 
 document.getElementById('exportBtn').addEventListener('click', async ()=>{
   try{
-    const r = await fetch('/api/menu');
+    const r = await fetch('/api/menu?full=1');  // full: photos inline, so the backup is complete
     const data = await r.json();
     const blob = new Blob([JSON.stringify(data,null,2)], {type:'application/json'});
     const a = document.createElement('a'); a.href = URL.createObjectURL(blob);
