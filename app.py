@@ -535,8 +535,12 @@ def _clean_keys(raw, limit):
             out.append(k)
     return out
 
+# Shown in "Doporučujeme" until the admin saves their own list ('Vánoční cukroví')
+_DEFAULT_FEATURED = ['c:1790338678888']
+
 def _default_layout():
-    return {'order': [], 'cats': [], 'popular': {'mode': 'auto', 'count': 8, 'pinned': []}}
+    return {'order': [], 'cats': [], 'featured': list(_DEFAULT_FEATURED),
+            'popular': {'mode': 'auto', 'count': 8, 'pinned': []}}
 
 @app.get('/api/menu-layout')
 def api_menu_layout_get():
@@ -545,7 +549,7 @@ def api_menu_layout_get():
     layout = _default_layout()
     if row and row[0]:
         saved = _json.loads(row[0])
-        layout.update({k: v for k, v in saved.items() if k in ('order', 'cats')})
+        layout.update({k: v for k, v in saved.items() if k in ('order', 'cats', 'featured')})
         layout['popular'].update(saved.get('popular') or {})
     return layout
 
@@ -563,6 +567,8 @@ async def api_menu_layout_set(req: Request):
     layout = {
         'order': _clean_keys(d.get('order'), 2000),
         'cats':  _clean_keys(d.get('cats'), 100),
+        # An admin page opened before this field existed doesn't send it; keep what's saved
+        'featured': _clean_keys(d['featured'], 24) if 'featured' in d else api_menu_layout_get()['featured'],
         'popular': {'mode': mode, 'count': count, 'pinned': _clean_keys(pop.get('pinned'), 24)},
     }
     with _get_pool().connection() as conn:

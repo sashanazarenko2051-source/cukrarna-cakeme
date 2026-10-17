@@ -287,6 +287,7 @@ body{font-family:'Raleway',sans-serif;background:var(--bg0);color:var(--tx0)}
 .ci-pin{background:transparent;border:1px solid transparent;width:28px;height:28px;cursor:pointer;font-size:.85rem;transition:.2s;flex-shrink:0;display:flex;align-items:center;justify-content:center;filter:grayscale(1);opacity:.4}
 .ci-pin:hover{opacity:.8}
 .ci-pin.on{filter:none;opacity:1;border-color:var(--gold-d)}
+.lay-feat{margin-bottom:24px;padding-bottom:20px;border-bottom:1px solid var(--bdr)}
 .lay-grid{display:grid;grid-template-columns:1fr 1fr;gap:28px}
 .lay-hint{font-size:.72rem;color:var(--tx2);margin:-4px 0 12px;line-height:1.55}
 .lay-row{display:flex;align-items:center;gap:10px;padding:7px 10px;border:1px solid var(--bdr);background:var(--bg3);margin-bottom:4px;font-size:.8rem;color:var(--tx0)}
@@ -470,6 +471,11 @@ body{font-family:'Raleway',sans-serif;background:var(--bg0);color:var(--tx0)}
       <!-- Order of sections and the "most ordered" strip on the website -->
       <div class="menu-panel" style="grid-column:1/-1">
         <h3><span data-k="adm_lay_title">Pořadí na webu</span><span class="lay-saved" id="laySaved"></span></h3>
+        <div class="lay-feat">
+          <div class="cat-mgr-title" data-k="adm_feat_title">Doporučujeme — úplně nahoře v menu</div>
+          <p class="lay-hint" data-k="adm_feat_hint">Velké karty nad všemi sekcemi — zákazník je uvidí jako první. Přidat nebo odebrat: tlačítko ⭐ u položky v seznamu níže.</p>
+          <div id="featList"></div>
+        </div>
         <div class="lay-grid">
           <div>
             <div class="cat-mgr-title" data-k="adm_lay_tabs">Pořadí sekcí v menu</div>
@@ -793,6 +799,10 @@ const TA = {
     adm_drag_hint:'Pořadí položek: táhněte myší nebo použijte šipky ⤒ ▲ ▼. Stejné pořadí uvidí zákazníci.',
     adm_lay_saved:'✓ Uloženo', adm_lay_err:'Neuloženo — zkuste znovu',
     adm_tab_all:'Vše', adm_tab_fav:'Oblíbené', adm_tab_celeb:'Slavnostní dorty',
+    adm_feat_title:'Doporučujeme — úplně nahoře v menu',
+    adm_feat_hint:'Velké karty nad všemi sekcemi — zákazník je uvidí jako první. Přidat nebo odebrat: tlačítko ⭐ u položky v seznamu níže.',
+    adm_feat_empty:'Nic — nahoře v menu se nic nezobrazuje. Přidejte položky tlačítkem ⭐.',
+    adm_feat_btn:'Úplně nahoru v menu (Doporučujeme)', adm_feat_remove:'Odebrat z Doporučujeme',
   },
   en:{
     adm_panel:'Admin Panel', adm_login:'Login', adm_refresh:'↻ Refresh', adm_logout:'Logout',
@@ -852,6 +862,10 @@ const TA = {
     adm_drag_hint:'Item order: drag with the mouse or use the arrows ⤒ ▲ ▼. Customers see the same order.',
     adm_lay_saved:'✓ Saved', adm_lay_err:'Not saved — try again',
     adm_tab_all:'All', adm_tab_fav:'Favorites', adm_tab_celeb:'Celebration cakes',
+    adm_feat_title:'We recommend — at the very top of the menu',
+    adm_feat_hint:'Large cards above all sections — customers see them first. Add or remove with the ⭐ button on an item in the list below.',
+    adm_feat_empty:'Nothing — the top of the menu is empty. Add items with ⭐.',
+    adm_feat_btn:'To the very top of the menu (We recommend)', adm_feat_remove:'Remove from We recommend',
   },
   uk:{
     adm_panel:'Адмін-панель', adm_login:'Увійти', adm_refresh:'↻ Оновити', adm_logout:'Вийти',
@@ -913,6 +927,10 @@ const TA = {
     adm_drag_hint:'Порядок позицій: перетягуйте мишкою або натискайте стрілки ⤒ ▲ ▼. Клієнти бачать такий самий порядок.',
     adm_lay_saved:'✓ Збережено', adm_lay_err:'Не збережено — спробуйте ще раз',
     adm_tab_all:'Усі', adm_tab_fav:'Улюблені', adm_tab_celeb:'Святкові торти',
+    adm_feat_title:'Рекомендуємо — на самому верху меню',
+    adm_feat_hint:'Великі картки над усіма розділами — клієнт побачить їх першими. Додати або прибрати: кнопка ⭐ біля позиції у списку нижче.',
+    adm_feat_empty:'Порожньо — нагорі меню нічого не показується. Додайте позиції кнопкою ⭐.',
+    adm_feat_btn:'На самий верх меню (Рекомендуємо)', adm_feat_remove:'Прибрати з «Рекомендуємо»',
   }
 };
 
@@ -1265,7 +1283,7 @@ async function loadMenuItems(){
 
 /* ── Order on the website (item order, section order, "most ordered" strip) ── */
 // Item keys match menu.html: 's:<static index>' or 'c:<custom id>'
-let menuLayout = {order:[], cats:[], popular:{mode:'auto', count:8, pinned:[]}};
+let menuLayout = {order:[], cats:[], featured:[], popular:{mode:'auto', count:8, pinned:[]}};
 let popularStats = [];
 let _allKeys = [];      // every visible item, in website order
 let _visibleKeys = [];  // items shown under the current filter
@@ -1355,6 +1373,45 @@ function movePin(key, dir){
   [pins[i], pins[j]] = [pins[j], pins[i]];
   saveMenuLayout();
   renderPopularPreview();
+}
+
+function _featKeyFor(item){
+  // A built-in item edited into a copy stays featured under the original's key
+  const f = menuLayout.featured, key = itemKey(item);
+  return !f.includes(key) && item.static_src_idx!=null && f.includes('s:'+item.static_src_idx)
+    ? 's:'+item.static_src_idx : key;
+}
+
+function toggleFeatured(key){
+  const f = menuLayout.featured;
+  menuLayout.featured = f.includes(key) ? f.filter(k=>k!==key) : [...f, key];
+  saveMenuLayout();
+  renderMenuItems(cachedMenuItems);
+}
+
+function moveFeatured(key, dir){
+  const f = menuLayout.featured;
+  const i = f.indexOf(key), j = i+dir;
+  if(i<0 || j<0 || j>=f.length) return;
+  [f[i], f[j]] = [f[j], f[i]];
+  saveMenuLayout();
+  renderFeaturedList();
+}
+
+function renderFeaturedList(){
+  const el = document.getElementById('featList');
+  if(!el) return;
+  const all = Object.values(_allItemsByKey);
+  const rows = menuLayout.featured.map(k=>({k, it: _allItemsByKey[k] || all.find(i=>i.static_src_idx!=null && 's:'+i.static_src_idx===k)}))
+    .filter(r=>r.it);
+  if(!rows.length){ el.innerHTML = `<p class="lay-empty">${t('adm_feat_empty')}</p>`; return; }
+  el.innerHTML = rows.map(({k, it}, i)=>`<div class="lay-row">
+      <span class="lay-num">${i+1}</span>
+      <span class="lay-name">${esc(it.name?.[adminLang] || it.name?.cs || '')}</span>
+      <button class="lay-btn" onclick="moveFeatured('${k}',-1)" title="${t('adm_move_up')}" ${i===0?'disabled':''}>▲</button>
+      <button class="lay-btn" onclick="moveFeatured('${k}',1)" title="${t('adm_move_down')}" ${i===rows.length-1?'disabled':''}>▼</button>
+      <button class="lay-btn" onclick="toggleFeatured('${k}')" title="${t('adm_feat_remove')}">✕</button>
+    </div>`).join('');
 }
 
 let _dragKey = null;
@@ -1489,6 +1546,7 @@ function renderMenuItems(customItems){
   _allKeys = all.map(itemKey);
   _allItemsByKey = Object.fromEntries(all.map(i=>[itemKey(i), i]));
   renderTabOrder();
+  renderFeaturedList();
   renderPopularPreview();
   let filtered = menuFilter==='custom' ? all.filter(i=>i._custom)
     : menuFilter==='fav' ? all.filter(i=>i._custom?!!i.favorite:staticFavs.has(i._staticIdx))
@@ -1500,7 +1558,10 @@ function renderMenuItems(customItems){
   el.innerHTML = filtered.map((item, pos)=>{
     const key = itemKey(item);
     const isPinned = pinned.has(key) || (item.static_src_idx!=null && pinned.has('s:'+item.static_src_idx));
-    const pinBtn = `<button class="ci-pin${isPinned?' on':''}" onclick="togglePin('${isPinned && !pinned.has(key) ? 's:'+item.static_src_idx : key}')" title="${t('adm_pin')}">📌</button>`;
+    const featKey = _featKeyFor(item);
+    const isFeat = menuLayout.featured.includes(featKey);
+    const pinBtn = `<button class="ci-pin${isFeat?' on':''}" onclick="toggleFeatured('${featKey}')" title="${t('adm_feat_btn')}">⭐</button>`
+      + `<button class="ci-pin${isPinned?' on':''}" onclick="togglePin('${isPinned && !pinned.has(key) ? 's:'+item.static_src_idx : key}')" title="${t('adm_pin')}">📌</button>`;
     const moveBtns = `<div class="ci-move">
         <button onclick="moveItem('${key}','top')" title="${t('adm_move_top')}" ${pos===0?'disabled':''}>⤒</button>
         <button onclick="moveItem('${key}',-1)" title="${t('adm_move_up')}" ${pos===0?'disabled':''}>▲</button>
