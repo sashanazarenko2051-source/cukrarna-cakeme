@@ -825,7 +825,7 @@ const TA = {
     adm_lay_saved:'✓ Uloženo', adm_lay_err:'Neuloženo — zkuste znovu',
     adm_tab_all:'Vše', adm_tab_fav:'Oblíbené', adm_tab_celeb:'Slavnostní dorty',
     adm_feat_title:'Doporučujeme — úplně nahoře v menu',
-    adm_feat_hint:'Velké karty nad všemi sekcemi — zákazník je uvidí jako první. Přidat nebo odebrat: tlačítko ⭐ u položky v seznamu níže.',
+    adm_feat_hint:'Velké karty nad všemi sekcemi — zákazník je uvidí jako první. Přidat: vyberte níže a „+ Přidat“, nebo ⭐ u položky. Odebrat: ✕.',
     adm_feat_empty:'Nic — nahoře v menu se nic nezobrazuje. Přidejte položky tlačítkem ⭐.',
     adm_feat_btn:'Úplně nahoru v menu (Doporučujeme)', adm_feat_remove:'Odebrat z Doporučujeme',
     adm_weight_lbl:'Hmotnost (g / kg)', adm_amount_lbl:'Hmotnost / velikosti', adm_amount_hint_w:'Jedna hmotnost: jen ji zadejte (⚖ 500 g). Více variant s vlastní cenou: zadejte cenu a klikněte „+ Přidat“ (500 g · 750 Kč, 1 kg · 1500 Kč).', adm_amount_hint_ks:'Prodej na kusy: na kartě +/−, minimálně {n} ks.', adm_sizes_lbl:'Velikosti / hmotnost', adm_sizes_hint:'(nepovinné — např. 500 g, 1 kg, M 23cm; pokud jsou nastaveny, pole Cena se ignoruje)',
@@ -889,7 +889,7 @@ const TA = {
     adm_lay_saved:'✓ Saved', adm_lay_err:'Not saved — try again',
     adm_tab_all:'All', adm_tab_fav:'Favorites', adm_tab_celeb:'Celebration cakes',
     adm_feat_title:'We recommend — at the very top of the menu',
-    adm_feat_hint:'Large cards above all sections — customers see them first. Add or remove with the ⭐ button on an item in the list below.',
+    adm_feat_hint:'Large cards above all sections — customers see them first. Add: pick below and “+ Add”, or ⭐ on an item. Remove: ✕.',
     adm_feat_empty:'Nothing — the top of the menu is empty. Add items with ⭐.',
     adm_feat_btn:'To the very top of the menu (We recommend)', adm_feat_remove:'Remove from We recommend',
     adm_weight_lbl:'Weight (g / kg)', adm_amount_lbl:'Weight / sizes', adm_amount_hint_w:'One weight: just enter it (⚖ 500 g). Several variants with their own price: enter the price and click “+ Add” (500 g · 750 Kč, 1 kg · 1500 Kč).', adm_amount_hint_ks:'Sold by the piece: +/− on the card, at least {n} pcs.', adm_sizes_lbl:'Sizes / weight', adm_sizes_hint:'(optional — e.g. 500 g, 1 kg, M 23cm; if set, the Price field is ignored)',
@@ -955,7 +955,7 @@ const TA = {
     adm_lay_saved:'✓ Збережено', adm_lay_err:'Не збережено — спробуйте ще раз',
     adm_tab_all:'Усі', adm_tab_fav:'Улюблені', adm_tab_celeb:'Святкові торти',
     adm_feat_title:'Рекомендуємо — на самому верху меню',
-    adm_feat_hint:'Великі картки над усіма розділами — клієнт побачить їх першими. Додати або прибрати: кнопка ⭐ біля позиції у списку нижче.',
+    adm_feat_hint:'Великі картки над усіма розділами — клієнт побачить їх першими. Додати: оберіть нижче і «+ Додати» або ⭐ біля позиції. Прибрати: ✕.',
     adm_feat_empty:'Порожньо — нагорі меню нічого не показується. Додайте позиції кнопкою ⭐.',
     adm_feat_btn:'На самий верх меню (Рекомендуємо)', adm_feat_remove:'Прибрати з «Рекомендуємо»',
     adm_weight_lbl:'Вага (г / кг)', adm_amount_lbl:'Вага / розміри', adm_amount_hint_w:'Одна вага — просто вкажіть її (⚖ 500 g). Кілька варіантів зі своєю ціною — впишіть ціну і натисніть «+ Додати» (500 g · 750 Kč, 1 kg · 1500 Kč).', adm_amount_hint_ks:'Продаж поштучно: на картці +/−, мінімум {n} шт.', adm_sizes_lbl:'Розміри / вага', adm_sizes_hint:'(необов’язково — напр. 500 g, 1 kg, M 23cm; якщо задані, поле Ціна ігнорується)',
@@ -1440,14 +1440,34 @@ function renderFeaturedList(){
   const all = Object.values(_allItemsByKey);
   const rows = menuLayout.featured.map(k=>({k, it: _allItemsByKey[k] || all.find(i=>i.static_src_idx!=null && 's:'+i.static_src_idx===k)}))
     .filter(r=>r.it);
-  if(!rows.length){ el.innerHTML = `<p class="lay-empty">${t('adm_feat_empty')}</p>`; return; }
+  const nameOf = it=>it.name?.[adminLang] || it.name?.cs || '';
+  const shown = new Set(rows.map(r=>r.it));
+  const choices = _allKeys.map(k=>_allItemsByKey[k]).filter(it=>!shown.has(it))
+    .sort((a,b)=>nameOf(a).localeCompare(nameOf(b)));
+  const picker = `<div class="lay-ctrls" style="margin-top:10px">
+      <select id="featAddSel" style="flex:1;min-width:0">
+        <option value="">${t('adm_pop_pick')}</option>
+        ${choices.map(it=>`<option value="${itemKey(it)}">${esc(nameOf(it))}</option>`).join('')}
+      </select>
+      <button type="button" class="cat-add-btn" onclick="addFeatured()">${t('adm_add_btn')}</button>
+    </div>`;
+  if(!rows.length){ el.innerHTML = `<p class="lay-empty">${t('adm_feat_empty')}</p>` + picker; return; }
   el.innerHTML = rows.map(({k, it}, i)=>`<div class="lay-row">
       <span class="lay-num">${i+1}</span>
-      <span class="lay-name">${esc(it.name?.[adminLang] || it.name?.cs || '')}</span>
+      <span class="lay-name">${esc(nameOf(it))}</span>
       <button class="lay-btn" onclick="moveFeatured('${k}',-1)" title="${t('adm_move_up')}" ${i===0?'disabled':''}>▲</button>
       <button class="lay-btn" onclick="moveFeatured('${k}',1)" title="${t('adm_move_down')}" ${i===rows.length-1?'disabled':''}>▼</button>
       <button class="lay-btn" onclick="toggleFeatured('${k}')" title="${t('adm_feat_remove')}">✕</button>
-    </div>`).join('');
+    </div>`).join('') + picker;
+}
+
+// "+ Add" picker in the "Doporučujeme" block
+function addFeatured(){
+  const key = document.getElementById('featAddSel').value;
+  if(!key || menuLayout.featured.includes(key)) return;
+  menuLayout.featured = [...menuLayout.featured, key];
+  saveMenuLayout();
+  renderMenuItems(cachedMenuItems);
 }
 
 let _dragKey = null;
