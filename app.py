@@ -509,7 +509,7 @@ async def api_notif_info(req: Request):
 # ── /api/categories ───────────────────────────────────────────────────────────
 # Built-in sections (cakes, kolace, desserts, doplnky) can be renamed or hidden:
 # 'builtin' maps id -> {'label': new name or '', 'hidden': bool}
-_BUILTIN_CAT_IDS = ('cakes', 'kolace', 'desserts', 'doplnky')
+_BUILTIN_CAT_IDS = ('all', 'cakes', 'kolace', 'desserts', 'doplnky', 'fav', 'celebration')
 
 @app.get('/api/categories')
 def api_categories_get():
@@ -560,7 +560,7 @@ _DEFAULT_FEATURED = ['c:1790338678888']
 
 def _default_layout():
     return {'order': [], 'cats': [], 'featured': list(_DEFAULT_FEATURED),
-            'popular': {'mode': 'auto', 'count': 8, 'pinned': []}}
+            'popular': {'mode': 'auto', 'count': 8, 'pinned': [], 'excluded': []}}
 
 @app.get('/api/menu-layout')
 def api_menu_layout_get():
@@ -589,7 +589,9 @@ async def api_menu_layout_set(req: Request):
         'cats':  _clean_keys(d.get('cats'), 100),
         # An admin page opened before this field existed doesn't send it; keep what's saved
         'featured': _clean_keys(d['featured'], 24) if 'featured' in d else api_menu_layout_get()['featured'],
-        'popular': {'mode': mode, 'count': count, 'pinned': _clean_keys(pop.get('pinned'), 24)},
+        'popular': {'mode': mode, 'count': count, 'pinned': _clean_keys(pop.get('pinned'), 24),
+                    # Items the admin removed from the strip; auto-fill skips them
+                    'excluded': _clean_keys(pop.get('excluded'), 500)},
     }
     with _get_pool().connection() as conn:
         conn.execute(

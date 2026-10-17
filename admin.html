@@ -274,6 +274,7 @@ body{font-family:'Raleway',sans-serif;background:var(--bg0);color:var(--tx0)}
 .cat-tag{display:flex;align-items:center;gap:5px;background:rgba(201,169,110,.08);border:1px solid var(--gold-d);padding:4px 10px;font-size:.7rem;color:var(--gold);letter-spacing:.5px}
 .cat-tag-del{background:transparent;border:none;color:var(--gold-d);cursor:pointer;font-size:.95rem;line-height:1;padding:0 2px;transition:.2s}
 .cat-tag-del:hover{color:#e08080}
+.cat-mgr-list .lay-row{width:100%;margin-bottom:0}
 .cat-tag-off{border-style:dashed;border-color:var(--bdr);color:var(--tx2);background:transparent}
 .cat-tag-off .cat-tag-del:hover{color:var(--gold)}
 .cat-off-lbl{width:100%;font-size:.6rem;letter-spacing:1.5px;text-transform:uppercase;color:var(--tx2);margin-top:6px}
@@ -482,12 +483,7 @@ body{font-family:'Raleway',sans-serif;background:var(--bg0);color:var(--tx0)}
           <p class="lay-hint" data-k="adm_feat_hint">Velké karty nad všemi sekcemi — zákazník je uvidí jako první. Přidat nebo odebrat: tlačítko ⭐ u položky v seznamu níže.</p>
           <div id="featList"></div>
         </div>
-        <div class="lay-grid">
-          <div>
-            <div class="cat-mgr-title" data-k="adm_lay_tabs">Pořadí sekcí v menu</div>
-            <p class="lay-hint" data-k="adm_lay_tabs_hint">První sekce se zákazníkovi otevře hned po vstupu do menu.</p>
-            <div id="tabOrderList"></div>
-          </div>
+        <div>
           <div>
             <div class="cat-mgr-title" data-k="adm_lay_pop">Nejčastěji objednávané</div>
             <p class="lay-hint" data-k="adm_lay_pop_hint">Pás karet nad menu. 📌 u položky ji připne na začátek — tak můžete propagovat, co potřebujete prodat. Ostatní místa se doplní podle objednávek za 90 dní.</p>
@@ -623,6 +619,7 @@ body{font-family:'Raleway',sans-serif;background:var(--bg0);color:var(--tx0)}
         <!-- Category manager -->
         <div class="cat-mgr">
           <div class="cat-mgr-title" data-k="adm_cat_mgr_title">Sekce menu</div>
+          <p class="lay-hint" data-k="adm_lay_tabs_hint">Pořadí záložek na webu: ▲ ▼. První sekce se otevře jako první. ✎ přejmenovat, ✕ smazat.</p>
           <div class="cat-mgr-list" id="catMgrList"></div>
           <div class="cat-add-row">
             <input type="text" id="catAddInput" placeholder="Název sekce (např. Sezónní)">
@@ -716,6 +713,11 @@ let staticFavs = new Set();
 const BUILTIN_CATS = [
   {id:'cakes', k:'adm_cat_cakes'}, {id:'kolace', k:'adm_cat_kolace'},
   {id:'desserts', k:'adm_cat_desserts'}, {id:'doplnky', k:'adm_cat_doplnky'},
+];
+// Every built-in tab on the website; all of them can be renamed, reordered and deleted
+const BUILTIN_TABS = [
+  {id:'all', k:'adm_tab_all'}, ...BUILTIN_CATS,
+  {id:'fav', k:'adm_tab_fav'}, {id:'celebration', k:'adm_tab_celeb'},
 ];
 let customCategories = [];
 let builtinCats = {};
@@ -819,11 +821,11 @@ const TA = {
     adm_cat_mgr_title:'Sekce menu', adm_cat_add_btn:'+ Přidat sekci', adm_cat_rename:'Nový název sekce (prázdné = původní název):', adm_cat_restore:'Vrátit sekci', adm_cat_removed:'Smazané sekce — ↺ vrátí zpět',
     adm_cat_del_confirm:'Smazat tuto sekci? Položky v ní zůstanou.',
     adm_lay_title:'Pořadí na webu', adm_lay_tabs:'Pořadí sekcí v menu',
-    adm_lay_tabs_hint:'První sekce se zákazníkovi otevře hned po vstupu do menu.',
+    adm_lay_tabs_hint:'Pořadí záložek na webu: ▲ ▼. První sekce se otevře jako první. ✎ přejmenovat, ✕ smazat.',
     adm_lay_pop:'Nejčastěji objednávané',
     adm_lay_pop_hint:'Pás karet nad menu. 📌 u položky ji připne na začátek — tak můžete propagovat, co potřebujete prodat. Ostatní místa se doplní podle objednávek za 90 dní.',
     adm_pop_auto:'Připnuté + podle objednávek', adm_pop_manual:'Jen připnuté', adm_pop_off:'Nezobrazovat',
-    adm_pop_count:'Počet karet', adm_pop_pinned:'Připnuto', adm_pop_by_orders:'{n}× objednáno', adm_pop_fav:'Oblíbené',
+    adm_pop_count:'Počet karet', adm_pop_pick:'+ Vyberte položku k přidání…', adm_pop_remove:'Odebrat z pásu', adm_pop_removed:'Odebrané z pásu — ↺ vrátí zpět', adm_pop_pinned:'Připnuto', adm_pop_by_orders:'{n}× objednáno', adm_pop_fav:'Oblíbené',
     adm_pop_empty:'Zatím nic — připněte položky 📌 v seznamu níže.', adm_pop_hidden:'Pás se na webu nezobrazuje.',
     adm_pin:'Připnout do „Nejčastěji objednávané“', adm_first_tab:'otevře se první',
     adm_move_top:'Na začátek', adm_move_up:'Výš', adm_move_down:'Níž', adm_unpin:'Odepnout',
@@ -883,11 +885,11 @@ const TA = {
     adm_cat_mgr_title:'Menu sections', adm_cat_add_btn:'+ Add section', adm_cat_rename:'New section name (empty = original name):', adm_cat_restore:'Restore section', adm_cat_removed:'Deleted sections — ↺ restores',
     adm_cat_del_confirm:'Delete this section? Items in it will remain.',
     adm_lay_title:'Order on the website', adm_lay_tabs:'Menu section order',
-    adm_lay_tabs_hint:'The first section opens as soon as a customer enters the menu.',
+    adm_lay_tabs_hint:'Tab order on the website: ▲ ▼. The first section opens first. ✎ rename, ✕ delete.',
     adm_lay_pop:'Most ordered',
     adm_lay_pop_hint:'A strip of cards above the menu. 📌 on an item pins it to the front — use it to promote what you need to sell. Remaining spots are filled from the last 90 days of orders.',
     adm_pop_auto:'Pinned + by orders', adm_pop_manual:'Pinned only', adm_pop_off:'Hidden',
-    adm_pop_count:'Number of cards', adm_pop_pinned:'Pinned', adm_pop_by_orders:'ordered {n}×', adm_pop_fav:'Favorite',
+    adm_pop_count:'Number of cards', adm_pop_pick:'+ Choose an item to add…', adm_pop_remove:'Remove from the strip', adm_pop_removed:'Removed from the strip — ↺ restores', adm_pop_pinned:'Pinned', adm_pop_by_orders:'ordered {n}×', adm_pop_fav:'Favorite',
     adm_pop_empty:'Nothing yet — pin items with 📌 in the list below.', adm_pop_hidden:'The strip is hidden on the website.',
     adm_pin:'Pin to “Most ordered”', adm_first_tab:'opens first',
     adm_move_top:'To the top', adm_move_up:'Up', adm_move_down:'Down', adm_unpin:'Unpin',
@@ -949,11 +951,11 @@ const TA = {
     adm_cat_mgr_title:'Розділи меню', adm_cat_add_btn:'+ Додати розділ', adm_cat_rename:'Нова назва розділу (порожньо = початкова назва):', adm_cat_restore:'Повернути розділ', adm_cat_removed:'Видалені розділи — ↺ поверне',
     adm_cat_del_confirm:'Видалити цей розділ? Позиції в ньому залишаться.',
     adm_lay_title:'Порядок на сайті', adm_lay_tabs:'Порядок розділів у меню',
-    adm_lay_tabs_hint:'Перший розділ відкривається клієнту одразу, коли він заходить у меню.',
+    adm_lay_tabs_hint:'Порядок вкладок на сайті: ▲ ▼. Перший розділ відкривається першим. ✎ перейменувати, ✕ видалити.',
     adm_lay_pop:'Найчастіше замовляють',
     adm_lay_pop_hint:'Стрічка карток над меню. 📌 біля позиції закріплює її на початку — так можна просувати те, що треба продати. Решта місць заповнюється за замовленнями за 90 днів.',
     adm_pop_auto:'Закріплені + за замовленнями', adm_pop_manual:'Лише закріплені', adm_pop_off:'Не показувати',
-    adm_pop_count:'Кількість карток', adm_pop_pinned:'Закріплено', adm_pop_by_orders:'замовлено {n}×', adm_pop_fav:'Улюблене',
+    adm_pop_count:'Кількість карток', adm_pop_pick:'+ Оберіть позицію, щоб додати…', adm_pop_remove:'Прибрати зі стрічки', adm_pop_removed:'Прибрані зі стрічки — ↺ поверне', adm_pop_pinned:'Закріплено', adm_pop_by_orders:'замовлено {n}×', adm_pop_fav:'Улюблене',
     adm_pop_empty:'Поки нічого — закріпіть позиції 📌 у списку нижче.', adm_pop_hidden:'Стрічка на сайті не показується.',
     adm_pin:'Закріпити в «Найчастіше замовляють»', adm_first_tab:'відкривається першим',
     adm_move_top:'На початок', adm_move_up:'Вище', adm_move_down:'Нижче', adm_unpin:'Відкріпити',
@@ -1323,7 +1325,7 @@ async function loadMenuItems(){
 
 /* ── Order on the website (item order, section order, "most ordered" strip) ── */
 // Item keys match menu.html: 's:<static index>' or 'c:<custom id>'
-let menuLayout = {order:[], cats:[], featured:[], popular:{mode:'auto', count:8, pinned:[]}};
+let menuLayout = {order:[], cats:[], featured:[], popular:{mode:'auto', count:8, pinned:[], excluded:[]}};
 let popularStats = [];
 let _allKeys = [];      // every visible item, in website order
 let _visibleKeys = [];  // items shown under the current filter
@@ -1402,6 +1404,7 @@ function moveItem(key, dir){
 function togglePin(key){
   const p = menuLayout.popular;
   p.pinned = p.pinned.includes(key) ? p.pinned.filter(k=>k!==key) : [...p.pinned, key];
+  p.excluded = (p.excluded||[]).filter(k=>k!==key);
   saveMenuLayout();
   renderMenuItems(cachedMenuItems);
 }
@@ -1483,19 +1486,14 @@ function _bindDrag(el){
   });
 }
 
-const BUILTIN_TABS = [
-  {id:'all', k:'adm_tab_all'}, {id:'cakes', k:'adm_cat_cakes'}, {id:'kolace', k:'adm_cat_kolace'},
-  {id:'desserts', k:'adm_cat_desserts'}, {id:'doplnky', k:'adm_cat_doplnky'},
-  {id:'fav', k:'adm_tab_fav'}, {id:'celebration', k:'adm_tab_celeb'},
-];
-
+// Website tabs in the order customers see them (deleted built-in tabs left out)
 function _orderedTabs(){
   // Same default order as menu.html: custom sections sit before "Oblíbené"
   const favAt = BUILTIN_TABS.findIndex(b=>b.id==='fav');
   const tabs = [
-    ...BUILTIN_TABS.slice(0, favAt).map(b=>({id:b.id, label:BUILTIN_CATS.some(c=>c.id===b.id) ? catLabel(b.id) : t(b.k)})),
-    ...customCategories.map(c=>({id:c.id, label:c.label})),
-    ...BUILTIN_TABS.slice(favAt).map(b=>({id:b.id, label:t(b.k)})),
+    ...BUILTIN_TABS.slice(0, favAt).map(b=>({id:b.id, label:catLabel(b.id)})),
+    ...customCategories.map(c=>({id:c.id, label:c.label, custom:true})),
+    ...BUILTIN_TABS.slice(favAt).map(b=>({id:b.id, label:catLabel(b.id)})),
   ].filter(tb=>!builtinCats[tb.id]?.hidden);
   const cats = menuLayout.cats;
   const rank = (tb, i)=>{ const r = cats.indexOf(tb.id); return r<0 ? cats.length+i : r; };
@@ -1509,21 +1507,12 @@ function moveTab(id, dir){
   [ids[i], ids[j]] = [ids[j], ids[i]];
   menuLayout.cats = ids;
   saveMenuLayout();
-  renderTabOrder();
+  renderCategoryManager();
+  rebuildCatFilters();
 }
 
-function renderTabOrder(){
-  const el = document.getElementById('tabOrderList');
-  if(!el) return;
-  const tabs = _orderedTabs();
-  el.innerHTML = tabs.map((tb, i)=>`<div class="lay-row">
-      <span class="lay-num">${i+1}</span>
-      <span class="lay-name">${esc(tb.label)}</span>
-      ${i===0?`<span class="lay-tag">${t('adm_first_tab')}</span>`:''}
-      <button class="lay-btn" onclick="moveTab('${esc(tb.id)}',-1)" title="${t('adm_move_up')}" ${i===0?'disabled':''}>▲</button>
-      <button class="lay-btn" onclick="moveTab('${esc(tb.id)}',1)" title="${t('adm_move_down')}" ${i===tabs.length-1?'disabled':''}>▼</button>
-    </div>`).join('');
-}
+// The section list lives in the "Sekce menu" panel (order, rename, delete in one place)
+function renderTabOrder(){ renderCategoryManager(); rebuildCatFilters(); }
 
 function _popularList(){
   // Mirrors popularItems() in menu.html
@@ -1533,11 +1522,43 @@ function _popularList(){
   const add = (it, why)=>{ if(it && !out.some(o=>o.it===it)) out.push({it, why}); };
   p.pinned.forEach(k=>add(_allItemsByKey[k] || all.find(i=>i.static_src_idx!=null && 's:'+i.static_src_idx===k), 'pin'));
   if(p.mode==='auto'){
-    popularStats.forEach(s=>add(all.find(i=>i.name?.cs===s.name||i.name?.en===s.name||i.name?.uk===s.name), s.qty));
+    const addAuto = (it, why)=>{ if(it && !_isExcluded(it)) add(it, why); };
+    popularStats.forEach(s=>addAuto(all.find(i=>i.name?.cs===s.name||i.name?.en===s.name||i.name?.uk===s.name), s.qty));
     if(!out.length) _allKeys.map(k=>_allItemsByKey[k])
-      .filter(i=>i._custom ? !!i.favorite : staticFavs.has(i._staticIdx)).forEach(i=>add(i, 'fav'));
+      .filter(i=>i._custom ? !!i.favorite : staticFavs.has(i._staticIdx)).forEach(i=>addAuto(i, 'fav'));
   }
   return out.slice(0, p.count||8);
+}
+
+function _isExcluded(it){
+  const ex = menuLayout.popular.excluded || [];
+  return ex.includes(itemKey(it)) || (it.static_src_idx!=null && ex.includes('s:'+it.static_src_idx));
+}
+
+// Remove an auto-picked item from the strip; ↺ in the list below brings it back
+function excludePopular(key){
+  const p = menuLayout.popular;
+  p.excluded = [...(p.excluded||[]).filter(k=>k!==key), key];
+  saveMenuLayout();
+  renderPopularPreview();
+}
+
+function restorePopular(key){
+  const p = menuLayout.popular;
+  p.excluded = (p.excluded||[]).filter(k=>k!==key);
+  saveMenuLayout();
+  renderPopularPreview();
+}
+
+// "+ Add" picker: pins the chosen item to the strip
+function addPopular(){
+  const key = document.getElementById('popAddSel').value;
+  if(!key) return;
+  const p = menuLayout.popular;
+  p.excluded = (p.excluded||[]).filter(k=>k!==key);
+  if(!p.pinned.includes(key)) p.pinned = [...p.pinned, key];
+  saveMenuLayout();
+  renderMenuItems(cachedMenuItems);
 }
 
 function renderPopularPreview(){
@@ -1548,7 +1569,22 @@ function renderPopularPreview(){
   document.getElementById('popCount').value = p.count;
   if(p.mode==='off'){ el.innerHTML = `<p class="lay-empty">${t('adm_pop_hidden')}</p>`; return; }
   const list = _popularList();
-  if(!list.length){ el.innerHTML = `<p class="lay-empty">${t('adm_pop_empty')}</p>`; return; }
+  const shown = new Set(list.map(x=>x.it));
+  const nameOf = it=>it.name?.[adminLang] || it.name?.cs || '';
+  const choices = _allKeys.map(k=>_allItemsByKey[k]).filter(it=>!shown.has(it))
+    .sort((a,b)=>nameOf(a).localeCompare(nameOf(b)));
+  const picker = `<div class="lay-ctrls" style="margin-top:10px">
+      <select id="popAddSel" style="flex:1;min-width:0">
+        <option value="">${t('adm_pop_pick')}</option>
+        ${choices.map(it=>`<option value="${itemKey(it)}">${esc(nameOf(it))}</option>`).join('')}
+      </select>
+      <button type="button" class="cat-add-btn" onclick="addPopular()">${t('adm_add_btn')}</button>
+    </div>`;
+  const removedItems = (p.excluded||[]).map(k=>({k, it:_allItemsByKey[k]})).filter(x=>x.it);
+  const removed = removedItems.length ? `<span class="cat-off-lbl">${t('adm_pop_removed')}</span>
+      <div class="cat-mgr-list">${removedItems.map(({k, it})=>`<span class="cat-tag cat-tag-off">${esc(nameOf(it))}
+        <button class="cat-tag-del" onclick="restorePopular('${k}')" title="${t('adm_cat_restore')}">↺</button></span>`).join('')}</div>` : '';
+  if(!list.length){ el.innerHTML = `<p class="lay-empty">${t('adm_pop_empty')}</p>` + picker + removed; return; }
   el.innerHTML = list.map(({it, why}, i)=>{
     const key = itemKey(it);
     const pinKey = p.pinned.includes(key) ? key : (it.static_src_idx!=null ? 's:'+it.static_src_idx : key);
@@ -1560,13 +1596,14 @@ function renderPopularPreview(){
       ? `<button class="lay-btn" onclick="movePin('${pinKey}',-1)" title="${t('adm_move_up')}" ${pinIdx===0?'disabled':''}>▲</button>
          <button class="lay-btn" onclick="movePin('${pinKey}',1)" title="${t('adm_move_down')}" ${pinIdx===p.pinned.length-1?'disabled':''}>▼</button>
          <button class="lay-btn" onclick="togglePin('${pinKey}')" title="${t('adm_unpin')}">✕</button>`
-      : `<button class="lay-btn" onclick="togglePin('${key}')" title="${t('adm_pin')}">📌</button>`;
+      : `<button class="lay-btn" onclick="togglePin('${key}')" title="${t('adm_pin')}">📌</button>
+         <button class="lay-btn" onclick="excludePopular('${key}')" title="${t('adm_pop_remove')}">✕</button>`;
     return `<div class="lay-row">
       <span class="lay-num">${i+1}</span>
-      <span class="lay-name">${esc(it.name?.[adminLang] || it.name?.cs || '')}</span>
+      <span class="lay-name">${esc(nameOf(it))}</span>
       ${tag}${ctrls}
     </div>`;
-  }).join('');
+  }).join('') + picker + removed;
 }
 
 document.getElementById('popMode').addEventListener('change', e=>{
@@ -1645,7 +1682,7 @@ function renderMenuItems(customItems){
 
 /* ── Category manager ── */
 function catLabel(id){
-  const b = BUILTIN_CATS.find(c=>c.id===id);
+  const b = BUILTIN_TABS.find(c=>c.id===id);
   if(b) return builtinCats[id]?.label || t(b.k);
   return customCategories.find(c=>c.id===id)?.label || id;
 }
@@ -1659,7 +1696,7 @@ function _catsChanged(){
 }
 
 function renameCat(id){
-  const isBuiltin = BUILTIN_CATS.some(c=>c.id===id);
+  const isBuiltin = BUILTIN_TABS.some(c=>c.id===id);
   const label = prompt(t('adm_cat_rename'), catLabel(id));
   if(label===null) return;
   const v = label.trim();
@@ -1676,7 +1713,7 @@ function renameCat(id){
 
 function deleteCat(id){
   if(!confirm(t('adm_cat_del_confirm'))) return;
-  if(BUILTIN_CATS.some(c=>c.id===id)) builtinCats[id] = {...(builtinCats[id]||{}), hidden: true};
+  if(BUILTIN_TABS.some(c=>c.id===id)) builtinCats[id] = {...(builtinCats[id]||{}), hidden: true};
   else customCategories = customCategories.filter(c=>c.id!==id);
   if(menuFilter===id){
     menuFilter = 'all';
@@ -1720,19 +1757,21 @@ async function saveCategories(){
 function renderCategoryManager(){
   const list = document.getElementById('catMgrList');
   if(!list) return;
-  renderTabOrder();
-  const tag = (id, label, extra='')=>`<span class="cat-tag${extra}">
-      ${esc(label)}
-      ${extra ? `<button class="cat-tag-del" onclick="restoreCat('${id}')" title="${t('adm_cat_restore')}">↺</button>`
-        : `<button class="cat-tag-del" onclick="renameCat('${id}')" title="${t('adm_cat_rename')}">✎</button>
-           <button class="cat-tag-del" onclick="deleteCat('${id}')" title="${t('adm_btn_delete')}">×</button>`}
-    </span>`;
-  const active = [
-    ...BUILTIN_CATS.filter(c=>!builtinCats[c.id]?.hidden).map(c=>tag(c.id, catLabel(c.id))),
-    ...customCategories.map(c=>tag(c.id, c.label)),
-  ];
-  const removed = BUILTIN_CATS.filter(c=>builtinCats[c.id]?.hidden).map(c=>tag(c.id, catLabel(c.id), ' cat-tag-off'));
-  list.innerHTML = (active.join('') || '<span style="font-size:.72rem;color:var(--tx2)">—</span>')
+  const tabs = _orderedTabs();
+  const rows = tabs.map((tb, i)=>`<div class="lay-row">
+      <span class="lay-num">${i+1}</span>
+      <span class="lay-name">${esc(tb.label)}</span>
+      ${i===0?`<span class="lay-tag">${t('adm_first_tab')}</span>`:''}
+      <button class="lay-btn" onclick="moveTab('${tb.id}',-1)" title="${t('adm_move_up')}" ${i===0?'disabled':''}>▲</button>
+      <button class="lay-btn" onclick="moveTab('${tb.id}',1)" title="${t('adm_move_down')}" ${i===tabs.length-1?'disabled':''}>▼</button>
+      <button class="lay-btn" onclick="renameCat('${tb.id}')" title="${t('adm_cat_rename')}">✎</button>
+      <button class="lay-btn" onclick="deleteCat('${tb.id}')" title="${t('adm_btn_delete')}">✕</button>
+    </div>`);
+  const removed = BUILTIN_TABS.filter(c=>builtinCats[c.id]?.hidden).map(c=>`<span class="cat-tag cat-tag-off">
+      ${esc(catLabel(c.id))}
+      <button class="cat-tag-del" onclick="restoreCat('${c.id}')" title="${t('adm_cat_restore')}">↺</button>
+    </span>`);
+  list.innerHTML = (rows.join('') || '<span style="font-size:.72rem;color:var(--tx2)">—</span>')
     + (removed.length ? `<span class="cat-off-lbl">${t('adm_cat_removed')}</span>${removed.join('')}` : '');
 }
 
@@ -1783,6 +1822,12 @@ function rebuildCatFilters(){
     });
     filters.insertBefore(btn, favBtn);
   });
+  // Same order as the website tabs: Vše, sections, removed sections (hidden), Vlastní, Oblíbené
+  const order = _orderedTabs().map(tb=>tb.id).filter(id=>!['all','fav','celebration'].includes(id));
+  const byMf = mf=>filters.querySelector(`[data-mf="${mf}"]`);
+  ['all', ...order, ...BUILTIN_CATS.map(c=>c.id).filter(id=>!order.includes(id)), 'custom', 'fav']
+    .forEach(mf=>{ const b = byMf(mf); if(b) filters.appendChild(b); });
+  filters.querySelectorAll('.ci-flt').forEach(b=>b.classList.toggle('on', b.dataset.mf===menuFilter));
 }
 
 document.getElementById('catAddBtn').addEventListener('click',()=>{

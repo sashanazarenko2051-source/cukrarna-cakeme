@@ -537,8 +537,11 @@ function popularItems(){
   const add=it=>{if(it&&!out.includes(it)) out.push(it);};
   (p.pinned||[]).forEach(k=>add(visible.find(i=>i._key===k||(i.static_src_idx!=null&&'s:'+i.static_src_idx===k))));
   if(p.mode==='auto'){
-    POPULAR.forEach(({name})=>add(visible.find(i=>i.name?.cs===name||i.name?.en===name||i.name?.uk===name)));
-    if(!out.length) visible.filter(i=>i.fav).sort(byRank).forEach(add);
+    // Items removed from the strip in the admin panel are never auto-added
+    const excluded=new Set(p.excluded||[]);
+    const addAuto=it=>{if(it&&!excluded.has(it._key)&&!(it.static_src_idx!=null&&excluded.has('s:'+it.static_src_idx))) add(it);};
+    POPULAR.forEach(({name})=>addAuto(visible.find(i=>i.name?.cs===name||i.name?.en===name||i.name?.uk===name)));
+    if(!out.length) visible.filter(i=>i.fav).sort(byRank).forEach(addAuto);
   }
   return out.slice(0,p.count||8);
 }
