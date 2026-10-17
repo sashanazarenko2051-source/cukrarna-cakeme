@@ -165,7 +165,34 @@ async def api_auth(req: Request):
 # inside one 5 MB JSON; ?v=<hash> changes whenever the photo changes.
 _IMG_URL_RE = re.compile(r'^/api/menu-img/(\d+)')
 
+# Ukrainian/English texts for items and sections added in the admin panel (translations.json).
+# Used only where the item has no own translation (missing or same as Czech).
+def _load_translations():
+    try:
+        with open(os.path.join(os.path.dirname(os.path.abspath(__file__)), 'translations.json'), encoding='utf-8') as f:
+            return json.load(f)
+    except (OSError, ValueError):
+        return {}
+
+_TR = _load_translations()
+_TR_PHRASES = {p['cs']: p for p in _TR.get('phrases', []) if p.get('cs')}
+
+def _translate(item):
+    tr = _TR.get('items', {}).get(str(item.get('id')), {})
+    out = {**item, 'name': dict(item.get('name') or {}), 'desc': dict(item.get('desc') or {})}
+    for field in ('name', 'desc'):
+        cs = out[field].get('cs', '')
+        for lang in ('uk', 'en'):
+            cur = out[field].get(lang, '')
+            if cur and cur != cs:
+                continue
+            new = (tr.get(field) or {}).get(lang) or (_TR_PHRASES.get(cs) or {}).get(lang)
+            if new:
+                out[field][lang] = new
+    return out
+
 def _public_item(item):
+    item = _translate(item)
     img = item.get('img') or ''
     if not img.startswith('data:'):
         return item
@@ -565,15 +592,24 @@ def api_categories_get():
     with _get_pool().connection() as conn:
         row = conn.execute("SELECT value FROM settings WHERE key='custom_categories'").fetchone()
         brow = conn.execute("SELECT value FROM settings WHERE key='builtin_categories'").fetchone()
-        return {'categories': _json.loads(row[0]) if row and row[0] else [],
-                'builtin': _json.loads(brow[0]) if brow and brow[0] else {}}
+        cats = _json.loads(row[0]) if row and row[0] else []
+        builtin = _json.loads(brow[0]) if brow and brow[0] else {}
+    # Section names per language: label (Czech), label_uk, label_en; fill gaps from translations.json
+    for c in cats:
+        tr = _TR.get('categories', {}).get(c.get('id'), {})
+        for lang in ('uk', 'en'):
+            if not c.get('label_' + lang) and tr.get(lang):
+                c['label_' + lang] = tr[lang]
+    return {'categories': cats, 'builtin': builtin}
 
 @app.post('/api/categories')
 async def api_categories_set(req: Request):
     d = await req.json()
     if not _verify_token(d.get('token')):
         raise HTTPException(401, 'Unauthorized')
-    cats = [{'id': c['id'], 'label': c['label']} for c in (d.get('categories') or []) if c.get('id') and c.get('label')]
+    def _labels(c):
+        return {k: str(c.get(k) or '').strip()[:60] for k in ('label', 'label_uk', 'label_en') if str(c.get(k) or '').strip()}
+    cats = [{'id': c['id'], **_labels(c)} for c in (d.get('categories') or []) if c.get('id') and c.get('label')]
     with _get_pool().connection() as conn:
         conn.execute(
             "INSERT INTO settings(key,value) VALUES('custom_categories',%s) ON CONFLICT(key) DO UPDATE SET value=EXCLUDED.value",
@@ -583,9 +619,9 @@ async def api_categories_set(req: Request):
             builtin = {}
             for cid in _BUILTIN_CAT_IDS:
                 b = d['builtin'].get(cid) or {}
-                label = str(b.get('label') or '').strip()[:60]
-                if label or b.get('hidden'):
-                    builtin[cid] = {'label': label, 'hidden': bool(b.get('hidden'))}
+                labels = _labels(b)
+                if labels or b.get('hidden'):
+                    builtin[cid] = {**labels, 'hidden': bool(b.get('hidden'))}
             conn.execute(
                 "INSERT INTO settings(key,value) VALUES('builtin_categories',%s) ON CONFLICT(key) DO UPDATE SET value=EXCLUDED.value",
                 (_json.dumps(builtin),)

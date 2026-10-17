@@ -563,7 +563,7 @@ function renderPopular(){
       <div class="pop-img">
         ${item.img?`<img src="${item.img}" alt="${name}" loading="lazy" onerror="this.style.display='none'">`:''}
         <span class="pop-rank">${n+1}</span>
-        ${item.badge?`<span class="m-badge">${item.badge}</span>`:''}
+        ${item.badge?`<span class="m-badge">${badgeText(item.badge)}</span>`:''}
       </div>
       <div class="pop-body">
         <div class="pop-name">${name}</div>
@@ -607,12 +607,32 @@ function applyLang(){
   renderFeatured();
   renderPopular();
   updateCartUI();
+  applyTabLabels();
   setTimeout(()=>{
     document.querySelectorAll('[data-k]').forEach(el=>{
       const val=t(el.dataset.k); if(val) el.textContent=val;
     });
+    applyTabLabels();
   },100);
 }
+
+// Section names set in the admin panel (per language) win over the built-in translations;
+// a section without a name in this language falls back to its Czech name
+function applyTabLabels(){
+  document.querySelectorAll('.m-tab').forEach(btn=>{
+    const l=btn._labels; if(!l) return;
+    const val=l[lang]||(btn.dataset.k?'':l.cs);
+    if(val) btn.textContent=val;
+  });
+}
+
+// Common badges typed in Czech in the admin panel
+const BADGE_T={
+  'nové':{uk:'Новинка',en:'New'}, 'novinka':{uk:'Новинка',en:'New'},
+  'bestseller':{uk:'Хіт продажу',en:'Bestseller'}, 'sleva':{uk:'Знижка',en:'Sale'},
+  'vánoce':{uk:'Різдво',en:'Christmas'}, 'doporučujeme':{uk:'Рекомендуємо',en:'Recommended'},
+};
+function badgeText(b){ return (BADGE_T[(b||'').trim().toLowerCase()]||{})[lang]||b; }
 
 function getCart(){return JSON.parse(localStorage.getItem('cakeme_cart')||'[]');}
 function saveCart(c){localStorage.setItem('cakeme_cart',JSON.stringify(c));}
@@ -756,7 +776,7 @@ function cardHtml(item){
       return `<div class="m-card fi">
       <div class="m-img">
         ${item.img?`<img src="${item.img}" alt="${name}" loading="lazy" onerror="this.style.display='none'">`:''}
-        ${item.badge?`<span class="m-badge">${item.badge}</span>`:''}
+        ${item.badge?`<span class="m-badge">${badgeText(item.badge)}</span>`:''}
       </div>
       <div class="m-body">
         <h3 class="m-name">${name}</h3>${item.weight?`<div class="m-weight">⚖ ${item.weight}</div>`:''}
@@ -775,7 +795,7 @@ function cardHtml(item){
       return `<div class="m-card fi">
         <div class="m-img">
           ${item.img?`<img src="${item.img}" alt="${name}" loading="lazy" onerror="this.style.display='none'">`:''}
-          ${item.badge?`<span class="m-badge">${item.badge}</span>`:''}
+          ${item.badge?`<span class="m-badge">${badgeText(item.badge)}</span>`:''}
         </div>
         <div class="m-body">
           <h3 class="m-name">${name}</h3>${item.weight?`<div class="m-weight">⚖ ${item.weight}</div>`:''}
@@ -796,7 +816,7 @@ function cardHtml(item){
     return `<div class="m-card fi">
       <div class="m-img">
         ${item.img?`<img src="${item.img}" alt="${name}" loading="lazy" onerror="this.style.display='none'">`:''}
-        ${item.badge?`<span class="m-badge">${item.badge}</span>`:''}
+        ${item.badge?`<span class="m-badge">${badgeText(item.badge)}</span>`:''}
       </div>
       <div class="m-body">
         <h3 class="m-name">${name}</h3>${item.weight?`<div class="m-weight">⚖ ${item.weight}</div>`:''}
@@ -915,12 +935,12 @@ async function loadCustomMenu(){
     // Inject custom category tabs
     if(cr.status==='fulfilled'&&cr.value.ok){
       const {categories,builtin}=await cr.value.json();
-      // Built-in sections renamed or deleted in the admin panel
+      // Built-in sections renamed (per language) or deleted in the admin panel
       Object.entries(builtin||{}).forEach(([id,b])=>{
         const btn=document.querySelector(`.m-tab[data-tab="${id}"]`);
         if(!btn) return;
         if(b.hidden){ btn.remove(); return; }
-        if(b.label){ btn.textContent=b.label; btn.removeAttribute('data-k'); }
+        btn._labels={cs:b.label,uk:b.label_uk,en:b.label_en};
       });
       if(categories&&categories.length){
         const tabsEl=document.querySelector('.m-tabs');
@@ -930,6 +950,7 @@ async function loadCustomMenu(){
           const btn=document.createElement('button');
           btn.className='m-tab';
           btn.dataset.tab=cat.id;
+          btn._labels={cs:cat.label,uk:cat.label_uk,en:cat.label_en};
           btn.textContent=cat.label;
           btn.addEventListener('click',()=>{
             tab=cat.id;

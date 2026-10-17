@@ -552,8 +552,14 @@ body{font-family:'Raleway',sans-serif;background:var(--bg0);color:var(--tx0)}
           <div class="mai-field full">
             <label data-k="adm_name_cs_lbl">Název CZ *</label>
             <input type="text" id="fNameCs" data-kp="adm_ph_name" placeholder="Název česky">
-            <input type="hidden" id="fNameUk">
-            <input type="hidden" id="fNameEn">
+          </div>
+          <div class="mai-field">
+            <label data-k="adm_name_uk_lbl">Назва UA</label>
+            <input type="text" id="fNameUk" data-kp="adm_ph_same_cs" placeholder="= CZ">
+          </div>
+          <div class="mai-field">
+            <label data-k="adm_name_en_lbl">Name EN</label>
+            <input type="text" id="fNameEn" data-kp="adm_ph_same_cs" placeholder="= CZ">
           </div>
           <div class="mai-field">
             <label data-k="adm_badge_lbl">Badge (Nové, Bestseller…)</label>
@@ -562,8 +568,14 @@ body{font-family:'Raleway',sans-serif;background:var(--bg0);color:var(--tx0)}
           <div class="mai-field full">
             <label data-k="adm_desc_cs_lbl">Popis CZ</label>
             <input type="text" id="fDescCs" data-kp="adm_ph_desc" placeholder="Krátký popis česky">
-            <input type="hidden" id="fDescUk">
-            <input type="hidden" id="fDescEn">
+          </div>
+          <div class="mai-field full">
+            <label data-k="adm_desc_uk_lbl">Опис UA</label>
+            <input type="text" id="fDescUk" data-kp="adm_ph_same_cs" placeholder="= CZ">
+          </div>
+          <div class="mai-field full">
+            <label data-k="adm_desc_en_lbl">Description EN</label>
+            <input type="text" id="fDescEn" data-kp="adm_ph_same_cs" placeholder="= CZ">
           </div>
           <div class="mai-field full">
             <label data-k="adm_img_lbl">Obrázek</label>
@@ -767,6 +779,7 @@ let adminLang = localStorage.getItem('cm_admin_lang') || 'cs';
 
 const TA = {
   cs:{
+    adm_ph_same_cs:'Nepovinné — jinak jako česky',
     adm_panel:'Admin Panel', adm_login:'Přihlásit se', adm_refresh:'↻ Obnovit', adm_logout:'Odhlásit',
     adm_orders:'Objednávky', adm_menu:'Menu',
     adm_stat_new:'Nové', adm_stat_today:'Dnes', adm_stat_total:'Celkem',
@@ -775,12 +788,12 @@ const TA = {
     adm_clear_done:'Smazat hotové',
     adm_add_title:'Přidat položku do menu',
     adm_cat_lbl:'Kategorie *', adm_price_lbl:'Cena * (např. 133 Kč)',
-    adm_name_cs_lbl:'Název CZ *', adm_name_uk_lbl:'Назва UA', adm_name_en_lbl:'Name EN',
+    adm_name_cs_lbl:'Název CZ *', adm_name_uk_lbl:'Název ukrajinsky', adm_name_en_lbl:'Název anglicky',
     adm_badge_lbl:'Badge (Nové, Bestseller…)',
     adm_qty_ctrl_lbl:'Výběr množství', adm_qty_ctrl_hint:'Počet kusů (+/−) na kartě',
     adm_qty_min_lbl:'Minimální počet kusů',
     adm_img_pos_lbl:'Poloha obrázku',
-    adm_desc_cs_lbl:'Popis CZ', adm_desc_uk_lbl:'Опис UA', adm_desc_en_lbl:'Description EN',
+    adm_desc_cs_lbl:'Popis CZ', adm_desc_uk_lbl:'Popis ukrajinsky', adm_desc_en_lbl:'Popis anglicky',
     adm_img_lbl:'Obrázek', adm_img_click:'Klikněte nebo přetáhněte soubor',
     adm_img_hint:'JPG, PNG, WebP · max 3 MB · automaticky zkomprimováno',
     adm_img_remove:'✕ Odebrat obrázek', adm_card_prev:'Náhled karty',
@@ -834,6 +847,7 @@ const TA = {
     adm_weight_lbl:'Hmotnost (g / kg)', adm_amount_lbl:'Hmotnost / velikosti', adm_amount_hint_w:'Jedna hmotnost: jen ji zadejte (⚖ 500 g). Více variant s vlastní cenou: zadejte cenu a klikněte „+ Přidat“ (500 g · 750 Kč, 1 kg · 1500 Kč).', adm_amount_hint_ks:'Prodej na kusy: na kartě +/−, minimálně {n} ks.', adm_sizes_lbl:'Velikosti / hmotnost', adm_sizes_hint:'(nepovinné — např. 500 g, 1 kg, M 23cm; pokud jsou nastaveny, pole Cena se ignoruje)',
   },
   en:{
+    adm_ph_same_cs:'Optional — otherwise same as Czech',
     adm_panel:'Admin Panel', adm_login:'Login', adm_refresh:'↻ Refresh', adm_logout:'Logout',
     adm_orders:'Orders', adm_menu:'Menu',
     adm_stat_new:'New', adm_stat_today:'Today', adm_stat_total:'Total',
@@ -842,10 +856,10 @@ const TA = {
     adm_clear_done:'Delete completed',
     adm_add_title:'Add menu item',
     adm_cat_lbl:'Category *', adm_price_lbl:'Price * (e.g. 133 Kč)',
-    adm_name_cs_lbl:'Name in Czech *', adm_name_uk_lbl:'Name UA', adm_name_en_lbl:'Name EN',
+    adm_name_cs_lbl:'Name in Czech *', adm_name_uk_lbl:'Name in Ukrainian', adm_name_en_lbl:'Name in English',
     adm_badge_lbl:'Badge (New, Bestseller…)',
     adm_qty_min_lbl:'Minimum quantity',
-    adm_desc_cs_lbl:'Description in Czech', adm_desc_uk_lbl:'Description UA', adm_desc_en_lbl:'Description EN',
+    adm_desc_cs_lbl:'Description in Czech', adm_desc_uk_lbl:'Description in Ukrainian', adm_desc_en_lbl:'Description in English',
     adm_img_lbl:'Image', adm_img_click:'Click or drag a file here',
     adm_img_hint:'JPG, PNG, WebP · max 3 MB · auto-compressed',
     adm_img_remove:'✕ Remove image', adm_card_prev:'Card preview',
@@ -899,6 +913,7 @@ const TA = {
     adm_weight_lbl:'Weight (g / kg)', adm_amount_lbl:'Weight / sizes', adm_amount_hint_w:'One weight: just enter it (⚖ 500 g). Several variants with their own price: enter the price and click “+ Add” (500 g · 750 Kč, 1 kg · 1500 Kč).', adm_amount_hint_ks:'Sold by the piece: +/− on the card, at least {n} pcs.', adm_sizes_lbl:'Sizes / weight', adm_sizes_hint:'(optional — e.g. 500 g, 1 kg, M 23cm; if set, the Price field is ignored)',
   },
   uk:{
+    adm_ph_same_cs:'Необов’язково — інакше як чеською',
     adm_panel:'Адмін-панель', adm_login:'Увійти', adm_refresh:'↻ Оновити', adm_logout:'Вийти',
     adm_orders:'Замовлення', adm_menu:'Меню',
     adm_stat_new:'Нові', adm_stat_today:'Сьогодні', adm_stat_total:'Усього',
@@ -907,12 +922,12 @@ const TA = {
     adm_clear_done:'Видалити готові',
     adm_add_title:'Додати позицію в меню',
     adm_cat_lbl:'Категорія *', adm_price_lbl:'Ціна * (напр. 133 Kč)',
-    adm_name_cs_lbl:'Назва чеською *', adm_name_uk_lbl:'Назва UA', adm_name_en_lbl:'Назва EN',
+    adm_name_cs_lbl:'Назва чеською *', adm_name_uk_lbl:'Назва українською', adm_name_en_lbl:'Назва англійською',
     adm_badge_lbl:'Бейдж (Новинка, Бестселер…)',
     adm_qty_ctrl_lbl:'Вибір кількості', adm_qty_ctrl_hint:'Кількість штук (+/−) на картці',
     adm_qty_min_lbl:'Мінімальна кількість штук',
     adm_img_pos_lbl:'Положення фото',
-    adm_desc_cs_lbl:'Опис чеською', adm_desc_uk_lbl:'Опис UA', adm_desc_en_lbl:'Опис EN',
+    adm_desc_cs_lbl:'Опис чеською', adm_desc_uk_lbl:'Опис українською', adm_desc_en_lbl:'Опис англійською',
     adm_img_lbl:'Фото', adm_img_click:'Натисніть або перетягніть файл',
     adm_img_hint:'JPG, PNG, WebP · макс. 3 МБ · стискається автоматично',
     adm_img_remove:'✕ Прибрати фото', adm_card_prev:'Попередній перегляд картки',
@@ -1513,7 +1528,7 @@ function _orderedTabs(){
   const favAt = BUILTIN_TABS.findIndex(b=>b.id==='fav');
   const tabs = [
     ...BUILTIN_TABS.slice(0, favAt).map(b=>({id:b.id, label:catLabel(b.id)})),
-    ...customCategories.map(c=>({id:c.id, label:c.label, custom:true})),
+    ...customCategories.map(c=>({id:c.id, label:catLabel(c.id), custom:true})),
     ...BUILTIN_TABS.slice(favAt).map(b=>({id:b.id, label:catLabel(b.id)})),
   ].filter(tb=>!builtinCats[tb.id]?.hidden);
   const cats = menuLayout.cats;
@@ -1702,10 +1717,14 @@ function renderMenuItems(customItems){
 }
 
 /* ── Category manager ── */
+// Section names are kept per language: label (Czech), label_uk, label_en
+function _labelKey(){ return adminLang==='cs' ? 'label' : 'label_'+adminLang; }
+
 function catLabel(id){
   const b = BUILTIN_TABS.find(c=>c.id===id);
-  if(b) return builtinCats[id]?.label || t(b.k);
-  return customCategories.find(c=>c.id===id)?.label || id;
+  if(b) return builtinCats[id]?.[_labelKey()] || t(b.k);
+  const c = customCategories.find(c=>c.id===id);
+  return c ? (c[_labelKey()] || c.label) : id;
 }
 
 function _catsChanged(){
@@ -1717,17 +1736,19 @@ function _catsChanged(){
 }
 
 function renameCat(id){
+  // Renames the section for the current admin language only
   const isBuiltin = BUILTIN_TABS.some(c=>c.id===id);
-  const label = prompt(t('adm_cat_rename'), catLabel(id));
+  const key = _labelKey();
+  const label = prompt(t('adm_cat_rename') + ' [' + adminLang.toUpperCase() + ']', catLabel(id));
   if(label===null) return;
   const v = label.trim();
   if(isBuiltin){
     // An empty name brings back the original translated name
-    builtinCats[id] = {...(builtinCats[id]||{}), label: v};
+    builtinCats[id] = {...(builtinCats[id]||{}), [key]: v};
   } else {
-    if(!v) return;
     const c = customCategories.find(c=>c.id===id);
-    if(c) c.label = v;
+    if(!c || (!v && key==='label')) return;  // the Czech name is required
+    c[key] = v;
   }
   _catsChanged();
 }
@@ -1811,7 +1832,7 @@ function rebuildCatSelect(){
   customCategories.forEach(cat=>{
     const o = document.createElement('option');
     o.value = cat.id;
-    o.textContent = cat.label;
+    o.textContent = catLabel(cat.id);
     o.dataset.custom = '1';
     sel.appendChild(o);
   });
@@ -1835,7 +1856,7 @@ function rebuildCatFilters(){
     btn.className = 'ci-flt';
     btn.dataset.mf = cat.id;
     btn.dataset.customCat = '1';
-    btn.textContent = cat.label;
+    btn.textContent = catLabel(cat.id);
     btn.addEventListener('click',()=>{
       menuFilter = cat.id;
       document.querySelectorAll('.ci-flt').forEach(b=>b.classList.toggle('on',b===btn));
@@ -1973,12 +1994,12 @@ function startEditStatic(idx){
   document.getElementById('fCat').value    = item.cat || 'desserts';
   document.getElementById('fPrice').value  = itemPrice(item);
   document.getElementById('fNameCs').value = item.name?.cs || '';
-  document.getElementById('fNameUk').value = item.name?.uk || '';
-  document.getElementById('fNameEn').value = item.name?.en || '';
+  document.getElementById('fNameUk').value = _ownText(item.name, 'uk');
+  document.getElementById('fNameEn').value = _ownText(item.name, 'en');
   document.getElementById('fBadge').value  = item.badge || '';
   document.getElementById('fDescCs').value = item.desc?.cs || '';
-  document.getElementById('fDescUk').value = item.desc?.uk || '';
-  document.getElementById('fDescEn').value = item.desc?.en || '';
+  document.getElementById('fDescUk').value = _ownText(item.desc, 'uk');
+  document.getElementById('fDescEn').value = _ownText(item.desc, 'en');
   _setAmountFields(item);
   if(item.img){ _loadImgForEdit(item.img); } else { resetImg(); }
   document.getElementById('formTitle').textContent = t('adm_edit_title');
@@ -2004,8 +2025,8 @@ function duplicateStatic(idx){
   document.getElementById('fNameEn').value = (item.name?.en || '') + ' (copy)';
   document.getElementById('fBadge').value  = item.badge || '';
   document.getElementById('fDescCs').value = item.desc?.cs || '';
-  document.getElementById('fDescUk').value = item.desc?.uk || '';
-  document.getElementById('fDescEn').value = item.desc?.en || '';
+  document.getElementById('fDescUk').value = _ownText(item.desc, 'uk');
+  document.getElementById('fDescEn').value = _ownText(item.desc, 'en');
   _setAmountFields(item);
   if(item.img){ _loadImgForEdit(item.img); } else { resetImg(); }
   document.getElementById('formTitle').textContent = t('adm_add_title');
@@ -2025,12 +2046,12 @@ function startEdit(item){
   document.getElementById('fCat').value        = item.cat || 'desserts';
   document.getElementById('fPrice').value      = item.price || '';
   document.getElementById('fNameCs').value     = item.name?.cs || '';
-  document.getElementById('fNameUk').value     = item.name?.uk || '';
-  document.getElementById('fNameEn').value     = item.name?.en || '';
+  document.getElementById('fNameUk').value     = _ownText(item.name, 'uk');
+  document.getElementById('fNameEn').value     = _ownText(item.name, 'en');
   document.getElementById('fBadge').value      = item.badge || '';
   document.getElementById('fDescCs').value     = item.desc?.cs || '';
-  document.getElementById('fDescUk').value     = item.desc?.uk || '';
-  document.getElementById('fDescEn').value     = item.desc?.en || '';
+  document.getElementById('fDescUk').value     = _ownText(item.desc, 'uk');
+  document.getElementById('fDescEn').value     = _ownText(item.desc, 'en');
   _setAmountFields(item);
   const _imgSrc = item.img || STATIC_ITEMS.find(si=>
     si.name?.cs===item.name?.cs || si.name?.uk===item.name?.uk || si.name?.en===item.name?.en
@@ -2094,6 +2115,12 @@ function _setAmountFields(item){
 
 document.querySelectorAll('.amt-u').forEach(b=>b.addEventListener('click', ()=>_setAmountUnit(b.dataset.u)));
 document.getElementById('fAmount').addEventListener('input', ()=>_setAmountUnit(amtUnit));
+
+// UA/EN text of an item, or '' when it only repeats the Czech one (the field then shows "same as Czech")
+function _ownText(obj, lang){
+  const v = (obj && obj[lang]) || '';
+  return v && v !== (obj.cs || '') ? v : '';
+}
 
 /* ── Sizes ── */
 let formSizes = [];

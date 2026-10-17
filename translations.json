@@ -1,0 +1,60 @@
+{
+  "_about": "Ukrainian/English texts for items and sections added in the admin panel. The server uses them only where the item has no own translation yet (text missing or equal to Czech); translations typed in the admin panel always win.",
+  "items": {
+    "1778596497468": {
+      "name": {"uk": "Ожиновий мус", "en": "Blackberry Mousse"},
+      "desc": {
+        "uk": "Ніжний ванільний бісквіт, повітряний мус і яскраве ожинове серце, що буквально тане на язиці. 🍰✨ Свіжа ожина та ніжний фруктовий смак роблять кожен шматочок досконалою солодкою насолодою.",
+        "en": "A light vanilla sponge, airy mousse and a bold blackberry heart that literally melts on your tongue. 🍰✨ Fresh blackberries and a delicate fruity taste make every bite a perfect sweet treat."
+      }
+    },
+    "1779368561414": {"name": {"uk": "Дракончик", "en": "Little Dragon"}},
+    "1779368709087": {"name": {"uk": "Торт Рибка", "en": "Fish Cake"}},
+    "1779368770782": {"name": {"uk": "Торт Рибка", "en": "Fish Cake"}},
+    "1779368933890": {"name": {"uk": "Торт Bing", "en": "Bing Cake"}},
+    "1779369256750": {"name": {"uk": "Торт Дракончик", "en": "Little Dragon Cake"}},
+    "1779369535704": {"name": {"uk": "Дівчинка", "en": "Girl"}},
+    "1779370694918": {"name": {"uk": "Любов", "en": "Love"}},
+    "1779455223883": {
+      "name": {"uk": "Малиновий мус-торт", "en": "Raspberry Mousse Cake"},
+      "desc": {
+        "uk": "Ніжний малиновий мус з оксамитово-гладкою текстурою та яскравим смаком свіжої малини. Легкий, повітряний і приємно освіжаючий десерт з ніжною фруктовою кислинкою. Чудово поєднується з ваніллю, білим шоколадом або хрустким бісквітом.",
+        "en": "A delicate raspberry mousse with a velvety smooth texture and the bold taste of fresh raspberries. A light, airy and pleasantly refreshing dessert with a gentle fruity tang. Pairs beautifully with vanilla, white chocolate or a crunchy sponge."
+      }
+    },
+    "1779612239160": {
+      "name": {"uk": "Тірамісу", "en": "Tiramisu"},
+      "desc": {
+        "uk": "Шматочок Італії в кожному кусні 🇮🇹✨ Наш торт тірамісу поєднує ніжний крем маскарпоне, кавові бісквіти та какао-посипку в ідеально легкий десерт.",
+        "en": "A piece of Italy in every bite 🇮🇹✨ Our tiramisu cake combines delicate mascarpone cream, coffee-soaked ladyfingers and a cocoa dusting into a perfectly light dessert."
+      }
+    },
+    "1789552244093": {
+      "name": {"uk": "Triple Choco", "en": "Triple Choco"},
+      "desc": {
+        "uk": "Три види повітряних шоколадних мусів, які ми викладаємо від найтемнішого до найсвітлішого на шоколадний бісквіт.",
+        "en": "Three kinds of airy chocolate mousse, layered from the darkest to the lightest on a chocolate sponge."
+      }
+    },
+    "1790338678888": {
+      "name": {"uk": "Різдвяне печиво", "en": "Christmas Cookies"},
+      "desc": {
+        "uk": "🎄 Різдвяна колекція печива 🎄 Ретельно приготоване, прикрашене вручну і з ароматом Різдва в кожному шматочку:  🍊 Апельсинові квіточки – ніжне печиво з освіжаючим цитрусовим смаком 🌰 Ванільні рогалики – класика з масляного тіста з горішками, обвалена у ванільному цукрі 🍫 Працни – ароматне пряникове тісто з какао та прянощами 🥥 Кокосові кульки – легкі й повітряні, з кокосовим ароматом 🌾 Макові з повидлом – м'яке печиво з маковою начинкою та краплею сливового повидла 💚 Фісташкові ялинки з фісташковим кремом – барвисте поєднання та ніжний смак фісташок 🍯 Кошики із солоною карамеллю – масляне тісто з карамельним кремом і дрібкою солі 🍪 Медові кульки – солодкі й ароматні, з медового тіста 🥐 Фісташкові рогалики – масляні, з фісташковим присмаком і зеленим відтінком 🌼 Лінецькі квіточки – склеєні мармеладом, посипані цукровою пудрою 🐝 Осині гнізда – печиво без випікання з ромовою начинкою 🌰 Горішки – з горіховим кремом, чудово розсипчасті.",
+        "en": "🎄 Christmas cookie collection 🎄 Carefully made, hand-decorated and with the scent of Christmas in every piece:  🍊 Orange flowers – delicate biscuits with a refreshing citrus taste 🌰 Vanilla crescents – the classic butter-dough cookie with nuts, rolled in vanilla sugar 🍫 Pracny – fragrant gingerbread dough with cocoa and spices 🥥 Coconut balls – light and airy, with a coconut aroma 🌾 Poppy seed with plum jam – soft cookies with poppy seed filling and a drop of plum jam 💚 Pistachio trees with pistachio cream – a colourful combination with a delicate pistachio taste 🍯 Salted caramel baskets – butter dough filled with caramel cream and a pinch of salt 🍪 Honey balls – sweet and aromatic, made from honey dough 🥐 Pistachio crescents – buttery, with a pistachio flavour and a green tint 🌼 Linzer flowers – sandwiched with jam and dusted with icing sugar 🐝 Wasp nests – no-bake cookies with a rum filling 🌰 Nuts – filled with nut cream, beautifully crumbly."
+      }
+    }
+  },
+  "_phrases": "Descriptions used by many items: translated wherever the Czech text matches exactly.",
+  "phrases": [
+    {
+      "cs": "Každý dort naceňujeme individuálně podle velikosti, počtu porcí a dekorací",
+      "uk": "Ціну кожного торта ми розраховуємо індивідуально — залежно від розміру, кількості порцій і декору",
+      "en": "Each cake is priced individually depending on size, number of servings and decorations"
+    }
+  ],
+  "categories": {
+    "c-mousse": {"uk": "Муси", "en": "Mousse"},
+    "c-dtsk-dorty": {"uk": "Дитячі торти", "en": "Kids' cakes"},
+    "c-narozeninov-dorty": {"uk": "Торти на день народження", "en": "Birthday cakes"}
+  }
+}
