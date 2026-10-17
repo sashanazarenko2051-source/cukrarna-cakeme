@@ -144,7 +144,14 @@ body{font-family:'Raleway',sans-serif;background:var(--bg0);color:var(--tx0)}
 .size-row-del:hover{color:#e08080}
 .size-add-row{display:grid;grid-template-columns:1fr 70px 90px auto;gap:8px;align-items:end}
 .sizes-section select{background:var(--bg3);border:1px solid var(--bdr);color:var(--tx0);padding:9px 6px;font:.82rem 'Raleway',sans-serif;outline:none}
-.weight-row{display:grid;grid-template-columns:1fr 76px;gap:6px}
+.weight-row{display:grid;grid-template-columns:1fr auto;gap:6px}
+.amt-units{display:flex}
+.amt-u{background:var(--bg3);border:1px solid var(--bdr);color:var(--tx2);min-width:42px;padding:0 10px;cursor:pointer;font:600 .8rem 'Raleway',sans-serif;transition:.2s}
+.amt-u+.amt-u{border-left:none}
+.amt-u:hover{color:var(--gold)}
+.amt-u.on{background:rgba(201,169,110,.15);border-color:var(--gold);color:var(--gold)}
+.amt-u.on+.amt-u{border-left:1px solid var(--gold)}
+.amt-hint{font-size:.68rem;color:var(--tx2);line-height:1.45}
 .cp-weight{font-size:.7rem;color:var(--tx2);margin-bottom:5px}
 .sizes-section input{background:var(--bg3);border:1px solid var(--bdr);color:var(--tx0);padding:9px 12px;font:.82rem 'Raleway',sans-serif;outline:none;transition:.25s}
 .sizes-section input:focus{border-color:var(--gold)}
@@ -519,14 +526,16 @@ body{font-family:'Raleway',sans-serif;background:var(--bg0);color:var(--tx0)}
             <input type="text" id="fPrice" placeholder="133 Kč">
           </div>
           <div class="mai-field">
-            <label data-k="adm_weight_lbl">Hmotnost (g / kg)</label>
+            <label data-k="adm_amount_lbl">Hmotnost / kusy</label>
             <div class="weight-row">
-              <input type="number" id="fWeight" min="0" step="any" placeholder="500">
-              <select id="fWeightUnit">
-                <option value="g">g</option>
-                <option value="kg">kg</option>
-              </select>
+              <input type="number" id="fAmount" min="0" step="any" placeholder="500">
+              <div class="amt-units">
+                <button type="button" class="amt-u on" data-u="g">g</button>
+                <button type="button" class="amt-u" data-u="kg">kg</button>
+                <button type="button" class="amt-u" data-u="ks">ks</button>
+              </div>
             </div>
+            <div class="amt-hint" id="amtHint"></div>
           </div>
           <div class="mai-field full">
             <label data-k="adm_name_cs_lbl">Název CZ *</label>
@@ -537,17 +546,6 @@ body{font-family:'Raleway',sans-serif;background:var(--bg0);color:var(--tx0)}
           <div class="mai-field">
             <label data-k="adm_badge_lbl">Badge (Nové, Bestseller…)</label>
             <input type="text" id="fBadge" placeholder="">
-          </div>
-          <div class="mai-field full">
-            <label data-k="adm_qty_ctrl_lbl">Výběr množství (kus)</label>
-            <label class="qty-ctrl-lbl">
-              <input type="checkbox" id="fQtyCtrl">
-              <span data-k="adm_qty_ctrl_hint">Zobrazit výběr počtu kusů (+/−) na kartě v menu</span>
-            </label>
-          </div>
-          <div class="mai-field">
-            <label data-k="adm_qty_min_lbl">Minimální počet kusů</label>
-            <input type="number" id="fQtyMin" min="1" max="999" step="1" placeholder="5">
           </div>
           <div class="mai-field full">
             <label data-k="adm_desc_cs_lbl">Popis CZ</label>
@@ -836,7 +834,7 @@ const TA = {
     adm_feat_hint:'Velké karty nad všemi sekcemi — zákazník je uvidí jako první. Přidat nebo odebrat: tlačítko ⭐ u položky v seznamu níže.',
     adm_feat_empty:'Nic — nahoře v menu se nic nezobrazuje. Přidejte položky tlačítkem ⭐.',
     adm_feat_btn:'Úplně nahoru v menu (Doporučujeme)', adm_feat_remove:'Odebrat z Doporučujeme',
-    adm_weight_lbl:'Hmotnost (g / kg)', adm_sizes_lbl:'Velikosti / hmotnost', adm_sizes_hint:'(nepovinné — např. 500 g, 1 kg, M 23cm; pokud jsou nastaveny, pole Cena se ignoruje)',
+    adm_weight_lbl:'Hmotnost (g / kg)', adm_amount_lbl:'Hmotnost / kusy', adm_amount_hint_w:'Hmotnost se ukáže na kartě (⚖ 500 g).', adm_amount_hint_ks:'Prodej na kusy: na kartě +/−, minimálně {n} ks.', adm_sizes_lbl:'Velikosti / hmotnost', adm_sizes_hint:'(nepovinné — např. 500 g, 1 kg, M 23cm; pokud jsou nastaveny, pole Cena se ignoruje)',
   },
   en:{
     adm_panel:'Admin Panel', adm_login:'Login', adm_refresh:'↻ Refresh', adm_logout:'Logout',
@@ -900,7 +898,7 @@ const TA = {
     adm_feat_hint:'Large cards above all sections — customers see them first. Add or remove with the ⭐ button on an item in the list below.',
     adm_feat_empty:'Nothing — the top of the menu is empty. Add items with ⭐.',
     adm_feat_btn:'To the very top of the menu (We recommend)', adm_feat_remove:'Remove from We recommend',
-    adm_weight_lbl:'Weight (g / kg)', adm_sizes_lbl:'Sizes / weight', adm_sizes_hint:'(optional — e.g. 500 g, 1 kg, M 23cm; if set, the Price field is ignored)',
+    adm_weight_lbl:'Weight (g / kg)', adm_amount_lbl:'Weight / pieces', adm_amount_hint_w:'The weight is shown on the card (⚖ 500 g).', adm_amount_hint_ks:'Sold by the piece: +/− on the card, at least {n} pcs.', adm_sizes_lbl:'Sizes / weight', adm_sizes_hint:'(optional — e.g. 500 g, 1 kg, M 23cm; if set, the Price field is ignored)',
   },
   uk:{
     adm_panel:'Адмін-панель', adm_login:'Увійти', adm_refresh:'↻ Оновити', adm_logout:'Вийти',
@@ -966,7 +964,7 @@ const TA = {
     adm_feat_hint:'Великі картки над усіма розділами — клієнт побачить їх першими. Додати або прибрати: кнопка ⭐ біля позиції у списку нижче.',
     adm_feat_empty:'Порожньо — нагорі меню нічого не показується. Додайте позиції кнопкою ⭐.',
     adm_feat_btn:'На самий верх меню (Рекомендуємо)', adm_feat_remove:'Прибрати з «Рекомендуємо»',
-    adm_weight_lbl:'Вага (г / кг)', adm_sizes_lbl:'Розміри / вага', adm_sizes_hint:'(необов’язково — напр. 500 g, 1 kg, M 23cm; якщо задані, поле Ціна ігнорується)',
+    adm_weight_lbl:'Вага (г / кг)', adm_amount_lbl:'Вага / штуки', adm_amount_hint_w:'Вага показується на картці (⚖ 500 g).', adm_amount_hint_ks:'Продаж поштучно: на картці +/−, мінімум {n} шт.', adm_sizes_lbl:'Розміри / вага', adm_sizes_hint:'(необов’язково — напр. 500 g, 1 kg, M 23cm; якщо задані, поле Ціна ігнорується)',
   }
 };
 
@@ -984,6 +982,7 @@ function applyAdminLang(){
   document.querySelectorAll('.adm-lang').forEach(btn => {
     btn.classList.toggle('on', btn.dataset.al === adminLang);
   });
+  _updateAmountHint();
   // Renamed sections override the translated names set above (the menu section reloads them when opened)
   if(activeSection === 'menu'){
     renderCategoryManager();
@@ -1958,9 +1957,7 @@ function startEditStatic(idx){
   document.getElementById('fDescCs').value = item.desc?.cs || '';
   document.getElementById('fDescUk').value = item.desc?.uk || '';
   document.getElementById('fDescEn').value = item.desc?.en || '';
-  const _qc1 = document.getElementById('fQtyCtrl'); if(_qc1) _qc1.checked = !!item.qty_ctrl;
-  const _qm1 = document.getElementById('fQtyMin'); if(_qm1) _qm1.value = item.qty_min || 5;
-  _setWeightFields(item.weight);
+  _setAmountFields(item);
   if(item.img){ _loadImgForEdit(item.img); } else { resetImg(); }
   document.getElementById('formTitle').textContent = t('adm_edit_title');
   document.getElementById('addItemBtn').textContent = t('adm_save_btn');
@@ -1987,9 +1984,7 @@ function duplicateStatic(idx){
   document.getElementById('fDescCs').value = item.desc?.cs || '';
   document.getElementById('fDescUk').value = item.desc?.uk || '';
   document.getElementById('fDescEn').value = item.desc?.en || '';
-  const _qc3 = document.getElementById('fQtyCtrl'); if(_qc3) _qc3.checked = !!item.qty_ctrl;
-  const _qm3 = document.getElementById('fQtyMin'); if(_qm3) _qm3.value = item.qty_min || 5;
-  _setWeightFields(item.weight);
+  _setAmountFields(item);
   if(item.img){ _loadImgForEdit(item.img); } else { resetImg(); }
   document.getElementById('formTitle').textContent = t('adm_add_title');
   document.getElementById('addItemBtn').textContent = t('adm_save_btn');
@@ -2014,9 +2009,7 @@ function startEdit(item){
   document.getElementById('fDescCs').value     = item.desc?.cs || '';
   document.getElementById('fDescUk').value     = item.desc?.uk || '';
   document.getElementById('fDescEn').value     = item.desc?.en || '';
-  const _qc2 = document.getElementById('fQtyCtrl'); if(_qc2) _qc2.checked = !!item.qty_ctrl;
-  const _qm2 = document.getElementById('fQtyMin'); if(_qm2) _qm2.value = item.qty_min || 5;
-  _setWeightFields(item.weight);
+  _setAmountFields(item);
   const _imgSrc = item.img || STATIC_ITEMS.find(si=>
     si.name?.cs===item.name?.cs || si.name?.uk===item.name?.uk || si.name?.en===item.name?.en
   )?.img || '';
@@ -2032,22 +2025,50 @@ function startEdit(item){
   document.getElementById('formPanel').scrollIntoView({behavior:'smooth', block:'start'});
 }
 
-/* ── Weight ("500 g", "1,5 kg") ── */
+/* ── Weight or pieces: one number + g / kg / ks ──
+   g, kg -> item.weight ("500 g", "1,5 kg") shown on the card
+   ks    -> sold by the piece: +/− on the card, the number is the minimum (qty_ctrl, qty_min) */
+var amtUnit = 'g';  // var: applyAdminLang can run before this line on page load
+
+function _amountValue(){ return document.getElementById('fAmount').value.trim().replace('.', ','); }
+
 function _weightValue(){
-  const v = document.getElementById('fWeight').value.trim().replace('.', ',');
-  return v ? v + ' ' + document.getElementById('fWeightUnit').value : '';
+  const v = _amountValue();
+  return v && amtUnit!=='ks' ? v + ' ' + amtUnit : '';
 }
-function _setWeightFields(weight){
-  const m = String(weight||'').match(/^([\d.,]+)\s*(kg|g)$/i);
-  document.getElementById('fWeight').value = m ? m[1].replace(',', '.') : '';
-  document.getElementById('fWeightUnit').value = m ? m[2].toLowerCase() : 'g';
+
+function _amountPayload(){
+  const v = _amountValue();
+  if(amtUnit==='ks') return {qty_ctrl:true, qty_min: parseInt(v)||5, weight:''};
+  // Empty weight keeps the default behaviour (desserts are sold by the piece)
+  return {qty_ctrl: v ? false : null, qty_min: 5, weight: _weightValue()};
+}
+
+function _setAmountUnit(u){
+  amtUnit = u;
+  document.querySelectorAll('.amt-u').forEach(b=>b.classList.toggle('on', b.dataset.u===u));
+  const input = document.getElementById('fAmount');
+  input.placeholder = u==='ks' ? '5' : u==='kg' ? '1,5' : '500';
+  input.step = u==='ks' ? '1' : 'any';
+  _updateAmountHint();
   updateCardPreview();
 }
-['fWeight','fWeightUnit'].forEach(id=>{
-  const el = document.getElementById(id);
-  el.addEventListener('input', updateCardPreview);
-  el.addEventListener('change', updateCardPreview);
-});
+
+function _updateAmountHint(){
+  document.getElementById('amtHint').textContent = (amtUnit||'g')==='ks'
+    ? t('adm_amount_hint_ks', {n: parseInt(_amountValue())||5})
+    : t('adm_amount_hint_w');
+}
+
+function _setAmountFields(item){
+  const perPiece = item.qty_ctrl===true || (item.cat==='desserts' && item.qty_ctrl!==false && !item.weight);
+  const m = String(item.weight||'').match(/^([\d.,]+)\s*(kg|g)$/i);
+  document.getElementById('fAmount').value = perPiece ? (item.qty_min||5) : (m ? m[1].replace(',', '.') : '');
+  _setAmountUnit(perPiece ? 'ks' : (m ? m[2].toLowerCase() : 'g'));
+}
+
+document.querySelectorAll('.amt-u').forEach(b=>b.addEventListener('click', ()=>_setAmountUnit(b.dataset.u)));
+document.getElementById('fAmount').addEventListener('input', ()=>_setAmountUnit(amtUnit));
 
 /* ── Sizes ── */
 let formSizes = [];
@@ -2116,9 +2137,7 @@ function cancelEdit(){
   document.getElementById('cancelEditBtn').classList.remove('show');
   ['fNameCs','fNameUk','fNameEn','fPrice','fBadge','fDescCs','fDescUk','fDescEn']
     .forEach(id=>{ const el=document.getElementById(id); if(el) el.value=''; });
-  const qc = document.getElementById('fQtyCtrl'); if(qc) qc.checked = false;
-  const qm = document.getElementById('fQtyMin'); if(qm) qm.value = '';
-  _setWeightFields('');
+  _setAmountFields({});
   formSizes = []; renderSizesList();
   resetImg(); updateCardPreview();
 }
@@ -2141,9 +2160,7 @@ document.getElementById('addItemBtn').addEventListener('click', async ()=>{
     name_en: document.getElementById('fNameEn').value.trim(),
     badge:   document.getElementById('fBadge').value.trim(),
     img:      currentImgData,
-    qty_ctrl: document.getElementById('fQtyCtrl')?.checked ? true : null,
-    qty_min:  parseInt(document.getElementById('fQtyMin')?.value) || 5,
-    weight:   _weightValue(),
+    ..._amountPayload(),
     desc_cs:  document.getElementById('fDescCs').value.trim(),
     desc_uk:  document.getElementById('fDescUk').value.trim(),
     desc_en:  document.getElementById('fDescEn').value.trim(),
@@ -2405,8 +2422,9 @@ function updateCardPreview(){
   const badge = document.getElementById('fBadge').value.trim();
   document.getElementById('cpName').textContent = name;
   const weightEl = document.getElementById('cpWeight');
-  weightEl.textContent = _weightValue() ? '⚖ ' + _weightValue() : '';
-  weightEl.style.display = _weightValue() ? '' : 'none';
+  const amtText = amtUnit==='ks' ? '+/− · min. ' + (parseInt(_amountValue())||5) + ' ks' : (_weightValue() ? '⚖ ' + _weightValue() : '');
+  weightEl.textContent = amtText;
+  weightEl.style.display = amtText ? '' : 'none';
   document.getElementById('cpDesc').textContent = desc;
   const badgeEl = document.getElementById('cpBadge');
   badgeEl.textContent = badge;

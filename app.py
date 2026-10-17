@@ -182,7 +182,7 @@ async def api_menu_add(req: Request):
             'en': (d.get('desc_en') or '').strip() or (d.get('desc_cs') or '').strip(),
         },
         'sizes':    [s for s in d.get('sizes', []) if s.get('label') and s.get('price')],
-        'qty_ctrl': True if d.get('qty_ctrl') is True else None,
+        'qty_ctrl': True if d.get('qty_ctrl') is True else (False if d.get('qty_ctrl') is False else None),
         'qty_min':  max(1, min(999, int(d['qty_min']))) if str(d.get('qty_min') or '').strip().isdigit() else 5,
         'img_pos':  (d.get('img_pos') or '').strip(),
         'weight':   (d.get('weight') or '').strip()[:30],
