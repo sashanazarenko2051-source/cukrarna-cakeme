@@ -253,6 +253,7 @@ input[type="date"]::-webkit-calendar-picker-indicator:hover{opacity:1}
       <div class="langs" translate="no">
         <button class="lang-btn" data-l="cs" translate="no"><span class="flag">🇨🇿</span><span class="lname">Česky</span></button>
         <button class="lang-btn" data-l="en" translate="no"><span class="flag">🇬🇧</span><span class="lname">EN</span></button>
+        <button class="lang-btn" data-l="uk" translate="no"><span class="flag">🇺🇦</span><span class="lname">UA</span></button>
       </div>
       <button class="burger" id="burgerBtn" aria-label="Menu">
         <span></span><span></span><span></span>
@@ -540,13 +541,31 @@ en:{nav_home:'Home',nav_menu:'Menu',nav_about:'About',nav_del:'Delivery',nav_con
   f_pay:'Payment Method',f_pay_cash:'Cash',f_pay_card:'Card',f_pay_split:'50% cash + 50% card',
   pay_ttl:'Payment Terms',pay_dep:'A 50% deposit is payable by bank transfer upon order confirmation. The remaining 50% is paid upon receipt.',pay_acc:'Account',
   f_submit:'Order Now',f_redirecting:'Redirecting to payment...',f_ok:'Thank you! Your order has been received.',f_err:'Error. Please try again or call us.',
-  ft_nav:'Navigation',ft_con:'Contact',rights:'All rights reserved.'}
+  ft_nav:'Navigation',ft_con:'Contact',rights:'All rights reserved.'},
+uk:{nav_home:'Головна',nav_menu:'Меню',nav_about:'Про нас',nav_del:'Доставка',nav_con:'Контакти',tagline:'Святкуйте кожен день',
+  del_lbl:'Швидко і зручно',del_ttl:'Доставка',
+  dh_ttl:'Доставляємо прямо до вас',dh_sub:'Замовте телефоном або e-mailом — ми привеземо свіжі десерти до вас додому',
+  s1t:'Оберіть у меню',s1d:'Перегляньте наше меню й оберіть десерти, які вам до вподоби',
+  s2t:'Зв’яжіться з нами',s2d:'Зателефонуйте або напишіть e-mail із замовленням та адресою доставки',
+  s3t:'Отримайте доставку',s3d:'Ваш свіжий торт привеземо прямо до ваших дверей',
+  i1t:'Час доставки',i1d:'хвилин після замовлення',
+  i2t:'Вартість доставки',i2d:'за межами Праги до 15 км · 250 Kč',i2e:'понад 15 км · за домовленістю',
+  oc_ttl:'Замовте зараз',oc_sub:'Заповніть форму — ми підтвердимо протягом 15 хвилин',
+  f_name:'Ім’я',f_phone:'Телефон',f_phone_opt:'необов’язково',f_addr:'Адреса доставки',
+  f_date:'Дата доставки / отримання',f_time:'Час доставки / отримання',f_date_note:'Замовлення тортів приймаємо щонайменше за 24 години · робочі години 09:00–20:00',
+  f_pay_dep_cash:'50 % готівкою',f_pay_dep_card:'50 % карткою',f_pay_dep_note:'Передоплата 50 % при замовленні',
+  f_cart:'Ваше замовлення',cart_total:'Разом',cart_empty_del:'Кошик порожній — додайте товари з меню',go_menu:'Перейти до меню',
+  f_table:'Стіл', f_type:'Спосіб замовлення',ot_delivery:'Доставка додому',ot_instore:'Самовивіз',
+  f_pay:'Спосіб оплати',f_pay_cash:'Готівкою',f_pay_card:'Карткою',f_pay_split:'50 % готівкою + 50 % карткою',
+  pay_ttl:'Умови оплати',pay_dep:'Передоплата 50 % від суми замовлення сплачується банківським переказом при підтвердженні. Решту 50 % ви сплачуєте при отриманні.',pay_acc:'Номер рахунку',
+  f_submit:'Замовити',f_redirecting:'Переходимо до оплати...',f_ok:'Дякуємо! Ваше замовлення прийнято.',f_err:'Помилка. Спробуйте ще раз або зателефонуйте.',
+  ft_nav:'Навігація',ft_con:'Контакти',rights:'Усі права захищені.'}
 };
 
-let lang=localStorage.getItem('cakeme_lang')||'cs'; if(lang==='uk') lang='cs';
+let lang=localStorage.getItem('cakeme_lang')||'cs';
 function t(k){ return T[lang][k]||k; }
 function applyLang(){
-  document.documentElement.lang=lang==='en'?'en':'cs';
+  document.documentElement.lang=lang;
   document.querySelectorAll('[data-k]').forEach(el=>{const val=t(el.dataset.k);if(val)el.textContent=val;});
   const pi=document.getElementById('phoneInput');
   if(pi){const isDelivery=document.querySelector('.ord-type-btn.on').dataset.type==='delivery';pi.placeholder=isDelivery?'':t('f_phone_opt');pi.required=isDelivery;
@@ -681,7 +700,7 @@ document.getElementById('orderForm').addEventListener('submit',async function(e)
     payload.total_czk=cart.reduce((s,c)=>s+c.price*c.qty,0);
     if(!payload.total_czk){
       msg.className='ord-msg err'; msg.style.cssText='';
-      msg.textContent={cs:'Košík je prázdný.',en:'Cart is empty.'}[lang]||'Cart is empty.';
+      msg.textContent={cs:'Košík je prázdný.',en:'Cart is empty.',uk:'Кошик порожній.'}[lang]||'Cart is empty.';
       btn.disabled=false; btn.textContent=orig;
       return;
     }

@@ -163,6 +163,7 @@ footer{background:#070707;border-top:1px solid var(--bdr);padding:52px 0 28px}
       <div class="langs" translate="no">
         <button class="lang-btn" data-l="cs" translate="no"><span class="flag">🇨🇿</span><span class="lname">Česky</span></button>
         <button class="lang-btn" data-l="en" translate="no"><span class="flag">🇬🇧</span><span class="lname">EN</span></button>
+        <button class="lang-btn" data-l="uk" translate="no"><span class="flag">🇺🇦</span><span class="lname">UA</span></button>
       </div>
       <button class="burger" id="burgerBtn" aria-label="Menu">
         <span></span><span></span><span></span>
@@ -290,13 +291,22 @@ en:{nav_home:'Home',nav_menu:'Menu',nav_about:'About',nav_del:'Delivery',nav_con
   f2t:'Handcrafted',f2d:'Every cake made with love and care',
   f3t:'Personal Approach',f3d:'Custom cakes for every occasion',
   f4t:'Home Delivery',f4d:'We deliver right to your door',
-  ft_nav:'Navigation',ft_con:'Contact',rights:'All rights reserved.'}
+  ft_nav:'Navigation',ft_con:'Contact',rights:'All rights reserved.'},
+uk:{nav_home:'Головна',nav_menu:'Меню',nav_about:'Про нас',nav_del:'Доставка',nav_con:'Контакти',tagline:'Святкуйте кожен день',
+  ab_lbl:'Наша історія',ab_ttl:'Про нас',years:'Рік досвіду',
+  ab_p1:'CakeMe — преміальна кондитерська і кав’ярня в серці Праги 10. Ми віримо, що кожна мить варта того, щоб її відсвяткувати найкращим десертом.',
+  ab_p2:'Наші торти й десерти ми готуємо з найякісніших інгредієнтів, з любов’ю та турботою, які ви відчуєте в кожному шматочку.',
+  f1t:'Преміальні інгредієнти',f1d:'Свіжі продукти від місцевих постачальників',
+  f2t:'Ручна робота',f2d:'Кожен торт зроблений з любов’ю та турботою',
+  f3t:'Індивідуальний підхід',f3d:'Торти на замовлення для будь-якої нагоди',
+  f4t:'Доставка додому',f4d:'Привеземо прямо до ваших дверей',
+  ft_nav:'Навігація',ft_con:'Контакти',rights:'Усі права захищені.'}
 };
 
-let lang=localStorage.getItem('cakeme_lang')||'cs'; if(lang==='uk') lang='cs';
+let lang=localStorage.getItem('cakeme_lang')||'cs';
 function t(k){ return T[lang][k]||k; }
 function applyLang(){
-  document.documentElement.lang=lang==='en'?'en':'cs';
+  document.documentElement.lang=lang;
   document.querySelectorAll('[data-k]').forEach(el=>{const val=t(el.dataset.k);if(val)el.textContent=val;});
   setTimeout(()=>{document.querySelectorAll('[data-k]').forEach(el=>{const val=t(el.dataset.k);if(val)el.textContent=val;});},100);
 }
