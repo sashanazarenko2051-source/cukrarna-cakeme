@@ -142,7 +142,10 @@ body{font-family:'Raleway',sans-serif;background:var(--bg0);color:var(--tx0)}
 .size-row-unit{color:var(--tx2);font-size:.75rem;white-space:nowrap}
 .size-row-del{background:transparent;border:none;color:var(--tx2);cursor:pointer;font-size:1.1rem;padding:0 4px;line-height:1;transition:.2s}
 .size-row-del:hover{color:#e08080}
-.size-add-row{display:grid;grid-template-columns:1fr 90px auto;gap:8px;align-items:end}
+.size-add-row{display:grid;grid-template-columns:1fr 70px 90px auto;gap:8px;align-items:end}
+.sizes-section select{background:var(--bg3);border:1px solid var(--bdr);color:var(--tx0);padding:9px 6px;font:.82rem 'Raleway',sans-serif;outline:none}
+.weight-row{display:grid;grid-template-columns:1fr 76px;gap:6px}
+.cp-weight{font-size:.7rem;color:var(--tx2);margin-bottom:5px}
 .sizes-section input{background:var(--bg3);border:1px solid var(--bdr);color:var(--tx0);padding:9px 12px;font:.82rem 'Raleway',sans-serif;outline:none;transition:.25s}
 .sizes-section input:focus{border-color:var(--gold)}
 .btn-add-size{background:transparent;border:1px solid var(--gold-d);color:var(--gold);padding:9px 14px;cursor:pointer;font:.72rem 'Raleway',sans-serif;letter-spacing:1px;white-space:nowrap;transition:.25s}
@@ -271,6 +274,9 @@ body{font-family:'Raleway',sans-serif;background:var(--bg0);color:var(--tx0)}
 .cat-tag{display:flex;align-items:center;gap:5px;background:rgba(201,169,110,.08);border:1px solid var(--gold-d);padding:4px 10px;font-size:.7rem;color:var(--gold);letter-spacing:.5px}
 .cat-tag-del{background:transparent;border:none;color:var(--gold-d);cursor:pointer;font-size:.95rem;line-height:1;padding:0 2px;transition:.2s}
 .cat-tag-del:hover{color:#e08080}
+.cat-tag-off{border-style:dashed;border-color:var(--bdr);color:var(--tx2);background:transparent}
+.cat-tag-off .cat-tag-del:hover{color:var(--gold)}
+.cat-off-lbl{width:100%;font-size:.6rem;letter-spacing:1.5px;text-transform:uppercase;color:var(--tx2);margin-top:6px}
 .cat-add-row{display:flex;gap:6px;align-items:center}
 .cat-add-row input{flex:1;background:var(--bg3);border:1px solid var(--bdr);color:var(--tx0);padding:7px 10px;font:.78rem 'Raleway',sans-serif;outline:none;transition:.2s;min-width:0}
 .cat-add-row input:focus{border-color:var(--gold)}
@@ -516,6 +522,16 @@ body{font-family:'Raleway',sans-serif;background:var(--bg0);color:var(--tx0)}
             <label data-k="adm_price_lbl">Cena * (např. 133 Kč)</label>
             <input type="text" id="fPrice" placeholder="133 Kč">
           </div>
+          <div class="mai-field">
+            <label data-k="adm_weight_lbl">Hmotnost (g / kg)</label>
+            <div class="weight-row">
+              <input type="number" id="fWeight" min="0" step="any" placeholder="500">
+              <select id="fWeightUnit">
+                <option value="g">g</option>
+                <option value="kg">kg</option>
+              </select>
+            </div>
+          </div>
           <div class="mai-field full">
             <label data-k="adm_name_cs_lbl">Název CZ *</label>
             <input type="text" id="fNameCs" placeholder="Název česky">
@@ -560,12 +576,19 @@ body{font-family:'Raleway',sans-serif;background:var(--bg0);color:var(--tx0)}
           </div>
         </div>
         <div class="sizes-section">
-          <label class="sizes-lbl">Velikosti / Sizes <span style="font-weight:400;color:var(--tx2)">(nepovinné — pokud jsou nastaveny, pole Cena se ignoruje)</span></label>
+          <label class="sizes-lbl"><span data-k="adm_sizes_lbl">Velikosti / hmotnost</span> <span style="font-weight:400;color:var(--tx2)" data-k="adm_sizes_hint">(nepovinné — pokud jsou nastaveny, pole Cena se ignoruje)</span></label>
           <div class="sizes-list" id="sizesList"></div>
           <div class="size-add-row">
-            <input type="text" id="fSizeLbl" placeholder="Malý (6 porcí) / Small">
-            <input type="text" id="fSizePrice" placeholder="350">
-            <button type="button" class="btn-add-size" id="addSizeBtn">+ Přidat</button>
+            <input type="text" id="fSizeLbl" placeholder="500 / M 23cm">
+            <select id="fSizeUnit" title="g / kg / cm / ks">
+              <option value="">—</option>
+              <option value="g">g</option>
+              <option value="kg">kg</option>
+              <option value="cm">cm</option>
+              <option value="ks">ks</option>
+            </select>
+            <input type="text" id="fSizePrice" placeholder="Kč">
+            <button type="button" class="btn-add-size" id="addSizeBtn" data-k="adm_add_btn">+ Přidat</button>
           </div>
         </div>
         <div class="card-prev-wrap">
@@ -578,6 +601,7 @@ body{font-family:'Raleway',sans-serif;background:var(--bg0);color:var(--tx0)}
             <div class="cp-body">
               <div class="cp-badge" id="cpBadge"></div>
               <div class="cp-name" id="cpName">Název položky</div>
+              <div class="cp-weight" id="cpWeight"></div>
               <div class="cp-desc" id="cpDesc">Popis…</div>
               <div class="cp-sizes" id="cpSizes" style="display:none"></div>
               <div class="cp-ft">
@@ -598,7 +622,7 @@ body{font-family:'Raleway',sans-serif;background:var(--bg0);color:var(--tx0)}
 
         <!-- Category manager -->
         <div class="cat-mgr">
-          <div class="cat-mgr-title" data-k="adm_cat_mgr_title">Vlastní sekce / Categories</div>
+          <div class="cat-mgr-title" data-k="adm_cat_mgr_title">Sekce menu</div>
           <div class="cat-mgr-list" id="catMgrList"></div>
           <div class="cat-add-row">
             <input type="text" id="catAddInput" placeholder="Název sekce (např. Sezónní)">
@@ -688,6 +712,13 @@ let activeFilter = 'all';
 let activeSection = 'orders';
 let cachedMenuItems = null;
 let staticFavs = new Set();
+// Built-in sections can be renamed or hidden (builtinCats[id] = {label, hidden}); custom ones live in customCategories
+const BUILTIN_CATS = [
+  {id:'cakes', k:'adm_cat_cakes'}, {id:'kolace', k:'adm_cat_kolace'},
+  {id:'desserts', k:'adm_cat_desserts'}, {id:'doplnky', k:'adm_cat_doplnky'},
+];
+let customCategories = [];
+let builtinCats = {};
 let hiddenStatics = new Set();
 let ordersCache = [];
 let editingId = null;
@@ -785,7 +816,7 @@ const TA = {
     adm_an_items:'Pozice', adm_an_avg:'Průměr (Kč)',
     adm_an_product:'Produkt', adm_an_qty:'Počet', adm_an_rev:'Příjem', adm_an_share:'Podíl',
     adm_an_no_data:'Žádná data pro toto období.',
-    adm_cat_mgr_title:'Vlastní sekce', adm_cat_add_btn:'+ Přidat sekci',
+    adm_cat_mgr_title:'Sekce menu', adm_cat_add_btn:'+ Přidat sekci', adm_cat_rename:'Nový název sekce (prázdné = původní název):', adm_cat_restore:'Vrátit sekci', adm_cat_removed:'Smazané sekce — ↺ vrátí zpět',
     adm_cat_del_confirm:'Smazat tuto sekci? Položky v ní zůstanou.',
     adm_lay_title:'Pořadí na webu', adm_lay_tabs:'Pořadí sekcí v menu',
     adm_lay_tabs_hint:'První sekce se zákazníkovi otevře hned po vstupu do menu.',
@@ -803,6 +834,7 @@ const TA = {
     adm_feat_hint:'Velké karty nad všemi sekcemi — zákazník je uvidí jako první. Přidat nebo odebrat: tlačítko ⭐ u položky v seznamu níže.',
     adm_feat_empty:'Nic — nahoře v menu se nic nezobrazuje. Přidejte položky tlačítkem ⭐.',
     adm_feat_btn:'Úplně nahoru v menu (Doporučujeme)', adm_feat_remove:'Odebrat z Doporučujeme',
+    adm_weight_lbl:'Hmotnost (g / kg)', adm_sizes_lbl:'Velikosti / hmotnost', adm_sizes_hint:'(nepovinné — např. 500 g, 1 kg, M 23cm; pokud jsou nastaveny, pole Cena se ignoruje)',
   },
   en:{
     adm_panel:'Admin Panel', adm_login:'Login', adm_refresh:'↻ Refresh', adm_logout:'Logout',
@@ -848,7 +880,7 @@ const TA = {
     adm_an_items:'Items', adm_an_avg:'Avg. order (Kč)',
     adm_an_product:'Product', adm_an_qty:'Qty', adm_an_rev:'Revenue', adm_an_share:'Share',
     adm_an_no_data:'No data for this period.',
-    adm_cat_mgr_title:'Custom sections', adm_cat_add_btn:'+ Add section',
+    adm_cat_mgr_title:'Menu sections', adm_cat_add_btn:'+ Add section', adm_cat_rename:'New section name (empty = original name):', adm_cat_restore:'Restore section', adm_cat_removed:'Deleted sections — ↺ restores',
     adm_cat_del_confirm:'Delete this section? Items in it will remain.',
     adm_lay_title:'Order on the website', adm_lay_tabs:'Menu section order',
     adm_lay_tabs_hint:'The first section opens as soon as a customer enters the menu.',
@@ -866,6 +898,7 @@ const TA = {
     adm_feat_hint:'Large cards above all sections — customers see them first. Add or remove with the ⭐ button on an item in the list below.',
     adm_feat_empty:'Nothing — the top of the menu is empty. Add items with ⭐.',
     adm_feat_btn:'To the very top of the menu (We recommend)', adm_feat_remove:'Remove from We recommend',
+    adm_weight_lbl:'Weight (g / kg)', adm_sizes_lbl:'Sizes / weight', adm_sizes_hint:'(optional — e.g. 500 g, 1 kg, M 23cm; if set, the Price field is ignored)',
   },
   uk:{
     adm_panel:'Адмін-панель', adm_login:'Увійти', adm_refresh:'↻ Оновити', adm_logout:'Вийти',
@@ -913,7 +946,7 @@ const TA = {
     adm_an_items:'Позицій', adm_an_avg:'Сер. чек (Kč)',
     adm_an_product:'Товар', adm_an_qty:'Кількість', adm_an_rev:'Дохід', adm_an_share:'Частка',
     adm_an_no_data:'Немає даних за цей період.',
-    adm_cat_mgr_title:'Власні розділи', adm_cat_add_btn:'+ Додати розділ',
+    adm_cat_mgr_title:'Розділи меню', adm_cat_add_btn:'+ Додати розділ', adm_cat_rename:'Нова назва розділу (порожньо = початкова назва):', adm_cat_restore:'Повернути розділ', adm_cat_removed:'Видалені розділи — ↺ поверне',
     adm_cat_del_confirm:'Видалити цей розділ? Позиції в ньому залишаться.',
     adm_lay_title:'Порядок на сайті', adm_lay_tabs:'Порядок розділів у меню',
     adm_lay_tabs_hint:'Перший розділ відкривається клієнту одразу, коли він заходить у меню.',
@@ -931,6 +964,7 @@ const TA = {
     adm_feat_hint:'Великі картки над усіма розділами — клієнт побачить їх першими. Додати або прибрати: кнопка ⭐ біля позиції у списку нижче.',
     adm_feat_empty:'Порожньо — нагорі меню нічого не показується. Додайте позиції кнопкою ⭐.',
     adm_feat_btn:'На самий верх меню (Рекомендуємо)', adm_feat_remove:'Прибрати з «Рекомендуємо»',
+    adm_weight_lbl:'Вага (г / кг)', adm_sizes_lbl:'Розміри / вага', adm_sizes_hint:'(необов’язково — напр. 500 g, 1 kg, M 23cm; якщо задані, поле Ціна ігнорується)',
   }
 };
 
@@ -948,6 +982,12 @@ function applyAdminLang(){
   document.querySelectorAll('.adm-lang').forEach(btn => {
     btn.classList.toggle('on', btn.dataset.al === adminLang);
   });
+  // Renamed sections override the translated names set above (the menu section reloads them when opened)
+  if(activeSection === 'menu'){
+    renderCategoryManager();
+    rebuildCatSelect();
+    rebuildCatFilters();
+  }
   if(activeSection === 'orders') renderOrders();
   if(activeSection === 'menu' && cachedMenuItems !== null) renderMenuItems(cachedMenuItems);
   if(activeSection === 'analytics') renderAnalytics();
@@ -1453,10 +1493,10 @@ function _orderedTabs(){
   // Same default order as menu.html: custom sections sit before "Oblíbené"
   const favAt = BUILTIN_TABS.findIndex(b=>b.id==='fav');
   const tabs = [
-    ...BUILTIN_TABS.slice(0, favAt).map(b=>({id:b.id, label:t(b.k)})),
+    ...BUILTIN_TABS.slice(0, favAt).map(b=>({id:b.id, label:BUILTIN_CATS.some(c=>c.id===b.id) ? catLabel(b.id) : t(b.k)})),
     ...customCategories.map(c=>({id:c.id, label:c.label})),
     ...BUILTIN_TABS.slice(favAt).map(b=>({id:b.id, label:t(b.k)})),
-  ];
+  ].filter(tb=>!builtinCats[tb.id]?.hidden);
   const cats = menuLayout.cats;
   const rank = (tb, i)=>{ const r = cats.indexOf(tb.id); return r<0 ? cats.length+i : r; };
   return tabs.map((tb, i)=>({tb, r:rank(tb, i)})).sort((a,b)=>a.r-b.r).map(x=>x.tb);
@@ -1594,7 +1634,7 @@ function renderMenuItems(customItems){
       ${thumb}
       <div class="ci-info"><div style="min-width:0">
         <div class="ci-name">${esc(name)}</div>
-        <div class="ci-meta">${esc(item.cat)}${item.badge?' · '+esc(item.badge):''}</div>
+        <div class="ci-meta">${esc(catLabel(item.cat))}${item.badge?' · '+esc(item.badge):''}</div>
         ${(item.sizes&&item.sizes.length)?`<div class="ci-sizes">${item.sizes.map(sz=>`<span class="ci-sz-tag">${esc(sz.label||'?')} — ${sz.price} Kč</span>`).join('')}</div>`:`<div class="ci-meta">${esc(price)}</div>`}
       </div></div>
       ${actions}
@@ -1604,7 +1644,51 @@ function renderMenuItems(customItems){
 }
 
 /* ── Category manager ── */
-let customCategories = [];
+function catLabel(id){
+  const b = BUILTIN_CATS.find(c=>c.id===id);
+  if(b) return builtinCats[id]?.label || t(b.k);
+  return customCategories.find(c=>c.id===id)?.label || id;
+}
+
+function _catsChanged(){
+  saveCategories();
+  renderCategoryManager();
+  rebuildCatSelect();
+  rebuildCatFilters();
+  if(cachedMenuItems!==null) renderMenuItems(cachedMenuItems);
+}
+
+function renameCat(id){
+  const isBuiltin = BUILTIN_CATS.some(c=>c.id===id);
+  const label = prompt(t('adm_cat_rename'), catLabel(id));
+  if(label===null) return;
+  const v = label.trim();
+  if(isBuiltin){
+    // An empty name brings back the original translated name
+    builtinCats[id] = {...(builtinCats[id]||{}), label: v};
+  } else {
+    if(!v) return;
+    const c = customCategories.find(c=>c.id===id);
+    if(c) c.label = v;
+  }
+  _catsChanged();
+}
+
+function deleteCat(id){
+  if(!confirm(t('adm_cat_del_confirm'))) return;
+  if(BUILTIN_CATS.some(c=>c.id===id)) builtinCats[id] = {...(builtinCats[id]||{}), hidden: true};
+  else customCategories = customCategories.filter(c=>c.id!==id);
+  if(menuFilter===id){
+    menuFilter = 'all';
+    document.querySelectorAll('.ci-flt').forEach(b=>b.classList.toggle('on', b.dataset.mf==='all'));
+  }
+  _catsChanged();
+}
+
+function restoreCat(id){
+  builtinCats[id] = {...(builtinCats[id]||{}), hidden: false};
+  _catsChanged();
+}
 
 function slugify(str){
   return str.toLowerCase().trim().replace(/\s+/g,'-').replace(/[^a-z0-9-]/g,'');
@@ -1616,6 +1700,7 @@ async function loadCategories(){
     if(!r.ok) return;
     const j = await r.json();
     customCategories = j.categories || [];
+    builtinCats = j.builtin || {};
     renderCategoryManager();
     rebuildCatSelect();
     rebuildCatFilters();
@@ -1624,10 +1709,11 @@ async function loadCategories(){
 
 async function saveCategories(){
   try{
-    await fetch('/api/categories',{
+    const r = await fetch('/api/categories',{
       method:'POST', headers:{'Content-Type':'application/json'},
-      body: JSON.stringify({token: sessionStorage.getItem('cm_token')||'', categories: customCategories})
+      body: JSON.stringify({token: sessionStorage.getItem('cm_token')||'', categories: customCategories, builtin: builtinCats})
     });
+    if(r.status===401) handleExpired();
   }catch{}
 }
 
@@ -1635,30 +1721,31 @@ function renderCategoryManager(){
   const list = document.getElementById('catMgrList');
   if(!list) return;
   renderTabOrder();
-  if(!customCategories.length){
-    list.innerHTML = '<span style="font-size:.72rem;color:var(--tx2);letter-spacing:.5px">—</span>';
-    return;
-  }
-  list.innerHTML = customCategories.map((cat,i)=>`
-    <span class="cat-tag">
-      ${esc(cat.label)}
-      <button class="cat-tag-del" data-ci="${i}" title="Smazat">×</button>
-    </span>
-  `).join('');
-  list.querySelectorAll('.cat-tag-del').forEach(btn=>btn.addEventListener('click',()=>{
-    const i = parseInt(btn.dataset.ci);
-    if(!confirm(t('adm_cat_del_confirm'))) return;
-    customCategories.splice(i,1);
-    saveCategories();
-    renderCategoryManager();
-    rebuildCatSelect();
-    rebuildCatFilters();
-  }));
+  const tag = (id, label, extra='')=>`<span class="cat-tag${extra}">
+      ${esc(label)}
+      ${extra ? `<button class="cat-tag-del" onclick="restoreCat('${id}')" title="${t('adm_cat_restore')}">↺</button>`
+        : `<button class="cat-tag-del" onclick="renameCat('${id}')" title="${t('adm_cat_rename')}">✎</button>
+           <button class="cat-tag-del" onclick="deleteCat('${id}')" title="${t('adm_btn_delete')}">×</button>`}
+    </span>`;
+  const active = [
+    ...BUILTIN_CATS.filter(c=>!builtinCats[c.id]?.hidden).map(c=>tag(c.id, catLabel(c.id))),
+    ...customCategories.map(c=>tag(c.id, c.label)),
+  ];
+  const removed = BUILTIN_CATS.filter(c=>builtinCats[c.id]?.hidden).map(c=>tag(c.id, catLabel(c.id), ' cat-tag-off'));
+  list.innerHTML = (active.join('') || '<span style="font-size:.72rem;color:var(--tx2)">—</span>')
+    + (removed.length ? `<span class="cat-off-lbl">${t('adm_cat_removed')}</span>${removed.join('')}` : '');
 }
 
 function rebuildCatSelect(){
   const sel = document.getElementById('fCat');
   if(!sel) return;
+  BUILTIN_CATS.forEach(c=>{
+    const o = sel.querySelector(`option[value="${c.id}"]`);
+    if(!o) return;
+    o.textContent = catLabel(c.id);
+    // Keep the option selectable while editing an item that is still in a removed section
+    o.hidden = !!builtinCats[c.id]?.hidden && sel.value!==c.id;
+  });
   // Remove previously injected custom options
   sel.querySelectorAll('option[data-custom]').forEach(o=>o.remove());
   customCategories.forEach(cat=>{
@@ -1673,6 +1760,12 @@ function rebuildCatSelect(){
 function rebuildCatFilters(){
   const filters = document.querySelector('.ci-filters');
   if(!filters) return;
+  BUILTIN_CATS.forEach(c=>{
+    const b = filters.querySelector(`[data-mf="${c.id}"]`);
+    if(!b) return;
+    b.textContent = catLabel(c.id);
+    b.style.display = builtinCats[c.id]?.hidden ? 'none' : '';
+  });
   // Remove previously injected custom filter buttons
   filters.querySelectorAll('button[data-custom-cat]').forEach(b=>b.remove());
   // Insert custom filter buttons before the last two buttons (custom / fav)
@@ -1700,10 +1793,7 @@ document.getElementById('catAddBtn').addEventListener('click',()=>{
   if(customCategories.some(c=>c.id===id)){ input.value=''; return; }
   customCategories.push({id, label});
   input.value = '';
-  saveCategories();
-  renderCategoryManager();
-  rebuildCatSelect();
-  rebuildCatFilters();
+  _catsChanged();
 });
 
 document.getElementById('catAddInput').addEventListener('keydown', e=>{
@@ -1825,6 +1915,7 @@ function startEditStatic(idx){
   document.getElementById('fDescEn').value = item.desc?.en || '';
   const _qc1 = document.getElementById('fQtyCtrl'); if(_qc1) _qc1.checked = !!item.qty_ctrl;
   const _qm1 = document.getElementById('fQtyMin'); if(_qm1) _qm1.value = item.qty_min || 5;
+  _setWeightFields(item.weight);
   if(item.img){ _loadImgForEdit(item.img); } else { resetImg(); }
   document.getElementById('formTitle').textContent = t('adm_edit_title');
   document.getElementById('addItemBtn').textContent = t('adm_save_btn');
@@ -1853,6 +1944,7 @@ function duplicateStatic(idx){
   document.getElementById('fDescEn').value = item.desc?.en || '';
   const _qc3 = document.getElementById('fQtyCtrl'); if(_qc3) _qc3.checked = !!item.qty_ctrl;
   const _qm3 = document.getElementById('fQtyMin'); if(_qm3) _qm3.value = item.qty_min || 5;
+  _setWeightFields(item.weight);
   if(item.img){ _loadImgForEdit(item.img); } else { resetImg(); }
   document.getElementById('formTitle').textContent = t('adm_add_title');
   document.getElementById('addItemBtn').textContent = t('adm_save_btn');
@@ -1879,6 +1971,7 @@ function startEdit(item){
   document.getElementById('fDescEn').value     = item.desc?.en || '';
   const _qc2 = document.getElementById('fQtyCtrl'); if(_qc2) _qc2.checked = !!item.qty_ctrl;
   const _qm2 = document.getElementById('fQtyMin'); if(_qm2) _qm2.value = item.qty_min || 5;
+  _setWeightFields(item.weight);
   const _imgSrc = item.img || STATIC_ITEMS.find(si=>
     si.name?.cs===item.name?.cs || si.name?.uk===item.name?.uk || si.name?.en===item.name?.en
   )?.img || '';
@@ -1893,6 +1986,23 @@ function startEdit(item){
   updateCardPreview();
   document.getElementById('formPanel').scrollIntoView({behavior:'smooth', block:'start'});
 }
+
+/* ── Weight ("500 g", "1,5 kg") ── */
+function _weightValue(){
+  const v = document.getElementById('fWeight').value.trim().replace('.', ',');
+  return v ? v + ' ' + document.getElementById('fWeightUnit').value : '';
+}
+function _setWeightFields(weight){
+  const m = String(weight||'').match(/^([\d.,]+)\s*(kg|g)$/i);
+  document.getElementById('fWeight').value = m ? m[1].replace(',', '.') : '';
+  document.getElementById('fWeightUnit').value = m ? m[2].toLowerCase() : 'g';
+  updateCardPreview();
+}
+['fWeight','fWeightUnit'].forEach(id=>{
+  const el = document.getElementById(id);
+  el.addEventListener('input', updateCardPreview);
+  el.addEventListener('change', updateCardPreview);
+});
 
 /* ── Sizes ── */
 let formSizes = [];
@@ -1940,9 +2050,12 @@ function removeSize(i){
 }
 
 document.getElementById('addSizeBtn').addEventListener('click',()=>{
-  const lbl   = document.getElementById('fSizeLbl').value.trim();
+  const unit  = document.getElementById('fSizeUnit').value;
+  let lbl     = document.getElementById('fSizeLbl').value.trim();
   const price = parseInt(document.getElementById('fSizePrice').value.trim());
   if(!lbl || !price) return;
+  // "500" + g -> "500 g"; "1,5" + kg -> "1,5 kg"
+  if(unit && /^\d+([.,]\d+)?$/.test(lbl)) lbl += ' ' + unit;
   formSizes.push({label:lbl, price});
   document.getElementById('fSizeLbl').value  = '';
   document.getElementById('fSizePrice').value = '';
@@ -1960,6 +2073,7 @@ function cancelEdit(){
     .forEach(id=>{ const el=document.getElementById(id); if(el) el.value=''; });
   const qc = document.getElementById('fQtyCtrl'); if(qc) qc.checked = false;
   const qm = document.getElementById('fQtyMin'); if(qm) qm.value = '';
+  _setWeightFields('');
   formSizes = []; renderSizesList();
   resetImg(); updateCardPreview();
 }
@@ -1984,6 +2098,7 @@ document.getElementById('addItemBtn').addEventListener('click', async ()=>{
     img:      currentImgData,
     qty_ctrl: document.getElementById('fQtyCtrl')?.checked ? true : null,
     qty_min:  parseInt(document.getElementById('fQtyMin')?.value) || 5,
+    weight:   _weightValue(),
     desc_cs:  document.getElementById('fDescCs').value.trim(),
     desc_uk:  document.getElementById('fDescUk').value.trim(),
     desc_en:  document.getElementById('fDescEn').value.trim(),
@@ -2244,6 +2359,9 @@ function updateCardPreview(){
   const price = document.getElementById('fPrice').value.trim();
   const badge = document.getElementById('fBadge').value.trim();
   document.getElementById('cpName').textContent = name;
+  const weightEl = document.getElementById('cpWeight');
+  weightEl.textContent = _weightValue() ? '⚖ ' + _weightValue() : '';
+  weightEl.style.display = _weightValue() ? '' : 'none';
   document.getElementById('cpDesc').textContent = desc;
   const badgeEl = document.getElementById('cpBadge');
   badgeEl.textContent = badge;

@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="cs" translate="no">
 <head>
 <!-- Google tag (gtag.js) -->
@@ -79,6 +79,7 @@ section{padding:96px 0}
 .m-badge{position:absolute;top:14px;right:14px;background:var(--gold);color:var(--bg0);font:.62rem 'Raleway',sans-serif;letter-spacing:1.5px;text-transform:uppercase;padding:4px 10px;font-weight:700}
 .m-body{padding:20px}
 .m-name{font-family:'Playfair Display',serif;font-size:1.18rem;color:var(--tx0);margin-bottom:7px}
+.m-weight{font-size:.74rem;color:var(--gold);letter-spacing:.5px;margin:-3px 0 8px}
 .m-desc{font-size:.78rem;color:var(--tx2);line-height:1.65;margin-bottom:18px}
 .m-ft{display:flex;align-items:center;justify-content:space-between}
 .m-price{font-family:'Playfair Display',serif;font-size:1.25rem;color:var(--gold)}
@@ -755,7 +756,7 @@ function cardHtml(item){
         ${item.badge?`<span class="m-badge">${item.badge}</span>`:''}
       </div>
       <div class="m-body">
-        <h3 class="m-name">${name}</h3>
+        <h3 class="m-name">${name}</h3>${item.weight?`<div class="m-weight">⚖ ${item.weight}</div>`:''}
         <p class="m-desc">${desc}</p>
         <div class="m-sizes" id="szg-${gi}">
           ${item.sizes.map((sz,i)=>`<button class="sz-btn${i===si?' on':''}" onclick="selectSize(${gi},${i})"><span class="sz-lbl">${sz.label}</span><span class="sz-price">${sz.price} Kč</span></button>`).join('')}
@@ -774,7 +775,7 @@ function cardHtml(item){
           ${item.badge?`<span class="m-badge">${item.badge}</span>`:''}
         </div>
         <div class="m-body">
-          <h3 class="m-name">${name}</h3>
+          <h3 class="m-name">${name}</h3>${item.weight?`<div class="m-weight">⚖ ${item.weight}</div>`:''}
           <p class="m-desc">${desc}</p>
           <div class="m-ft-des">
             <div class="des-qty-row">
@@ -795,7 +796,7 @@ function cardHtml(item){
         ${item.badge?`<span class="m-badge">${item.badge}</span>`:''}
       </div>
       <div class="m-body">
-        <h3 class="m-name">${name}</h3>
+        <h3 class="m-name">${name}</h3>${item.weight?`<div class="m-weight">⚖ ${item.weight}</div>`:''}
         <p class="m-desc">${desc}</p>
         <div class="m-ft">
           <span class="m-price">${item.price}</span>
@@ -910,7 +911,14 @@ async function loadCustomMenu(){
     });
     // Inject custom category tabs
     if(cr.status==='fulfilled'&&cr.value.ok){
-      const {categories}=await cr.value.json();
+      const {categories,builtin}=await cr.value.json();
+      // Built-in sections renamed or deleted in the admin panel
+      Object.entries(builtin||{}).forEach(([id,b])=>{
+        const btn=document.querySelector(`.m-tab[data-tab="${id}"]`);
+        if(!btn) return;
+        if(b.hidden){ btn.remove(); return; }
+        if(b.label){ btn.textContent=b.label; btn.removeAttribute('data-k'); }
+      });
       if(categories&&categories.length){
         const tabsEl=document.querySelector('.m-tabs');
         const favTabEl=tabsEl.querySelector('[data-tab="fav"]');

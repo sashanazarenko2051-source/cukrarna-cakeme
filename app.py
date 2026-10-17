@@ -185,6 +185,7 @@ async def api_menu_add(req: Request):
         'qty_ctrl': True if d.get('qty_ctrl') is True else None,
         'qty_min':  max(1, min(999, int(d['qty_min']))) if str(d.get('qty_min') or '').strip().isdigit() else 5,
         'img_pos':  (d.get('img_pos') or '').strip(),
+        'weight':   (d.get('weight') or '').strip()[:30],
         'static_src_idx': int(d['static_src_idx']) if d.get('static_src_idx') is not None else None,
     }
     with _get_pool().connection() as conn:
@@ -215,6 +216,8 @@ async def api_menu_patch(item_id: int, req: Request):
             item['qty_min'] = max(1, min(999, int(raw))) if raw.isdigit() else 5
         if 'img_pos' in d:
             item['img_pos'] = (d['img_pos'] or '').strip()
+        if 'weight' in d:
+            item['weight'] = (d['weight'] or '').strip()[:30]
         if 'sizes' in d:
             raw = d['sizes'] if isinstance(d['sizes'], list) else []
             item['sizes'] = [s for s in raw if s.get('label') and s.get('price')]
@@ -504,11 +507,17 @@ async def api_notif_info(req: Request):
     return {'topic': topic, 'url': f'https://ntfy.sh/{topic}'}
 
 # ── /api/categories ───────────────────────────────────────────────────────────
+# Built-in sections (cakes, kolace, desserts, doplnky) can be renamed or hidden:
+# 'builtin' maps id -> {'label': new name or '', 'hidden': bool}
+_BUILTIN_CAT_IDS = ('cakes', 'kolace', 'desserts', 'doplnky')
+
 @app.get('/api/categories')
 def api_categories_get():
     with _get_pool().connection() as conn:
         row = conn.execute("SELECT value FROM settings WHERE key='custom_categories'").fetchone()
-        return {'categories': _json.loads(row[0]) if row and row[0] else []}
+        brow = conn.execute("SELECT value FROM settings WHERE key='builtin_categories'").fetchone()
+        return {'categories': _json.loads(row[0]) if row and row[0] else [],
+                'builtin': _json.loads(brow[0]) if brow and brow[0] else {}}
 
 @app.post('/api/categories')
 async def api_categories_set(req: Request):
@@ -521,6 +530,17 @@ async def api_categories_set(req: Request):
             "INSERT INTO settings(key,value) VALUES('custom_categories',%s) ON CONFLICT(key) DO UPDATE SET value=EXCLUDED.value",
             (_json.dumps(cats),)
         )
+        if isinstance(d.get('builtin'), dict):
+            builtin = {}
+            for cid in _BUILTIN_CAT_IDS:
+                b = d['builtin'].get(cid) or {}
+                label = str(b.get('label') or '').strip()[:60]
+                if label or b.get('hidden'):
+                    builtin[cid] = {'label': label, 'hidden': bool(b.get('hidden'))}
+            conn.execute(
+                "INSERT INTO settings(key,value) VALUES('builtin_categories',%s) ON CONFLICT(key) DO UPDATE SET value=EXCLUDED.value",
+                (_json.dumps(builtin),)
+            )
     return {'ok': True}
 
 # ── /api/menu-layout ──────────────────────────────────────────────────────────
