@@ -115,7 +115,9 @@ body{font-family:'Raleway',sans-serif;background:var(--bg0);color:var(--tx0)}
 .no-orders{text-align:center;color:var(--tx2);padding:56px;font-size:.88rem}
 
 /* ── MENU SECTION ── */
-.menu-admin-body{padding:28px;max-width:960px;margin:0 auto;display:grid;grid-template-columns:1fr 1fr;gap:28px;align-items:start}
+.menu-admin-body{padding:28px;max-width:960px;margin:0 auto;display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:28px;align-items:start}
+.menu-panel{min-width:0}
+.menu-panel select{max-width:100%}
 .menu-panel{background:var(--bg2);border:1px solid var(--bdr);padding:24px}
 .menu-panel h3{font-family:'Playfair Display',serif;font-size:1.15rem;color:var(--tx0);margin-bottom:20px;padding-bottom:12px;border-bottom:1px solid var(--bdr)}
 .mai-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px}
@@ -440,8 +442,8 @@ body{font-family:'Raleway',sans-serif;background:var(--bg0);color:var(--tx0)}
         <button class="adm-lang" data-al="en">🇬🇧 EN</button>
         <button class="adm-lang" data-al="uk">🇺🇦 UA</button>
       </div>
-      <button class="adm-btn" id="pushTestBtn" title="Otestovat notifikaci" style="display:none;font-size:.65rem;padding:5px 9px">Test</button>
-      <button class="adm-btn" id="pushBtn" title="Notifikace o objednávkách">🔔</button>
+      <button class="adm-btn" id="pushTestBtn" data-kt="adm_tt_push_test" title="Otestovat notifikaci" style="display:none;font-size:.65rem;padding:5px 9px">Test</button>
+      <button class="adm-btn" id="pushBtn" data-kt="adm_tt_push_on" title="Notifikace o objednávkách">🔔</button>
       <button class="adm-btn" id="refreshBtn" data-k="adm_refresh">↻ Obnovit</button>
       <button class="adm-btn danger" id="logoutBtn" data-k="adm_logout">Odhlásit</button>
     </div>
@@ -549,7 +551,7 @@ body{font-family:'Raleway',sans-serif;background:var(--bg0);color:var(--tx0)}
           </div>
           <div class="mai-field full">
             <label data-k="adm_name_cs_lbl">Název CZ *</label>
-            <input type="text" id="fNameCs" placeholder="Název česky">
+            <input type="text" id="fNameCs" data-kp="adm_ph_name" placeholder="Název česky">
             <input type="hidden" id="fNameUk">
             <input type="hidden" id="fNameEn">
           </div>
@@ -559,7 +561,7 @@ body{font-family:'Raleway',sans-serif;background:var(--bg0);color:var(--tx0)}
           </div>
           <div class="mai-field full">
             <label data-k="adm_desc_cs_lbl">Popis CZ</label>
-            <input type="text" id="fDescCs" placeholder="Krátký popis česky">
+            <input type="text" id="fDescCs" data-kp="adm_ph_desc" placeholder="Krátký popis česky">
             <input type="hidden" id="fDescUk">
             <input type="hidden" id="fDescEn">
           </div>
@@ -574,8 +576,8 @@ body{font-family:'Raleway',sans-serif;background:var(--bg0);color:var(--tx0)}
             <img class="img-upload-preview" id="imgUploadPreview" alt="" onerror="this.style.display='none';document.getElementById('uploadZone').style.display=''">
             <button type="button" class="img-reset-btn" id="imgResetBtn" data-k="adm_img_remove">✕ Odebrat obrázek</button>
             <div class="img-rotate-row" id="imgRotateRow">
-              <button type="button" class="img-rotate-btn" id="rotateLeftBtn" title="Otočit doleva">↺</button>
-              <button type="button" class="img-rotate-btn" id="rotateRightBtn" title="Otočit doprava">↻</button>
+              <button type="button" class="img-rotate-btn" id="rotateLeftBtn" data-kt="adm_tt_rot_l" title="Otočit doleva">↺</button>
+              <button type="button" class="img-rotate-btn" id="rotateRightBtn" data-kt="adm_tt_rot_r" title="Otočit doprava">↻</button>
             </div>
           </div>
         </div>
@@ -614,7 +616,7 @@ body{font-family:'Raleway',sans-serif;background:var(--bg0);color:var(--tx0)}
           <p class="lay-hint" data-k="adm_lay_tabs_hint">Pořadí záložek na webu: ▲ ▼. První sekce se otevře jako první. ✎ přejmenovat, ✕ smazat.</p>
           <div class="cat-mgr-list" id="catMgrList"></div>
           <div class="cat-add-row">
-            <input type="text" id="catAddInput" placeholder="Název sekce (např. Sezónní)">
+            <input type="text" id="catAddInput" data-kp="adm_ph_section" placeholder="Název sekce (např. Sezónní)">
             <button type="button" class="cat-add-btn" id="catAddBtn" data-k="adm_cat_add_btn">+ Přidat sekci</button>
           </div>
         </div>
@@ -824,6 +826,7 @@ const TA = {
     adm_drag_hint:'Pořadí položek: táhněte myší nebo použijte šipky ⤒ ▲ ▼. Stejné pořadí uvidí zákazníci.',
     adm_lay_saved:'✓ Uloženo', adm_lay_err:'Neuloženo — zkuste znovu',
     adm_tab_all:'Vše', adm_tab_fav:'Oblíbené', adm_tab_celeb:'Slavnostní dorty',
+    adm_ph_name:'Název česky', adm_ph_desc:'Krátký popis česky', adm_ph_section:'Název sekce (např. Sezónní)', adm_ph_size:'Název velikosti', adm_prev_name:'Název položky', adm_prev_desc:'Popis…', adm_tt_pieces:'Prodej na kusy (+/−)', adm_tt_rot_l:'Otočit doleva', adm_tt_rot_r:'Otočit doprava', adm_tt_push_test:'Otestovat notifikaci', adm_tt_push_on:'Zapnout notifikace o nových objednávkách', adm_tt_push_denied:'Notifikace zablokovány v prohlížeči — povolte v nastavení prohlížeče', adm_tt_push_both:'Notifikace zapnuty (Push + kontrola) — klikněte pro vypnutí push', adm_tt_push_polling:'Notifikace zapnuty (kontrola) — klikněte pro zapnutí push', adm_err_prefix:'Chyba: ', adm_push_ok_title:'Notifikace zapnuty! 🔔', adm_push_ok_body:'Budete dostávat upozornění o nových objednávkách.', adm_push_err:'Chyba při zapínání notifikací: ', adm_push_blocked:'Notifikace jsou zablokovány v prohlížeči. Povolte je v nastavení prohlížeče a obnovte stránku.',
     adm_feat_title:'Doporučujeme — úplně nahoře v menu',
     adm_feat_hint:'Velké karty nad všemi sekcemi — zákazník je uvidí jako první. Přidat: vyberte níže a „+ Přidat“, nebo ⭐ u položky. Odebrat: ✕.',
     adm_feat_empty:'Nic — nahoře v menu se nic nezobrazuje. Přidejte položky tlačítkem ⭐.',
@@ -839,10 +842,10 @@ const TA = {
     adm_clear_done:'Delete completed',
     adm_add_title:'Add menu item',
     adm_cat_lbl:'Category *', adm_price_lbl:'Price * (e.g. 133 Kč)',
-    adm_name_cs_lbl:'Name CZ *', adm_name_uk_lbl:'Name UA', adm_name_en_lbl:'Name EN',
+    adm_name_cs_lbl:'Name in Czech *', adm_name_uk_lbl:'Name UA', adm_name_en_lbl:'Name EN',
     adm_badge_lbl:'Badge (New, Bestseller…)',
     adm_qty_min_lbl:'Minimum quantity',
-    adm_desc_cs_lbl:'Description CZ', adm_desc_uk_lbl:'Description UA', adm_desc_en_lbl:'Description EN',
+    adm_desc_cs_lbl:'Description in Czech', adm_desc_uk_lbl:'Description UA', adm_desc_en_lbl:'Description EN',
     adm_img_lbl:'Image', adm_img_click:'Click or drag a file here',
     adm_img_hint:'JPG, PNG, WebP · max 3 MB · auto-compressed',
     adm_img_remove:'✕ Remove image', adm_card_prev:'Card preview',
@@ -888,6 +891,7 @@ const TA = {
     adm_drag_hint:'Item order: drag with the mouse or use the arrows ⤒ ▲ ▼. Customers see the same order.',
     adm_lay_saved:'✓ Saved', adm_lay_err:'Not saved — try again',
     adm_tab_all:'All', adm_tab_fav:'Favorites', adm_tab_celeb:'Celebration cakes',
+    adm_ph_name:'Name in Czech', adm_ph_desc:'Short description in Czech', adm_ph_section:'Section name (e.g. Seasonal)', adm_ph_size:'Size name', adm_prev_name:'Item name', adm_prev_desc:'Description…', adm_tt_pieces:'Sold by the piece (+/−)', adm_tt_rot_l:'Rotate left', adm_tt_rot_r:'Rotate right', adm_tt_push_test:'Test notification', adm_tt_push_on:'Turn on new-order notifications', adm_tt_push_denied:'Notifications are blocked in the browser — allow them in browser settings', adm_tt_push_both:'Notifications on (push + polling) — click to turn push off', adm_tt_push_polling:'Notifications on (polling) — click to turn push on', adm_err_prefix:'Error: ', adm_push_ok_title:'Notifications on! 🔔', adm_push_ok_body:'You will be notified about new orders.', adm_push_err:'Could not turn on notifications: ', adm_push_blocked:'Notifications are blocked in the browser. Allow them in browser settings and reload the page.',
     adm_feat_title:'We recommend — at the very top of the menu',
     adm_feat_hint:'Large cards above all sections — customers see them first. Add: pick below and “+ Add”, or ⭐ on an item. Remove: ✕.',
     adm_feat_empty:'Nothing — the top of the menu is empty. Add items with ⭐.',
@@ -903,12 +907,12 @@ const TA = {
     adm_clear_done:'Видалити готові',
     adm_add_title:'Додати позицію в меню',
     adm_cat_lbl:'Категорія *', adm_price_lbl:'Ціна * (напр. 133 Kč)',
-    adm_name_cs_lbl:'Назва CZ *', adm_name_uk_lbl:'Назва UA', adm_name_en_lbl:'Назва EN',
+    adm_name_cs_lbl:'Назва чеською *', adm_name_uk_lbl:'Назва UA', adm_name_en_lbl:'Назва EN',
     adm_badge_lbl:'Бейдж (Новинка, Бестселер…)',
     adm_qty_ctrl_lbl:'Вибір кількості', adm_qty_ctrl_hint:'Кількість штук (+/−) на картці',
     adm_qty_min_lbl:'Мінімальна кількість штук',
     adm_img_pos_lbl:'Положення фото',
-    adm_desc_cs_lbl:'Опис CZ', adm_desc_uk_lbl:'Опис UA', adm_desc_en_lbl:'Опис EN',
+    adm_desc_cs_lbl:'Опис чеською', adm_desc_uk_lbl:'Опис UA', adm_desc_en_lbl:'Опис EN',
     adm_img_lbl:'Фото', adm_img_click:'Натисніть або перетягніть файл',
     adm_img_hint:'JPG, PNG, WebP · макс. 3 МБ · стискається автоматично',
     adm_img_remove:'✕ Прибрати фото', adm_card_prev:'Попередній перегляд картки',
@@ -954,6 +958,7 @@ const TA = {
     adm_drag_hint:'Порядок позицій: перетягуйте мишкою або натискайте стрілки ⤒ ▲ ▼. Клієнти бачать такий самий порядок.',
     adm_lay_saved:'✓ Збережено', adm_lay_err:'Не збережено — спробуйте ще раз',
     adm_tab_all:'Усі', adm_tab_fav:'Улюблені', adm_tab_celeb:'Святкові торти',
+    adm_ph_name:'Назва чеською', adm_ph_desc:'Короткий опис чеською', adm_ph_section:'Назва розділу (напр. Сезонне)', adm_ph_size:'Назва розміру', adm_prev_name:'Назва позиції', adm_prev_desc:'Опис…', adm_tt_pieces:'Продаж поштучно (+/−)', adm_tt_rot_l:'Повернути ліворуч', adm_tt_rot_r:'Повернути праворуч', adm_tt_push_test:'Перевірити сповіщення', adm_tt_push_on:'Увімкнути сповіщення про нові замовлення', adm_tt_push_denied:'Сповіщення заблоковані в браузері — дозвольте їх у налаштуваннях браузера', adm_tt_push_both:'Сповіщення увімкнені (push + перевірка) — натисніть, щоб вимкнути push', adm_tt_push_polling:'Сповіщення увімкнені (перевірка) — натисніть, щоб увімкнути push', adm_err_prefix:'Помилка: ', adm_push_ok_title:'Сповіщення увімкнено! 🔔', adm_push_ok_body:'Ви отримуватимете сповіщення про нові замовлення.', adm_push_err:'Не вдалося увімкнути сповіщення: ', adm_push_blocked:'Сповіщення заблоковані в браузері. Дозвольте їх у налаштуваннях браузера й оновіть сторінку.',
     adm_feat_title:'Рекомендуємо — на самому верху меню',
     adm_feat_hint:'Великі картки над усіма розділами — клієнт побачить їх першими. Додати: оберіть нижче і «+ Додати» або ⭐ біля позиції. Прибрати: ✕.',
     adm_feat_empty:'Порожньо — нагорі меню нічого не показується. Додайте позиції кнопкою ⭐.',
@@ -976,6 +981,9 @@ function applyAdminLang(){
   document.querySelectorAll('.adm-lang').forEach(btn => {
     btn.classList.toggle('on', btn.dataset.al === adminLang);
   });
+  document.querySelectorAll('[data-kp]').forEach(el => { el.placeholder = t(el.dataset.kp); });
+  document.querySelectorAll('[data-kt]').forEach(el => { el.title = t(el.dataset.kt); });
+  try{ _updatePushBtn(); }catch{}  // its state isn't initialised yet on the very first call
   _updateAmountHint();
   // Renamed sections override the translated names set above (the menu section reloads them when opened)
   if(activeSection === 'menu'){
@@ -1666,7 +1674,7 @@ function renderMenuItems(customItems){
     const actions = item._custom
       ? `<div class="ci-btns">
            ${pinBtn}
-           <button class="ci-ks${qc?' on':''}" onclick="toggleQtyCtrl(${item.id},${qc})" title="Počet kusů">1ks</button>
+           <button class="ci-ks${qc?' on':''}" onclick="toggleQtyCtrl(${item.id},${qc})" title="${t('adm_tt_pieces')}">1ks</button>
            <button class="ci-fav${item.favorite?' on':''}" onclick="toggleFav(${item.id},${!!item.favorite})" title="❤">❤</button>
            <button class="ci-edit" onclick="startEditById(${item.id})" title="✎">✎</button>
            <button class="ci-del"  onclick="deleteMenuItem(${item.id})" title="✕">✕</button>
@@ -2099,7 +2107,7 @@ function renderSizesList(){
 
     const lblIn = document.createElement('input');
     lblIn.className = 'size-row-input-lbl';
-    lblIn.placeholder = 'Název velikosti';
+    lblIn.placeholder = t('adm_ph_size');
     lblIn.value = sz.label || '';
     lblIn.addEventListener('change', () => { formSizes[i].label = lblIn.value.trim(); });
 
@@ -2437,8 +2445,8 @@ function resetImg(){
 });
 
 function updateCardPreview(){
-  const name  = document.getElementById('fNameCs').value.trim() || 'Název položky';
-  const desc  = document.getElementById('fDescCs').value.trim() || 'Popis…';
+  const name  = document.getElementById('fNameCs').value.trim() || t('adm_prev_name');
+  const desc  = document.getElementById('fDescCs').value.trim() || t('adm_prev_desc');
   const price = document.getElementById('fPrice').value.trim();
   const badge = document.getElementById('fBadge').value.trim();
   document.getElementById('cpName').textContent = name;
@@ -2505,19 +2513,19 @@ function _updatePushBtn(){
   }
   if(Notification.permission === 'denied'){
     btn.className = 'adm-btn push-denied';
-    btn.title = 'Notifikace zablokovány v prohlížeči — povolte v nastavení prohlížeče';
+    btn.title = t('adm_tt_push_denied');
     btn.textContent = '🔕';
     if(testBtn) testBtn.style.display = 'none';
     return;
   }
   if(Notification.permission === 'granted'){
     btn.className = 'adm-btn push-on';
-    btn.title = _pushSub ? 'Notifikace zapnuty (Push+Polling) — klikněte pro vypnutí push' : 'Notifikace zapnuty (Polling) — klikněte pro zapnutí Push';
+    btn.title = _pushSub ? t('adm_tt_push_both') : t('adm_tt_push_polling');
     btn.textContent = '🔔';
     if(testBtn) testBtn.style.display = '';
   } else {
     btn.className = 'adm-btn push-off';
-    btn.title = 'Zapnout notifikace o nových objednávkách';
+    btn.title = t('adm_tt_push_on');
     btn.textContent = '🔕';
     if(testBtn) testBtn.style.display = 'none';
   }
@@ -2533,7 +2541,7 @@ document.getElementById('pushTestBtn').addEventListener('click', async ()=>{
     });
     const j = await r.json();
     if(j.ok){ btn.textContent = '✓'; }
-    else { btn.textContent = 'Err'; alert('Chyba: '+(j.error||'unknown')); }
+    else { btn.textContent = 'Err'; alert(t('adm_err_prefix')+(j.error||'unknown')); }
   }catch(e){ btn.textContent = 'Err'; }
   setTimeout(()=>{ btn.textContent = 'Test'; btn.disabled = false; }, 2000);
 });
@@ -2568,13 +2576,13 @@ async function _subscribePush(){
     if(!sr.ok) throw new Error('subscribe save failed: '+sr.status);
     _updatePushBtn();
     // Show in-browser test notification to confirm it works
-    await _swReg.showNotification('Notifikace zapnuty! 🔔', {
-      body: 'Budete dostávat upozornění o nových objednávkách.',
+    await _swReg.showNotification(t('adm_push_ok_title'), {
+      body: t('adm_push_ok_body'),
       icon: '/favicon.svg', tag: 'cakeme-setup'
     });
   }catch(e){
     console.error('Push subscribe failed', e);
-    alert('Chyba při zapínání notifikací: '+e.message);
+    alert(t('adm_push_err')+e.message);
     _updatePushBtn();
   }
 }
@@ -2594,7 +2602,7 @@ async function _unsubscribePush(){
 
 document.getElementById('pushBtn').addEventListener('click', async ()=>{
   if(Notification.permission === 'denied'){
-    alert('Notifikace jsou zablokovány v prohlížeči. Povolte je v nastavení prohlížeče a obnovte stránku.');
+    alert(t('adm_push_blocked'));
     return;
   }
   if(Notification.permission === 'default'){
