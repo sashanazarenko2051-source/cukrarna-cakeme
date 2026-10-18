@@ -705,6 +705,85 @@ def api_popular():
     top = sorted(counts.items(), key=lambda kv: -kv[1])[:50]
     return {'items': [{'name': n, 'qty': q} for n, q in top]}
 
+# ── Server-side prices ────────────────────────────────────────────────────────
+# The cart in the browser can't be trusted for the amount charged online, so the
+# server prices every line itself: built-in items are read from menu.html (the
+# same list the menu page shows), admin-added items from the DB.
+def _lead_int(v):
+    """Leading integer like JS parseInt: '97 Kč' -> 97, 800 -> 800, 'abc' -> None."""
+    m = re.match(r'\s*(\d+)', str(v if v is not None else ''))
+    return int(m.group(1)) if m else None
+
+def _load_static_items():
+    try:
+        with open(os.path.join(os.path.dirname(os.path.abspath(__file__)), 'menu.html'), encoding='utf-8') as f:
+            src = f.read()
+        block = src[src.index('let ITEMS=['):]
+        block = block[:block.index('\n];')]
+    except (OSError, ValueError):
+        return []
+    items = []
+    for cat, body, name in re.findall(r"\{cat:'([^']*)'(.*?)name:\{cs:'([^']*)'", block, re.S):
+        sizes = [{'label': l, 'price': int(p)} for l, p in re.findall(r"\{label:'([^']*)',price:(\d+)\}", body)]
+        price = re.search(r"price:'([^']*)'", body)
+        items.append({'cat': cat, 'name': name, 'sizes': sizes, 'price': price.group(1) if price else ''})
+    return items
+
+_STATIC_ITEMS = _load_static_items()
+
+def _price_catalog(conn):
+    """(Czech name, size label) -> set of valid unit prices for everything currently on the menu."""
+    catalog = defaultdict(set)
+    def add(name, sizes, price):
+        if sizes:
+            for s in sizes:
+                p = _lead_int(s.get('price'))
+                if p:
+                    catalog[(name, str(s.get('label') or ''))].add(p)
+        elif _lead_int(price):
+            catalog[(name, '')].add(_lead_int(price))
+    custom = [r[0] for r in conn.execute('SELECT data FROM menu_items ORDER BY id ASC').fetchall()]
+    row = conn.execute("SELECT value FROM settings WHERE key='hidden_statics'").fetchone()
+    hidden = set(_json.loads(row[0])) if row and row[0] else set()
+    custom_names = {(i.get('name') or {}).get('cs') for i in custom}
+    replaced = {i.get('static_src_idx') for i in custom if i.get('static_src_idx') is not None}
+    # Same rule as menu.html: a built-in item replaced by an admin copy (same name) is not on sale
+    for idx, it in enumerate(_STATIC_ITEMS):
+        if idx in hidden or idx in replaced or it['name'] in custom_names:
+            continue
+        add(it['name'], it['sizes'], it['price'])
+    for it in custom:
+        add((it.get('name') or {}).get('cs', ''), it.get('sizes') or [], it.get('price'))
+    return catalog
+
+def _price_cart(conn, cart):
+    """Price cart lines [{name, size, qty, price}] on the server.
+    Returns (lines, total, unknown_names); the client's price only picks between
+    duplicates that share a name, it never sets the amount."""
+    catalog = _price_catalog(conn)
+    lines, total, unknown = [], 0, []
+    for c in cart if isinstance(cart, list) else []:
+        if not isinstance(c, dict):
+            continue
+        name, size = str(c.get('name') or '').strip(), str(c.get('size') or '').strip()
+        qty = _lead_int(c.get('qty')) or 0
+        if qty < 1:
+            continue
+        valid = catalog.get((name, size))
+        if not valid:
+            unknown.append(name + (f' ({size})' if size else ''))
+            continue
+        unit = _lead_int(c.get('price'))
+        if unit not in valid:
+            unit = max(valid)
+        qty = min(qty, 999)
+        lines.append(f"{name}{f' ({size})' if size else ''} x{qty} ({unit * qty} Kč)")
+        total += unit * qty
+    return lines, total, unknown
+
+def _priced_order_text(lines, total):
+    return ', '.join(lines) + f' | Celkem: {total} Kč'
+
 # ── /api/order ────────────────────────────────────────────────────────────────
 # Orders come from a public form: cap field sizes so nobody can push megabytes
 # into the DB and the Telegram/ntfy notifications.
@@ -731,8 +810,14 @@ async def api_order(req: Request, bg: BackgroundTasks):
         'delivery_time': (d.get('delivery_time') or '').strip(),
         'status':        'new',
     }
-    _clip_order(order)
     with _get_pool().connection() as conn:
+        # Pay-on-delivery: use server prices when every line is known, otherwise keep
+        # the customer's text so the order still arrives (staff check it anyway)
+        if d.get('cart'):
+            lines, total, unknown = _price_cart(conn, d['cart'])
+            if lines and not unknown:
+                order['order'] = _priced_order_text(lines, total)
+        _clip_order(order)
         conn.execute(
             'INSERT INTO orders (id,ts,name,phone,address,ord,payment,order_type,delivery_date,delivery_time,status)'
             ' VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)',
@@ -791,7 +876,11 @@ async def api_create_checkout(req: Request):
     if not STRIPE_SECRET_KEY:
         raise HTTPException(503, 'Stripe not configured')
     d = await req.json()
-    total_czk = int(d.get('total_czk') or 0)
+    # The amount comes from server prices, never from the browser's total_czk
+    with _get_pool().connection() as conn:
+        lines, total_czk, unknown = _price_cart(conn, d.get('cart'))
+    if unknown:
+        raise HTTPException(409, {'error': 'unknown_items', 'items': unknown})
     if total_czk < 1:
         raise HTTPException(400, 'Invalid amount')
     deposit_czk = max(1, -(-total_czk // 2))  # ceiling division for 50%
@@ -804,7 +893,7 @@ async def api_create_checkout(req: Request):
         'name':          (d.get('name')          or '').strip(),
         'phone':         (d.get('phone')         or '').strip(),
         'address':       (d.get('address')       or '').strip(),
-        'order':         (d.get('order')         or '').strip(),
+        'order':         _priced_order_text(lines, total_czk),
         'payment':       'online',
         'order_type':    (d.get('order_type')    or '').strip(),
         'delivery_date': (d.get('delivery_date') or '').strip(),
@@ -857,25 +946,53 @@ async def api_verify_payment(session_id: str, order_id: int, bg: BackgroundTasks
         raise HTTPException(400, 'Invalid session')
     if (session.payment_status == 'paid'
             and str(session.metadata.get('order_id')) == str(order_id)):
-        with _get_pool().connection() as conn:
-            with conn.cursor(row_factory=dict_row) as cur:
-                cur.execute(
-                    'UPDATE orders SET status=%s WHERE id=%s AND status=%s'
-                    ' RETURNING id,ts,name,phone,address,ord AS "order",'
-                    'payment,order_type,delivery_date,delivery_time',
-                    ('paid', order_id, 'pending_payment')
-                )
-                row = cur.fetchone()
-        if row:
-            bg.add_task(_send_ntfy, row)
-            bg.add_task(_send_telegram, row)
-            bg.add_task(_send_push_notifications, {
-                'title': 'Nová objednávka (zaplaceno) 🎂',
-                'body':  f"{row['name']} — {(row['order'] or '')[:80]}",
-                'url':   '/admin.html'
-            })
+        _mark_paid(order_id, bg)
         return {'paid': True}
     return {'paid': False}
+
+def _mark_paid(order_id, bg):
+    """pending_payment -> paid and notify. Runs once per order, whichever comes
+    first: the customer's return to /success or Stripe's webhook."""
+    with _get_pool().connection() as conn:
+        with conn.cursor(row_factory=dict_row) as cur:
+            cur.execute(
+                'UPDATE orders SET status=%s WHERE id=%s AND status=%s'
+                ' RETURNING id,ts,name,phone,address,ord AS "order",'
+                'payment,order_type,delivery_date,delivery_time',
+                ('paid', order_id, 'pending_payment')
+            )
+            row = cur.fetchone()
+    if row:
+        bg.add_task(_send_ntfy, row)
+        bg.add_task(_send_telegram, row)
+        bg.add_task(_send_push_notifications, {
+            'title': 'Nová objednávka (zaplaceno) 🎂',
+            'body':  f"{row['name']} — {(row['order'] or '')[:80]}",
+            'url':   '/admin.html'
+        })
+
+# ── /api/stripe-webhook ───────────────────────────────────────────────────────
+# Stripe calls this when a payment completes, so a paid order is confirmed even if
+# the customer closes the browser before returning to /success. Needs the webhook's
+# signing secret in the STRIPE_WEBHOOK_SECRET env var (Stripe dashboard -> Webhooks).
+@app.post('/api/stripe-webhook')
+async def api_stripe_webhook(req: Request, bg: BackgroundTasks):
+    secret = os.environ.get('STRIPE_WEBHOOK_SECRET', '')
+    if not STRIPE_SECRET_KEY or not secret:
+        raise HTTPException(503, 'Stripe webhook not configured')
+    payload = await req.body()
+    try:
+        _stripe.Webhook.construct_event(payload, req.headers.get('stripe-signature', ''), secret)
+    except Exception:
+        raise HTTPException(400, 'Invalid signature')
+    # Signature checked; read the event as plain JSON (StripeObject API differs between library versions)
+    event = json.loads(payload)
+    if event.get('type') in ('checkout.session.completed', 'checkout.session.async_payment_succeeded'):
+        session = event['data']['object']
+        order_id = _lead_int((session.get('metadata') or {}).get('order_id'))
+        if order_id and session.get('payment_status') == 'paid':
+            _mark_paid(order_id, bg)
+    return {'received': True}
 
 # ── /api/order/{id} PATCH — allow 'paid' status for admin ────────────────────
 # (override to extend valid statuses)
