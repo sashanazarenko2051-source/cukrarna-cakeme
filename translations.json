@@ -1,5 +1,5 @@
 {
-  "_about": "Ukrainian/English texts for items and sections added in the admin panel. The server uses them only where the item has no own translation yet (text missing or equal to Czech); translations typed in the admin panel always win.",
+  "_about": "Ukrainian/English texts for items and sections added in the admin panel. The server uses them only where the item has no own translation yet (text missing, equal to Czech, or one of the stale Czech values listed in \"replace\"); translations typed in the admin panel always win.",
   "items": {
     "1778596497468": {
       "name": {"uk": "Ожиновий мус", "en": "Blackberry Mousse"},
@@ -10,10 +10,15 @@
     },
     "1779368561414": {"name": {"uk": "Дракончик", "en": "Little Dragon"}},
     "1779368709087": {"name": {"uk": "Торт Рибка", "en": "Fish Cake"}},
-    "1779368770782": {"name": {"uk": "Торт Рибка", "en": "Fish Cake"}},
+    "1779368770782": {"name": {"uk": "Торт Рибка", "en": "Fish Cake", "replace": ["Dort ryba"]}},
     "1779368933890": {"name": {"uk": "Торт Bing", "en": "Bing Cake"}},
-    "1779369256750": {"name": {"uk": "Торт Дракончик", "en": "Little Dragon Cake"}},
+    "1779369256750": {"name": {"uk": "Торт Дракончик", "en": "Little Dragon Cake", "replace": ["Dort Draček"]}},
     "1779369535704": {"name": {"uk": "Дівчинка", "en": "Girl"}},
+    "1779369639705": {"name": {"uk": "Чорний"}},
+    "1779369713682": {"name": {"uk": "З днем народження", "en": "Happy Birthday"}},
+    "1779369778515": {"name": {"uk": "Кохання"}},
+    "1779369914100": {"name": {"uk": "Солодкий"}},
+    "1779371080540": {"name": {"uk": "Скорпіон"}},
     "1779370694918": {"name": {"uk": "Любов", "en": "Love"}},
     "1779455223883": {
       "name": {"uk": "Малиновий мус-торт", "en": "Raspberry Mousse Cake"},
@@ -30,7 +35,7 @@
       }
     },
     "1789552244093": {
-      "name": {"uk": "Triple Choco", "en": "Triple Choco"},
+      "name": {"uk": "Потрійний шоколад", "en": "Triple Choco"},
       "desc": {
         "uk": "Три види повітряних шоколадних мусів, які ми викладаємо від найтемнішого до найсвітлішого на шоколадний бісквіт.",
         "en": "Three kinds of airy chocolate mousse, layered from the darkest to the lightest on a chocolate sponge."

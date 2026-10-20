@@ -64,6 +64,7 @@ const T = {
   }
 };
 const tx = T[lang] || T.cs;
+document.title=({cs:'Platba úspěšná — CakeMe',en:'Payment successful — CakeMe',uk:'Оплата успішна — CakeMe'})[lang]||document.title;
 
 const params = new URLSearchParams(location.search);
 const sessionId = params.get('session_id');

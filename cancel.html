@@ -40,6 +40,7 @@ const T = {
   uk: { ico:'❌', title:'Оплату скасовано', body:'Оплату не завершено. Ваше замовлення не підтверджено. Спробуйте ще раз або оберіть інший спосіб оплати.', retry:'← Спробувати ще раз', home:'Головна' }
 };
 const tx = T[lang] || T.cs;
+document.title=({cs:'Platba zrušena — CakeMe',en:'Payment cancelled — CakeMe',uk:'Оплату скасовано — CakeMe'})[lang]||document.title;
 document.getElementById('ico').textContent   = tx.ico;
 document.getElementById('title').textContent = tx.title;
 document.getElementById('body').textContent  = tx.body;

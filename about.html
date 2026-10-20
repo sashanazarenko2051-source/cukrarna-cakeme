@@ -42,7 +42,7 @@ body{font-family:'Raleway',sans-serif;background-color:var(--bg0);background-ima
 .nav-right{display:flex;align-items:center;gap:20px}
 .langs{display:flex;gap:5px;align-items:center}
 .lang-btn{display:flex;align-items:center;gap:6px;background:transparent;border:1px solid var(--bdr);color:var(--tx2);padding:6px 12px;cursor:pointer;font:.73rem 'Raleway',sans-serif;letter-spacing:.5px;transition:.25s;border-radius:3px;white-space:nowrap;user-select:none}
-.lang-btn .flag{font-size:1rem;line-height:1}
+.lang-btn .flag{display:none}
 .lang-btn .lname{font-size:.7rem;font-weight:600}
 .lang-btn:hover,.lang-btn.on{border-color:var(--gold);color:var(--gold);background:rgba(201,169,110,.1)}
 .burger{display:none;flex-direction:column;gap:5px;cursor:pointer;padding:5px;background:none;border:none}
@@ -115,7 +115,7 @@ footer{background:#070707;border-top:1px solid var(--bdr);padding:52px 0 28px}
   .nav-links{display:none}
   .burger{display:flex}
   .nav-in{padding:0 14px;gap:8px}
-  .langs .lname{display:none}
+  .langs .lname{display:inline}
   .nav-logo-sub{display:none}
   .nav-logo svg{width:28px;height:28px}
   .nav-logo-txt{font-size:.9rem;letter-spacing:1px}
@@ -150,7 +150,7 @@ footer{background:#070707;border-top:1px solid var(--bdr);padding:52px 0 28px}
         <circle cx="4"  cy="18" r="1.3" fill="#c9a96e"/>
         <circle cx="32" cy="18" r="1.3" fill="#c9a96e"/>
       </svg>
-      <span class="nav-logo-txt">Cukrárna CakeMe<br><span class="nav-logo-sub">Oslavte každý den</span></span>
+      <span class="nav-logo-txt">Cukrárna CakeMe<br><span class="nav-logo-sub" data-k="tagline">Oslavte každý den</span></span>
     </a>
     <ul class="nav-links">
       <li><a href="index.html"    data-k="nav_home">Domů</a></li>
@@ -161,7 +161,7 @@ footer{background:#070707;border-top:1px solid var(--bdr);padding:52px 0 28px}
     </ul>
     <div class="nav-right">
       <div class="langs" translate="no">
-        <button class="lang-btn" data-l="cs" translate="no"><span class="flag">🇨🇿</span><span class="lname">Česky</span></button>
+        <button class="lang-btn" data-l="cs" translate="no"><span class="flag">🇨🇿</span><span class="lname">CZ</span></button>
         <button class="lang-btn" data-l="en" translate="no"><span class="flag">🇬🇧</span><span class="lname">EN</span></button>
         <button class="lang-btn" data-l="uk" translate="no"><span class="flag">🇺🇦</span><span class="lname">UA</span></button>
       </div>
@@ -226,7 +226,7 @@ footer{background:#070707;border-top:1px solid var(--bdr);padding:52px 0 28px}
           <circle cx="32" cy="18" r="1.3" fill="#c9a96e"/>
         </svg>
         <div class="ft-logo">Cukrárna CakeMe</div>
-        <p class="ft-sub">Oslavte každý den</p>
+        <p class="ft-sub" data-k="tagline">Oslavte každý den</p>
         <div class="socials">
           <a href="https://instagram.com/cukrarna_cakeme" target="_blank" class="soc" title="Instagram">
             <svg width="17" height="17" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/></svg>
@@ -306,6 +306,7 @@ uk:{nav_home:'Головна',nav_menu:'Меню',nav_about:'Про нас',nav_
 let lang=localStorage.getItem('cakeme_lang')||'cs';
 function t(k){ return T[lang][k]||k; }
 function applyLang(){
+  document.title=({cs:'O nás | Cukrárna CakeMe',en:'About | Cukrárna CakeMe',uk:'Про нас | Cukrárna CakeMe'})[lang]||document.title;
   document.documentElement.lang=lang;
   document.querySelectorAll('[data-k]').forEach(el=>{const val=t(el.dataset.k);if(val)el.textContent=val;});
   setTimeout(()=>{document.querySelectorAll('[data-k]').forEach(el=>{const val=t(el.dataset.k);if(val)el.textContent=val;});},100);

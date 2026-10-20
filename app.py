@@ -182,9 +182,10 @@ def _translate(item):
     out = {**item, 'name': dict(item.get('name') or {}), 'desc': dict(item.get('desc') or {})}
     for field in ('name', 'desc'):
         cs = out[field].get('cs', '')
+        stale = set((tr.get(field) or {}).get('replace') or [])  # Czech text once saved as a "translation"
         for lang in ('uk', 'en'):
             cur = out[field].get(lang, '')
-            if cur and cur != cs:
+            if cur and cur != cs and cur not in stale:
                 continue
             new = (tr.get(field) or {}).get(lang) or (_TR_PHRASES.get(cs) or {}).get(lang)
             if new:

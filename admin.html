@@ -998,7 +998,9 @@ function applyAdminLang(){
   });
   document.querySelectorAll('[data-kp]').forEach(el => { el.placeholder = t(el.dataset.kp); });
   document.querySelectorAll('[data-kt]').forEach(el => { el.title = t(el.dataset.kt); });
-  try{ _updatePushBtn(); }catch{}  // its state isn't initialised yet on the very first call
+  // On the very first call (page load) these aren't initialised yet; the end of the script runs them
+  try{ _updatePushBtn(); }catch{}
+  try{ updateCardPreview(); }catch{}
   _updateAmountHint();
   // Renamed sections override the translated names set above (the menu section reloads them when opened)
   if(activeSection === 'menu'){
@@ -2649,6 +2651,10 @@ document.getElementById('pushBtn').addEventListener('click', async ()=>{
   if(!_swReg) await _initPush();
   if(_pushSub){ await _unsubscribePush(); } else { await _subscribePush(); }
 });
+
+// Everything is defined now: fill the card preview and push button in the chosen language
+updateCardPreview();
+_updatePushBtn();
 </script>
 </body>
 </html>
