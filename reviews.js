@@ -4,7 +4,7 @@
    then CakeReviews.refresh() after a language change. */
 (function(){
   const RT = {
-    cs: {lbl:'Co říkají zákazníci', ttl:'Recenze', none:'Zatím žádné recenze — buďte první!', reviews:['recenze','recenze','recenzí'],
+    cs: {lbl:'Co říkají zákazníci', ttl:'Recenze', none:'Zatím žádné recenze — buďte první!', first:'Napište první recenzi →', reviews:['recenze','recenze','recenzí'],
       write:'Napsat recenzi', more:'Zobrazit další', verified:'Ověřený zákazník', reply:'Odpověď cukrárny',
       f_stars:'Vaše hodnocení', f_name:'Jméno', f_text:'Vaše recenze', f_item:'Co jste si objednali (nepovinné)',
       f_phone:'Telefon z objednávky (nepovinné)', f_phone_hint:'Jen pro označení „Ověřený zákazník“. Nikde se nezobrazuje.',
@@ -12,7 +12,7 @@
       f_need:'Vyberte hvězdičky, vyplňte jméno a text recenze.', f_big:'Fotka je příliš velká (max 10 MB).',
       f_ok:'Děkujeme! Recenze se zobrazí po kontrole.', f_err:'Nepodařilo se odeslat. Zkuste to prosím znovu.', f_limit:'Příliš mnoho recenzí za krátkou dobu. Zkuste to později.',
       honest:'Recenze zveřejňujeme po kontrole spamu, negativní recenze nemažeme a hodnocení neupravujeme. Označení „Ověřený zákazník“ znamená, že telefon souhlasí s objednávkou.'},
-    en: {lbl:'What customers say', ttl:'Reviews', none:'No reviews yet — be the first!', reviews:['review','reviews','reviews'],
+    en: {lbl:'What customers say', ttl:'Reviews', none:'No reviews yet — be the first!', first:'Write the first review →', reviews:['review','reviews','reviews'],
       write:'Write a review', more:'Show more', verified:'Verified customer', reply:'Reply from the shop',
       f_stars:'Your rating', f_name:'Name', f_text:'Your review', f_item:'What did you order (optional)',
       f_phone:'Phone used for the order (optional)', f_phone_hint:'Only for the “Verified customer” badge. Never shown.',
@@ -20,7 +20,7 @@
       f_need:'Choose the stars and fill in your name and review.', f_big:'The photo is too large (max 10 MB).',
       f_ok:'Thank you! Your review will appear after a check.', f_err:'Could not send. Please try again.', f_limit:'Too many reviews in a short time. Please try later.',
       honest:'Reviews are published after a spam check; we don’t delete negative reviews or change ratings. “Verified customer” means the phone matches an order.'},
-    uk: {lbl:'Що кажуть клієнти', ttl:'Відгуки', none:'Поки що немає відгуків — будьте першим!', reviews:['відгук','відгуки','відгуків'],
+    uk: {lbl:'Що кажуть клієнти', ttl:'Відгуки', none:'Поки що немає відгуків — будьте першим!', first:'Залиште перший відгук →', reviews:['відгук','відгуки','відгуків'],
       write:'Залишити відгук', more:'Показати ще', verified:'Перевірений покупець', reply:'Відповідь кондитерської',
       f_stars:'Ваша оцінка', f_name:'Ім’я', f_text:'Ваш відгук', f_item:'Що ви замовляли (необов’язково)',
       f_phone:'Телефон із замовлення (необов’язково)', f_phone_hint:'Лише для позначки «Перевірений покупець». Ніде не показується.',
@@ -132,8 +132,11 @@
 
   function renderLine(el){
     const s = data && data.summary;
-    if (!s || !s.count){ el.innerHTML = ''; return; }
-    el.innerHTML = `<a class="rv-line" href="index.html#reviews">${starsHtml(s.avg)} <b>${fmtAvg(s.avg)}</b> · ${s.count} ${plural(s.count)}</a>`;
+    // Jump to the reviews block on this page if there is one, otherwise to the home page
+    const href = document.querySelector('[data-reviews="full"]') ? '#reviews' : 'index.html#reviews';
+    el.innerHTML = s && s.count
+      ? `<a class="rv-line" href="${href}">${starsHtml(s.avg)} <b>${fmtAvg(s.avg)}</b> · ${s.count} ${plural(s.count)}</a>`
+      : `<a class="rv-line" href="${href}">${starsHtml(0)} ${tr('first')}</a>`;
   }
 
   function renderFull(el){
