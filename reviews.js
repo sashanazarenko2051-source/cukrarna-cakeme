@@ -11,7 +11,8 @@
       f_photo:'Fotka (nepovinné)', f_photo_btn:'📷 Přidat fotku', f_photo_rm:'✕ Odebrat', f_send:'Odeslat recenzi',
       f_need:'Vyberte hvězdičky, vyplňte jméno a text recenze.', f_big:'Fotka je příliš velká (max 10 MB).',
       f_ok:'Děkujeme! Recenze se zobrazí po kontrole.', f_err:'Nepodařilo se odeslat. Zkuste to prosím znovu.', f_limit:'Příliš mnoho recenzí za krátkou dobu. Zkuste to později.',
-      honest:'Recenze zveřejňujeme po kontrole spamu, negativní recenze nemažeme a hodnocení neupravujeme. Označení „Ověřený zákazník“ znamená, že telefon souhlasí s objednávkou.'},
+      src_google:'z Google', src_instagram:'z Instagramu', src_facebook:'z Facebooku', src_in_person:'osobně v cukrárně', src_other:'jinde',
+      honest:'Recenze zveřejňujeme po kontrole spamu, negativní recenze nemažeme a hodnocení neupravujeme. Označení „Ověřený zákazník“ znamená, že telefon souhlasí s objednávkou. Recenze přenesené z Google či sociálních sítí mají uvedený zdroj.'},
     en: {lbl:'What customers say', ttl:'Reviews', none:'No reviews yet — be the first!', first:'Write the first review →', reviews:['review','reviews','reviews'],
       write:'Write a review', more:'Show more', verified:'Verified customer', reply:'Reply from the shop',
       f_stars:'Your rating', f_name:'Name', f_text:'Your review', f_item:'What did you order (optional)',
@@ -19,7 +20,8 @@
       f_photo:'Photo (optional)', f_photo_btn:'📷 Add a photo', f_photo_rm:'✕ Remove', f_send:'Send review',
       f_need:'Choose the stars and fill in your name and review.', f_big:'The photo is too large (max 10 MB).',
       f_ok:'Thank you! Your review will appear after a check.', f_err:'Could not send. Please try again.', f_limit:'Too many reviews in a short time. Please try later.',
-      honest:'Reviews are published after a spam check; we don’t delete negative reviews or change ratings. “Verified customer” means the phone matches an order.'},
+      src_google:'from Google', src_instagram:'from Instagram', src_facebook:'from Facebook', src_in_person:'in person', src_other:'elsewhere',
+      honest:'Reviews are published after a spam check; we don’t delete negative reviews or change ratings. “Verified customer” means the phone matches an order. Reviews moved over from Google or social media show their source.'},
     uk: {lbl:'Що кажуть клієнти', ttl:'Відгуки', none:'Поки що немає відгуків — будьте першим!', first:'Залиште перший відгук →', reviews:['відгук','відгуки','відгуків'],
       write:'Залишити відгук', more:'Показати ще', verified:'Перевірений покупець', reply:'Відповідь кондитерської',
       f_stars:'Ваша оцінка', f_name:'Ім’я', f_text:'Ваш відгук', f_item:'Що ви замовляли (необов’язково)',
@@ -27,7 +29,8 @@
       f_photo:'Фото (необов’язково)', f_photo_btn:'📷 Додати фото', f_photo_rm:'✕ Прибрати', f_send:'Надіслати відгук',
       f_need:'Оберіть зірки, вкажіть ім’я та напишіть відгук.', f_big:'Фото завелике (макс. 10 МБ).',
       f_ok:'Дякуємо! Відгук з’явиться після перевірки.', f_err:'Не вдалося надіслати. Спробуйте ще раз.', f_limit:'Забагато відгуків за короткий час. Спробуйте пізніше.',
-      honest:'Відгуки публікуються після перевірки на спам; ми не видаляємо негативні відгуки й не змінюємо оцінки. «Перевірений покупець» — телефон збігається із замовленням.'},
+      src_google:'з Google', src_instagram:'з Instagram', src_facebook:'з Facebook', src_in_person:'особисто в кондитерській', src_other:'з інших джерел',
+      honest:'Відгуки публікуються після перевірки на спам; ми не видаляємо негативні відгуки й не змінюємо оцінки. «Перевірений покупець» — телефон збігається із замовленням. Відгуки, перенесені з Google чи соцмереж, мають позначку джерела.'},
   };
   const LOCALE = {cs:'cs-CZ', en:'en-GB', uk:'uk-UA'};
   const L = () => (typeof lang !== 'undefined' && RT[lang]) ? lang : 'cs';
@@ -54,6 +57,7 @@
 .rv-head{display:flex;justify-content:space-between;gap:10px;align-items:flex-start}
 .rv-name{color:var(--tx0,#f5f0e8);font-weight:600;font-size:.92rem}.rv-date{color:var(--tx2,#777);font-size:.72rem}
 .rv-ver{display:inline-block;font-size:.62rem;letter-spacing:1px;text-transform:uppercase;color:#8fcc8f;border:1px solid #3d5a3d;padding:2px 7px;margin-top:4px}
+.rv-src{display:inline-block;font-size:.62rem;letter-spacing:1px;text-transform:uppercase;color:var(--tx2,#777);border:1px solid var(--bdr,#333);padding:2px 7px;margin:4px 0 0 4px}
 .rv-text{color:var(--tx1,#c8b898);font-size:.86rem;line-height:1.65;white-space:pre-line;overflow-wrap:anywhere}
 .rv-item{font-size:.7rem;color:var(--gold);letter-spacing:.5px}
 .rv-photo{width:100%;max-height:260px;object-fit:cover;cursor:zoom-in;border:1px solid var(--bdr,#242424)}
@@ -104,7 +108,7 @@
   function cardHtml(rv){
     const date = new Date(rv.ts).toLocaleDateString(LOCALE[L()], {day:'numeric', month:'long', year:'numeric'});
     return `<div class="rv-card">
-      <div class="rv-head"><div><div class="rv-name">${esc(rv.name)}</div>${rv.verified ? `<span class="rv-ver">✓ ${tr('verified')}</span>` : ''}</div>
+      <div class="rv-head"><div><div class="rv-name">${esc(rv.name)}</div>${rv.verified ? `<span class="rv-ver">✓ ${tr('verified')}</span>` : ''}${rv.source ? `<span class="rv-src">${tr('src_' + rv.source)}</span>` : ''}</div>
         <div style="text-align:right">${starsHtml(rv.stars)}<div class="rv-date">${esc(date)}</div></div></div>
       ${rv.item ? `<div class="rv-item">${esc(itemName(rv.item))}</div>` : ''}
       <div class="rv-text">${esc(rv.text)}</div>

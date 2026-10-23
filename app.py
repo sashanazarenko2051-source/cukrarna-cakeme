@@ -102,6 +102,8 @@ def _init_tables():
                 item TEXT DEFAULT '', photo TEXT DEFAULT '', status TEXT DEFAULT 'new',
                 verified BOOLEAN DEFAULT FALSE, reply TEXT DEFAULT ''
             )""")
+        # Where a review came from when the admin moved it over from elsewhere (google, instagram…)
+        conn.execute("ALTER TABLE reviews ADD COLUMN IF NOT EXISTS source TEXT DEFAULT ''")
         if not os.environ.get('SECRET_KEY'):
             conn.execute("INSERT INTO settings(key,value) VALUES('secret_key',%s) ON CONFLICT(key) DO NOTHING",
                          (secrets.token_hex(32),))
@@ -1092,7 +1094,8 @@ def api_builder_img(fid: str):
 # admin to publish them; stars and text can't be edited by anyone, and the rating is
 # the plain average of all published reviews. A review is marked "verified" when the
 # phone given (never shown or stored) matches an existing order.
-_REVIEW_COLS = 'id, ts, name, stars, body, item, photo, status, verified, reply'
+_REVIEW_COLS = "id, ts, name, stars, body, item, photo, status, verified, reply, COALESCE(source, '')"
+_REVIEW_SOURCES = ('google', 'instagram', 'facebook', 'in_person', 'other')
 _review_log: dict = defaultdict(list)
 _PHOTO_RE = re.compile(r'^data:image/(jpeg|png|webp);base64,[A-Za-z0-9+/=]+$')
 
@@ -1100,9 +1103,9 @@ def _digits(phone):
     return re.sub(r'\D', '', str(phone or ''))[-9:]
 
 def _review_row(r, admin=False, token=''):
-    rid, ts, name, stars, body, item, photo, status, verified, reply = r
+    rid, ts, name, stars, body, item, photo, status, verified, reply, source = r
     out = {'id': rid, 'ts': ts, 'name': name, 'stars': stars, 'text': body, 'item': item or '',
-           'verified': bool(verified), 'reply': reply or '', 'status': status}
+           'verified': bool(verified), 'reply': reply or '', 'status': status, 'source': source or ''}
     if photo:
         v = hashlib.sha1(photo.encode()).hexdigest()[:10]
         out['photo'] = f'/api/review-img/{rid}?v={v}' + (f'&token={token}' if admin else '')
@@ -1177,6 +1180,32 @@ async def api_reviews_admin(req: Request):
         rows = conn.execute(f'SELECT {_REVIEW_COLS} FROM reviews ORDER BY id DESC').fetchall()
     published = [r for r in rows if r[7] == 'published']
     return {'summary': _review_summary(published), 'reviews': [_review_row(r, True, tok) for r in rows]}
+
+@app.post('/api/reviews/import')
+async def api_reviews_import(req: Request):
+    """Admin moves over a real review left elsewhere (Google, Instagram, in person…).
+    It is published with its source shown, never as a review written on this site."""
+    d = await req.json()
+    if not _verify_token(d.get('token')):
+        raise HTTPException(401, 'Unauthorized')
+    stars = _lead_int(d.get('stars'))
+    name = str(d.get('name') or '').strip()[:60]
+    body = str(d.get('text') or '').strip()[:1500]
+    source = d.get('source') if d.get('source') in _REVIEW_SOURCES else ''
+    if not stars or not 1 <= stars <= 5 or not name or len(body) < 3 or not source:
+        raise HTTPException(400, 'stars, name, text and source are required')
+    photo = str(d.get('photo') or '')
+    if photo and (len(photo) > 2_000_000 or not _PHOTO_RE.match(photo)):
+        raise HTTPException(400, 'Invalid photo')
+    date = str(d.get('date') or '').strip()
+    ts = f'{date}T12:00:00Z' if _DATE_RE.match(date) else time.strftime('%Y-%m-%dT%H:%M:%SZ', time.gmtime())
+    rid = int(time.time() * 1000)
+    with _get_pool().connection() as conn:
+        conn.execute(
+            'INSERT INTO reviews (id, ts, name, stars, body, item, photo, status, verified, reply, source)'
+            " VALUES (%s,%s,%s,%s,%s,%s,%s,'published',FALSE,'',%s)",
+            (rid, ts, name, stars, body, str(d.get('item') or '').strip()[:120], photo, source))
+    return {'ok': True, 'id': rid}
 
 @app.patch('/api/reviews/{review_id}')
 async def api_reviews_patch(review_id: int, req: Request):

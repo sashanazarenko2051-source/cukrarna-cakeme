@@ -264,6 +264,13 @@ body{font-family:'Raleway',sans-serif;background:var(--bg0);color:var(--tx0)}
 .bld-head{font-size:.58rem;letter-spacing:1px;text-transform:uppercase;color:var(--tx2)}
 @media(max-width:680px){ .bld-row.occ,.bld-row.dec,.bld-row.siz,.bld-row.fil{grid-template-columns:1fr 1fr} }
 /* ── Reviews ── */
+.rv-imp{border:1px solid var(--gold-d);background:rgba(201,169,110,.05);padding:14px;margin-bottom:16px}
+.rv-imp-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px}
+.rv-imp-grid .full{grid-column:1/-1}
+.rv-imp-grid label{display:flex;flex-direction:column;gap:5px;font-size:.62rem;letter-spacing:1px;text-transform:uppercase;color:var(--tx2)}
+.rv-imp-grid input,.rv-imp-grid select,.rv-imp-grid textarea{background:var(--bg3);border:1px solid var(--bdr);color:var(--tx0);padding:8px 9px;font:.82rem 'Raleway',sans-serif;outline:none;text-transform:none;letter-spacing:0;min-width:0}
+.rv-imp-grid textarea{min-height:80px;resize:vertical}
+@media(max-width:680px){ .rv-imp-grid{grid-template-columns:1fr 1fr} }
 .rv-adm-sum{font-family:'Raleway',sans-serif;font-size:.8rem;color:var(--gold);margin-left:8px}
 .rv-adm{border:1px solid var(--bdr);background:var(--bg3);padding:16px;margin-bottom:12px;display:grid;grid-template-columns:minmax(0,1fr) auto;gap:14px}
 .rv-adm-head{display:flex;flex-wrap:wrap;gap:8px 14px;align-items:center;font-size:.8rem;color:var(--tx2)}
@@ -813,6 +820,23 @@ body{font-family:'Raleway',sans-serif;background:var(--bg0);color:var(--tx0)}
       <div class="menu-panel">
         <h3><span data-k="adm_rv_title">Recenze zákazníků</span> <span class="rv-adm-sum" id="rvSummary"></span></h3>
         <p class="lay-hint" data-k="adm_rv_hint">Skrývejte jen spam a urážky. Skrývání poctivých negativních recenzí klame zákazníky a v EU je zakázané. Hvězdičky ani text recenze upravit nelze — můžete odpovědět.</p>
+        <button type="button" class="cat-add-btn" id="rvImportOpen" style="margin-bottom:14px">+ <span data-k="adm_rv_import">Přidat recenzi z Google / Instagramu</span></button>
+        <!-- Move over a REAL review from elsewhere; it is shown with its source -->
+        <div class="rv-imp" id="rvImport" style="display:none">
+          <p class="lay-hint" data-k="adm_rv_import_hint">Jen skutečné recenze, které zákazníci napsali jinde (Google, Instagram, Facebook, osobně). Na webu se zobrazí se zdrojem. Vymyšlené recenze jsou podvod a v EU jsou zakázané.</p>
+          <div class="rv-imp-grid">
+            <label><span data-k="adm_f_name">Jméno</span><input id="rviName" maxlength="60"></label>
+            <label><span data-k="adm_rv_stars">Hvězdičky</span><select id="rviStars"><option>5</option><option>4</option><option>3</option><option>2</option><option>1</option></select></label>
+            <label><span data-k="adm_rv_source">Zdroj</span><select id="rviSource">
+              <option value="google">Google</option><option value="instagram">Instagram</option><option value="facebook">Facebook</option>
+              <option value="in_person" data-k="adm_rv_src_person">Osobně v cukrárně</option><option value="other" data-k="adm_rv_src_other">Jinde</option></select></label>
+            <label><span data-k="adm_rv_date">Datum recenze</span><input type="date" id="rviDate"></label>
+            <label class="full"><span data-k="adm_rv_text">Text recenze</span><textarea id="rviText" maxlength="1500"></textarea></label>
+            <label><span data-k="adm_rv_item">Dort (nepovinné)</span><select id="rviItem"></select></label>
+            <label><span data-k="adm_rv_photo">Fotka (nepovinné)</span><button type="button" class="cat-add-btn" id="rviPhotoBtn">📷</button></label>
+          </div>
+          <div style="display:flex;gap:10px;align-items:center;margin:10px 0 18px"><button type="button" class="btn-add-item" id="rviSave" style="margin:0" data-k="adm_rv_import_save">Zveřejnit recenzi</button><span class="lay-hint" id="rviMsg" style="margin:0"></span></div>
+        </div>
         <div class="ci-filters" id="rvFilters">
           <button class="ci-flt on" data-rvf="new" data-k="adm_rv_f_new">Nové</button>
           <button class="ci-flt" data-rvf="published" data-k="adm_rv_f_pub">Zveřejněné</button>
@@ -1009,6 +1033,7 @@ const TA = {
     adm_drag_hint:'Pořadí položek: táhněte myší nebo použijte šipky ⤒ ▲ ▼. Stejné pořadí uvidí zákazníci.',
     adm_lay_saved:'✓ Uloženo', adm_lay_err:'Neuloženo — zkuste znovu',
     adm_tab_all:'Vše', adm_tab_fav:'Oblíbené', adm_tab_celeb:'Slavnostní dorty',
+    adm_rv_import:'Přidat recenzi z Google / Instagramu', adm_rv_import_hint:'Jen skutečné recenze, které zákazníci napsali jinde (Google, Instagram, Facebook, osobně). Na webu se zobrazí se zdrojem. Vymyšlené recenze jsou podvod a v EU jsou zakázané.', adm_rv_stars:'Hvězdičky', adm_rv_source:'Zdroj', adm_rv_src_person:'Osobně v cukrárně', adm_rv_src_other:'Jinde', adm_rv_date:'Datum recenze', adm_rv_text:'Text recenze', adm_rv_item:'Dort (nepovinné)', adm_rv_photo:'Fotka (nepovinné)', adm_rv_import_save:'Zveřejnit recenzi', adm_rv_import_need:'Vyplňte jméno a text recenze.',
     adm_rules_lbl:'Omezení a předobjednávky', adm_lead_lbl:'Min. dní předem', adm_from_lbl:'Výdej od', adm_to_lbl:'Výdej do', adm_stock_lbl:'Zbývá kusů', adm_stock_ph:'bez omezení', adm_stock_btn:'Zbývá kusů (zobrazí se na webu)', adm_stock_prompt:'Kolik kusů „{name}“ zbývá? Na webu se zobrazí „Zbývá N“, při 0 „Vyprodáno“. Prázdné = bez omezení.', adm_stock_bad:'Zadejte celé číslo, nebo nechte prázdné.', adm_rules_hint:'Velké dorty: např. 14 dní předem. Vánoční předobjednávka: výdej 20.–23. 12. a počet krabic — zákazníci uvidí „zbývá 12“, po vyprodání „Vyprodáno“.', adm_stock_info:'Prodáno {sold} z {total}, zbývá {left}. Změna počtu spustí nové počítání.', adm_f_attachment:'Obrázek-předloha', adm_builder:'Konfigurátor', adm_bld_title:'Konfigurátor dortu na zakázku', adm_bld_hint:'Zákazník si na webu poskládá dort: příležitost → velikost → náplň → zdobení, nápis a obrázek-předloha. Cena se počítá z těchto nastavení; zaplatí zálohu 50 % kartou.', adm_bld_enabled:'Zobrazit konfigurátor na webu', adm_bld_lead:'Nejdříve za (dní)', adm_bld_mode:'Cena na webu', adm_bld_from:'od … Kč (upřesníme)', adm_bld_exact:'přesná cena', adm_bld_occasions:'Příležitosti', adm_bld_sizes:'Velikosti (počet hostů a cena)', adm_bld_fillings:'Náplně (s fotkou a příplatkem)', adm_bld_decor:'Zdobení (s cenou)', adm_bld_label:'Velikost', adm_bld_guests_from:'Hostů od', adm_bld_guests_to:'Hostů do', adm_bld_photo:'Fotka náplně',
     adm_reviews:'Recenze', adm_rv_title:'Recenze zákazníků', adm_rv_hint:'Skrývejte jen spam a urážky. Skrývání poctivých negativních recenzí klame zákazníky a v EU je zakázané. Hvězdičky ani text recenze upravit nelze — můžete odpovědět.', adm_rv_f_new:'Nové', adm_rv_f_pub:'Zveřejněné', adm_rv_f_hidden:'Skryté', adm_rv_empty:'Žádné recenze v tomto seznamu.', adm_rv_verified:'Ověřený zákazník', adm_rv_publish:'Zveřejnit', adm_rv_hide:'Skrýt', adm_rv_restore:'Vrátit mezi nové', adm_rv_reply_ph:'Odpověď cukrárny (zobrazí se pod recenzí)', adm_rv_reply_save:'Uložit odpověď', adm_rv_del_confirm:'Smazat recenzi natrvalo? (Jen pro spam.)',
     adm_schedule:'Rozvrh', adm_sch_title:'Termíny doručení a převzetí', adm_sch_enabled:'Zákazník vybírá den a čas z volných termínů', adm_sch_weekdays:'Pracovní dny', adm_sch_times:'Časové intervaly', adm_sch_per_slot:'Objednávek na interval', adm_sch_per_day:'Objednávek za den', adm_sch_ahead:'Dní dopředu', adm_sch_lead:'Nejdříve za (dní)', adm_sch_cal:'Obsazenost', adm_sch_cal_hint:'2 měsíce zpět a 2 měsíce dopředu. Klikněte na den: uvidíte objednávky a můžete den zavřít nebo otevřít.', adm_sch_l_free:'volno', adm_sch_l_mid:'částečně', adm_sch_l_full:'plno', adm_sch_l_closed:'zavřeno', adm_sch_orders:'objednávek: {n}', adm_sch_no_orders:'Na tento den nejsou žádné objednávky.', adm_sch_off_day:'Tento den v týdnu je nepracovní (nastavení výše).', adm_sch_open:'Otevřít den', adm_sch_close:'Zavřít den',
@@ -1078,6 +1103,7 @@ const TA = {
     adm_drag_hint:'Item order: drag with the mouse or use the arrows ⤒ ▲ ▼. Customers see the same order.',
     adm_lay_saved:'✓ Saved', adm_lay_err:'Not saved — try again',
     adm_tab_all:'All', adm_tab_fav:'Favorites', adm_tab_celeb:'Celebration cakes',
+    adm_rv_import:'Add a review from Google / Instagram', adm_rv_import_hint:'Only real reviews customers wrote elsewhere (Google, Instagram, Facebook, in person). The site shows the source. Made-up reviews are fraud and forbidden in the EU.', adm_rv_stars:'Stars', adm_rv_source:'Source', adm_rv_src_person:'In person at the shop', adm_rv_src_other:'Elsewhere', adm_rv_date:'Review date', adm_rv_text:'Review text', adm_rv_item:'Cake (optional)', adm_rv_photo:'Photo (optional)', adm_rv_import_save:'Publish review', adm_rv_import_need:'Fill in the name and the review text.',
     adm_rules_lbl:'Limits and pre-orders', adm_lead_lbl:'Min. days ahead', adm_from_lbl:'Pickup from', adm_to_lbl:'Pickup until', adm_stock_lbl:'Stock left', adm_stock_ph:'unlimited', adm_stock_btn:'Pieces left (shown on the site)', adm_stock_prompt:'How many “{name}” are left? The site shows “N left”, and “Sold out” at 0. Empty = unlimited.', adm_stock_bad:'Enter a whole number, or leave it empty.', adm_rules_hint:'Big cakes: e.g. 14 days ahead. Christmas pre-order: pickup 20–23 Dec and a number of boxes — customers see “12 left”, then “Sold out”.', adm_stock_info:'Sold {sold} of {total}, {left} left. Changing the quantity restarts the count.', adm_f_attachment:'Example picture', adm_builder:'Cake builder', adm_bld_title:'Custom cake builder', adm_bld_hint:'Customers put a cake together on the site: occasion → size → filling → decor, inscription and an example picture. The price comes from these settings; they pay a 50 % deposit by card.', adm_bld_enabled:'Show the builder on the site', adm_bld_lead:'Earliest in (days)', adm_bld_mode:'Price on the site', adm_bld_from:'from … CZK (we confirm)', adm_bld_exact:'exact price', adm_bld_occasions:'Occasions', adm_bld_sizes:'Sizes (guests and price)', adm_bld_fillings:'Fillings (with photo and surcharge)', adm_bld_decor:'Decor (with price)', adm_bld_label:'Size', adm_bld_guests_from:'Guests from', adm_bld_guests_to:'Guests to', adm_bld_photo:'Filling photo',
     adm_reviews:'Reviews', adm_rv_title:'Customer reviews', adm_rv_hint:'Hide only spam and insults. Hiding honest negative reviews misleads customers and is forbidden in the EU. Stars and text can’t be edited — you can reply.', adm_rv_f_new:'New', adm_rv_f_pub:'Published', adm_rv_f_hidden:'Hidden', adm_rv_empty:'No reviews in this list.', adm_rv_verified:'Verified customer', adm_rv_publish:'Publish', adm_rv_hide:'Hide', adm_rv_restore:'Back to new', adm_rv_reply_ph:'Reply from the shop (shown under the review)', adm_rv_reply_save:'Save reply', adm_rv_del_confirm:'Delete this review permanently? (Spam only.)',
     adm_schedule:'Schedule', adm_sch_title:'Delivery and pickup times', adm_sch_enabled:'Customers choose a day and time from free slots', adm_sch_weekdays:'Working days', adm_sch_times:'Time intervals', adm_sch_per_slot:'Orders per interval', adm_sch_per_day:'Orders per day', adm_sch_ahead:'Days ahead', adm_sch_lead:'Earliest in (days)', adm_sch_cal:'Occupancy', adm_sch_cal_hint:'2 months back and 2 months ahead. Click a day to see its orders and to close or open it.', adm_sch_l_free:'free', adm_sch_l_mid:'partly booked', adm_sch_l_full:'full', adm_sch_l_closed:'closed', adm_sch_orders:'orders: {n}', adm_sch_no_orders:'No orders for this day.', adm_sch_off_day:'This weekday is a day off (settings above).', adm_sch_open:'Open day', adm_sch_close:'Close day',
@@ -1149,6 +1175,7 @@ const TA = {
     adm_drag_hint:'Порядок позицій: перетягуйте мишкою або натискайте стрілки ⤒ ▲ ▼. Клієнти бачать такий самий порядок.',
     adm_lay_saved:'✓ Збережено', adm_lay_err:'Не збережено — спробуйте ще раз',
     adm_tab_all:'Усі', adm_tab_fav:'Улюблені', adm_tab_celeb:'Святкові торти',
+    adm_rv_import:'Додати відгук із Google / Instagram', adm_rv_import_hint:'Лише справжні відгуки, які клієнти написали деінде (Google, Instagram, Facebook, особисто). На сайті буде видно джерело. Вигадані відгуки — це шахрайство, і в ЄС вони заборонені.', adm_rv_stars:'Зірки', adm_rv_source:'Джерело', adm_rv_src_person:'Особисто в кондитерській', adm_rv_src_other:'Інше', adm_rv_date:'Дата відгуку', adm_rv_text:'Текст відгуку', adm_rv_item:'Торт (необов’язково)', adm_rv_photo:'Фото (необов’язково)', adm_rv_import_save:'Опублікувати відгук', adm_rv_import_need:'Вкажіть ім’я та текст відгуку.',
     adm_rules_lbl:'Обмеження та передзамовлення', adm_lead_lbl:'Мін. днів наперед', adm_from_lbl:'Видача з', adm_to_lbl:'Видача по', adm_stock_lbl:'Залишок, шт.', adm_stock_ph:'без обмежень', adm_stock_btn:'Залишок, шт. (показується на сайті)', adm_stock_prompt:'Скільки «{name}» залишилось? На сайті буде «Залишилось N», при 0 — «Розпродано». Порожньо = без обмежень.', adm_stock_bad:'Введіть ціле число або залиште порожнім.', adm_rules_hint:'Великі торти: напр. 14 днів наперед. Різдвяне передзамовлення: видача 20–23 грудня й кількість коробок — клієнти побачать «залишилось 12», потім «Розпродано».', adm_stock_info:'Продано {sold} із {total}, залишилось {left}. Зміна кількості починає підрахунок заново.', adm_f_attachment:'Картинка-приклад', adm_builder:'Конструктор', adm_bld_title:'Конструктор торта на замовлення', adm_bld_hint:'Клієнт на сайті збирає торт: привід → розмір → начинка → декор, напис і картинка-приклад. Ціна рахується з цих налаштувань; передоплата 50 % карткою.', adm_bld_enabled:'Показувати конструктор на сайті', adm_bld_lead:'Найраніше через (днів)', adm_bld_mode:'Ціна на сайті', adm_bld_from:'від … Kč (уточнимо)', adm_bld_exact:'точна ціна', adm_bld_occasions:'Приводи', adm_bld_sizes:'Розміри (кількість гостей і ціна)', adm_bld_fillings:'Начинки (з фото й доплатою)', adm_bld_decor:'Декор (з ціною)', adm_bld_label:'Розмір', adm_bld_guests_from:'Гостей від', adm_bld_guests_to:'Гостей до', adm_bld_photo:'Фото начинки',
     adm_reviews:'Відгуки', adm_rv_title:'Відгуки клієнтів', adm_rv_hint:'Ховайте лише спам і образи. Приховування чесних негативних відгуків вводить клієнтів в оману і в ЄС заборонене. Зірки й текст відгуку змінити не можна — можна відповісти.', adm_rv_f_new:'Нові', adm_rv_f_pub:'Опубліковані', adm_rv_f_hidden:'Приховані', adm_rv_empty:'У цьому списку відгуків немає.', adm_rv_verified:'Перевірений покупець', adm_rv_publish:'Опублікувати', adm_rv_hide:'Сховати', adm_rv_restore:'Повернути в нові', adm_rv_reply_ph:'Відповідь кондитерської (показується під відгуком)', adm_rv_reply_save:'Зберегти відповідь', adm_rv_del_confirm:'Видалити відгук назавжди? (Лише для спаму.)',
     adm_schedule:'Розклад', adm_sch_title:'Дати й час доставки та отримання', adm_sch_enabled:'Клієнт обирає день і час із вільних слотів', adm_sch_weekdays:'Робочі дні', adm_sch_times:'Часові інтервали', adm_sch_per_slot:'Замовлень на інтервал', adm_sch_per_day:'Замовлень на день', adm_sch_ahead:'Днів наперед', adm_sch_lead:'Найраніше через (днів)', adm_sch_cal:'Зайнятість', adm_sch_cal_hint:'2 місяці назад і 2 місяці вперед. Натисніть на день: побачите замовлення й зможете закрити або відкрити день.', adm_sch_l_free:'вільно', adm_sch_l_mid:'частково', adm_sch_l_full:'зайнято', adm_sch_l_closed:'зачинено', adm_sch_orders:'замовлень: {n}', adm_sch_no_orders:'На цей день замовлень немає.', adm_sch_off_day:'Цей день тижня вихідний (налаштування вище).', adm_sch_open:'Відкрити день', adm_sch_close:'Закрити день',
@@ -3181,7 +3208,7 @@ function renderReviews(){
     const st = {new:t('adm_rv_f_new'), published:t('adm_rv_f_pub'), hidden:t('adm_rv_f_hidden')}[r.status] || r.status;
     return `<div class="rv-adm">
       <div>
-        <div class="rv-adm-head">${_rvStars(r.stars)}<b>${esc(r.name)}</b>${r.verified?`<span class="rv-adm-ver">✓ ${t('adm_rv_verified')}</span>`:''}<span>${esc(date)}</span><span class="rv-adm-st ${r.status}">${esc(st)}</span></div>
+        <div class="rv-adm-head">${_rvStars(r.stars)}<b>${esc(r.name)}</b>${r.verified?`<span class="rv-adm-ver">✓ ${t('adm_rv_verified')}</span>`:''}${r.source?`<span class="rv-adm-st">${esc(r.source==='in_person'?t('adm_rv_src_person'):r.source==='other'?t('adm_rv_src_other'):r.source)}</span>`:''}<span>${esc(date)}</span><span class="rv-adm-st ${r.status}">${esc(st)}</span></div>
         ${r.item?`<div class="rv-adm-item">${esc(r.item)}</div>`:''}
         <div class="rv-adm-text">${esc(r.text)}</div>
         ${r.photo?`<img src="${esc(r.photo)}" alt="" onclick="window.open(this.src,'_blank')">`:''}
@@ -3218,6 +3245,48 @@ async function rvDelete(id){
   }catch{}
   loadReviews();
 }
+/* Move over a real review from Google / Instagram / in person (published with its source) */
+let rviPhoto = '';
+document.getElementById('rvImportOpen').addEventListener('click', async ()=>{
+  const box = document.getElementById('rvImport');
+  box.style.display = box.style.display === 'none' ? '' : 'none';
+  if(box.style.display === 'none') return;
+  try{
+    const r = await fetch('/api/review-items');
+    const items = r.ok ? (await r.json()).items : [];
+    document.getElementById('rviItem').innerHTML = '<option value="">—</option>' + items.map(i=>`<option value="${esc(i.cs)}">${esc(i[adminLang]||i.cs)}</option>`).join('');
+  }catch{}
+});
+document.getElementById('rviPhotoBtn').addEventListener('click', ()=>{
+  const inp = document.createElement('input'); inp.type = 'file'; inp.accept = 'image/*';
+  inp.onchange = ()=>{
+    const f = inp.files[0]; if(!f) return; const img = new Image();
+    img.onload = ()=>{ const k = Math.min(1, 1280/Math.max(img.width, img.height)), c = document.createElement('canvas');
+      c.width = Math.round(img.width*k); c.height = Math.round(img.height*k); c.getContext('2d').drawImage(img, 0, 0, c.width, c.height);
+      rviPhoto = c.toDataURL('image/jpeg', .8);
+      const b = document.getElementById('rviPhotoBtn'); b.textContent = '✓ 📷'; };
+    img.src = URL.createObjectURL(f);
+  };
+  inp.click();
+});
+document.getElementById('rviSave').addEventListener('click', async ()=>{
+  const v = id => document.getElementById(id).value.trim(), msg = document.getElementById('rviMsg');
+  if(!v('rviName') || v('rviText').length < 3){ msg.textContent = t('adm_rv_import_need'); return; }
+  try{
+    const r = await fetch('/api/reviews/import', {method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({
+      token: sessionStorage.getItem('cm_token')||'', name: v('rviName'), stars: +v('rviStars'), source: v('rviSource'),
+      date: v('rviDate'), text: v('rviText'), item: v('rviItem'), photo: rviPhoto})});
+    if(r.status===401){ handleExpired(); return; }
+    if(!r.ok){ msg.textContent = t('adm_lay_err'); return; }
+    ['rviName','rviText','rviDate'].forEach(id=>document.getElementById(id).value = '');
+    rviPhoto = ''; document.getElementById('rviPhotoBtn').textContent = '📷';
+    msg.textContent = t('adm_lay_saved');
+    rvFilter = 'published';
+    document.querySelectorAll('#rvFilters .ci-flt').forEach(x=>x.classList.toggle('on', x.dataset.rvf==='published'));
+    loadReviews();
+  }catch{ msg.textContent = t('adm_lay_err'); }
+});
+
 document.querySelectorAll('#rvFilters .ci-flt').forEach(b=>b.addEventListener('click', ()=>{
   rvFilter = b.dataset.rvf;
   document.querySelectorAll('#rvFilters .ci-flt').forEach(x=>x.classList.toggle('on', x===b));
