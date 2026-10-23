@@ -215,6 +215,32 @@ def api_menu_get(full: int = 0):
     # full=1 keeps the photos inline (used by the admin JSON export / backup)
     return [r[0] if full else _public_item(r[0]) for r in rows]
 
+# ── /api/translate ────────────────────────────────────────────────────────────
+# Draft UA/EN translation of a Czech menu text for the admin form. The admin sees
+# it in the form and can fix it before saving (short names are often mistranslated).
+def _gtranslate(text, target):
+    import urllib.request, urllib.parse
+    url = ('https://translate.googleapis.com/translate_a/single?client=gtx&sl=cs&tl=%s&dt=t&q=%s'
+           % (target, urllib.parse.quote(text)))
+    try:
+        data = json.loads(urllib.request.urlopen(url, timeout=6).read().decode('utf-8'))
+        return ''.join(seg[0] for seg in data[0] if seg and seg[0]).strip()
+    except Exception:
+        return ''
+
+@app.post('/api/translate')
+async def api_translate(req: Request):
+    from starlette.concurrency import run_in_threadpool
+    d = await req.json()
+    if not _verify_token(d.get('token')):
+        raise HTTPException(401, 'Unauthorized')
+    text = str(d.get('text') or '').strip()[:3000]
+    if not text:
+        return {'uk': '', 'en': ''}
+    uk = await run_in_threadpool(_gtranslate, text, 'uk')
+    en = await run_in_threadpool(_gtranslate, text, 'en')
+    return {'uk': uk, 'en': en}
+
 @app.get('/api/menu-img/{item_id}')
 def api_menu_img(item_id: int):
     with _get_pool().connection() as conn:

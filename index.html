@@ -151,6 +151,14 @@ footer{background:#070707;border-top:1px solid var(--bdr);padding:52px 0 28px}
   .logo-pre{font-size:.65rem;letter-spacing:3px}
   .logo-tagline{font-size:.65rem;letter-spacing:3px}
 }
+
+/* Header must fit: longer Ukrainian/English link texts pushed the language buttons off-screen */
+.nav-in{gap:16px}
+.nav-links{gap:clamp(14px,2.4vw,36px);flex-wrap:nowrap;min-width:0}
+.nav-links a{white-space:nowrap}
+.nav-right{flex-shrink:0}
+@media(max-width:1240px){ .nav-links a{font-size:.72rem;letter-spacing:1px} .nav-logo-sub{display:none} }
+@media(max-width:1060px){ .nav-links{display:none} .burger{display:flex} }
 </style>
 </head>
 <body translate="no">

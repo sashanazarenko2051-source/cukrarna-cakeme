@@ -41,6 +41,20 @@
         "en": "Three kinds of airy chocolate mousse, layered from the darkest to the lightest on a chocolate sponge."
       }
     },
+    "1792564094950": {
+      "name": {"uk": "Індіанчик", "en": "Indiánek"},
+      "desc": {
+        "uk": "Під хрусткою оболонкою з шоколаду й какао-масла ховається повітряна білково-цукрова піна. Усе це тримається на бісквітній основі, яку називають буфлер.",
+        "en": "A crunchy shell of chocolate and cocoa butter hides a fluffy meringue-style foam, all resting on a sponge base called a bufler."
+      }
+    },
+    "1792684968120": {
+      "name": {"uk": "Яєчний лікер", "en": "Czech Eggnog"},
+      "desc": {
+        "uk": "Справжній чеський яєчний лікер — кремовий лікер із жовтків, вершків і рому.",
+        "en": "Genuine Czech eggnog — a creamy liqueur made from egg yolks, cream and rum."
+      }
+    },
     "1790338678888": {
       "name": {"uk": "Різдвяне печиво", "en": "Christmas Cookies"},
       "desc": {

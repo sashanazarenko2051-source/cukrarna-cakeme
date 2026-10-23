@@ -80,7 +80,10 @@ section{padding:96px 0}
 .m-body{padding:20px}
 .m-name{font-family:'Playfair Display',serif;font-size:1.18rem;color:var(--tx0);margin-bottom:7px}
 .m-weight{font-size:.74rem;color:var(--gold);letter-spacing:.5px;margin:-3px 0 8px}
-.m-desc{font-size:.78rem;color:var(--tx2);line-height:1.65;margin-bottom:18px}
+.m-desc{font-size:.78rem;color:var(--tx2);line-height:1.65;margin-bottom:18px;display:-webkit-box;-webkit-line-clamp:4;-webkit-box-orient:vertical;overflow:hidden}
+.m-desc.open{display:block}
+.m-more{background:none;border:none;color:var(--gold);font:.72rem 'Raleway',sans-serif;letter-spacing:.5px;cursor:pointer;padding:0;margin:-12px 0 16px;display:block}
+.m-more:hover{text-decoration:underline}
 .m-ft{display:flex;align-items:center;justify-content:space-between}
 .m-price{font-family:'Playfair Display',serif;font-size:1.25rem;color:var(--gold)}
 .btn-ord{background:transparent;border:1px solid var(--gold-d);color:var(--gold);padding:8px 18px;font:.72rem 'Raleway',sans-serif;letter-spacing:1.5px;text-transform:uppercase;cursor:pointer;transition:.25s}
@@ -221,6 +224,14 @@ footer{background:#070707;border-top:1px solid var(--bdr);padding:52px 0 28px}
   .m-img{height:200px}
   .m-body{padding:16px}
 }
+
+/* Header must fit: longer Ukrainian/English link texts pushed the language buttons off-screen */
+.nav-in{gap:16px}
+.nav-links{gap:clamp(14px,2.4vw,36px);flex-wrap:nowrap;min-width:0}
+.nav-links a{white-space:nowrap}
+.nav-right{flex-shrink:0}
+@media(max-width:1240px){ .nav-links a{font-size:.72rem;letter-spacing:1px} .nav-logo-sub{display:none} }
+@media(max-width:1060px){ .nav-links{display:none} .burger{display:flex} }
 </style>
 </head>
 <body translate="no">
@@ -380,9 +391,9 @@ footer{background:#070707;border-top:1px solid var(--bdr);padding:52px 0 28px}
 
 <script>
 const T={
-cs:{nav_home:'Domů',nav_menu:'Menu',nav_about:'O nás',nav_del:'Doručení',nav_con:'Kontakt',tagline:'Oslavte každý den',menu_lbl:'Naše nabídka',menu_ttl:'Menu',t_all:'Vše',t_cakes:'Dorty',t_kolace:'Koláče',t_des:'Dezerty',t_drk:'Nápoje',t_doplnky:'Doplňky',t_fav:'Oblíbené',t_celeb:'Slavnostní dorty',celeb_h:'Slavnostní & narozeninové dorty',celeb_warn:'Objednávky přijímáme minimálně 14 dní předem',celeb_p1:'Připravíme dort přesně podle vašich přání — narozeniny, svatba, výročí nebo firemní akce. Zvolte design, chuť a velikost.',celeb_p2:'Pro objednávku nás prosím kontaktujte telefonicky nebo e-mailem.',cart_add:'Do košíku',cart_ttl:'Košík',cart_empty:'Košík je prázdný',cart_total:'Celkem',cart_go:'Objednat s doručením',ft_nav:'Navigace',ft_con:'Kontakt',rights:'Všechna práva vyhrazena.',t_pcs:'Počet kusů',pop_ttl:'Nejčastěji objednávané',pop_from:'od',feat_ttl:'Doporučujeme'},
-en:{nav_home:'Home',nav_menu:'Menu',nav_about:'About',nav_del:'Delivery',nav_con:'Contact',tagline:'Celebrate Every Day',menu_lbl:'Our Offerings',menu_ttl:'Menu',t_all:'All',t_cakes:'Cakes',t_kolace:'Pastries',t_des:'Desserts',t_drk:'Drinks',t_doplnky:'Additions',t_fav:'Favorites',t_celeb:'Celebration Cakes',celeb_h:'Wedding & Celebration Cakes',celeb_warn:'Orders accepted minimum 2 weeks in advance',celeb_p1:'We\'ll create a cake tailored to your wishes — birthdays, weddings, anniversaries or corporate events. Choose the design, flavour and size.',celeb_p2:'To place an order, please contact us by phone or email.',cart_add:'Add to Cart',cart_ttl:'Cart',cart_empty:'Your cart is empty',cart_total:'Total',cart_go:'Order with Delivery',ft_nav:'Navigation',ft_con:'Contact',rights:'All rights reserved.',t_pcs:'Pieces',pop_ttl:'Most ordered',pop_from:'from',feat_ttl:'We recommend'},
-uk:{nav_home:'Головна',nav_menu:'Меню',nav_about:'Про нас',nav_del:'Доставка',nav_con:'Контакти',tagline:'Святкуйте кожен день',menu_lbl:'Наша пропозиція',menu_ttl:'Меню',t_all:'Усе',t_cakes:'Торти',t_kolace:'Пироги',t_des:'Десерти',t_drk:'Напої',t_doplnky:'Доповнення',t_fav:'Улюблене',t_celeb:'Святкові торти',celeb_h:'Святкові торти та торти на день народження',celeb_warn:'Замовлення приймаємо щонайменше за 14 днів',celeb_p1:'Приготуємо торт саме таким, як ви бажаєте — на день народження, весілля, річницю чи корпоратив. Оберіть дизайн, смак і розмір.',celeb_p2:'Щоб замовити, зв’яжіться з нами телефоном або e-mailом.',cart_add:'До кошика',cart_ttl:'Кошик',cart_empty:'Кошик порожній',cart_total:'Разом',cart_go:'Замовити з доставкою',ft_nav:'Навігація',ft_con:'Контакти',rights:'Усі права захищені.',t_pcs:'Кількість штук',pop_ttl:'Найчастіше замовляють',pop_from:'від',feat_ttl:'Рекомендуємо'}
+cs:{nav_home:'Domů',nav_menu:'Menu',nav_about:'O nás',nav_del:'Doručení',nav_con:'Kontakt',tagline:'Oslavte každý den',menu_lbl:'Naše nabídka',menu_ttl:'Menu',t_all:'Vše',t_cakes:'Dorty',t_kolace:'Koláče',t_des:'Dezerty',t_drk:'Nápoje',t_doplnky:'Doplňky',t_fav:'Oblíbené',t_celeb:'Slavnostní dorty',celeb_h:'Slavnostní & narozeninové dorty',celeb_warn:'Objednávky přijímáme minimálně 14 dní předem',celeb_p1:'Připravíme dort přesně podle vašich přání — narozeniny, svatba, výročí nebo firemní akce. Zvolte design, chuť a velikost.',celeb_p2:'Pro objednávku nás prosím kontaktujte telefonicky nebo e-mailem.',cart_add:'Do košíku',cart_ttl:'Košík',cart_empty:'Košík je prázdný',cart_total:'Celkem',cart_go:'Objednat s doručením',ft_nav:'Navigace',ft_con:'Kontakt',rights:'Všechna práva vyhrazena.',t_pcs:'Počet kusů',pop_ttl:'Nejčastěji objednávané',pop_from:'od',more:'Číst dál',less:'Skrýt',feat_ttl:'Doporučujeme'},
+en:{nav_home:'Home',nav_menu:'Menu',nav_about:'About',nav_del:'Delivery',nav_con:'Contact',tagline:'Celebrate Every Day',menu_lbl:'Our Offerings',menu_ttl:'Menu',t_all:'All',t_cakes:'Cakes',t_kolace:'Pastries',t_des:'Desserts',t_drk:'Drinks',t_doplnky:'Additions',t_fav:'Favorites',t_celeb:'Celebration Cakes',celeb_h:'Wedding & Celebration Cakes',celeb_warn:'Orders accepted minimum 2 weeks in advance',celeb_p1:'We\'ll create a cake tailored to your wishes — birthdays, weddings, anniversaries or corporate events. Choose the design, flavour and size.',celeb_p2:'To place an order, please contact us by phone or email.',cart_add:'Add to Cart',cart_ttl:'Cart',cart_empty:'Your cart is empty',cart_total:'Total',cart_go:'Order with Delivery',ft_nav:'Navigation',ft_con:'Contact',rights:'All rights reserved.',t_pcs:'Pieces',pop_ttl:'Most ordered',pop_from:'from',more:'Read more',less:'Show less',feat_ttl:'We recommend'},
+uk:{nav_home:'Головна',nav_menu:'Меню',nav_about:'Про нас',nav_del:'Доставка',nav_con:'Контакти',tagline:'Святкуйте кожен день',menu_lbl:'Наша пропозиція',menu_ttl:'Меню',t_all:'Усе',t_cakes:'Торти',t_kolace:'Пироги',t_des:'Десерти',t_drk:'Напої',t_doplnky:'Доповнення',t_fav:'Улюблене',t_celeb:'Святкові торти',celeb_h:'Святкові торти та торти на день народження',celeb_warn:'Замовлення приймаємо щонайменше за 14 днів',celeb_p1:'Приготуємо торт саме таким, як ви бажаєте — на день народження, весілля, річницю чи корпоратив. Оберіть дизайн, смак і розмір.',celeb_p2:'Щоб замовити, зв’яжіться з нами телефоном або e-mailом.',cart_add:'До кошика',cart_ttl:'Кошик',cart_empty:'Кошик порожній',cart_total:'Разом',cart_go:'Замовити з доставкою',ft_nav:'Навігація',ft_con:'Контакти',rights:'Усі права захищені.',t_pcs:'Кількість штук',pop_ttl:'Найчастіше замовляють',pop_from:'від',more:'Читати далі',less:'Згорнути',feat_ttl:'Рекомендуємо'}
 };
 
 let ITEMS=[
@@ -553,7 +564,7 @@ function renderPopular(){
   document.getElementById('popRow').innerHTML=list.map((item,n)=>{
     const gi=ITEMS.indexOf(item);
     const name=item.name[lang]||item.name.cs;
-    let price=item.price||'';
+    let price=fmtPrice(item.price);
     if(item.sizes&&item.sizes.length){
       const min=Math.min(...item.sizes.map(s=>s.price));
       price=(item.sizes.length>1?t('pop_from')+' ':'')+min+' Kč';
@@ -635,6 +646,21 @@ const BADGE_T={
   'vánoce':{uk:'Різдво',en:'Christmas'}, 'doporučujeme':{uk:'Рекомендуємо',en:'Recommended'},
 };
 function badgeText(b){ return (BADGE_T[(b||'').trim().toLowerCase()]||{})[lang]||b; }
+
+// Prices typed in the admin as a bare number ("490") get the currency
+function fmtPrice(p){ p=String(p||'').trim(); return /^\d+$/.test(p) ? p+' Kč' : p; }
+
+// Long descriptions show 4 lines; "Read more" appears only where the text is cut
+function addReadMore(root){
+  (root||document).querySelectorAll('.m-desc').forEach(p=>{
+    if(p.nextElementSibling&&p.nextElementSibling.classList.contains('m-more')) return;
+    if(p.scrollHeight<=p.clientHeight+2) return;
+    const b=document.createElement('button');
+    b.className='m-more'; b.type='button'; b.textContent=t('more');
+    b.addEventListener('click',()=>{ const open=p.classList.toggle('open'); b.textContent=t(open?'less':'more'); });
+    p.after(b);
+  });
+}
 
 function getCart(){return JSON.parse(localStorage.getItem('cakeme_cart')||'[]');}
 function saveCart(c){localStorage.setItem('cakeme_cart',JSON.stringify(c));}
@@ -763,6 +789,7 @@ function renderMenu(){
   setTimeout(()=>{
     document.querySelectorAll('.m-card').forEach(c=>c.classList.add('show'));
     initFI();
+    addReadMore();
   },80);
 }
 
@@ -808,7 +835,7 @@ function cardHtml(item){
               <button class="dq-btn" onclick="desQty(${gi},-1)">−</button>
               <span class="dq-num" id="dq-${gi}">${cardQty[gi]||item.qty_min||5}</span>
               <button class="dq-btn" onclick="desQty(${gi},1)">+</button>
-              <span class="m-price">${item.price}</span>
+              <span class="m-price">${fmtPrice(item.price)}</span>
             </div>
             <button class="btn-ord btn-ord-full" onclick="addToCartN(${gi})">${t('cart_add')}</button>
           </div>
@@ -824,7 +851,7 @@ function cardHtml(item){
         <h3 class="m-name">${name}</h3>${item.weight?`<div class="m-weight">⚖ ${item.weight}</div>`:''}
         <p class="m-desc">${desc}</p>
         <div class="m-ft">
-          <span class="m-price">${item.price}</span>
+          <span class="m-price">${fmtPrice(item.price)}</span>
           <button class="btn-ord" onclick="addToCart(${gi})">${t('cart_add')}</button>
         </div>
       </div>
@@ -845,6 +872,7 @@ function renderFeatured(){
   const list=featuredItems();
   document.getElementById('featWrap').style.display=list.length?'':'none';
   document.getElementById('featGrid').innerHTML=list.map(cardHtml).join('');
+  setTimeout(()=>addReadMore(document.getElementById('featGrid')),90);
 }
 
 function initLangBtns(){

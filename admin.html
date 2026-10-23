@@ -155,6 +155,7 @@ body{font-family:'Raleway',sans-serif;background:var(--bg0);color:var(--tx0)}
 .mai-field .size-row .size-row-input-lbl{width:auto}
 .mai-field .size-row .size-row-input-price{width:72px}
 .amt-units{display:flex}
+.mai-field input.auto-tr{border-color:var(--gold-d);background:rgba(201,169,110,.06)}
 .amt-u{background:var(--bg3);border:1px solid var(--bdr);color:var(--tx2);min-width:42px;padding:0 10px;cursor:pointer;font:600 .8rem 'Raleway',sans-serif;transition:.2s}
 .amt-u+.amt-u{border-left:none}
 .amt-u:hover{color:var(--gold)}
@@ -779,7 +780,7 @@ let adminLang = localStorage.getItem('cm_admin_lang') || 'cs';
 
 const TA = {
   cs:{
-    adm_ph_same_cs:'Nepovinné — jinak jako česky',
+    adm_ph_same_cs:'Nepovinné — jinak jako česky', adm_auto_tr:'Automatický překlad — zkontrolujte a případně opravte',
     adm_panel:'Admin Panel', adm_login:'Přihlásit se', adm_refresh:'↻ Obnovit', adm_logout:'Odhlásit',
     adm_orders:'Objednávky', adm_menu:'Menu',
     adm_stat_new:'Nové', adm_stat_today:'Dnes', adm_stat_total:'Celkem',
@@ -847,7 +848,7 @@ const TA = {
     adm_weight_lbl:'Hmotnost (g / kg)', adm_amount_lbl:'Hmotnost / velikosti', adm_amount_hint_w:'Jedna hmotnost: jen ji zadejte (⚖ 500 g). Více variant s vlastní cenou: zadejte cenu a klikněte „+ Přidat“ (500 g · 750 Kč, 1 kg · 1500 Kč).', adm_amount_hint_ks:'Prodej na kusy: na kartě +/−, minimálně {n} ks.', adm_sizes_lbl:'Velikosti / hmotnost', adm_sizes_hint:'(nepovinné — např. 500 g, 1 kg, M 23cm; pokud jsou nastaveny, pole Cena se ignoruje)',
   },
   en:{
-    adm_ph_same_cs:'Optional — otherwise same as Czech',
+    adm_ph_same_cs:'Optional — otherwise same as Czech', adm_auto_tr:'Automatic translation — please check and correct if needed',
     adm_panel:'Admin Panel', adm_login:'Login', adm_refresh:'↻ Refresh', adm_logout:'Logout',
     adm_orders:'Orders', adm_menu:'Menu',
     adm_stat_new:'New', adm_stat_today:'Today', adm_stat_total:'Total',
@@ -913,7 +914,7 @@ const TA = {
     adm_weight_lbl:'Weight (g / kg)', adm_amount_lbl:'Weight / sizes', adm_amount_hint_w:'One weight: just enter it (⚖ 500 g). Several variants with their own price: enter the price and click “+ Add” (500 g · 750 Kč, 1 kg · 1500 Kč).', adm_amount_hint_ks:'Sold by the piece: +/− on the card, at least {n} pcs.', adm_sizes_lbl:'Sizes / weight', adm_sizes_hint:'(optional — e.g. 500 g, 1 kg, M 23cm; if set, the Price field is ignored)',
   },
   uk:{
-    adm_ph_same_cs:'Необов’язково — інакше як чеською',
+    adm_ph_same_cs:'Необов’язково — інакше як чеською', adm_auto_tr:'Автоматичний переклад — перевірте й за потреби виправте',
     adm_panel:'Адмін-панель', adm_login:'Увійти', adm_refresh:'↻ Оновити', adm_logout:'Вийти',
     adm_orders:'Замовлення', adm_menu:'Меню',
     adm_stat_new:'Нові', adm_stat_today:'Сьогодні', adm_stat_total:'Усього',
@@ -1319,7 +1320,7 @@ async function renderOrders(){
 
 /* ── Menu helpers ── */
 function itemPrice(item){
-  if(item.price) return item.price;
+  if(item.price) return /^\s*\d+\s*$/.test(item.price) ? item.price.trim()+' Kč' : item.price;
   if(item.sizes && item.sizes.length){
     const prices = item.sizes.map(s=>s.price);
     if(prices.length===1) return prices[0]+' Kč';
@@ -2003,6 +2004,7 @@ function startEditStatic(idx){
   document.getElementById('fDescUk').value = _ownText(item.desc, 'uk');
   document.getElementById('fDescEn').value = _ownText(item.desc, 'en');
   _setAmountFields(item);
+  _clearAutoTr();
   if(item.img){ _loadImgForEdit(item.img); } else { resetImg(); }
   document.getElementById('formTitle').textContent = t('adm_edit_title');
   document.getElementById('addItemBtn').textContent = t('adm_save_btn');
@@ -2030,6 +2032,7 @@ function duplicateStatic(idx){
   document.getElementById('fDescUk').value = _ownText(item.desc, 'uk');
   document.getElementById('fDescEn').value = _ownText(item.desc, 'en');
   _setAmountFields(item);
+  _clearAutoTr();
   if(item.img){ _loadImgForEdit(item.img); } else { resetImg(); }
   document.getElementById('formTitle').textContent = t('adm_add_title');
   document.getElementById('addItemBtn').textContent = t('adm_save_btn');
@@ -2055,6 +2058,7 @@ function startEdit(item){
   document.getElementById('fDescUk').value     = _ownText(item.desc, 'uk');
   document.getElementById('fDescEn').value     = _ownText(item.desc, 'en');
   _setAmountFields(item);
+  _clearAutoTr();
   const _imgSrc = item.img || STATIC_ITEMS.find(si=>
     si.name?.cs===item.name?.cs || si.name?.uk===item.name?.uk || si.name?.en===item.name?.en
   )?.img || '';
@@ -2123,6 +2127,34 @@ function _ownText(obj, lang){
   const v = (obj && obj[lang]) || '';
   return v && v !== (obj.cs || '') ? v : '';
 }
+
+/* ── Draft translation: when the Czech name/description changes, fill the EMPTY
+   UA/EN fields (or ones we filled ourselves) and mark them "check me". ── */
+function _autoTranslate(srcId, ukId, enId){
+  const src = document.getElementById(srcId);
+  const targets = [document.getElementById(ukId), document.getElementById(enId)];
+  targets.forEach(el => el.addEventListener('input', ()=>{ delete el.dataset.auto; el.classList.remove('auto-tr'); el.title = ''; }));
+  src.addEventListener('change', async ()=>{
+    const text = src.value.trim();
+    const free = targets.filter(el => !el.value.trim() || el.dataset.auto);
+    if(!text || !free.length) return;
+    try{
+      const r = await fetch('/api/translate', {method:'POST', headers:{'Content-Type':'application/json'},
+        body: JSON.stringify({token: sessionStorage.getItem('cm_token')||'', text})});
+      if(!r.ok) return;
+      const j = await r.json();
+      [[targets[0], j.uk], [targets[1], j.en]].forEach(([el, val])=>{
+        if(!val || !free.includes(el) || src.value.trim() !== text) return;
+        el.value = val; el.dataset.auto = '1'; el.classList.add('auto-tr'); el.title = t('adm_auto_tr');
+      });
+    }catch{}
+  });
+}
+function _clearAutoTr(){
+  document.querySelectorAll('.auto-tr').forEach(el=>{ delete el.dataset.auto; el.classList.remove('auto-tr'); el.title=''; });
+}
+_autoTranslate('fNameCs', 'fNameUk', 'fNameEn');
+_autoTranslate('fDescCs', 'fDescUk', 'fDescEn');
 
 /* ── Sizes ── */
 let formSizes = [];
@@ -2196,6 +2228,7 @@ function cancelEdit(){
   ['fNameCs','fNameUk','fNameEn','fPrice','fBadge','fDescCs','fDescUk','fDescEn']
     .forEach(id=>{ const el=document.getElementById(id); if(el) el.value=''; });
   _setAmountFields({});
+  _clearAutoTr();
   formSizes = []; renderSizesList();
   resetImg(); updateCardPreview();
 }
