@@ -243,6 +243,11 @@ footer{background:#070707;border-top:1px solid var(--bdr);padding:52px 0 28px}
   <p><span data-k="open">Otevřeno</span>: <span data-k="days">Po — Ne</span> · 09:00 — 20:00</p>
 </div>
 
+<!-- REVIEWS (filled by reviews.js) -->
+<section id="reviews">
+  <div class="wrap" data-reviews="full"></div>
+</section>
+
 <!-- FOOTER -->
 <footer>
   <div class="wrap">
@@ -325,6 +330,7 @@ function applyLang(){
       const val=t(el.dataset.k); if(val) el.textContent=val;
     });
   },100);
+  if(window.CakeReviews) CakeReviews.refresh();
 }
 
 function initLangBtns(){
@@ -374,5 +380,6 @@ initLangBtns();
 applyLang();
 initFI();
 </script>
+<script src="reviews.js"></script>
 </body>
 </html>

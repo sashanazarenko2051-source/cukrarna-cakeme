@@ -94,6 +94,12 @@ def _init_tables():
             CREATE TABLE IF NOT EXISTS settings (
                 key VARCHAR(100) PRIMARY KEY, value TEXT NOT NULL DEFAULT ''
             )""")
+        conn.execute("""
+            CREATE TABLE IF NOT EXISTS reviews (
+                id BIGINT PRIMARY KEY, ts TEXT, name TEXT, stars INT, body TEXT,
+                item TEXT DEFAULT '', photo TEXT DEFAULT '', status TEXT DEFAULT 'new',
+                verified BOOLEAN DEFAULT FALSE, reply TEXT DEFAULT ''
+            )""")
         if not os.environ.get('SECRET_KEY'):
             conn.execute("INSERT INTO settings(key,value) VALUES('secret_key',%s) ON CONFLICT(key) DO NOTHING",
                          (secrets.token_hex(32),))
@@ -126,7 +132,7 @@ async def _sec(req: Request, call_next):
         'X-XSS-Protection':       '1; mode=block',
         'Referrer-Policy':        'strict-origin-when-cross-origin',
     })
-    if req.url.path.startswith('/api/menu-img/'):
+    if req.url.path.startswith(('/api/menu-img/', '/api/review-img/')):
         pass  # set by the endpoint: long-lived, the URL changes when the photo does
     elif req.url.path.startswith('/api/'):
         resp.headers['Cache-Control'] = 'no-store'
@@ -584,10 +590,20 @@ def _send_telegram(order: dict):
             lines.append(f"Adresa: {order['address']}")
         if order.get('payment'):
             lines.append(f"Platba: {order['payment']}")
-        text = '\n'.join(lines)[:4000]  # Telegram rejects messages over 4096 chars
+        text = '\n'.join(lines)
     except Exception as e:
         print(f'[TG] Error: {e}', file=sys.stderr)
         return
+    _tg_send(text, f'order: {name}')
+
+def _tg_send(text, label=''):
+    """Send a message to every chat in TELEGRAM_CHAT_ID."""
+    import sys, urllib.request, urllib.parse
+    token    = os.environ.get('TELEGRAM_TOKEN', '')
+    chat_ids = [c.strip() for c in os.environ.get('TELEGRAM_CHAT_ID', '').split(',') if c.strip()]
+    if not token or not chat_ids:
+        return
+    text = text[:4000]  # Telegram rejects messages over 4096 chars
     # One failing chat (bot blocked, wrong id) must not stop the others
     for chat_id in chat_ids:
         try:
@@ -597,7 +613,7 @@ def _send_telegram(order: dict):
                 data=body, method='POST'
             )
             urllib.request.urlopen(req, timeout=8)
-            print(f'[TG] Sent to {chat_id} for order: {name}', file=sys.stderr)
+            print(f'[TG] Sent to {chat_id} ({label})', file=sys.stderr)
         except Exception as e:
             print(f'[TG] Error for chat {chat_id}: {e}', file=sys.stderr)
 
@@ -810,6 +826,119 @@ def _price_cart(conn, cart):
 
 def _priced_order_text(lines, total):
     return ', '.join(lines) + f' | Celkem: {total} Kč'
+
+# ── Reviews ───────────────────────────────────────────────────────────────────
+# Customers leave stars (1–5), text and an optional photo. New reviews wait for the
+# admin to publish them; stars and text can't be edited by anyone, and the rating is
+# the plain average of all published reviews. A review is marked "verified" when the
+# phone given (never shown or stored) matches an existing order.
+_REVIEW_COLS = 'id, ts, name, stars, body, item, photo, status, verified, reply'
+_review_log: dict = defaultdict(list)
+_PHOTO_RE = re.compile(r'^data:image/(jpeg|png|webp);base64,[A-Za-z0-9+/=]+$')
+
+def _digits(phone):
+    return re.sub(r'\D', '', str(phone or ''))[-9:]
+
+def _review_row(r, admin=False, token=''):
+    rid, ts, name, stars, body, item, photo, status, verified, reply = r
+    out = {'id': rid, 'ts': ts, 'name': name, 'stars': stars, 'text': body, 'item': item or '',
+           'verified': bool(verified), 'reply': reply or '', 'status': status}
+    if photo:
+        v = hashlib.sha1(photo.encode()).hexdigest()[:10]
+        out['photo'] = f'/api/review-img/{rid}?v={v}' + (f'&token={token}' if admin else '')
+    return out
+
+def _review_summary(rows):
+    stars = [r[3] for r in rows]
+    dist = {str(n): stars.count(n) for n in range(1, 6)}
+    return {'count': len(stars), 'avg': round(sum(stars) / len(stars), 1) if stars else 0, 'dist': dist}
+
+@app.get('/api/reviews')
+def api_reviews_get():
+    with _get_pool().connection() as conn:
+        rows = conn.execute(f"SELECT {_REVIEW_COLS} FROM reviews WHERE status='published' ORDER BY id DESC").fetchall()
+    return {'summary': _review_summary(rows), 'reviews': [_review_row(r) for r in rows[:200]]}
+
+@app.post('/api/reviews')
+async def api_reviews_add(req: Request, bg: BackgroundTasks):
+    d = await req.json()
+    if d.get('website'):  # hidden field only bots fill in
+        return {'ok': True}
+    ip, now = _get_ip(req), time.time()
+    recent = [t for t in _review_log.get(ip, []) if now - t < 3600]
+    if len(recent) >= 3:
+        raise HTTPException(429, 'Too many reviews, try later')
+    stars = _lead_int(d.get('stars'))
+    name = str(d.get('name') or '').strip()[:60]
+    body = str(d.get('text') or '').strip()[:1500]
+    if not stars or not 1 <= stars <= 5 or not name or len(body) < 3:
+        raise HTTPException(400, 'stars, name and text are required')
+    photo = str(d.get('photo') or '')
+    if photo and (len(photo) > 2_000_000 or not _PHOTO_RE.match(photo)):
+        raise HTTPException(400, 'Invalid photo')
+    item = str(d.get('item') or '').strip()[:120]
+    rid = int(now * 1000)
+    with _get_pool().connection() as conn:
+        phone = _digits(d.get('phone'))
+        verified = False
+        if len(phone) >= 9:
+            phones = conn.execute("SELECT phone FROM orders WHERE phone <> ''").fetchall()
+            verified = any(_digits(p[0]) == phone for p in phones)
+        conn.execute(
+            'INSERT INTO reviews (id, ts, name, stars, body, item, photo, status, verified, reply)'
+            " VALUES (%s,%s,%s,%s,%s,%s,%s,'new',%s,'')",
+            (rid, time.strftime('%Y-%m-%dT%H:%M:%SZ', time.gmtime()), name, stars, body, item, photo, verified))
+    recent.append(now)
+    _review_log[ip] = recent
+    bg.add_task(_tg_send, f"⭐ Nová recenze ({'★' * stars}{'☆' * (5 - stars)})\n{name}"
+                          f"{' · ověřený zákazník' if verified else ''}\n{body[:500]}\n\nZveřejnit: /admin.html", 'review')
+    return {'ok': True}
+
+@app.get('/api/review-img/{review_id}')
+def api_review_img(review_id: int, token: str = ''):
+    with _get_pool().connection() as conn:
+        row = conn.execute('SELECT photo, status FROM reviews WHERE id=%s', (review_id,)).fetchone()
+    # Photos of unpublished reviews are visible only in the admin panel
+    if not row or not row[0] or (row[1] != 'published' and not _verify_token(token)):
+        raise HTTPException(404)
+    m = re.match(r'^data:(image/[\w.+-]+);base64,(.*)$', row[0], re.S)
+    if not m:
+        raise HTTPException(404)
+    return Response(base64.b64decode(m.group(2)), media_type=m.group(1),
+                    headers={'Cache-Control': 'public, max-age=31536000, immutable' if row[1] == 'published' else 'no-store'})
+
+@app.post('/api/reviews/admin')
+async def api_reviews_admin(req: Request):
+    d = await req.json()
+    tok = d.get('token')
+    if not _verify_token(tok):
+        raise HTTPException(401, 'Unauthorized')
+    with _get_pool().connection() as conn:
+        rows = conn.execute(f'SELECT {_REVIEW_COLS} FROM reviews ORDER BY id DESC').fetchall()
+    published = [r for r in rows if r[7] == 'published']
+    return {'summary': _review_summary(published), 'reviews': [_review_row(r, True, tok) for r in rows]}
+
+@app.patch('/api/reviews/{review_id}')
+async def api_reviews_patch(review_id: int, req: Request):
+    """Publish / hide a review and set the shop's reply. Stars and text stay as written."""
+    d = await req.json()
+    if not _verify_token(d.get('token')):
+        raise HTTPException(401, 'Unauthorized')
+    with _get_pool().connection() as conn:
+        if d.get('status') in ('new', 'published', 'hidden'):
+            conn.execute('UPDATE reviews SET status=%s WHERE id=%s', (d['status'], review_id))
+        if 'reply' in d:
+            conn.execute('UPDATE reviews SET reply=%s WHERE id=%s', (str(d['reply'] or '').strip()[:1000], review_id))
+    return {'ok': True}
+
+@app.delete('/api/reviews/{review_id}')
+async def api_reviews_del(review_id: int, req: Request):
+    d = await req.json()
+    if not _verify_token(d.get('token')):
+        raise HTTPException(401, 'Unauthorized')
+    with _get_pool().connection() as conn:
+        conn.execute('DELETE FROM reviews WHERE id=%s', (review_id,))
+    return {'ok': True}
 
 # ── Delivery/pickup slots ─────────────────────────────────────────────────────
 # Customers pick a day within the next `days_ahead` days (2 months) and a time

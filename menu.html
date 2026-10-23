@@ -292,6 +292,8 @@ footer{background:#070707;border-top:1px solid var(--bdr);padding:52px 0 28px}
       <h2 class="sec-ttl" data-k="menu_ttl">Menu</h2>
       <div class="sec-div"></div>
     </div>
+    <!-- "★ 4,9 · 12 reviews" line, links to the reviews on the home page (reviews.js) -->
+    <div data-reviews="summary" style="text-align:center;margin:-36px 0 34px"></div>
     <div class="feat-wrap" id="featWrap" style="display:none">
       <div class="pop-hd"><span class="pop-ttl" data-k="feat_ttl">Doporučujeme</span></div>
       <div class="m-grid" id="featGrid"></div>
@@ -621,6 +623,7 @@ function applyLang(){
   renderPopular();
   updateCartUI();
   applyTabLabels();
+  if(window.CakeReviews) CakeReviews.refresh();
   setTimeout(()=>{
     document.querySelectorAll('[data-k]').forEach(el=>{
       const val=t(el.dataset.k); if(val) el.textContent=val;
@@ -1002,5 +1005,6 @@ async function loadCustomMenu(){
   initFI();
 })();
 </script>
+<script src="reviews.js"></script>
 </body>
 </html>

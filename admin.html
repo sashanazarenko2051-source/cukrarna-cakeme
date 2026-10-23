@@ -243,6 +243,27 @@ body{font-family:'Raleway',sans-serif;background:var(--bg0);color:var(--tx0)}
 .ci-btns{display:flex;gap:3px;flex-shrink:0;align-items:center}
 /* ── ANALYTICS ── */
 .analytics-wrap{padding:28px;max-width:960px;margin:0 auto}
+/* ── Reviews ── */
+.rv-adm-sum{font-family:'Raleway',sans-serif;font-size:.8rem;color:var(--gold);margin-left:8px}
+.rv-adm{border:1px solid var(--bdr);background:var(--bg3);padding:16px;margin-bottom:12px;display:grid;grid-template-columns:minmax(0,1fr) auto;gap:14px}
+.rv-adm-head{display:flex;flex-wrap:wrap;gap:8px 14px;align-items:center;font-size:.8rem;color:var(--tx2)}
+.rv-adm-head b{color:var(--tx0);font-size:.9rem}
+.rv-adm-stars{color:var(--gold);letter-spacing:2px}.rv-adm-stars span{color:#3a3a3a}
+.rv-adm-ver{font-size:.6rem;letter-spacing:1px;text-transform:uppercase;color:#8fcc8f;border:1px solid #3d5a3d;padding:2px 6px}
+.rv-adm-st{font-size:.6rem;letter-spacing:1px;text-transform:uppercase;padding:2px 6px;border:1px solid var(--bdr)}
+.rv-adm-st.new{color:var(--gold);border-color:var(--gold-d)}.rv-adm-st.published{color:#8fcc8f;border-color:#3d5a3d}.rv-adm-st.hidden{color:var(--tx2)}
+.rv-adm-text{color:var(--tx1);font-size:.85rem;line-height:1.6;margin:8px 0;white-space:pre-line;overflow-wrap:anywhere}
+.rv-adm-item{font-size:.72rem;color:var(--gold)}
+.rv-adm img{max-width:180px;max-height:180px;object-fit:cover;border:1px solid var(--bdr);cursor:zoom-in}
+.rv-adm-btns{display:flex;flex-direction:column;gap:6px;min-width:130px}
+.rv-adm-btns button{background:transparent;border:1px solid var(--bdr);color:var(--tx1);padding:7px 10px;cursor:pointer;font:.7rem 'Raleway',sans-serif;letter-spacing:.5px;transition:.2s}
+.rv-adm-btns .pub{border-color:#3d5a3d;color:#8fcc8f}.rv-adm-btns .pub:hover{background:rgba(110,170,110,.12)}
+.rv-adm-btns .del:hover{border-color:#e08080;color:#e08080}
+.rv-adm-btns button:hover{border-color:var(--gold);color:var(--gold)}
+.rv-adm-reply{grid-column:1/-1;display:flex;gap:8px}
+.rv-adm-reply textarea{flex:1;min-width:0;background:var(--bg2);border:1px solid var(--bdr);color:var(--tx0);padding:8px 10px;font:.8rem 'Raleway',sans-serif;min-height:42px;resize:vertical;outline:none}
+.rv-adm-reply textarea:focus{border-color:var(--gold)}
+@media(max-width:680px){ .rv-adm{grid-template-columns:1fr} .rv-adm-btns{flex-direction:row;flex-wrap:wrap} .rv-adm-reply{flex-direction:column} }
 /* ── Schedule ── */
 .sched-wrap{padding:28px;max-width:960px;margin:0 auto;display:grid;gap:28px}
 .sch-check{display:flex;align-items:center;gap:10px;font-size:.85rem;color:var(--tx0);margin-bottom:20px;cursor:pointer}
@@ -490,6 +511,7 @@ body{font-family:'Raleway',sans-serif;background:var(--bg0);color:var(--tx0)}
     <button class="amn" data-sec="menu"><span class="amn-ic">🎂</span> <span data-k="adm_menu">Menu</span></button>
     <button class="amn" data-sec="analytics"><span class="amn-ic">📊</span> <span data-k="adm_analytics">Analytika</span></button>
     <button class="amn" data-sec="schedule"><span class="amn-ic">📅</span> <span data-k="adm_schedule">Rozvrh</span></button>
+    <button class="amn" data-sec="reviews"><span class="amn-ic">⭐</span> <span data-k="adm_reviews">Recenze</span> <span class="f-cnt" id="rvNewCount" style="display:none"></span></button>
   </div>
 
   <!-- ── ORDERS ── -->
@@ -733,6 +755,23 @@ body{font-family:'Raleway',sans-serif;background:var(--bg0);color:var(--tx0)}
     </div>
   </div>
 
+  <!-- ── REVIEWS: publish / hide / reply; stars and text stay as the customer wrote them ── -->
+  <div id="secReviews" style="display:none">
+    <div class="sched-wrap">
+      <div class="menu-panel">
+        <h3><span data-k="adm_rv_title">Recenze zákazníků</span> <span class="rv-adm-sum" id="rvSummary"></span></h3>
+        <p class="lay-hint" data-k="adm_rv_hint">Skrývejte jen spam a urážky. Skrývání poctivých negativních recenzí klame zákazníky a v EU je zakázané. Hvězdičky ani text recenze upravit nelze — můžete odpovědět.</p>
+        <div class="ci-filters" id="rvFilters">
+          <button class="ci-flt on" data-rvf="new" data-k="adm_rv_f_new">Nové</button>
+          <button class="ci-flt" data-rvf="published" data-k="adm_rv_f_pub">Zveřejněné</button>
+          <button class="ci-flt" data-rvf="hidden" data-k="adm_rv_f_hidden">Skryté</button>
+          <button class="ci-flt" data-rvf="all" data-k="adm_filter_all">Vše</button>
+        </div>
+        <div id="rvList"></div>
+      </div>
+    </div>
+  </div>
+
   <!-- ── ANALYTICS ── -->
   <div id="secAnalytics" style="display:none">
     <div class="analytics-wrap">
@@ -918,6 +957,7 @@ const TA = {
     adm_drag_hint:'Pořadí položek: táhněte myší nebo použijte šipky ⤒ ▲ ▼. Stejné pořadí uvidí zákazníci.',
     adm_lay_saved:'✓ Uloženo', adm_lay_err:'Neuloženo — zkuste znovu',
     adm_tab_all:'Vše', adm_tab_fav:'Oblíbené', adm_tab_celeb:'Slavnostní dorty',
+    adm_reviews:'Recenze', adm_rv_title:'Recenze zákazníků', adm_rv_hint:'Skrývejte jen spam a urážky. Skrývání poctivých negativních recenzí klame zákazníky a v EU je zakázané. Hvězdičky ani text recenze upravit nelze — můžete odpovědět.', adm_rv_f_new:'Nové', adm_rv_f_pub:'Zveřejněné', adm_rv_f_hidden:'Skryté', adm_rv_empty:'Žádné recenze v tomto seznamu.', adm_rv_verified:'Ověřený zákazník', adm_rv_publish:'Zveřejnit', adm_rv_hide:'Skrýt', adm_rv_restore:'Vrátit mezi nové', adm_rv_reply_ph:'Odpověď cukrárny (zobrazí se pod recenzí)', adm_rv_reply_save:'Uložit odpověď', adm_rv_del_confirm:'Smazat recenzi natrvalo? (Jen pro spam.)',
     adm_schedule:'Rozvrh', adm_sch_title:'Termíny doručení a převzetí', adm_sch_enabled:'Zákazník vybírá den a čas z volných termínů', adm_sch_weekdays:'Pracovní dny', adm_sch_times:'Časové intervaly', adm_sch_per_slot:'Objednávek na interval', adm_sch_per_day:'Objednávek za den', adm_sch_ahead:'Dní dopředu', adm_sch_lead:'Nejdříve za (dní)', adm_sch_cal:'Obsazenost', adm_sch_cal_hint:'2 měsíce zpět a 2 měsíce dopředu. Klikněte na den: uvidíte objednávky a můžete den zavřít nebo otevřít.', adm_sch_l_free:'volno', adm_sch_l_mid:'částečně', adm_sch_l_full:'plno', adm_sch_l_closed:'zavřeno', adm_sch_orders:'objednávek: {n}', adm_sch_no_orders:'Na tento den nejsou žádné objednávky.', adm_sch_off_day:'Tento den v týdnu je nepracovní (nastavení výše).', adm_sch_open:'Otevřít den', adm_sch_close:'Zavřít den',
     adm_ph_name:'Název česky', adm_ph_desc:'Krátký popis česky', adm_ph_section:'Název sekce (např. Sezónní)', adm_ph_size:'Název velikosti', adm_prev_name:'Název položky', adm_prev_desc:'Popis…', adm_tt_pieces:'Prodej na kusy (+/−)', adm_tt_rot_l:'Otočit doleva', adm_tt_rot_r:'Otočit doprava', adm_tt_push_test:'Otestovat notifikaci', adm_tt_push_on:'Zapnout notifikace o nových objednávkách', adm_tt_push_denied:'Notifikace zablokovány v prohlížeči — povolte v nastavení prohlížeče', adm_tt_push_both:'Notifikace zapnuty (Push + kontrola) — klikněte pro vypnutí push', adm_tt_push_polling:'Notifikace zapnuty (kontrola) — klikněte pro zapnutí push', adm_err_prefix:'Chyba: ', adm_push_ok_title:'Notifikace zapnuty! 🔔', adm_push_ok_body:'Budete dostávat upozornění o nových objednávkách.', adm_push_err:'Chyba při zapínání notifikací: ', adm_push_blocked:'Notifikace jsou zablokovány v prohlížeči. Povolte je v nastavení prohlížeče a obnovte stránku.',
     adm_feat_title:'Doporučujeme — úplně nahoře v menu',
@@ -985,6 +1025,7 @@ const TA = {
     adm_drag_hint:'Item order: drag with the mouse or use the arrows ⤒ ▲ ▼. Customers see the same order.',
     adm_lay_saved:'✓ Saved', adm_lay_err:'Not saved — try again',
     adm_tab_all:'All', adm_tab_fav:'Favorites', adm_tab_celeb:'Celebration cakes',
+    adm_reviews:'Reviews', adm_rv_title:'Customer reviews', adm_rv_hint:'Hide only spam and insults. Hiding honest negative reviews misleads customers and is forbidden in the EU. Stars and text can’t be edited — you can reply.', adm_rv_f_new:'New', adm_rv_f_pub:'Published', adm_rv_f_hidden:'Hidden', adm_rv_empty:'No reviews in this list.', adm_rv_verified:'Verified customer', adm_rv_publish:'Publish', adm_rv_hide:'Hide', adm_rv_restore:'Back to new', adm_rv_reply_ph:'Reply from the shop (shown under the review)', adm_rv_reply_save:'Save reply', adm_rv_del_confirm:'Delete this review permanently? (Spam only.)',
     adm_schedule:'Schedule', adm_sch_title:'Delivery and pickup times', adm_sch_enabled:'Customers choose a day and time from free slots', adm_sch_weekdays:'Working days', adm_sch_times:'Time intervals', adm_sch_per_slot:'Orders per interval', adm_sch_per_day:'Orders per day', adm_sch_ahead:'Days ahead', adm_sch_lead:'Earliest in (days)', adm_sch_cal:'Occupancy', adm_sch_cal_hint:'2 months back and 2 months ahead. Click a day to see its orders and to close or open it.', adm_sch_l_free:'free', adm_sch_l_mid:'partly booked', adm_sch_l_full:'full', adm_sch_l_closed:'closed', adm_sch_orders:'orders: {n}', adm_sch_no_orders:'No orders for this day.', adm_sch_off_day:'This weekday is a day off (settings above).', adm_sch_open:'Open day', adm_sch_close:'Close day',
     adm_ph_name:'Name in Czech', adm_ph_desc:'Short description in Czech', adm_ph_section:'Section name (e.g. Seasonal)', adm_ph_size:'Size name', adm_prev_name:'Item name', adm_prev_desc:'Description…', adm_tt_pieces:'Sold by the piece (+/−)', adm_tt_rot_l:'Rotate left', adm_tt_rot_r:'Rotate right', adm_tt_push_test:'Test notification', adm_tt_push_on:'Turn on new-order notifications', adm_tt_push_denied:'Notifications are blocked in the browser — allow them in browser settings', adm_tt_push_both:'Notifications on (push + polling) — click to turn push off', adm_tt_push_polling:'Notifications on (polling) — click to turn push on', adm_err_prefix:'Error: ', adm_push_ok_title:'Notifications on! 🔔', adm_push_ok_body:'You will be notified about new orders.', adm_push_err:'Could not turn on notifications: ', adm_push_blocked:'Notifications are blocked in the browser. Allow them in browser settings and reload the page.',
     adm_feat_title:'We recommend — at the very top of the menu',
@@ -1054,6 +1095,7 @@ const TA = {
     adm_drag_hint:'Порядок позицій: перетягуйте мишкою або натискайте стрілки ⤒ ▲ ▼. Клієнти бачать такий самий порядок.',
     adm_lay_saved:'✓ Збережено', adm_lay_err:'Не збережено — спробуйте ще раз',
     adm_tab_all:'Усі', adm_tab_fav:'Улюблені', adm_tab_celeb:'Святкові торти',
+    adm_reviews:'Відгуки', adm_rv_title:'Відгуки клієнтів', adm_rv_hint:'Ховайте лише спам і образи. Приховування чесних негативних відгуків вводить клієнтів в оману і в ЄС заборонене. Зірки й текст відгуку змінити не можна — можна відповісти.', adm_rv_f_new:'Нові', adm_rv_f_pub:'Опубліковані', adm_rv_f_hidden:'Приховані', adm_rv_empty:'У цьому списку відгуків немає.', adm_rv_verified:'Перевірений покупець', adm_rv_publish:'Опублікувати', adm_rv_hide:'Сховати', adm_rv_restore:'Повернути в нові', adm_rv_reply_ph:'Відповідь кондитерської (показується під відгуком)', adm_rv_reply_save:'Зберегти відповідь', adm_rv_del_confirm:'Видалити відгук назавжди? (Лише для спаму.)',
     adm_schedule:'Розклад', adm_sch_title:'Дати й час доставки та отримання', adm_sch_enabled:'Клієнт обирає день і час із вільних слотів', adm_sch_weekdays:'Робочі дні', adm_sch_times:'Часові інтервали', adm_sch_per_slot:'Замовлень на інтервал', adm_sch_per_day:'Замовлень на день', adm_sch_ahead:'Днів наперед', adm_sch_lead:'Найраніше через (днів)', adm_sch_cal:'Зайнятість', adm_sch_cal_hint:'2 місяці назад і 2 місяці вперед. Натисніть на день: побачите замовлення й зможете закрити або відкрити день.', adm_sch_l_free:'вільно', adm_sch_l_mid:'частково', adm_sch_l_full:'зайнято', adm_sch_l_closed:'зачинено', adm_sch_orders:'замовлень: {n}', adm_sch_no_orders:'На цей день замовлень немає.', adm_sch_off_day:'Цей день тижня вихідний (налаштування вище).', adm_sch_open:'Відкрити день', adm_sch_close:'Закрити день',
     adm_ph_name:'Назва чеською', adm_ph_desc:'Короткий опис чеською', adm_ph_section:'Назва розділу (напр. Сезонне)', adm_ph_size:'Назва розміру', adm_prev_name:'Назва позиції', adm_prev_desc:'Опис…', adm_tt_pieces:'Продаж поштучно (+/−)', adm_tt_rot_l:'Повернути ліворуч', adm_tt_rot_r:'Повернути праворуч', adm_tt_push_test:'Перевірити сповіщення', adm_tt_push_on:'Увімкнути сповіщення про нові замовлення', adm_tt_push_denied:'Сповіщення заблоковані в браузері — дозвольте їх у налаштуваннях браузера', adm_tt_push_both:'Сповіщення увімкнені (push + перевірка) — натисніть, щоб вимкнути push', adm_tt_push_polling:'Сповіщення увімкнені (перевірка) — натисніть, щоб увімкнути push', adm_err_prefix:'Помилка: ', adm_push_ok_title:'Сповіщення увімкнено! 🔔', adm_push_ok_body:'Ви отримуватимете сповіщення про нові замовлення.', adm_push_err:'Не вдалося увімкнути сповіщення: ', adm_push_blocked:'Сповіщення заблоковані в браузері. Дозвольте їх у налаштуваннях браузера й оновіть сторінку.',
     adm_feat_title:'Рекомендуємо — на самому верху меню',
@@ -1094,6 +1136,7 @@ function applyAdminLang(){
   if(activeSection === 'menu' && cachedMenuItems !== null) renderMenuItems(cachedMenuItems);
   if(activeSection === 'analytics') renderAnalytics();
   if(activeSection === 'schedule' && schCfg) renderSchedule();
+  if(activeSection === 'reviews' && rvData) renderReviews();
 }
 
 document.querySelectorAll('.adm-lang').forEach(btn => {
@@ -1146,6 +1189,7 @@ function showPanel(){
   renderOrders();
   _initPush();
   loadNtfyCard();
+  loadReviews();  // number of new reviews on the tab button
 }
 
 document.getElementById('logoutBtn').addEventListener('click', ()=>{
@@ -1160,6 +1204,7 @@ document.getElementById('logoutBtn').addEventListener('click', ()=>{
 document.getElementById('refreshBtn').addEventListener('click', ()=>{
   if(activeSection==='orders') renderOrders();
   else if(activeSection==='schedule') loadSchedule();
+  else if(activeSection==='reviews') loadReviews();
   else loadMenuItems();
 });
 
@@ -1250,7 +1295,9 @@ document.querySelectorAll('.amn').forEach(btn => btn.addEventListener('click', (
   document.getElementById('secMenu').style.display      = activeSection==='menu'      ? '' : 'none';
   document.getElementById('secAnalytics').style.display = activeSection==='analytics' ? '' : 'none';
   document.getElementById('secSchedule').style.display  = activeSection==='schedule'  ? '' : 'none';
+  document.getElementById('secReviews').style.display   = activeSection==='reviews'   ? '' : 'none';
   if(activeSection==='schedule') loadSchedule();
+  if(activeSection==='reviews') loadReviews();
   if(activeSection==='menu'){ Promise.all([loadCategories(), loadStaticFavs(), loadHiddenStatics(), loadMenuLayout()]).then(()=>loadMenuItems()); }
   if(activeSection==='analytics') renderAnalytics();
 }));
@@ -2913,6 +2960,79 @@ async function saveSchedule(){
   renderSchedule();
 }
 document.getElementById('schSave').addEventListener('click', saveSchedule);
+
+/* ── Reviews ── */
+var rvData = null;   // var: applyAdminLang may check it before this line runs
+let rvFilter = 'new';
+
+async function loadReviews(){
+  try{
+    const r = await fetch('/api/reviews/admin', {method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({token: sessionStorage.getItem('cm_token')||''})});
+    if(r.status===401){ handleExpired(); return; }
+    if(r.ok) rvData = await r.json();
+  }catch{}
+  if(rvData) renderReviews();
+}
+
+function _rvStars(n){ return `<span class="rv-adm-stars">${'★'.repeat(n)}<span>${'★'.repeat(5-n)}</span></span>`; }
+
+function renderReviews(){
+  const all = rvData.reviews || [], s = rvData.summary || {};
+  const newCount = all.filter(r=>r.status==='new').length;
+  const badge = document.getElementById('rvNewCount');
+  badge.textContent = newCount; badge.style.display = newCount ? '' : 'none';
+  document.getElementById('rvSummary').textContent = s.count ? `★ ${s.avg} · ${s.count}` : '';
+  const list = rvFilter==='all' ? all : all.filter(r=>r.status===rvFilter);
+  const el = document.getElementById('rvList');
+  if(!list.length){ el.innerHTML = `<p class="lay-empty">${t('adm_rv_empty')}</p>`; return; }
+  el.innerHTML = list.map(r=>{
+    const date = new Date(r.ts).toLocaleString(SCH_LOCALE[adminLang]||'cs-CZ', {day:'numeric', month:'short', year:'numeric', hour:'2-digit', minute:'2-digit'});
+    const st = {new:t('adm_rv_f_new'), published:t('adm_rv_f_pub'), hidden:t('adm_rv_f_hidden')}[r.status] || r.status;
+    return `<div class="rv-adm">
+      <div>
+        <div class="rv-adm-head">${_rvStars(r.stars)}<b>${esc(r.name)}</b>${r.verified?`<span class="rv-adm-ver">✓ ${t('adm_rv_verified')}</span>`:''}<span>${esc(date)}</span><span class="rv-adm-st ${r.status}">${esc(st)}</span></div>
+        ${r.item?`<div class="rv-adm-item">${esc(r.item)}</div>`:''}
+        <div class="rv-adm-text">${esc(r.text)}</div>
+        ${r.photo?`<img src="${esc(r.photo)}" alt="" onclick="window.open(this.src,'_blank')">`:''}
+      </div>
+      <div class="rv-adm-btns">
+        ${r.status!=='published'?`<button class="pub" onclick="rvSet(${r.id},'published')">✓ ${t('adm_rv_publish')}</button>`:''}
+        ${r.status==='published'?`<button onclick="rvSet(${r.id},'hidden')">${t('adm_rv_hide')}</button>`:''}
+        ${r.status==='hidden'?`<button onclick="rvSet(${r.id},'new')">↺ ${t('adm_rv_restore')}</button>`:''}
+        <button class="del" onclick="rvDelete(${r.id})">✕ ${t('adm_btn_delete').replace('✕','').trim()}</button>
+      </div>
+      <div class="rv-adm-reply">
+        <textarea id="rvReply${r.id}" maxlength="1000" placeholder="${esc(t('adm_rv_reply_ph'))}">${esc(r.reply)}</textarea>
+        <button class="cat-add-btn" onclick="rvReply(${r.id})">${t('adm_rv_reply_save')}</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+async function _rvPatch(id, body){
+  try{
+    const r = await fetch('/api/reviews/'+id, {method:'PATCH', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({token: sessionStorage.getItem('cm_token')||'', ...body})});
+    if(r.status===401){ handleExpired(); return; }
+  }catch{}
+  loadReviews();
+}
+function rvSet(id, status){ _rvPatch(id, {status}); }
+function rvReply(id){ _rvPatch(id, {reply: document.getElementById('rvReply'+id).value}); }
+async function rvDelete(id){
+  if(!confirm(t('adm_rv_del_confirm'))) return;
+  try{
+    await fetch('/api/reviews/'+id, {method:'DELETE', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({token: sessionStorage.getItem('cm_token')||''})});
+  }catch{}
+  loadReviews();
+}
+document.querySelectorAll('#rvFilters .ci-flt').forEach(b=>b.addEventListener('click', ()=>{
+  rvFilter = b.dataset.rvf;
+  document.querySelectorAll('#rvFilters .ci-flt').forEach(x=>x.classList.toggle('on', x===b));
+  if(rvData) renderReviews();
+}));
 
 // Everything is defined now: fill the card preview and push button in the chosen language
 updateCardPreview();
