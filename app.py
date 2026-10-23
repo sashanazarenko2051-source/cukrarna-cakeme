@@ -86,6 +86,8 @@ def _init_tables():
             )""")
         conn.execute("ALTER TABLE orders ADD COLUMN IF NOT EXISTS delivery_date TEXT DEFAULT ''")
         conn.execute("ALTER TABLE orders ADD COLUMN IF NOT EXISTS delivery_time TEXT DEFAULT ''")
+        # Example picture uploaded with a custom cake from the builder (data: URI)
+        conn.execute("ALTER TABLE orders ADD COLUMN IF NOT EXISTS attachment TEXT DEFAULT ''")
         conn.execute("""
             CREATE TABLE IF NOT EXISTS menu_items (
                 id BIGINT PRIMARY KEY, data JSONB NOT NULL
@@ -218,8 +220,87 @@ def _resolve_img(conn, img):
 def api_menu_get(full: int = 0):
     with _get_pool().connection() as conn:
         rows = conn.execute('SELECT data FROM menu_items ORDER BY id ASC').fetchall()
+        items = [r[0] for r in rows]
+        left = _stock_left(conn, items)
     # full=1 keeps the photos inline (used by the admin JSON export / backup)
-    return [r[0] if full else _public_item(r[0]) for r in rows]
+    out = [i if full else _public_item(i) for i in items]
+    return [{**i, 'stock_left': left[i['id']]} if i['id'] in left else i for i in out]
+
+# ── Item rules: minimum notice, pickup window, limited quantity (pre-orders) ──
+# lead_days  — earliest pickup/delivery is today + lead_days (e.g. 14 for big cakes)
+# avail_from / avail_to — pickup only on these days (e.g. 20–23 December)
+# stock_total — how many can be sold; sold pieces are counted from orders placed
+#               since stock_since (reset whenever the admin changes stock_total)
+def _apply_rules(item, d):
+    if 'lead_days' in d:
+        v = _lead_int(d['lead_days'])
+        item['lead_days'] = max(0, min(120, v)) if v is not None else None
+    for f in ('avail_from', 'avail_to'):
+        if f in d:
+            v = str(d[f] or '').strip()
+            item[f] = v if _DATE_RE.match(v) else ''
+    if 'stock_total' in d:
+        v = _lead_int(d['stock_total'])
+        v = max(0, min(100000, v)) if v is not None else None
+        if v != item.get('stock_total') or not item.get('stock_since'):
+            item['stock_since'] = time.strftime('%Y-%m-%dT%H:%M:%SZ', time.gmtime())
+        item['stock_total'] = v
+
+def _stock_left(conn, items):
+    """{item id: pieces left} for items with a limited quantity."""
+    limited = [i for i in items if i.get('stock_total') is not None]
+    if not limited:
+        return {}
+    since = min(i.get('stock_since') or '' for i in limited)
+    rows = conn.execute('SELECT ord, ts, status FROM orders WHERE ts >= %s', (since,)).fetchall()
+    stale = time.strftime('%Y-%m-%dT%H:%M:%SZ', time.gmtime(time.time() - 1800))
+    left = {}
+    for it in limited:
+        name, sold = (it.get('name') or {}).get('cs', ''), 0
+        for ord_text, ts, status in rows:
+            if (ts or '') < (it.get('stock_since') or '') or (status == 'pending_payment' and (ts or '') < stale):
+                continue
+            for part in (ord_text or '').split('|')[0].split(','):
+                m = _ORDER_LINE_RE.match(part.strip())
+                if m and m.group(1).strip() == name:
+                    sold += int(m.group(2))
+        left[it['id']] = max(0, it['stock_total'] - sold)
+    return left
+
+def _check_item_rules(conn, cart, date):
+    """None if the cart can be ordered for this date, otherwise an error dict."""
+    if not isinstance(cart, list) or not cart:
+        return None
+    if any(isinstance(c, dict) and c.get('builder') is not None for c in cart):
+        earliest = (_today() + _dt.timedelta(days=_builder_cfg(conn)['lead_days'])).isoformat()
+        if not date or date < earliest:
+            return {'error': 'too_early', 'item': _BUILDER_NAME, 'earliest': earliest}
+    items = [r[0] for r in conn.execute('SELECT data FROM menu_items ORDER BY id ASC').fetchall()]
+    by_name = {}
+    for it in items:
+        if it.get('lead_days') or it.get('avail_from') or it.get('avail_to') or it.get('stock_total') is not None:
+            by_name.setdefault((it.get('name') or {}).get('cs', ''), it)
+    wanted = defaultdict(int)
+    for c in cart:
+        if isinstance(c, dict) and c.get('name') in by_name:
+            wanted[c['name']] += _lead_int(c.get('qty')) or 0
+    if not wanted:
+        return None
+    today = _today().isoformat()
+    for name in wanted:
+        it = by_name[name]
+        if it.get('lead_days'):
+            earliest = (_today() + _dt.timedelta(days=it['lead_days'])).isoformat()
+            if not date or date < earliest:
+                return {'error': 'too_early', 'item': name, 'earliest': earliest}
+        if (it.get('avail_from') and (not date or date < it['avail_from'])) or \
+           (it.get('avail_to') and (not date or date > it['avail_to'])):
+            return {'error': 'outside_window', 'item': name, 'from': it.get('avail_from', ''), 'to': it.get('avail_to', '')}
+    left = _stock_left(conn, list(by_name.values()))
+    sold_out = [n for n, q in wanted.items() if by_name[n]['id'] in left and q > left[by_name[n]['id']]]
+    if sold_out:
+        return {'error': 'sold_out', 'items': sold_out, 'left': {n: left[by_name[n]['id']] for n in sold_out}}
+    return None
 
 # ── /api/translate ────────────────────────────────────────────────────────────
 # Draft UA/EN translation of a Czech menu text for the admin form. The admin sees
@@ -289,6 +370,7 @@ async def api_menu_add(req: Request):
         'weight':   (d.get('weight') or '').strip()[:30],
         'static_src_idx': int(d['static_src_idx']) if d.get('static_src_idx') is not None else None,
     }
+    _apply_rules(item, d)
     with _get_pool().connection() as conn:
         item['img'] = _resolve_img(conn, d.get('img'))
         conn.execute('INSERT INTO menu_items (id, data) VALUES (%s, %s)',
@@ -322,6 +404,7 @@ async def api_menu_patch(item_id: int, req: Request):
             item['img_pos'] = (d['img_pos'] or '').strip()
         if 'weight' in d:
             item['weight'] = (d['weight'] or '').strip()[:30]
+        _apply_rules(item, d)
         if 'sizes' in d:
             raw = d['sizes'] if isinstance(d['sizes'], list) else []
             item['sizes'] = [s for s in raw if s.get('label') and s.get('price')]
@@ -590,6 +673,8 @@ def _send_telegram(order: dict):
             lines.append(f"Adresa: {order['address']}")
         if order.get('payment'):
             lines.append(f"Platba: {order['payment']}")
+        if order.get('attachment'):
+            lines.append('📎 Obrázek-předloha je v administraci (Objednávky)')
         text = '\n'.join(lines)
     except Exception as e:
         print(f'[TG] Error: {e}', file=sys.stderr)
@@ -766,11 +851,37 @@ def _load_static_items():
     except (OSError, ValueError):
         return []
     items = []
-    for cat, body, name in re.findall(r"\{cat:'([^']*)'(.*?)name:\{cs:'([^']*)'", block, re.S):
+    for cat, body, name, uk, en in re.findall(r"\{cat:'([^']*)'(.*?)name:\{cs:'([^']*)'(?:,uk:'([^']*)')?(?:,en:'([^']*)')?", block, re.S):
         sizes = [{'label': l, 'price': int(p)} for l, p in re.findall(r"\{label:'([^']*)',price:(\d+)\}", body)]
         price = re.search(r"price:'([^']*)'", body)
-        items.append({'cat': cat, 'name': name, 'sizes': sizes, 'price': price.group(1) if price else ''})
+        items.append({'cat': cat, 'name': name, 'names': {'cs': name, 'uk': uk or name, 'en': en or name},
+                      'sizes': sizes, 'price': price.group(1) if price else ''})
     return items
+
+def _visible_items(conn):
+    """Everything currently on the menu as (Czech name, {cs, uk, en} names, admin item or None)."""
+    custom = [r[0] for r in conn.execute('SELECT data FROM menu_items ORDER BY id ASC').fetchall()]
+    row = conn.execute("SELECT value FROM settings WHERE key='hidden_statics'").fetchone()
+    hidden = set(_json.loads(row[0])) if row and row[0] else set()
+    custom_names = {(i.get('name') or {}).get('cs') for i in custom}
+    replaced = {i.get('static_src_idx') for i in custom if i.get('static_src_idx') is not None}
+    out = [(it['name'], it['names'], None) for idx, it in enumerate(_STATIC_ITEMS)
+           if idx not in hidden and idx not in replaced and it['name'] not in custom_names]
+    for it in custom:
+        names = _translate(it).get('name') or {}
+        out.append((names.get('cs', ''), {k: names.get(k) or names.get('cs', '') for k in ('cs', 'uk', 'en')}, it))
+    return out
+
+@app.get('/api/review-items')
+def api_review_items():
+    """Menu items a review can be about (Czech name is the key, plus UA/EN labels)."""
+    with _get_pool().connection() as conn:
+        seen, out = set(), []
+        for cs, names, _ in _visible_items(conn):
+            if cs and cs not in seen:
+                seen.add(cs)
+                out.append(names)
+    return {'items': out}
 
 _STATIC_ITEMS = _load_static_items()
 
@@ -805,12 +916,21 @@ def _price_cart(conn, cart):
     duplicates that share a name, it never sets the amount."""
     catalog = _price_catalog(conn)
     lines, total, unknown = [], 0, []
+    builder = None
     for c in cart if isinstance(cart, list) else []:
         if not isinstance(c, dict):
             continue
         name, size = str(c.get('name') or '').strip(), str(c.get('size') or '').strip()
         qty = _lead_int(c.get('qty')) or 0
         if qty < 1:
+            continue
+        if c.get('builder') is not None:   # custom cake from the builder: priced from its settings
+            builder = builder or _builder_cfg(conn)
+            res = _builder_line(builder, c['builder'], min(qty, 10))
+            if not res:
+                unknown.append(_BUILDER_NAME)
+                continue
+            lines.append(res[0]); total += res[1]
             continue
         valid = catalog.get((name, size))
         if not valid:
@@ -826,6 +946,146 @@ def _price_cart(conn, cart):
 
 def _priced_order_text(lines, total):
     return ', '.join(lines) + f' | Celkem: {total} Kč'
+
+# ── Cake builder ──────────────────────────────────────────────────────────────
+# Customers put a custom cake together (occasion, size, filling, decor, inscription,
+# example picture). The admin sets the options and prices; the server prices every
+# builder cake itself, requires lead_days of notice and (with Stripe) a 50 % prepayment.
+_BUILDER_NAME = 'Dort na zakázku'
+_BUILDER_DEFAULT = {
+    'enabled': True,
+    'lead_days': 14,
+    'price_mode': 'from',   # 'from': shown as "od … Kč", the pastry chef confirms the final price
+    'occasions': [
+        {'id': 'birthday', 'name': {'cs': 'Narozeniny', 'uk': 'День народження', 'en': 'Birthday'}},
+        {'id': 'wedding', 'name': {'cs': 'Svatba', 'uk': 'Весілля', 'en': 'Wedding'}},
+        {'id': 'kids', 'name': {'cs': 'Dětská oslava', 'uk': 'Дитяче свято', 'en': 'Kids’ party'}},
+        {'id': 'corporate', 'name': {'cs': 'Firemní akce', 'uk': 'Корпоратив', 'en': 'Corporate event'}},
+        {'id': 'other', 'name': {'cs': 'Jiná příležitost', 'uk': 'Інша нагода', 'en': 'Other occasion'}},
+    ],
+    'sizes': [   # sample prices — the pastry shop sets its own in the admin panel
+        {'id': 'xs', 'label': 'XS 16 cm', 'min_guests': 4, 'max_guests': 8, 'price': 1500},
+        {'id': 's', 'label': 'S 18 cm', 'min_guests': 9, 'max_guests': 12, 'price': 1900},
+        {'id': 'm', 'label': 'M 23 cm', 'min_guests': 13, 'max_guests': 20, 'price': 2500},
+        {'id': 'l', 'label': 'L 26 cm', 'min_guests': 21, 'max_guests': 30, 'price': 3200},
+    ],
+    'fillings': [
+        {'id': 'choco', 'name': {'cs': 'Čokoládová', 'uk': 'Шоколадна', 'en': 'Chocolate'}, 'extra': 0, 'img': ''},
+        {'id': 'rasp', 'name': {'cs': 'Malinová', 'uk': 'Малинова', 'en': 'Raspberry'}, 'extra': 0, 'img': ''},
+        {'id': 'cheese', 'name': {'cs': 'Cheesecake', 'uk': 'Чізкейк', 'en': 'Cheesecake'}, 'extra': 0, 'img': ''},
+        {'id': 'pist', 'name': {'cs': 'Pistáciová', 'uk': 'Фісташкова', 'en': 'Pistachio'}, 'extra': 200, 'img': ''},
+    ],
+    'decor': [
+        {'id': 'text', 'name': {'cs': 'Nápis na dortu', 'uk': 'Напис на торті', 'en': 'Inscription'}, 'price': 0},
+        {'id': 'number', 'name': {'cs': 'Číslo / věk', 'uk': 'Цифра / вік', 'en': 'Number / age'}, 'price': 150},
+        {'id': 'flowers', 'name': {'cs': 'Živé květy', 'uk': 'Живі квіти', 'en': 'Fresh flowers'}, 'price': 300},
+        {'id': 'figures', 'name': {'cs': 'Figurky', 'uk': 'Фігурки', 'en': 'Figurines'}, 'price': 400},
+        {'id': 'photo', 'name': {'cs': 'Jedlá fotka', 'uk': 'Їстівне фото', 'en': 'Edible photo'}, 'price': 250},
+    ],
+}
+_ID_RE = re.compile(r'^[a-z0-9_-]{1,32}$')
+
+def _clean_names(raw):
+    raw = raw if isinstance(raw, dict) else {}
+    cs = str(raw.get('cs') or '').strip()[:80]
+    return {'cs': cs, 'uk': str(raw.get('uk') or '').strip()[:80] or cs, 'en': str(raw.get('en') or '').strip()[:80] or cs}
+
+def _clean_builder(raw, old=None):
+    raw = raw if isinstance(raw, dict) else {}
+    old_imgs = {f['id']: f.get('img', '') for f in ((old or {}).get('fillings') or [])}
+    cfg = {'enabled': bool(raw.get('enabled', True)),
+           'lead_days': max(0, min(120, _lead_int(raw.get('lead_days')) if _lead_int(raw.get('lead_days')) is not None else 14)),
+           'price_mode': 'exact' if raw.get('price_mode') == 'exact' else 'from'}
+    def items(key, fn):
+        out, seen = [], set()
+        for x in (raw.get(key) or [])[:30]:
+            if isinstance(x, dict) and _ID_RE.match(str(x.get('id') or '')) and x['id'] not in seen:
+                y = fn(x)
+                if y:
+                    seen.add(x['id']); out.append(y)
+        return out
+    cfg['occasions'] = items('occasions', lambda x: {'id': x['id'], 'name': _clean_names(x.get('name'))} if _clean_names(x.get('name'))['cs'] else None)
+    cfg['sizes'] = items('sizes', lambda x: {'id': x['id'], 'label': re.sub(r'[(),|]', '', str(x.get('label') or '')).strip()[:30],
+                                             'min_guests': max(0, _lead_int(x.get('min_guests')) or 0),
+                                             'max_guests': max(0, _lead_int(x.get('max_guests')) or 0),
+                                             'price': max(0, _lead_int(x.get('price')) or 0)} if str(x.get('label') or '').strip() and _lead_int(x.get('price')) else None)
+    def filling(x):
+        names = _clean_names(x.get('name'))
+        if not names['cs']:
+            return None
+        img = str(x.get('img') or '')
+        if img.startswith('/api/builder-img/'):
+            img = old_imgs.get(x['id'], '')          # unchanged photo sent back as its URL
+        elif img and (len(img) > 1_500_000 or not _PHOTO_RE.match(img)):
+            img = ''
+        return {'id': x['id'], 'name': names, 'extra': max(0, _lead_int(x.get('extra')) or 0), 'img': img}
+    cfg['fillings'] = items('fillings', filling)
+    cfg['decor'] = items('decor', lambda x: {'id': x['id'], 'name': _clean_names(x.get('name')), 'price': max(0, _lead_int(x.get('price')) or 0)}
+                         if _clean_names(x.get('name'))['cs'] else None)
+    return cfg
+
+def _builder_cfg(conn):
+    row = conn.execute("SELECT value FROM settings WHERE key='cake_builder'").fetchone()
+    return _clean_builder(_json.loads(row[0])) if row and row[0] else _clean_builder(_BUILDER_DEFAULT)
+
+def _public_builder(cfg):
+    out = dict(cfg)
+    out['fillings'] = [{**f, 'img': f"/api/builder-img/{f['id']}?v={hashlib.sha1(f['img'].encode()).hexdigest()[:10]}" if f.get('img') else ''}
+                       for f in cfg['fillings']]
+    return out
+
+def _builder_line(cfg, b, qty):
+    """Price one builder cake: (order line, total, photo) or None when the choice is invalid."""
+    if not cfg['enabled'] or not isinstance(b, dict):
+        return None
+    pick = lambda key, i: next((x for x in cfg[key] if x['id'] == i), None)
+    size, filling = pick('sizes', b.get('size')), pick('fillings', b.get('filling'))
+    occasion = pick('occasions', b.get('occasion'))
+    if not size or not filling:
+        return None
+    decor = [x for x in (pick('decor', i) for i in (b.get('decor') or [])[:10]) if x]
+    unit = size['price'] + filling['extra'] + sum(x['price'] for x in decor)
+    clean = lambda s: re.sub(r'[(),|]', ' ', str(s or '')).strip()
+    text = clean(b.get('text'))[:60]
+    parts = [size['label'], filling['name']['cs']] + [x['name']['cs'] for x in decor]
+    if occasion:
+        parts.insert(0, occasion['name']['cs'])
+    if text:
+        parts.append(f'nápis: „{text}“')
+    photo = str(b.get('photo') or '')
+    if photo and (len(photo) > 1_500_000 or not _PHOTO_RE.match(photo)):
+        photo = ''
+    if photo:
+        parts.append('📎 obrázek')
+    label = clean(' · '.join(parts))
+    return f'{_BUILDER_NAME} ({label}) x{qty} ({unit * qty} Kč)', unit * qty, photo
+
+@app.get('/api/builder')
+def api_builder_get():
+    with _get_pool().connection() as conn:
+        return _public_builder(_builder_cfg(conn))
+
+@app.post('/api/builder')
+async def api_builder_set(req: Request):
+    d = await req.json()
+    if not _verify_token(d.get('token')):
+        raise HTTPException(401, 'Unauthorized')
+    with _get_pool().connection() as conn:
+        cfg = _clean_builder(d.get('config'), _builder_cfg(conn))
+        conn.execute(
+            "INSERT INTO settings(key,value) VALUES('cake_builder',%s) ON CONFLICT(key) DO UPDATE SET value=EXCLUDED.value",
+            (_json.dumps(cfg),))
+    return {'ok': True, 'config': _public_builder(cfg)}
+
+@app.get('/api/builder-img/{fid}')
+def api_builder_img(fid: str):
+    with _get_pool().connection() as conn:
+        f = next((x for x in _builder_cfg(conn)['fillings'] if x['id'] == fid), None)
+    m = re.match(r'^data:(image/[\w.+-]+);base64,(.*)$', (f or {}).get('img') or '', re.S)
+    if not m:
+        raise HTTPException(404)
+    return Response(base64.b64decode(m.group(2)), media_type=m.group(1),
+                    headers={'Cache-Control': 'public, max-age=31536000, immutable'})
 
 # ── Reviews ───────────────────────────────────────────────────────────────────
 # Customers leave stars (1–5), text and an optional photo. New reviews wait for the
@@ -1076,6 +1336,26 @@ def _clip_order(order):
     for k, limit in _ORDER_LIMITS.items():
         order[k] = str(order.get(k) or '')[:limit]
 
+def _has_builder(cart):
+    return isinstance(cart, list) and any(isinstance(c, dict) and c.get('builder') is not None for c in cart)
+
+def _cart_photo(cart):
+    """First valid example picture from builder cakes in the cart ('' if none)."""
+    for c in cart if isinstance(cart, list) else []:
+        p = str(((c or {}).get('builder') or {}).get('photo') or '') if isinstance(c, dict) and isinstance(c.get('builder'), dict) else ''
+        if p and len(p) <= 1_500_000 and _PHOTO_RE.match(p):
+            return p
+    return ''
+
+def _insert_order(conn, order):
+    conn.execute(
+        'INSERT INTO orders (id,ts,name,phone,address,ord,payment,order_type,delivery_date,delivery_time,status,attachment)'
+        ' VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)',
+        (order['id'], order['ts'], order['name'], order['phone'],
+         order['address'], order['order'], order['payment'],
+         order['order_type'], order['delivery_date'], order['delivery_time'], order['status'],
+         order.get('attachment') or ''))
+
 @app.post('/api/order')
 async def api_order(req: Request, bg: BackgroundTasks):
     d = await req.json()
@@ -1096,20 +1376,21 @@ async def api_order(req: Request, bg: BackgroundTasks):
         err = _check_slot(conn, order['delivery_date'], order['delivery_time'])
         if err:
             raise HTTPException(409, {'error': err})
+        rule_err = _check_item_rules(conn, d.get('cart'), order['delivery_date'])
+        if rule_err:
+            raise HTTPException(409, rule_err)
+        # A custom cake from the builder is paid 50 % in advance by card when card payments work
+        if STRIPE_SECRET_KEY and _has_builder(d.get('cart')):
+            raise HTTPException(409, {'error': 'prepay_required'})
         # Pay-on-delivery: use server prices when every line is known, otherwise keep
         # the customer's text so the order still arrives (staff check it anyway)
         if d.get('cart'):
             lines, total, unknown = _price_cart(conn, d['cart'])
             if lines and not unknown:
                 order['order'] = _priced_order_text(lines, total)
+        order['attachment'] = _cart_photo(d.get('cart'))
         _clip_order(order)
-        conn.execute(
-            'INSERT INTO orders (id,ts,name,phone,address,ord,payment,order_type,delivery_date,delivery_time,status)'
-            ' VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)',
-            (order['id'], order['ts'], order['name'], order['phone'],
-             order['address'], order['order'], order['payment'],
-             order['order_type'], order['delivery_date'], order['delivery_time'], order['status'])
-        )
+        _insert_order(conn, order)
     bg.add_task(_send_ntfy, order)
     bg.add_task(_send_telegram, order)
     bg.add_task(_send_push_notifications, {
@@ -1129,10 +1410,23 @@ async def api_orders(req: Request):
         with conn.cursor(row_factory=dict_row) as cur:
             cur.execute(
                 'SELECT id,ts,name,phone,address,ord AS "order",'
-                'payment,order_type,delivery_date,delivery_time,status FROM orders ORDER BY id DESC'
+                "payment,order_type,delivery_date,delivery_time,status,"
+                "COALESCE(attachment,'') <> '' AS has_attachment FROM orders ORDER BY id DESC"
             )
             rows = cur.fetchall()
     return rows
+
+@app.get('/api/order-img/{order_id}')
+def api_order_img(order_id: int, token: str = ''):
+    """Example picture attached to a builder order (admin only)."""
+    if not _verify_token(token):
+        raise HTTPException(401, 'Unauthorized')
+    with _get_pool().connection() as conn:
+        row = conn.execute('SELECT attachment FROM orders WHERE id=%s', (order_id,)).fetchone()
+    m = re.match(r'^data:(image/[\w.+-]+);base64,(.*)$', (row[0] if row else '') or '', re.S)
+    if not m:
+        raise HTTPException(404)
+    return Response(base64.b64decode(m.group(2)), media_type=m.group(1), headers={'Cache-Control': 'no-store'})
 
 @app.patch('/api/order/{order_id}')
 async def api_order_status(order_id: int, req: Request):
@@ -1165,8 +1459,11 @@ async def api_create_checkout(req: Request):
     with _get_pool().connection() as conn:
         lines, total_czk, unknown = _price_cart(conn, d.get('cart'))
         slot_err = _check_slot(conn, (d.get('delivery_date') or '').strip(), (d.get('delivery_time') or '').strip())
+        rule_err = _check_item_rules(conn, d.get('cart'), (d.get('delivery_date') or '').strip())
     if slot_err:
         raise HTTPException(409, {'error': slot_err})
+    if rule_err:
+        raise HTTPException(409, rule_err)
     if unknown:
         raise HTTPException(409, {'error': 'unknown_items', 'items': unknown})
     if total_czk < 1:
@@ -1187,16 +1484,11 @@ async def api_create_checkout(req: Request):
         'delivery_date': (d.get('delivery_date') or '').strip(),
         'delivery_time': (d.get('delivery_time') or '').strip(),
         'status':        'pending_payment',
+        'attachment':    _cart_photo(d.get('cart')),
     }
     _clip_order(order)
     with _get_pool().connection() as conn:
-        conn.execute(
-            'INSERT INTO orders (id,ts,name,phone,address,ord,payment,order_type,delivery_date,delivery_time,status)'
-            ' VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)',
-            (order['id'], order['ts'], order['name'], order['phone'],
-             order['address'], order['order'], order['payment'],
-             order['order_type'], order['delivery_date'], order['delivery_time'], order['status'])
-        )
+        _insert_order(conn, order)
 
     host   = req.headers.get('X-Forwarded-Host') or req.headers.get('host', '')
     scheme = req.headers.get('X-Forwarded-Proto', 'https')

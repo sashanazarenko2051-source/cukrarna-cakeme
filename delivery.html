@@ -439,6 +439,7 @@ input[type="date"]::-webkit-calendar-picker-indicator:hover{opacity:1}
           <div class="slot-times" id="slotTimes"></div>
           <span class="date-note" data-k="f_slot_note">Volné termíny na 2 měsíce dopředu. Šedé dny jsou plně obsazené nebo zavřené.</span>
         </div>
+        <div class="ord-field full" style="margin-top:-8px"><span class="date-note" id="cartRulesNote" style="display:none;color:var(--gold)"></span></div>
         <div class="ord-field full">
           <label data-k="f_cart">Vaše objednávka</label>
           <div id="cartBox" class="cart-del-box"></div>
@@ -564,7 +565,7 @@ cs:{nav_home:'Domů',nav_menu:'Menu',nav_about:'O nás',nav_del:'Doručení',nav
   f_table:'Stůl', f_type:'Způsob objednávky',ot_delivery:'Doručení domů',ot_instore:'Osobní odběr',
   f_pay:'Způsob platby',f_pay_cash:'Hotově',f_pay_card:'Kartou',f_pay_split:'50 % hotově + 50 % kartou',
   pay_ttl:'Platební podmínky',pay_dep:'Záloha 50 % z celkové ceny objednávky je splatná bankovním převodem při potvrzení. Zbývajících 50 % hradíte při převzetí.',pay_acc:'Číslo účtu',
-  f_submit:'Objednat',f_redirecting:'Přesměrování na platbu...',f_ok:'Děkujeme! Vaši objednávku jsme přijali.',f_err:'Chyba. Zkuste to znovu nebo zavolejte.',f_pick_day:'Nejprve vyberte den v kalendáři.',f_pick_slot:'Vyberte prosím den a čas doručení / převzetí.',f_slot_left:'volno: {n}',f_slot_full:'obsazeno',f_slot_taken:'Vybraný termín se mezitím obsadil. Vyberte prosím jiný.',f_slot_note:'Volné termíny na 2 měsíce dopředu. Šedé dny jsou plně obsazené nebo zavřené.',f_err_items:'Některé položky v košíku už nejsou v menu nebo se změnily. Odeberte je a přidejte znovu z menu:',
+  f_submit:'Objednat',f_redirecting:'Přesměrování na platbu...',f_ok:'Děkujeme! Vaši objednávku jsme přijali.',f_err:'Chyba. Zkuste to znovu nebo zavolejte.',f_pay_builder:'Dort na zakázku: záloha 50 % kartou při objednávce.',f_rule_earliest:'Pro vaši objednávku nejdříve {d}.',f_rule_window:'Výdej předobjednávky: {a} – {b}.',f_err_early:'Tento dort lze připravit nejdříve na {d}. Vyberte prosím pozdější den.',f_err_window:'Předobjednávku lze vyzvednout jen {a} – {b}.',f_err_soldout:'Některé položky jsou vyprodané nebo jich zbývá méně (zbývá):',f_pick_day:'Nejprve vyberte den v kalendáři.',f_pick_slot:'Vyberte prosím den a čas doručení / převzetí.',f_slot_left:'volno: {n}',f_slot_full:'obsazeno',f_slot_taken:'Vybraný termín se mezitím obsadil. Vyberte prosím jiný.',f_slot_note:'Volné termíny na 2 měsíce dopředu. Šedé dny jsou plně obsazené nebo zavřené.',f_err_items:'Některé položky v košíku už nejsou v menu nebo se změnily. Odeberte je a přidejte znovu z menu:',
   ft_nav:'Navigace',ft_con:'Kontakt',rights:'Všechna práva vyhrazena.'},
 en:{nav_home:'Home',nav_menu:'Menu',nav_about:'About',nav_del:'Delivery',nav_con:'Contact',tagline:'Celebrate Every Day',
   del_lbl:'Fast & Convenient',del_ttl:'Delivery',
@@ -582,7 +583,7 @@ en:{nav_home:'Home',nav_menu:'Menu',nav_about:'About',nav_del:'Delivery',nav_con
   f_table:'Table', f_type:'Order type',ot_delivery:'Home Delivery',ot_instore:'In-store Pickup',
   f_pay:'Payment Method',f_pay_cash:'Cash',f_pay_card:'Card',f_pay_split:'50% cash + 50% card',
   pay_ttl:'Payment Terms',pay_dep:'A 50% deposit is payable by bank transfer upon order confirmation. The remaining 50% is paid upon receipt.',pay_acc:'Account',
-  f_submit:'Order Now',f_redirecting:'Redirecting to payment...',f_ok:'Thank you! Your order has been received.',f_err:'Error. Please try again or call us.',f_pick_day:'First choose a day in the calendar.',f_pick_slot:'Please choose a delivery / pickup day and time.',f_slot_left:'{n} left',f_slot_full:'fully booked',f_slot_taken:'This time has just been taken. Please choose another one.',f_slot_note:'Free dates for the next 2 months. Grey days are fully booked or closed.',f_err_items:'Some items in your cart are no longer on the menu or have changed. Remove them and add them again from the menu:',
+  f_submit:'Order Now',f_redirecting:'Redirecting to payment...',f_ok:'Thank you! Your order has been received.',f_err:'Error. Please try again or call us.',f_pay_builder:'Custom cake: 50 % deposit by card when ordering.',f_rule_earliest:'For your order the earliest date is {d}.',f_rule_window:'Pre-order pickup: {a} – {b}.',f_err_early:'This cake can be ready on {d} at the earliest. Please choose a later day.',f_err_window:'The pre-order can only be picked up {a} – {b}.',f_err_soldout:'Some items are sold out or fewer are left (left):',f_pick_day:'First choose a day in the calendar.',f_pick_slot:'Please choose a delivery / pickup day and time.',f_slot_left:'{n} left',f_slot_full:'fully booked',f_slot_taken:'This time has just been taken. Please choose another one.',f_slot_note:'Free dates for the next 2 months. Grey days are fully booked or closed.',f_err_items:'Some items in your cart are no longer on the menu or have changed. Remove them and add them again from the menu:',
   ft_nav:'Navigation',ft_con:'Contact',rights:'All rights reserved.'},
 uk:{nav_home:'Головна',nav_menu:'Меню',nav_about:'Про нас',nav_del:'Доставка',nav_con:'Контакти',tagline:'Святкуйте кожен день',
   del_lbl:'Швидко і зручно',del_ttl:'Доставка',
@@ -600,7 +601,7 @@ uk:{nav_home:'Головна',nav_menu:'Меню',nav_about:'Про нас',nav_
   f_table:'Стіл', f_type:'Спосіб замовлення',ot_delivery:'Доставка додому',ot_instore:'Самовивіз',
   f_pay:'Спосіб оплати',f_pay_cash:'Готівкою',f_pay_card:'Карткою',f_pay_split:'50 % готівкою + 50 % карткою',
   pay_ttl:'Умови оплати',pay_dep:'Передоплата 50 % від суми замовлення сплачується банківським переказом при підтвердженні. Решту 50 % ви сплачуєте при отриманні.',pay_acc:'Номер рахунку',
-  f_submit:'Замовити',f_redirecting:'Переходимо до оплати...',f_ok:'Дякуємо! Ваше замовлення прийнято.',f_err:'Помилка. Спробуйте ще раз або зателефонуйте.',f_pick_day:'Спочатку оберіть день у календарі.',f_pick_slot:'Будь ласка, оберіть день і час доставки / отримання.',f_slot_left:'залишилось: {n}',f_slot_full:'зайнято',f_slot_taken:'Цей час щойно зайняли. Будь ласка, оберіть інший.',f_slot_note:'Вільні дати на 2 місяці вперед. Сірі дні повністю зайняті або вихідні.',f_err_items:'Деяких позицій із кошика вже немає в меню або вони змінилися. Видаліть їх і додайте знову з меню:',
+  f_submit:'Замовити',f_redirecting:'Переходимо до оплати...',f_ok:'Дякуємо! Ваше замовлення прийнято.',f_err:'Помилка. Спробуйте ще раз або зателефонуйте.',f_pay_builder:'Торт на замовлення: передоплата 50 % карткою при оформленні.',f_rule_earliest:'Для вашого замовлення найраніше {d}.',f_rule_window:'Видача передзамовлення: {a} – {b}.',f_err_early:'Цей торт можна приготувати найраніше на {d}. Оберіть, будь ласка, пізніший день.',f_err_window:'Передзамовлення можна забрати лише {a} – {b}.',f_err_soldout:'Деякі позиції розпродано або їх залишилось менше (залишилось):',f_pick_day:'Спочатку оберіть день у календарі.',f_pick_slot:'Будь ласка, оберіть день і час доставки / отримання.',f_slot_left:'залишилось: {n}',f_slot_full:'зайнято',f_slot_taken:'Цей час щойно зайняли. Будь ласка, оберіть інший.',f_slot_note:'Вільні дати на 2 місяці вперед. Сірі дні повністю зайняті або вихідні.',f_err_items:'Деяких позицій із кошика вже немає в меню або вони змінилися. Видаліть їх і додайте знову з меню:',
   ft_nav:'Навігація',ft_con:'Контакти',rights:'Усі права захищені.'}
 };
 
@@ -657,6 +658,66 @@ function updatePaymentLabels(){
   const note=document.getElementById('payDepNote');
   note.textContent=isDelivery?t('f_pay_dep_note'):'';
   note.style.display=isDelivery?'':'none';
+  // A custom cake from the builder is always paid 50 % in advance by card
+  const builder=getCart().some(c=>c.builder);
+  const cashBtn=document.getElementById('payOptCash');
+  cashBtn.style.display=builder?'none':'';
+  if(builder){
+    setPayment(document.getElementById('payOptCard'));
+    note.textContent=t('f_pay_builder'); note.style.display='';
+  }
+}
+
+/* ── Rules of the items in the cart: minimum notice (big cakes, custom cake) and
+   pickup days (pre-orders). Days that don't fit are greyed out in the calendar. ── */
+let CART_RULES={earliest:'',from:'',to:''}, _menuCache=null, _builderCache=null;
+async function loadCartRules(){
+  const cart=getCart(), rules={earliest:'',from:'',to:''};
+  const today=new Date(), isoOf=d=>d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
+  const later=(a,b)=>!a?b:!b?a:(a>b?a:b), sooner=(a,b)=>!a?b:!b?a:(a<b?a:b);
+  const plusDays=n=>{ const d=new Date(today); d.setDate(d.getDate()+n); return isoOf(d); };
+  try{
+    if(cart.some(c=>!c.builder)&&!_menuCache){ const r=await fetch('/api/menu'); if(r.ok) _menuCache=await r.json(); }
+    if(cart.some(c=>c.builder)&&!_builderCache){ const r=await fetch('/api/builder'); if(r.ok) _builderCache=await r.json(); }
+  }catch{}
+  cart.forEach(c=>{
+    if(c.builder){ if(_builderCache) rules.earliest=later(rules.earliest,plusDays(_builderCache.lead_days)); return; }
+    const it=(_menuCache||[]).find(i=>i.name&&i.name.cs===c.names.cs);
+    if(!it) return;
+    if(it.lead_days) rules.earliest=later(rules.earliest,plusDays(it.lead_days));
+    if(it.avail_from) rules.from=later(rules.from,it.avail_from);
+    if(it.avail_to) rules.to=sooner(rules.to,it.avail_to);
+  });
+  CART_RULES=rules;
+  const dIn=document.getElementById('deliveryDate');
+  if(dIn.type==='date'){  // plain date field (slot picker switched off)
+    const min=later(dIn.min,rules.from); dIn.min=later(min,rules.earliest)||dIn.min; if(rules.to) dIn.max=rules.to;
+  }
+  // Drop a chosen day that no longer fits
+  if(selDate&&!dayAllowed(selDate)){ selDate=''; selTime=''; dIn.value=''; document.getElementById('deliveryTime').value=''; }
+  const fmt=iso=>new Date(iso+'T12:00:00').toLocaleDateString(({cs:'cs-CZ',en:'en-GB',uk:'uk-UA'})[lang]||'cs-CZ',{day:'numeric',month:'long'});
+  const note=document.getElementById('cartRulesNote');
+  const parts=[];
+  if(rules.earliest) parts.push(t('f_rule_earliest').replace('{d}',fmt(rules.earliest)));
+  if(rules.from||rules.to) parts.push(t('f_rule_window').replace('{a}',rules.from?fmt(rules.from):'…').replace('{b}',rules.to?fmt(rules.to):'…'));
+  note.textContent=parts.join(' · '); note.style.display=parts.length?'':'none';
+  try{ renderSlots(); }catch{}
+}
+function dayAllowed(iso){
+  return !(CART_RULES.earliest&&iso<CART_RULES.earliest)&&!(CART_RULES.from&&iso<CART_RULES.from)&&!(CART_RULES.to&&iso>CART_RULES.to);
+}
+
+// Readable text for the server's "can't order this" answers
+function orderErrText(status,j){
+  const fmt=iso=>iso?new Date(iso+'T12:00:00').toLocaleDateString(({cs:'cs-CZ',en:'en-GB',uk:'uk-UA'})[lang]||'cs-CZ',{day:'numeric',month:'long'}):'…';
+  if(status!==409||!j) return t('f_err');
+  if(j.items&&j.error==='unknown_items') return t('f_err_items')+' '+j.items.join(', ');
+  if(/^slot_/.test(j.error||'')) return t('f_slot_taken');
+  if(j.error==='too_early') return t('f_err_early').replace('{d}',fmt(j.earliest));
+  if(j.error==='outside_window') return t('f_err_window').replace('{a}',fmt(j.from)).replace('{b}',fmt(j.to));
+  if(j.error==='sold_out') return t('f_err_soldout')+' '+j.items.map(n=>`${n} (${(j.left||{})[n]??0})`).join(', ');
+  if(j.error==='prepay_required') return t('f_pay_builder');
+  return t('f_err');
 }
 function setOrderType(btn){
   document.querySelectorAll('.ord-type-btn').forEach(b=>b.classList.remove('on'));
@@ -685,6 +746,8 @@ function changeQtyDel(id,delta){
   if(it.qty<=0) cart=cart.filter(c=>c.id!==id);
   saveCart(cart);
   renderCartDel();
+  loadCartRules();        // earliest day / pickup window depend on what's in the cart
+  updatePaymentLabels();  // cash comes back when the custom cake is removed
 }
 
 function renderCartDel(){
@@ -744,7 +807,7 @@ document.getElementById('orderForm').addEventListener('submit',async function(e)
     delivery_date: document.getElementById('deliveryDate').value,
     delivery_time: document.getElementById('deliveryTime').value,
     // What and how many; the server prices it (online payments are charged from server prices)
-    cart: getCart().map(c=>({name:c.names.cs, size:c.sizeLabel||'', qty:c.qty, price:c.price})),
+    cart: getCart().map(c=>({name:c.names.cs, size:c.builder?'':(c.sizeLabel||''), qty:c.qty, price:c.price, ...(c.builder?{builder:c.builder}:{})})),
   };
 
   // ── Online payment via Stripe ──
@@ -768,8 +831,7 @@ document.getElementById('orderForm').addEventListener('submit',async function(e)
       let j={}; try{ j=await r.json(); }catch{}
       msg.className='ord-msg err'; msg.style.cssText='';
       // Items no longer on the menu (removed or renamed since they were added to the cart)
-      msg.textContent=(r.status===409&&j.items)?t('f_err_items')+' '+j.items.join(', ')
-        :(r.status===409&&/^slot_/.test(j.error||''))?t('f_slot_taken'):t('f_err');
+      msg.textContent=orderErrText(r.status,j);
       if(r.status===409&&/^slot_/.test(j.error||'')) loadSlots();
     }catch{
       msg.className='ord-msg err'; msg.style.cssText=''; msg.textContent=t('f_err');
@@ -779,12 +841,13 @@ document.getElementById('orderForm').addEventListener('submit',async function(e)
   }
 
   // ── Cash / card payment ──
-  let ok=false, slotTaken=false;
+  let ok=false, slotTaken=false, errText='';
   try{
     const r=await fetch('/api/order',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});
     let j={success:false};try{j=await r.json();}catch{}
     ok=r.ok&&j.success;
     slotTaken=r.status===409&&/^slot_/.test(j.error||'');
+    if(!ok) errText=orderErrText(r.status,j);
   }catch{}
   if(ok){
     msg.className='ord-msg ok';
@@ -798,7 +861,7 @@ document.getElementById('orderForm').addEventListener('submit',async function(e)
   }else{
     msg.className='ord-msg err';
     msg.style.cssText='';
-    msg.textContent=slotTaken?t('f_slot_taken'):t('f_err');
+    msg.textContent=errText||t('f_err');
     if(slotTaken) loadSlots();
   }
   btn.disabled=false; btn.textContent=orig;
@@ -838,7 +901,7 @@ function renderSlots(){
     const cls=['slot-day'];
     if(info&&!info.open) cls.push('full');
     if(iso===selDate) cls.push('on');
-    html+=`<button type="button" class="${cls.join(' ')}" data-date="${iso}" ${info&&info.open?'':'disabled'}>${dd}</button>`;
+    html+=`<button type="button" class="${cls.join(' ')}" data-date="${iso}" ${info&&info.open&&dayAllowed(iso)?'':'disabled'}>${dd}</button>`;
   }
   const grid=document.getElementById('slotGrid');
   grid.innerHTML=html;
@@ -890,7 +953,7 @@ document.getElementById('slotPrev').addEventListener('click',()=>{ slotMonthIdx-
 document.getElementById('slotNext').addEventListener('click',()=>{ slotMonthIdx++; renderSlots(); });
 
 initLangBtns();applyLang();initFI();
-loadSlots();
+loadSlots().then(loadCartRules);
 </script>
 </body>
 </html>

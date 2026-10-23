@@ -83,10 +83,20 @@
   const style = document.createElement('style'); style.textContent = css; document.head.appendChild(style);
 
   let data = null, shown = 6, formOpen = false, rating = 0, photoData = '', msg = null;
+  let items = [], presetItem = '', modal = null, modalItem = '', modalForm = false;
+  // Czech item name -> name in the current language
+  const itemName = cs => { const it = items.find(i => i.cs === cs); return it ? (it[L()] || it.cs) : cs; };
+  const itemOptions = sel => `<option value="">—</option>` + items.slice().sort((a, b) => (a[L()] || a.cs).localeCompare(b[L()] || b.cs))
+    .map(i => `<option value="${esc(i.cs)}" ${i.cs === sel ? 'selected' : ''}>${esc(i[L()] || i.cs)}</option>`).join('');
 
   async function load(){
-    try{ const r = await fetch('/api/reviews'); if (r.ok) data = await r.json(); }catch{}
+    try{
+      const [r, ri] = await Promise.all([fetch('/api/reviews'), fetch('/api/review-items')]);
+      if (r.ok) data = await r.json();
+      if (ri.ok) items = (await ri.json()).items || [];
+    }catch{}
     render();
+    decorate();
     // Coming from the menu's rating link: the block was empty when the browser tried to scroll
     if (location.hash === '#reviews'){ const t = document.getElementById('reviews'); if (t) t.scrollIntoView(); }
   }
@@ -96,7 +106,7 @@
     return `<div class="rv-card">
       <div class="rv-head"><div><div class="rv-name">${esc(rv.name)}</div>${rv.verified ? `<span class="rv-ver">✓ ${tr('verified')}</span>` : ''}</div>
         <div style="text-align:right">${starsHtml(rv.stars)}<div class="rv-date">${esc(date)}</div></div></div>
-      ${rv.item ? `<div class="rv-item">${esc(rv.item)}</div>` : ''}
+      ${rv.item ? `<div class="rv-item">${esc(itemName(rv.item))}</div>` : ''}
       <div class="rv-text">${esc(rv.text)}</div>
       ${rv.photo ? `<img class="rv-photo" src="${esc(rv.photo)}" alt="" loading="lazy">` : ''}
       ${rv.reply ? `<div class="rv-reply"><b>${tr('reply')}</b>${esc(rv.reply)}</div>` : ''}
@@ -107,7 +117,7 @@
     return `<form class="rv-form" novalidate>
       <label class="full">${tr('f_stars')}<div class="rv-pick">${[1,2,3,4,5].map(n=>`<button type="button" data-n="${n}" class="${n <= rating ? 'on' : ''}">★</button>`).join('')}</div></label>
       <label>${tr('f_name')}<input name="name" maxlength="60" autocomplete="name"></label>
-      <label>${tr('f_item')}<input name="ordered" maxlength="120"></label>
+      <label>${tr('f_item')}<select name="ordered" class="rv-select">${itemOptions(presetItem)}</select></label>
       <label class="full">${tr('f_text')}<textarea name="text" maxlength="1500"></textarea></label>
       <label>${tr('f_phone')}<input name="phone" type="tel" maxlength="20" autocomplete="tel"><small>${tr('f_phone_hint')}</small></label>
       <label>${tr('f_photo')}<div class="rv-photo-row"><button type="button" class="rv-ghost rv-add-photo">${tr('f_photo_btn')}</button><input type="file" accept="image/*" hidden></div></label>
@@ -185,13 +195,69 @@
       try{
         const r = await fetch('/api/reviews', {method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({
           stars: rating, name: v('name'), text: v('text'), item: v('ordered'), phone: v('phone'), photo: photoData, website: v('website')})});
-        if (r.ok){ rating = 0; photoData = ''; form.reset(); showPhoto(); form.querySelectorAll('.rv-pick button').forEach(x => x.classList.remove('on')); msg = ['ok', 'f_ok']; }
+        if (r.ok){ rating = 0; photoData = ''; form.reset(); showPhoto(); form.querySelectorAll('.rv-pick button').forEach(x => x.classList.remove('on')); msg = ['ok', 'f_ok'];
+          const s = form.querySelector('select[name=ordered]'); if (s) s.value = presetItem; }
         else msg = ['err', r.status === 429 ? 'f_limit' : 'f_err'];
       }catch{ msg = ['err', 'f_err']; }
       btn.disabled = false; msgEl.className = 'rv-msg ' + msg[0]; msgEl.textContent = tr(msg[1]);
     };
   }
 
-  window.CakeReviews = {refresh: render, reload: load};
+  /* ── Reviews of one menu item (menu page): "★ 4,8 (5)" under the name, opens a dialog ── */
+  function itemStats(cs){
+    const list = ((data && data.reviews) || []).filter(r => r.item === cs);
+    return {list, count: list.length, avg: list.length ? Math.round(list.reduce((a, r) => a + r.stars, 0) / list.length * 10) / 10 : 0};
+  }
+
+  function decorate(){
+    document.querySelectorAll('[data-rv-item]').forEach(el => {
+      const s = itemStats(el.dataset.rvItem);
+      el.innerHTML = s.count ? `<button type="button" class="rv-mini">${starsHtml(s.avg)} <b>${fmtAvg(s.avg)}</b> (${s.count})</button>` : '';
+      const b = el.querySelector('button'); if (b) b.onclick = () => openItem(el.dataset.rvItem);
+    });
+  }
+
+  function openItem(cs){
+    modalItem = cs; modalForm = false; msg = null;
+    if (!modal){
+      modal = document.createElement('div'); modal.className = 'rv-modal';
+      modal.addEventListener('click', e => { if (e.target === modal) closeItem(); });
+      document.body.appendChild(modal); document.body.style.overflow = 'hidden';
+    }
+    renderItem();
+  }
+  function closeItem(){ if (modal){ modal.remove(); modal = null; document.body.style.overflow = ''; presetItem = ''; } }
+
+  function renderItem(){
+    if (!modal) return;
+    const s = itemStats(modalItem);
+    presetItem = modalItem;
+    modal.innerHTML = `<div class="rv-modal-box">
+      <button type="button" class="rv-modal-x">×</button>
+      <h3>${esc(itemName(modalItem))}</h3>
+      <div class="rv-modal-sum">${starsHtml(s.avg)} <b>${s.count ? fmtAvg(s.avg) : '—'}</b> · ${s.count} ${plural(s.count)}</div>
+      <button type="button" class="rv-btn rv-modal-write">${tr('write')}</button>
+      ${modalForm ? formHtml() : ''}
+      <div class="rv-list" style="margin-top:18px">${s.list.map(cardHtml).join('')}</div>
+      <p class="rv-honest">${tr('honest')}</p></div>`;
+    modal.querySelector('.rv-modal-x').onclick = closeItem;
+    modal.querySelector('.rv-modal-write').onclick = () => { modalForm = !modalForm; renderItem(); };
+    modal.querySelectorAll('.rv-photo').forEach(img => img.onclick = () => window.open(img.src, '_blank'));
+    if (modalForm) bindForm(modal.querySelector('.rv-form'));
+  }
+
+  const css2 = `
+.rv-select{background:var(--bg2,#161616);border:1px solid var(--bdr,#242424);color:var(--tx0,#f5f0e8);padding:11px 13px;font:.9rem 'Raleway',sans-serif;outline:none;text-transform:none;letter-spacing:0}
+.rv-mini{background:none;border:none;padding:0;margin:-2px 0 8px;cursor:pointer;color:var(--tx1,#c8b898);font:.78rem 'Raleway',sans-serif;display:inline-flex;gap:6px;align-items:center}
+.rv-mini:hover b{text-decoration:underline}.rv-mini b{color:var(--tx0,#f5f0e8)}.rv-mini .rv-stars{font-size:.85rem;letter-spacing:1px}
+.rv-modal{position:fixed;inset:0;background:rgba(0,0,0,.82);z-index:2600;display:flex;justify-content:center;align-items:flex-start;overflow-y:auto;padding:30px 14px}
+.rv-modal-box{background:var(--bg2,#161616);border:1px solid var(--gold-d,#9a7a4a);width:100%;max-width:820px;padding:28px;position:relative}
+.rv-modal-box h3{font-family:'Playfair Display',serif;font-weight:400;font-size:1.7rem;color:var(--tx0,#f5f0e8);margin-bottom:6px;padding-right:30px}
+.rv-modal-sum{color:var(--tx1,#c8b898);margin-bottom:16px}.rv-modal-sum b{color:var(--tx0,#f5f0e8)}
+.rv-modal-x{position:absolute;top:12px;right:16px;background:none;border:none;color:var(--gold);font-size:1.7rem;cursor:pointer}
+.rv-modal-box .rv-form{margin:16px 0 0}`;
+  const st2 = document.createElement('style'); st2.textContent = css2; document.head.appendChild(st2);
+
+  window.CakeReviews = {refresh(){ render(); decorate(); renderItem(); }, reload: load, decorate, openItem};
   load();
 })();

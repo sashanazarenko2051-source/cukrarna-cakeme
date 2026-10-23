@@ -79,6 +79,10 @@ section{padding:96px 0}
 .m-badge{position:absolute;top:14px;right:14px;background:var(--gold);color:var(--bg0);font:.62rem 'Raleway',sans-serif;letter-spacing:1.5px;text-transform:uppercase;padding:4px 10px;font-weight:700}
 .m-body{padding:20px}
 .m-name{font-family:'Playfair Display',serif;font-size:1.18rem;color:var(--tx0);margin-bottom:7px}
+.m-rules{font-size:.74rem;color:var(--tx1);line-height:1.7;margin:-3px 0 10px}
+.m-left{display:inline-block;color:var(--bg0);background:var(--gold);font-weight:700;font-size:.66rem;letter-spacing:1px;text-transform:uppercase;padding:2px 8px}
+.m-left.out{background:#5a2a2a;color:#f0b0b0}
+.btn-ord:disabled{opacity:.45;cursor:not-allowed;background:transparent!important;color:var(--tx2)!important;border-color:var(--bdr)!important}
 .m-weight{font-size:.74rem;color:var(--gold);letter-spacing:.5px;margin:-3px 0 8px}
 .m-desc{font-size:.78rem;color:var(--tx2);line-height:1.65;margin-bottom:18px;display:-webkit-box;-webkit-line-clamp:4;-webkit-box-orient:vertical;overflow:hidden}
 .m-desc.open{display:block}
@@ -293,7 +297,8 @@ footer{background:#070707;border-top:1px solid var(--bdr);padding:52px 0 28px}
       <div class="sec-div"></div>
     </div>
     <!-- "★ 4,9 · 12 reviews" line, links to the reviews on the home page (reviews.js) -->
-    <div data-reviews="summary" style="text-align:center;margin:-36px 0 34px"></div>
+    <div data-reviews="summary" style="text-align:center;margin:-36px 0 18px"></div>
+    <div data-builder-open style="text-align:center;margin:0 0 36px;display:none"></div>
     <div class="feat-wrap" id="featWrap" style="display:none">
       <div class="pop-hd"><span class="pop-ttl" data-k="feat_ttl">Doporučujeme</span></div>
       <div class="m-grid" id="featGrid"></div>
@@ -393,9 +398,9 @@ footer{background:#070707;border-top:1px solid var(--bdr);padding:52px 0 28px}
 
 <script>
 const T={
-cs:{nav_home:'Domů',nav_menu:'Menu',nav_about:'O nás',nav_del:'Doručení',nav_con:'Kontakt',tagline:'Oslavte každý den',menu_lbl:'Naše nabídka',menu_ttl:'Menu',t_all:'Vše',t_cakes:'Dorty',t_kolace:'Koláče',t_des:'Dezerty',t_drk:'Nápoje',t_doplnky:'Doplňky',t_fav:'Oblíbené',t_celeb:'Slavnostní dorty',celeb_h:'Slavnostní & narozeninové dorty',celeb_warn:'Objednávky přijímáme minimálně 14 dní předem',celeb_p1:'Připravíme dort přesně podle vašich přání — narozeniny, svatba, výročí nebo firemní akce. Zvolte design, chuť a velikost.',celeb_p2:'Pro objednávku nás prosím kontaktujte telefonicky nebo e-mailem.',cart_add:'Do košíku',cart_ttl:'Košík',cart_empty:'Košík je prázdný',cart_total:'Celkem',cart_go:'Objednat s doručením',ft_nav:'Navigace',ft_con:'Kontakt',rights:'Všechna práva vyhrazena.',t_pcs:'Počet kusů',pop_ttl:'Nejčastěji objednávané',pop_from:'od',more:'Číst dál',less:'Skrýt',feat_ttl:'Doporučujeme'},
-en:{nav_home:'Home',nav_menu:'Menu',nav_about:'About',nav_del:'Delivery',nav_con:'Contact',tagline:'Celebrate Every Day',menu_lbl:'Our Offerings',menu_ttl:'Menu',t_all:'All',t_cakes:'Cakes',t_kolace:'Pastries',t_des:'Desserts',t_drk:'Drinks',t_doplnky:'Additions',t_fav:'Favorites',t_celeb:'Celebration Cakes',celeb_h:'Wedding & Celebration Cakes',celeb_warn:'Orders accepted minimum 2 weeks in advance',celeb_p1:'We\'ll create a cake tailored to your wishes — birthdays, weddings, anniversaries or corporate events. Choose the design, flavour and size.',celeb_p2:'To place an order, please contact us by phone or email.',cart_add:'Add to Cart',cart_ttl:'Cart',cart_empty:'Your cart is empty',cart_total:'Total',cart_go:'Order with Delivery',ft_nav:'Navigation',ft_con:'Contact',rights:'All rights reserved.',t_pcs:'Pieces',pop_ttl:'Most ordered',pop_from:'from',more:'Read more',less:'Show less',feat_ttl:'We recommend'},
-uk:{nav_home:'Головна',nav_menu:'Меню',nav_about:'Про нас',nav_del:'Доставка',nav_con:'Контакти',tagline:'Святкуйте кожен день',menu_lbl:'Наша пропозиція',menu_ttl:'Меню',t_all:'Усе',t_cakes:'Торти',t_kolace:'Пироги',t_des:'Десерти',t_drk:'Напої',t_doplnky:'Доповнення',t_fav:'Улюблене',t_celeb:'Святкові торти',celeb_h:'Святкові торти та торти на день народження',celeb_warn:'Замовлення приймаємо щонайменше за 14 днів',celeb_p1:'Приготуємо торт саме таким, як ви бажаєте — на день народження, весілля, річницю чи корпоратив. Оберіть дизайн, смак і розмір.',celeb_p2:'Щоб замовити, зв’яжіться з нами телефоном або e-mailом.',cart_add:'До кошика',cart_ttl:'Кошик',cart_empty:'Кошик порожній',cart_total:'Разом',cart_go:'Замовити з доставкою',ft_nav:'Навігація',ft_con:'Контакти',rights:'Усі права захищені.',t_pcs:'Кількість штук',pop_ttl:'Найчастіше замовляють',pop_from:'від',more:'Читати далі',less:'Згорнути',feat_ttl:'Рекомендуємо'}
+cs:{nav_home:'Domů',nav_menu:'Menu',nav_about:'O nás',nav_del:'Doručení',nav_con:'Kontakt',tagline:'Oslavte každý den',menu_lbl:'Naše nabídka',menu_ttl:'Menu',t_all:'Vše',t_cakes:'Dorty',t_kolace:'Koláče',t_des:'Dezerty',t_drk:'Nápoje',t_doplnky:'Doplňky',t_fav:'Oblíbené',t_celeb:'Slavnostní dorty',celeb_h:'Slavnostní & narozeninové dorty',celeb_warn:'Objednávky přijímáme minimálně 14 dní předem',celeb_p1:'Připravíme dort přesně podle vašich přání — narozeniny, svatba, výročí nebo firemní akce. Zvolte design, chuť a velikost.',celeb_p2:'Pro objednávku nás prosím kontaktujte telefonicky nebo e-mailem.',cart_add:'Do košíku',cart_ttl:'Košík',cart_empty:'Košík je prázdný',cart_total:'Celkem',cart_go:'Objednat s doručením',ft_nav:'Navigace',ft_con:'Kontakt',rights:'Všechna práva vyhrazena.',t_pcs:'Počet kusů',pop_ttl:'Nejčastěji objednávané',pop_from:'od',sold_out:'Vyprodáno',left_n:'Zbývá {n}',pickup:'Výdej',lead_n:'Objednávka {n} dní předem',more:'Číst dál',less:'Skrýt',feat_ttl:'Doporučujeme'},
+en:{nav_home:'Home',nav_menu:'Menu',nav_about:'About',nav_del:'Delivery',nav_con:'Contact',tagline:'Celebrate Every Day',menu_lbl:'Our Offerings',menu_ttl:'Menu',t_all:'All',t_cakes:'Cakes',t_kolace:'Pastries',t_des:'Desserts',t_drk:'Drinks',t_doplnky:'Additions',t_fav:'Favorites',t_celeb:'Celebration Cakes',celeb_h:'Wedding & Celebration Cakes',celeb_warn:'Orders accepted minimum 2 weeks in advance',celeb_p1:'We\'ll create a cake tailored to your wishes — birthdays, weddings, anniversaries or corporate events. Choose the design, flavour and size.',celeb_p2:'To place an order, please contact us by phone or email.',cart_add:'Add to Cart',cart_ttl:'Cart',cart_empty:'Your cart is empty',cart_total:'Total',cart_go:'Order with Delivery',ft_nav:'Navigation',ft_con:'Contact',rights:'All rights reserved.',t_pcs:'Pieces',pop_ttl:'Most ordered',pop_from:'from',sold_out:'Sold out',left_n:'{n} left',pickup:'Pickup',lead_n:'Order {n} days ahead',more:'Read more',less:'Show less',feat_ttl:'We recommend'},
+uk:{nav_home:'Головна',nav_menu:'Меню',nav_about:'Про нас',nav_del:'Доставка',nav_con:'Контакти',tagline:'Святкуйте кожен день',menu_lbl:'Наша пропозиція',menu_ttl:'Меню',t_all:'Усе',t_cakes:'Торти',t_kolace:'Пироги',t_des:'Десерти',t_drk:'Напої',t_doplnky:'Доповнення',t_fav:'Улюблене',t_celeb:'Святкові торти',celeb_h:'Святкові торти та торти на день народження',celeb_warn:'Замовлення приймаємо щонайменше за 14 днів',celeb_p1:'Приготуємо торт саме таким, як ви бажаєте — на день народження, весілля, річницю чи корпоратив. Оберіть дизайн, смак і розмір.',celeb_p2:'Щоб замовити, зв’яжіться з нами телефоном або e-mailом.',cart_add:'До кошика',cart_ttl:'Кошик',cart_empty:'Кошик порожній',cart_total:'Разом',cart_go:'Замовити з доставкою',ft_nav:'Навігація',ft_con:'Контакти',rights:'Усі права захищені.',t_pcs:'Кількість штук',pop_ttl:'Найчастіше замовляють',pop_from:'від',sold_out:'Розпродано',left_n:'Залишилось {n}',pickup:'Видача',lead_n:'Замовлення за {n} днів',more:'Читати далі',less:'Згорнути',feat_ttl:'Рекомендуємо'}
 };
 
 let ITEMS=[
@@ -582,7 +587,7 @@ function renderPopular(){
         <div class="pop-name">${name}</div>
         <div class="pop-ft">
           <span class="pop-price">${price}</span>
-          <button class="btn-ord pop-add" onclick="${add}">${t('cart_add')}</button>
+          <button class="btn-ord pop-add" onclick="${add}" ${isSoldOut(item)?'disabled':''}>${isSoldOut(item)?t('sold_out'):t('cart_add')}</button>
         </div>
       </div>
     </div>`;
@@ -624,6 +629,7 @@ function applyLang(){
   updateCartUI();
   applyTabLabels();
   if(window.CakeReviews) CakeReviews.refresh();
+  if(window.CakeBuilder) CakeBuilder.refresh();
   setTimeout(()=>{
     document.querySelectorAll('[data-k]').forEach(el=>{
       const val=t(el.dataset.k); if(val) el.textContent=val;
@@ -650,11 +656,24 @@ const BADGE_T={
 };
 function badgeText(b){ return (BADGE_T[(b||'').trim().toLowerCase()]||{})[lang]||b; }
 
+// Item rules set in the admin: limited quantity, pickup days, minimum notice
+function isSoldOut(item){ return item && item.stock_left!=null && item.stock_left<=0; }
+function rulesHtml(item){
+  const out=[], loc={cs:'cs-CZ',en:'en-GB',uk:'uk-UA'}[lang]||'cs-CZ';
+  const d=iso=>new Date(iso+'T12:00:00').toLocaleDateString(loc,{day:'numeric',month:'short'});
+  if(item.stock_left!=null) out.push(item.stock_left>0?`<span class="m-left">${t('left_n').replace('{n}',item.stock_left)}</span>`:`<span class="m-left out">${t('sold_out')}</span>`);
+  if(item.avail_from||item.avail_to) out.push(`📅 ${t('pickup')} ${item.avail_from?d(item.avail_from):''}${item.avail_from&&item.avail_to?' – ':''}${item.avail_to?d(item.avail_to):''}`);
+  if(item.lead_days>=2) out.push(`⏳ ${t('lead_n').replace('{n}',item.lead_days)}`);
+  return out.length?`<div class="m-rules">${out.join('<br>')}</div>`:'';
+}
+
 // Prices typed in the admin as a bare number ("490") get the currency
 function fmtPrice(p){ p=String(p||'').trim(); return /^\d+$/.test(p) ? p+' Kč' : p; }
 
 // Long descriptions show 4 lines; "Read more" appears only where the text is cut
 function addReadMore(root){
+  if(window.CakeReviews&&CakeReviews.decorate) CakeReviews.decorate();
+  if(window.CakeBuilder&&!root) CakeBuilder.refresh();
   (root||document).querySelectorAll('.m-desc').forEach(p=>{
     if(p.nextElementSibling&&p.nextElementSibling.classList.contains('m-more')) return;
     if(p.scrollHeight<=p.clientHeight+2) return;
@@ -670,6 +689,7 @@ function saveCart(c){localStorage.setItem('cakeme_cart',JSON.stringify(c));}
 
 function addToCart(gi){
   const item=ITEMS[gi];
+  if(isSoldOut(item)) return;
   let price,sizeLabel='',id;
   if(item.sizes && item.sizes.length){
     const si=defSi(item);
@@ -698,6 +718,7 @@ function desQty(gi,delta){
 }
 function addToCartN(gi){
   const item=ITEMS[gi];
+  if(isSoldOut(item)) return;
   const qty=cardQty[gi]||item.qty_min||5;
   const price=parseInt(item.price);
   const id=''+gi;
@@ -774,11 +795,13 @@ function renderMenu(){
       <div class="celeb-warn">⏰ ${t('celeb_warn')}</div>
       <p class="celeb-p">${t('celeb_p1')}</p>
       <p class="celeb-p">${t('celeb_p2')}</p>
+      <div data-builder-open style="margin:6px 0 18px;display:none"></div>
       <div class="celeb-cta">
         <a href="tel:+420770612984" class="btn-ord" style="text-decoration:none">Ira — +420 770 612 984</a>
         <a href="mailto:?to=cakeme.cukrarna@seznam.cz" class="btn-ord" style="text-decoration:none;font-size:.65rem;padding:8px 14px">cakeme.cukrarna@seznam.cz</a>
       </div>
     </div>`;
+    if(window.CakeBuilder) CakeBuilder.refresh();
     return;
   }
   let list;
@@ -811,14 +834,14 @@ function cardHtml(item){
         ${item.badge?`<span class="m-badge">${badgeText(item.badge)}</span>`:''}
       </div>
       <div class="m-body">
-        <h3 class="m-name">${name}</h3>${item.weight?`<div class="m-weight">⚖ ${item.weight}</div>`:''}
+        <h3 class="m-name">${name}</h3>${item.weight?`<div class="m-weight">⚖ ${item.weight}</div>`:''}${rulesHtml(item)}<div class="m-rv" data-rv-item="${String(item.name.cs).replace(/"/g,'&quot;')}"></div>
         <p class="m-desc">${desc}</p>
         <div class="m-sizes" id="szg-${gi}">
           ${item.sizes.map((sz,i)=>`<button class="sz-btn${i===si?' on':''}" onclick="selectSize(${gi},${i})"><span class="sz-lbl">${sz.label}</span><span class="sz-price">${sz.price} Kč</span></button>`).join('')}
         </div>
         <div class="m-ft">
           <span class="m-price" id="price-${gi}">${curSz.price} Kč</span>
-          <button class="btn-ord" onclick="addToCart(${gi})">${t('cart_add')}</button>
+          <button class="btn-ord" onclick="addToCart(${gi})" ${isSoldOut(item)?'disabled':''}>${isSoldOut(item)?t('sold_out'):t('cart_add')}</button>
         </div>
       </div>
     </div>`;
@@ -830,7 +853,7 @@ function cardHtml(item){
           ${item.badge?`<span class="m-badge">${badgeText(item.badge)}</span>`:''}
         </div>
         <div class="m-body">
-          <h3 class="m-name">${name}</h3>${item.weight?`<div class="m-weight">⚖ ${item.weight}</div>`:''}
+          <h3 class="m-name">${name}</h3>${item.weight?`<div class="m-weight">⚖ ${item.weight}</div>`:''}${rulesHtml(item)}<div class="m-rv" data-rv-item="${String(item.name.cs).replace(/"/g,'&quot;')}"></div>
           <p class="m-desc">${desc}</p>
           <div class="m-ft-des">
             <div class="des-qty-row">
@@ -840,7 +863,7 @@ function cardHtml(item){
               <button class="dq-btn" onclick="desQty(${gi},1)">+</button>
               <span class="m-price">${fmtPrice(item.price)}</span>
             </div>
-            <button class="btn-ord btn-ord-full" onclick="addToCartN(${gi})">${t('cart_add')}</button>
+            <button class="btn-ord btn-ord-full" onclick="addToCartN(${gi})" ${isSoldOut(item)?'disabled':''}>${isSoldOut(item)?t('sold_out'):t('cart_add')}</button>
           </div>
         </div>
       </div>`;
@@ -851,11 +874,11 @@ function cardHtml(item){
         ${item.badge?`<span class="m-badge">${badgeText(item.badge)}</span>`:''}
       </div>
       <div class="m-body">
-        <h3 class="m-name">${name}</h3>${item.weight?`<div class="m-weight">⚖ ${item.weight}</div>`:''}
+        <h3 class="m-name">${name}</h3>${item.weight?`<div class="m-weight">⚖ ${item.weight}</div>`:''}${rulesHtml(item)}<div class="m-rv" data-rv-item="${String(item.name.cs).replace(/"/g,'&quot;')}"></div>
         <p class="m-desc">${desc}</p>
         <div class="m-ft">
           <span class="m-price">${fmtPrice(item.price)}</span>
-          <button class="btn-ord" onclick="addToCart(${gi})">${t('cart_add')}</button>
+          <button class="btn-ord" onclick="addToCart(${gi})" ${isSoldOut(item)?'disabled':''}>${isSoldOut(item)?t('sold_out'):t('cart_add')}</button>
         </div>
       </div>
     </div>`;
@@ -1006,5 +1029,6 @@ async function loadCustomMenu(){
 })();
 </script>
 <script src="reviews.js"></script>
+<script src="builder.js"></script>
 </body>
 </html>
