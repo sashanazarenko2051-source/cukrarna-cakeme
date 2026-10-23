@@ -243,6 +243,40 @@ body{font-family:'Raleway',sans-serif;background:var(--bg0);color:var(--tx0)}
 .ci-btns{display:flex;gap:3px;flex-shrink:0;align-items:center}
 /* ── ANALYTICS ── */
 .analytics-wrap{padding:28px;max-width:960px;margin:0 auto}
+/* ── Schedule ── */
+.sched-wrap{padding:28px;max-width:960px;margin:0 auto;display:grid;gap:28px}
+.sch-check{display:flex;align-items:center;gap:10px;font-size:.85rem;color:var(--tx0);margin-bottom:20px;cursor:pointer}
+.sch-check input{width:18px;height:18px;accent-color:var(--gold)}
+.sch-grid{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:24px;margin-bottom:18px}
+.sch-wd{display:flex;flex-wrap:wrap;gap:6px}
+.sch-wd label{display:flex;align-items:center;gap:6px;border:1px solid var(--bdr);padding:6px 10px;font-size:.75rem;color:var(--tx1);cursor:pointer}
+.sch-wd input{accent-color:var(--gold)}
+.sch-nums{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin-bottom:18px}
+.sch-nums label{display:flex;flex-direction:column;gap:6px;font-size:.68rem;letter-spacing:1px;text-transform:uppercase;color:var(--tx1)}
+.sch-nums input{background:var(--bg3);border:1px solid var(--bdr);color:var(--tx0);padding:9px 10px;font:.85rem 'Raleway',sans-serif;outline:none}
+.sch-nums input:focus{border-color:var(--gold)}
+.sch-legend{display:flex;flex-wrap:wrap;gap:14px;font-size:.7rem;color:var(--tx2);margin-bottom:14px}
+.sch-legend span{display:flex;align-items:center;gap:6px}
+.sch-legend i{width:14px;height:14px;display:inline-block;border:1px solid var(--bdr)}
+.sl-free{background:rgba(110,170,110,.25)}.sl-mid{background:rgba(201,169,110,.35)}.sl-full{background:rgba(224,128,128,.4)}
+.sl-closed{background:repeating-linear-gradient(45deg,transparent 0 3px,#444 3px 5px)}
+.sch-month{margin-bottom:18px}
+.sch-month-ttl{font-family:'Playfair Display',serif;color:var(--tx0);margin-bottom:8px;text-transform:capitalize}
+.sch-cal{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:3px}
+.sch-wdh{font-size:.6rem;color:var(--tx2);text-align:center;letter-spacing:1px;text-transform:uppercase}
+.sch-d{border:1px solid var(--bdr);background:var(--bg3);color:var(--tx0);padding:5px 3px;min-height:46px;cursor:pointer;font:.75rem 'Raleway',sans-serif;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;transition:.15s}
+.sch-d small{font-size:.6rem;color:var(--tx1)}
+.sch-d:hover{border-color:var(--gold)}
+.sch-d.free{background:rgba(110,170,110,.18)}.sch-d.mid{background:rgba(201,169,110,.28)}.sch-d.full{background:rgba(224,128,128,.32)}
+.sch-d.closed{background:repeating-linear-gradient(45deg,var(--bg3) 0 4px,#2c2c2c 4px 7px);color:var(--tx2)}
+.sch-d.past{opacity:.45}
+.sch-d.today{outline:1px solid var(--gold)}
+.sch-d.sel{border-color:var(--gold);box-shadow:inset 0 0 0 1px var(--gold)}
+.sch-dayinfo{margin-top:14px;padding:14px;border:1px solid var(--bdr);background:var(--bg3)}
+.sch-dayinfo h4{font-family:'Playfair Display',serif;color:var(--tx0);margin-bottom:10px;font-weight:400}
+.sch-ord{display:flex;gap:10px;font-size:.78rem;color:var(--tx1);padding:6px 0;border-bottom:1px solid var(--bdr)}
+.sch-ord b{color:var(--gold);min-width:92px;font-weight:600}
+@media(max-width:680px){ .sched-wrap{padding:14px} .sch-grid{grid-template-columns:1fr} .sch-nums{grid-template-columns:repeat(2,minmax(0,1fr))} .sch-d{min-height:40px} }
 .analytics-period{display:flex;gap:6px;margin-bottom:22px;flex-wrap:wrap}
 .ap-btn{background:transparent;border:1px solid var(--bdr);color:var(--tx2);padding:7px 16px;cursor:pointer;font:.7rem 'Raleway',sans-serif;letter-spacing:1px;text-transform:uppercase;transition:.2s}
 .ap-btn:hover,.ap-btn.on{border-color:var(--gold);color:var(--gold);background:rgba(201,169,110,.08)}
@@ -455,6 +489,7 @@ body{font-family:'Raleway',sans-serif;background:var(--bg0);color:var(--tx0)}
     <button class="amn on" data-sec="orders"><span class="amn-ic">📋</span> <span data-k="adm_orders">Objednávky</span></button>
     <button class="amn" data-sec="menu"><span class="amn-ic">🎂</span> <span data-k="adm_menu">Menu</span></button>
     <button class="amn" data-sec="analytics"><span class="amn-ic">📊</span> <span data-k="adm_analytics">Analytika</span></button>
+    <button class="amn" data-sec="schedule"><span class="amn-ic">📅</span> <span data-k="adm_schedule">Rozvrh</span></button>
   </div>
 
   <!-- ── ORDERS ── -->
@@ -655,6 +690,49 @@ body{font-family:'Raleway',sans-serif;background:var(--bg0);color:var(--tx0)}
     </div>
   </div>
 
+  <!-- ── SCHEDULE: free days / time intervals customers can book ── -->
+  <div id="secSchedule" style="display:none">
+    <div class="sched-wrap">
+      <div class="menu-panel">
+        <h3><span data-k="adm_sch_title">Termíny doručení a převzetí</span><span class="lay-saved" id="schSaved"></span></h3>
+        <label class="sch-check"><input type="checkbox" id="schEnabled"> <span data-k="adm_sch_enabled">Zákazník vybírá den a čas z volných termínů</span></label>
+        <div class="sch-grid">
+          <div>
+            <div class="cat-mgr-title" data-k="adm_sch_weekdays">Pracovní dny</div>
+            <div class="sch-wd" id="schWeekdays"></div>
+          </div>
+          <div>
+            <div class="cat-mgr-title" data-k="adm_sch_times">Časové intervaly</div>
+            <div class="cat-mgr-list" id="schTimes"></div>
+            <div class="cat-add-row">
+              <input type="text" id="schTimeInput" placeholder="10:00-12:00">
+              <button type="button" class="cat-add-btn" id="schTimeAdd" data-k="adm_add_btn">+ Přidat</button>
+            </div>
+          </div>
+        </div>
+        <div class="sch-nums">
+          <label><span data-k="adm_sch_per_slot">Objednávek na interval</span><input type="number" id="schPerSlot" min="1" max="500"></label>
+          <label><span data-k="adm_sch_per_day">Objednávek za den</span><input type="number" id="schPerDay" min="1" max="2000"></label>
+          <label><span data-k="adm_sch_ahead">Dní dopředu</span><input type="number" id="schAhead" min="1" max="180"></label>
+          <label><span data-k="adm_sch_lead">Nejdříve za (dní)</span><input type="number" id="schLead" min="0" max="60"></label>
+        </div>
+        <button type="button" class="btn-add-item" id="schSave" data-k="adm_save_btn">✓ Uložit změny</button>
+      </div>
+      <div class="menu-panel">
+        <h3 data-k="adm_sch_cal">Obsazenost</h3>
+        <p class="lay-hint" data-k="adm_sch_cal_hint">2 měsíce zpět a 2 měsíce dopředu. Klikněte na den: uvidíte objednávky a můžete den zavřít nebo otevřít.</p>
+        <div class="sch-legend">
+          <span><i class="sl-free"></i><span data-k="adm_sch_l_free">volno</span></span>
+          <span><i class="sl-mid"></i><span data-k="adm_sch_l_mid">částečně</span></span>
+          <span><i class="sl-full"></i><span data-k="adm_sch_l_full">plno</span></span>
+          <span><i class="sl-closed"></i><span data-k="adm_sch_l_closed">zavřeno</span></span>
+        </div>
+        <div id="schCal"></div>
+        <div id="schDay"></div>
+      </div>
+    </div>
+  </div>
+
   <!-- ── ANALYTICS ── -->
   <div id="secAnalytics" style="display:none">
     <div class="analytics-wrap">
@@ -840,6 +918,7 @@ const TA = {
     adm_drag_hint:'Pořadí položek: táhněte myší nebo použijte šipky ⤒ ▲ ▼. Stejné pořadí uvidí zákazníci.',
     adm_lay_saved:'✓ Uloženo', adm_lay_err:'Neuloženo — zkuste znovu',
     adm_tab_all:'Vše', adm_tab_fav:'Oblíbené', adm_tab_celeb:'Slavnostní dorty',
+    adm_schedule:'Rozvrh', adm_sch_title:'Termíny doručení a převzetí', adm_sch_enabled:'Zákazník vybírá den a čas z volných termínů', adm_sch_weekdays:'Pracovní dny', adm_sch_times:'Časové intervaly', adm_sch_per_slot:'Objednávek na interval', adm_sch_per_day:'Objednávek za den', adm_sch_ahead:'Dní dopředu', adm_sch_lead:'Nejdříve za (dní)', adm_sch_cal:'Obsazenost', adm_sch_cal_hint:'2 měsíce zpět a 2 měsíce dopředu. Klikněte na den: uvidíte objednávky a můžete den zavřít nebo otevřít.', adm_sch_l_free:'volno', adm_sch_l_mid:'částečně', adm_sch_l_full:'plno', adm_sch_l_closed:'zavřeno', adm_sch_orders:'objednávek: {n}', adm_sch_no_orders:'Na tento den nejsou žádné objednávky.', adm_sch_off_day:'Tento den v týdnu je nepracovní (nastavení výše).', adm_sch_open:'Otevřít den', adm_sch_close:'Zavřít den',
     adm_ph_name:'Název česky', adm_ph_desc:'Krátký popis česky', adm_ph_section:'Název sekce (např. Sezónní)', adm_ph_size:'Název velikosti', adm_prev_name:'Název položky', adm_prev_desc:'Popis…', adm_tt_pieces:'Prodej na kusy (+/−)', adm_tt_rot_l:'Otočit doleva', adm_tt_rot_r:'Otočit doprava', adm_tt_push_test:'Otestovat notifikaci', adm_tt_push_on:'Zapnout notifikace o nových objednávkách', adm_tt_push_denied:'Notifikace zablokovány v prohlížeči — povolte v nastavení prohlížeče', adm_tt_push_both:'Notifikace zapnuty (Push + kontrola) — klikněte pro vypnutí push', adm_tt_push_polling:'Notifikace zapnuty (kontrola) — klikněte pro zapnutí push', adm_err_prefix:'Chyba: ', adm_push_ok_title:'Notifikace zapnuty! 🔔', adm_push_ok_body:'Budete dostávat upozornění o nových objednávkách.', adm_push_err:'Chyba při zapínání notifikací: ', adm_push_blocked:'Notifikace jsou zablokovány v prohlížeči. Povolte je v nastavení prohlížeče a obnovte stránku.',
     adm_feat_title:'Doporučujeme — úplně nahoře v menu',
     adm_feat_hint:'Velké karty nad všemi sekcemi — zákazník je uvidí jako první. Přidat: vyberte níže a „+ Přidat“, nebo ⭐ u položky. Odebrat: ✕.',
@@ -906,6 +985,7 @@ const TA = {
     adm_drag_hint:'Item order: drag with the mouse or use the arrows ⤒ ▲ ▼. Customers see the same order.',
     adm_lay_saved:'✓ Saved', adm_lay_err:'Not saved — try again',
     adm_tab_all:'All', adm_tab_fav:'Favorites', adm_tab_celeb:'Celebration cakes',
+    adm_schedule:'Schedule', adm_sch_title:'Delivery and pickup times', adm_sch_enabled:'Customers choose a day and time from free slots', adm_sch_weekdays:'Working days', adm_sch_times:'Time intervals', adm_sch_per_slot:'Orders per interval', adm_sch_per_day:'Orders per day', adm_sch_ahead:'Days ahead', adm_sch_lead:'Earliest in (days)', adm_sch_cal:'Occupancy', adm_sch_cal_hint:'2 months back and 2 months ahead. Click a day to see its orders and to close or open it.', adm_sch_l_free:'free', adm_sch_l_mid:'partly booked', adm_sch_l_full:'full', adm_sch_l_closed:'closed', adm_sch_orders:'orders: {n}', adm_sch_no_orders:'No orders for this day.', adm_sch_off_day:'This weekday is a day off (settings above).', adm_sch_open:'Open day', adm_sch_close:'Close day',
     adm_ph_name:'Name in Czech', adm_ph_desc:'Short description in Czech', adm_ph_section:'Section name (e.g. Seasonal)', adm_ph_size:'Size name', adm_prev_name:'Item name', adm_prev_desc:'Description…', adm_tt_pieces:'Sold by the piece (+/−)', adm_tt_rot_l:'Rotate left', adm_tt_rot_r:'Rotate right', adm_tt_push_test:'Test notification', adm_tt_push_on:'Turn on new-order notifications', adm_tt_push_denied:'Notifications are blocked in the browser — allow them in browser settings', adm_tt_push_both:'Notifications on (push + polling) — click to turn push off', adm_tt_push_polling:'Notifications on (polling) — click to turn push on', adm_err_prefix:'Error: ', adm_push_ok_title:'Notifications on! 🔔', adm_push_ok_body:'You will be notified about new orders.', adm_push_err:'Could not turn on notifications: ', adm_push_blocked:'Notifications are blocked in the browser. Allow them in browser settings and reload the page.',
     adm_feat_title:'We recommend — at the very top of the menu',
     adm_feat_hint:'Large cards above all sections — customers see them first. Add: pick below and “+ Add”, or ⭐ on an item. Remove: ✕.',
@@ -974,6 +1054,7 @@ const TA = {
     adm_drag_hint:'Порядок позицій: перетягуйте мишкою або натискайте стрілки ⤒ ▲ ▼. Клієнти бачать такий самий порядок.',
     adm_lay_saved:'✓ Збережено', adm_lay_err:'Не збережено — спробуйте ще раз',
     adm_tab_all:'Усі', adm_tab_fav:'Улюблені', adm_tab_celeb:'Святкові торти',
+    adm_schedule:'Розклад', adm_sch_title:'Дати й час доставки та отримання', adm_sch_enabled:'Клієнт обирає день і час із вільних слотів', adm_sch_weekdays:'Робочі дні', adm_sch_times:'Часові інтервали', adm_sch_per_slot:'Замовлень на інтервал', adm_sch_per_day:'Замовлень на день', adm_sch_ahead:'Днів наперед', adm_sch_lead:'Найраніше через (днів)', adm_sch_cal:'Зайнятість', adm_sch_cal_hint:'2 місяці назад і 2 місяці вперед. Натисніть на день: побачите замовлення й зможете закрити або відкрити день.', adm_sch_l_free:'вільно', adm_sch_l_mid:'частково', adm_sch_l_full:'зайнято', adm_sch_l_closed:'зачинено', adm_sch_orders:'замовлень: {n}', adm_sch_no_orders:'На цей день замовлень немає.', adm_sch_off_day:'Цей день тижня вихідний (налаштування вище).', adm_sch_open:'Відкрити день', adm_sch_close:'Закрити день',
     adm_ph_name:'Назва чеською', adm_ph_desc:'Короткий опис чеською', adm_ph_section:'Назва розділу (напр. Сезонне)', adm_ph_size:'Назва розміру', adm_prev_name:'Назва позиції', adm_prev_desc:'Опис…', adm_tt_pieces:'Продаж поштучно (+/−)', adm_tt_rot_l:'Повернути ліворуч', adm_tt_rot_r:'Повернути праворуч', adm_tt_push_test:'Перевірити сповіщення', adm_tt_push_on:'Увімкнути сповіщення про нові замовлення', adm_tt_push_denied:'Сповіщення заблоковані в браузері — дозвольте їх у налаштуваннях браузера', adm_tt_push_both:'Сповіщення увімкнені (push + перевірка) — натисніть, щоб вимкнути push', adm_tt_push_polling:'Сповіщення увімкнені (перевірка) — натисніть, щоб увімкнути push', adm_err_prefix:'Помилка: ', adm_push_ok_title:'Сповіщення увімкнено! 🔔', adm_push_ok_body:'Ви отримуватимете сповіщення про нові замовлення.', adm_push_err:'Не вдалося увімкнути сповіщення: ', adm_push_blocked:'Сповіщення заблоковані в браузері. Дозвольте їх у налаштуваннях браузера й оновіть сторінку.',
     adm_feat_title:'Рекомендуємо — на самому верху меню',
     adm_feat_hint:'Великі картки над усіма розділами — клієнт побачить їх першими. Додати: оберіть нижче і «+ Додати» або ⭐ біля позиції. Прибрати: ✕.',
@@ -1012,6 +1093,7 @@ function applyAdminLang(){
   if(activeSection === 'orders') renderOrders();
   if(activeSection === 'menu' && cachedMenuItems !== null) renderMenuItems(cachedMenuItems);
   if(activeSection === 'analytics') renderAnalytics();
+  if(activeSection === 'schedule' && schCfg) renderSchedule();
 }
 
 document.querySelectorAll('.adm-lang').forEach(btn => {
@@ -1077,6 +1159,7 @@ document.getElementById('logoutBtn').addEventListener('click', ()=>{
 
 document.getElementById('refreshBtn').addEventListener('click', ()=>{
   if(activeSection==='orders') renderOrders();
+  else if(activeSection==='schedule') loadSchedule();
   else loadMenuItems();
 });
 
@@ -1166,6 +1249,8 @@ document.querySelectorAll('.amn').forEach(btn => btn.addEventListener('click', (
   document.getElementById('secOrders').style.display    = activeSection==='orders'    ? '' : 'none';
   document.getElementById('secMenu').style.display      = activeSection==='menu'      ? '' : 'none';
   document.getElementById('secAnalytics').style.display = activeSection==='analytics' ? '' : 'none';
+  document.getElementById('secSchedule').style.display  = activeSection==='schedule'  ? '' : 'none';
+  if(activeSection==='schedule') loadSchedule();
   if(activeSection==='menu'){ Promise.all([loadCategories(), loadStaticFavs(), loadHiddenStatics(), loadMenuLayout()]).then(()=>loadMenuItems()); }
   if(activeSection==='analytics') renderAnalytics();
 }));
@@ -2684,6 +2769,150 @@ document.getElementById('pushBtn').addEventListener('click', async ()=>{
   if(!_swReg) await _initPush();
   if(_pushSub){ await _unsubscribePush(); } else { await _subscribePush(); }
 });
+
+/* ── Schedule: settings for the customer's day/time picker + occupancy calendar ──
+   Occupancy comes from the orders list (delivery_date / delivery_time), shown
+   2 months back and 2 months ahead. */
+var schCfg = null;   // var: applyAdminLang may check it before this line runs
+let schSelDay = '';
+const SCH_LOCALE = {cs:'cs-CZ', en:'en-GB', uk:'uk-UA'};
+
+function _isoDay(d){ return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0'); }
+function _wdNames(){ return [...Array(7)].map((_,i)=>new Date(2024,0,1+i).toLocaleDateString(SCH_LOCALE[adminLang]||'cs-CZ',{weekday:'short'})); }
+
+async function loadSchedule(){
+  try{
+    const [cr] = await Promise.all([fetch('/api/slot-config'), loadOrders()]);
+    if(cr.ok) schCfg = await cr.json();
+  }catch{}
+  if(schCfg) renderSchedule();
+}
+
+function renderSchedule(){
+  const c = schCfg;
+  document.getElementById('schEnabled').checked = !!c.enabled;
+  document.getElementById('schWeekdays').innerHTML = _wdNames().map((n,i)=>
+    `<label><input type="checkbox" value="${i}" ${c.weekdays.includes(i)?'checked':''}>${esc(n)}</label>`).join('');
+  document.getElementById('schTimes').innerHTML = c.times.length ? c.times.map(tm=>
+    `<span class="cat-tag">${tm.replace('-','–')}<button class="cat-tag-del" onclick="schRemoveTime('${tm}')" title="${t('adm_btn_delete')}">×</button></span>`).join('')
+    : '<span style="font-size:.72rem;color:var(--tx2)">—</span>';
+  document.getElementById('schPerSlot').value = c.per_slot;
+  document.getElementById('schPerDay').value = c.per_day;
+  document.getElementById('schAhead').value = c.days_ahead;
+  document.getElementById('schLead').value = c.min_lead_days;
+  renderScheduleCal();
+}
+
+function _schCounts(){
+  // Same rule as the server: unpaid online orders older than 30 minutes don't hold a place
+  const stale = Date.now() - 30*60*1000, byDay = {};
+  (ordersCache||[]).forEach(o=>{
+    if(!o.delivery_date) return;
+    if(o.status==='pending_payment' && new Date(o.ts).getTime() < stale) return;
+    (byDay[o.delivery_date] = byDay[o.delivery_date] || []).push(o);
+  });
+  return byDay;
+}
+
+function renderScheduleCal(){
+  const c = schCfg, byDay = _schCounts(), today = _isoDay(new Date());
+  const keep = c.keep_days || 60;
+  const from = new Date(); from.setDate(from.getDate()-keep);
+  const to = new Date(); to.setDate(to.getDate()+Math.max(keep, c.days_ahead));
+  const wd = _wdNames();
+  let html = '', cur = new Date(from.getFullYear(), from.getMonth(), 1);
+  while(cur <= to){
+    const y = cur.getFullYear(), m = cur.getMonth(), days = new Date(y, m+1, 0).getDate();
+    html += `<div class="sch-month"><div class="sch-month-ttl">${cur.toLocaleDateString(SCH_LOCALE[adminLang]||'cs-CZ',{month:'long',year:'numeric'})}</div><div class="sch-cal">`
+      + wd.map(n=>`<div class="sch-wdh">${esc(n)}</div>`).join('') + '<div></div>'.repeat((new Date(y,m,1).getDay()+6)%7);
+    for(let d=1; d<=days; d++){
+      const dt = new Date(y, m, d), iso = _isoDay(dt);
+      if(dt < new Date(from.getFullYear(), from.getMonth(), from.getDate()) || dt > to){ html += '<div></div>'; continue; }
+      const n = (byDay[iso]||[]).length;
+      const closed = !c.weekdays.includes((dt.getDay()+6)%7) || c.closed.includes(iso);
+      const cls = ['sch-d', closed ? 'closed' : n >= c.per_day ? 'full' : n >= c.per_day/2 ? 'mid' : n ? 'free' : ''];
+      if(iso < today) cls.push('past');
+      if(iso === today) cls.push('today');
+      if(iso === schSelDay) cls.push('sel');
+      html += `<button type="button" class="${cls.join(' ')}" onclick="schPickDay('${iso}')">${d}<small>${n ? n+'/'+c.per_day : (closed ? '✕' : '')}</small></button>`;
+    }
+    html += '</div></div>';
+    cur = new Date(y, m+1, 1);
+  }
+  document.getElementById('schCal').innerHTML = html;
+  renderScheduleDay();
+}
+
+function renderScheduleDay(){
+  const box = document.getElementById('schDay');
+  if(!schSelDay){ box.innerHTML = ''; return; }
+  const c = schCfg, list = (_schCounts()[schSelDay]||[]).slice().sort((a,b)=>(a.delivery_time||'').localeCompare(b.delivery_time||''));
+  const dt = new Date(schSelDay+'T12:00:00');
+  const offDay = !c.weekdays.includes((dt.getDay()+6)%7);
+  const closed = c.closed.includes(schSelDay);
+  const title = dt.toLocaleDateString(SCH_LOCALE[adminLang]||'cs-CZ',{weekday:'long', day:'numeric', month:'long'});
+  const canToggle = schSelDay >= _isoDay(new Date()) && !offDay;
+  box.innerHTML = `<div class="sch-dayinfo">
+      <h4>${esc(title)} · ${t('adm_sch_orders', {n: list.length})}</h4>
+      ${list.length ? list.map(o=>`<div class="sch-ord"><b>${esc((o.delivery_time||'—').replace('-','–'))}</b><span>${esc(o.name||'')} · ${esc(statusLbl(o.status))}</span></div>`).join('')
+        : `<p class="lay-empty">${t('adm_sch_no_orders')}</p>`}
+      ${offDay ? `<p class="lay-hint" style="margin-top:10px">${t('adm_sch_off_day')}</p>` : ''}
+      ${canToggle ? `<button type="button" class="cat-add-btn" style="margin-top:12px" onclick="schToggleClosed('${schSelDay}')">${closed ? t('adm_sch_open') : t('adm_sch_close')}</button>` : ''}
+    </div>`;
+}
+
+function schPickDay(iso){ schSelDay = iso; renderScheduleCal(); }
+
+function schToggleClosed(iso){
+  const set = new Set(schCfg.closed);
+  set.has(iso) ? set.delete(iso) : set.add(iso);
+  schCfg.closed = [...set].sort();
+  saveSchedule();
+}
+
+function schRemoveTime(tm){
+  schCfg.times = schCfg.times.filter(x=>x!==tm);
+  renderSchedule();
+}
+
+document.getElementById('schTimeAdd').addEventListener('click', ()=>{
+  const input = document.getElementById('schTimeInput');
+  const v = input.value.replace(/\s/g,'').replace('–','-');
+  const m = v.match(/^(\d{1,2}):(\d{2})-(\d{1,2}):(\d{2})$/);
+  if(!m){ input.focus(); return; }
+  const tm = m[1].padStart(2,'0')+':'+m[2]+'-'+m[3].padStart(2,'0')+':'+m[4];
+  if(tm.slice(0,5) >= tm.slice(6)){ input.focus(); return; }
+  if(!schCfg.times.includes(tm)) schCfg.times = [...schCfg.times, tm].sort();
+  input.value = '';
+  renderSchedule();
+});
+document.getElementById('schTimeInput').addEventListener('keydown', e=>{ if(e.key==='Enter') document.getElementById('schTimeAdd').click(); });
+
+function _readScheduleForm(){
+  schCfg.enabled = document.getElementById('schEnabled').checked;
+  schCfg.weekdays = [...document.querySelectorAll('#schWeekdays input:checked')].map(i=>+i.value);
+  schCfg.per_slot = parseInt(document.getElementById('schPerSlot').value)||schCfg.per_slot;
+  schCfg.per_day = parseInt(document.getElementById('schPerDay').value)||schCfg.per_day;
+  schCfg.days_ahead = parseInt(document.getElementById('schAhead').value)||schCfg.days_ahead;
+  const lead = parseInt(document.getElementById('schLead').value);
+  schCfg.min_lead_days = isNaN(lead) ? schCfg.min_lead_days : lead;
+}
+
+async function saveSchedule(){
+  _readScheduleForm();
+  const flag = document.getElementById('schSaved');
+  try{
+    const r = await fetch('/api/slot-config', {method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({token: sessionStorage.getItem('cm_token')||'', config: schCfg})});
+    if(r.status===401){ handleExpired(); return; }
+    const j = await r.json();
+    if(r.ok && j.config){ schCfg = {...j.config, keep_days: schCfg.keep_days}; flag.textContent = t('adm_lay_saved'); }
+    else flag.textContent = t('adm_lay_err');
+  }catch{ flag.textContent = t('adm_lay_err'); }
+  flag.classList.add('on'); setTimeout(()=>flag.classList.remove('on'), 1800);
+  renderSchedule();
+}
+document.getElementById('schSave').addEventListener('click', saveSchedule);
 
 // Everything is defined now: fill the card preview and push button in the chosen language
 updateCardPreview();

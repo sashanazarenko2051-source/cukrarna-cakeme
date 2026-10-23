@@ -811,6 +811,132 @@ def _price_cart(conn, cart):
 def _priced_order_text(lines, total):
     return ', '.join(lines) + f' | Celkem: {total} Kč'
 
+# ── Delivery/pickup slots ─────────────────────────────────────────────────────
+# Customers pick a day within the next `days_ahead` days (2 months) and a time
+# interval with free capacity. Capacity is counted from existing orders, so no
+# separate bookings table is needed. Closed days older than 2 months are dropped.
+import datetime as _dt
+try:
+    from zoneinfo import ZoneInfo
+    _TZ = ZoneInfo('Europe/Prague')
+except Exception:
+    _TZ = _dt.timezone(_dt.timedelta(hours=1))
+
+_SLOT_DEFAULT = {
+    'enabled': True,
+    'days_ahead': 60,       # how far ahead customers can book (2 months)
+    'min_lead_days': 1,     # earliest day: tomorrow
+    'weekdays': [0, 1, 2, 3, 4, 5, 6],  # Mon=0 … Sun=6
+    'times': ['09:00-11:00', '11:00-13:00', '13:00-15:00', '15:00-17:00', '17:00-20:00'],
+    'per_slot': 3,          # orders per interval
+    'per_day': 12,          # orders per day
+    'closed': [],           # YYYY-MM-DD days off
+}
+_SLOT_KEEP_DAYS = 60        # closed days and the admin schedule go 2 months back
+_TIME_RE = re.compile(r'^([01]\d|2[0-3]):[0-5]\d-([01]\d|2[0-3]):[0-5]\d$')
+_DATE_RE = re.compile(r'^\d{4}-\d{2}-\d{2}$')
+
+def _today():
+    return _dt.datetime.now(_TZ).date()
+
+def _clean_slot_cfg(raw):
+    cfg = dict(_SLOT_DEFAULT)
+    raw = raw if isinstance(raw, dict) else {}
+    num = lambda v, lo, hi, dflt: max(lo, min(hi, _lead_int(v))) if _lead_int(v) is not None else dflt
+    cfg['enabled'] = bool(raw.get('enabled', cfg['enabled']))
+    cfg['days_ahead'] = num(raw.get('days_ahead'), 1, 180, cfg['days_ahead'])
+    cfg['min_lead_days'] = num(raw.get('min_lead_days'), 0, 60, cfg['min_lead_days'])
+    cfg['per_slot'] = num(raw.get('per_slot'), 1, 500, cfg['per_slot'])
+    cfg['per_day'] = num(raw.get('per_day'), 1, 2000, cfg['per_day'])
+    if isinstance(raw.get('weekdays'), list):
+        cfg['weekdays'] = sorted({int(w) for w in raw['weekdays'] if str(w).isdigit() and 0 <= int(w) <= 6})
+    if isinstance(raw.get('times'), list):
+        times = [str(t).replace(' ', '').replace('–', '-') for t in raw['times']]
+        cfg['times'] = sorted({t for t in times if _TIME_RE.match(t) and t[:5] < t[6:]})[:24]
+    oldest = (_today() - _dt.timedelta(days=_SLOT_KEEP_DAYS)).isoformat()
+    cfg['closed'] = sorted({str(c) for c in (raw.get('closed') or []) if _DATE_RE.match(str(c)) and str(c) >= oldest})
+    return cfg
+
+def _slot_cfg(conn):
+    row = conn.execute("SELECT value FROM settings WHERE key='slot_config'").fetchone()
+    return _clean_slot_cfg(_json.loads(row[0]) if row and row[0] else {})
+
+def _slot_counts(conn, start, end):
+    """Orders per (date, time) and per date between start and end (ISO dates).
+    Unpaid online orders hold their place for 30 minutes, then free it."""
+    rows = conn.execute(
+        'SELECT delivery_date, delivery_time, status, ts FROM orders WHERE delivery_date >= %s AND delivery_date <= %s',
+        (start, end)).fetchall()
+    stale = time.strftime('%Y-%m-%dT%H:%M:%SZ', time.gmtime(time.time() - 1800))
+    by_slot, by_day = defaultdict(int), defaultdict(int)
+    for date, tm, status, ts in rows:
+        if status == 'pending_payment' and (ts or '') < stale:
+            continue
+        by_slot[(date, tm)] += 1
+        by_day[date] += 1
+    return by_slot, by_day
+
+def _slot_days(conn, cfg):
+    """Bookable days from the earliest allowed date up to days_ahead, with free places."""
+    today = _today()
+    first = today + _dt.timedelta(days=cfg['min_lead_days'])
+    last = today + _dt.timedelta(days=cfg['days_ahead'])
+    by_slot, by_day = _slot_counts(conn, first.isoformat(), last.isoformat())
+    now_hm = _dt.datetime.now(_TZ).strftime('%H:%M')
+    days, d = [], first
+    while d <= last:
+        iso = d.isoformat()
+        open_day = d.weekday() in cfg['weekdays'] and iso not in cfg['closed']
+        day_left = max(0, cfg['per_day'] - by_day[iso])
+        slots = []
+        if open_day:
+            for tm in cfg['times']:
+                if d == today and tm[:5] <= now_hm:
+                    continue  # interval already started today
+                slots.append({'time': tm, 'left': min(day_left, max(0, cfg['per_slot'] - by_slot[(iso, tm)]))})
+        days.append({'date': iso, 'open': open_day and day_left > 0 and any(s['left'] for s in slots), 'slots': slots})
+        d += _dt.timedelta(days=1)
+    return days
+
+def _check_slot(conn, date, tm):
+    """None if the order may take this date/time, otherwise an error code."""
+    cfg = _slot_cfg(conn)
+    if not cfg['enabled']:
+        return None
+    day = next((x for x in _slot_days(conn, cfg) if x['date'] == date), None)
+    if not day or not day['open']:
+        return 'slot_unavailable'
+    slot = next((s for s in day['slots'] if s['time'] == tm), None)
+    if not slot or slot['left'] < 1:
+        return 'slot_full'
+    return None
+
+@app.get('/api/slots')
+def api_slots():
+    with _get_pool().connection() as conn:
+        cfg = _slot_cfg(conn)
+        if not cfg['enabled']:
+            return {'enabled': False, 'days': []}
+        return {'enabled': True, 'days': _slot_days(conn, cfg)}
+
+@app.get('/api/slot-config')
+def api_slot_config_get():
+    with _get_pool().connection() as conn:
+        return {**_slot_cfg(conn), 'keep_days': _SLOT_KEEP_DAYS}
+
+@app.post('/api/slot-config')
+async def api_slot_config_set(req: Request):
+    d = await req.json()
+    if not _verify_token(d.get('token')):
+        raise HTTPException(401, 'Unauthorized')
+    cfg = _clean_slot_cfg(d.get('config'))
+    with _get_pool().connection() as conn:
+        conn.execute(
+            "INSERT INTO settings(key,value) VALUES('slot_config',%s) ON CONFLICT(key) DO UPDATE SET value=EXCLUDED.value",
+            (_json.dumps(cfg),)
+        )
+    return {'ok': True, 'config': cfg}
+
 # ── /api/order ────────────────────────────────────────────────────────────────
 # Orders come from a public form: cap field sizes so nobody can push megabytes
 # into the DB and the Telegram/ntfy notifications.
@@ -838,6 +964,9 @@ async def api_order(req: Request, bg: BackgroundTasks):
         'status':        'new',
     }
     with _get_pool().connection() as conn:
+        err = _check_slot(conn, order['delivery_date'], order['delivery_time'])
+        if err:
+            raise HTTPException(409, {'error': err})
         # Pay-on-delivery: use server prices when every line is known, otherwise keep
         # the customer's text so the order still arrives (staff check it anyway)
         if d.get('cart'):
@@ -906,6 +1035,9 @@ async def api_create_checkout(req: Request):
     # The amount comes from server prices, never from the browser's total_czk
     with _get_pool().connection() as conn:
         lines, total_czk, unknown = _price_cart(conn, d.get('cart'))
+        slot_err = _check_slot(conn, (d.get('delivery_date') or '').strip(), (d.get('delivery_time') or '').strip())
+    if slot_err:
+        raise HTTPException(409, {'error': slot_err})
     if unknown:
         raise HTTPException(409, {'error': 'unknown_items', 'items': unknown})
     if total_czk < 1:
