@@ -119,6 +119,14 @@ footer{background:#070707;border-top:1px solid var(--bdr);padding:52px 0 28px}
 .ord-form-wrap{margin-top:48px;padding:48px;background:var(--bg3);border:1px solid var(--bdr)}
 .ord-form-wrap h3{font-family:'Playfair Display',serif;font-size:2.6rem;color:var(--tx0);margin-bottom:10px;text-align:center}
 .ord-form-wrap>p{color:var(--tx2);margin-bottom:32px;font-size:1.05rem;text-align:center}
+.bday-box{border:1px dashed var(--gold-d);padding:14px 16px;background:rgba(201,169,110,.04)}
+.bday-check{display:flex;align-items:center;gap:10px;cursor:pointer;color:var(--tx0);font-size:.9rem;text-transform:none;letter-spacing:0}
+.bday-check input{width:18px;height:18px;accent-color:var(--gold);flex-shrink:0}
+.bday-fields{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:12px;margin-top:12px}
+.bday-fields label{display:flex;flex-direction:column;gap:6px}
+.bday-fields .date-note{grid-column:1/-1}
+.bday-date{display:flex;gap:6px}.bday-date select{flex:1;min-width:0}
+@media(max-width:600px){ .bday-fields{grid-template-columns:1fr} }
 .ask-box{border:1px solid var(--gold-d);background:rgba(201,169,110,.06);padding:16px 20px;margin:-12px 0 32px;text-align:center}
 .ask-ttl{display:block;color:var(--tx1);font-size:.9rem;margin-bottom:12px}
 .ask-links{display:flex;flex-wrap:wrap;justify-content:center;gap:8px}
@@ -462,6 +470,16 @@ input[type="date"]::-webkit-calendar-picker-indicator:hover{opacity:1}
           <div id="cartBox" class="cart-del-box"></div>
           <input type="hidden" name="order" id="cartHidden">
         </div>
+        <!-- Optional birthday reminder (shown only when switched on in the admin) -->
+        <div class="ord-field full bday-box" id="bdayBox" style="display:none">
+          <label class="bday-check"><input type="checkbox" id="bdayOptin"> <span id="bdayOptinTxt"></span></label>
+          <div class="bday-fields" id="bdayFields" style="display:none">
+            <label><span data-k="f_bday_email">E-mail</span><input type="email" id="bdayEmail" maxlength="254" autocomplete="email"></label>
+            <label><span data-k="f_bday_date">Datum narozenin</span>
+              <span class="bday-date"><select id="bdayDay"></select><select id="bdayMonth"></select></span></label>
+            <small class="date-note" data-k="f_bday_note">Jeden e-mail ročně. Odhlásit se můžete odkazem v každém e-mailu. Rok narození nepotřebujeme.</small>
+          </div>
+        </div>
         <div class="ord-submit">
           <button type="submit" data-k="f_submit">Objednat</button>
         </div>
@@ -582,7 +600,7 @@ cs:{nav_home:'Domů',nav_menu:'Menu',nav_about:'O nás',nav_del:'Doručení',nav
   f_table:'Stůl', f_type:'Způsob objednávky',ot_delivery:'Doručení domů',ot_instore:'Osobní odběr',
   f_pay:'Způsob platby',f_pay_cash:'Hotově',f_pay_card:'Kartou',f_pay_split:'50 % hotově + 50 % kartou',
   pay_ttl:'Platební podmínky',pay_dep:'Záloha 50 % z celkové ceny objednávky je splatná bankovním převodem při potvrzení. Zbývajících 50 % hradíte při převzetí.',pay_acc:'Číslo účtu',
-  f_submit:'Objednat',f_redirecting:'Přesměrování na platbu...',f_ok:'Děkujeme! Vaši objednávku jsme přijali.',f_err:'Chyba. Zkuste to znovu nebo zavolejte.',f_pay_builder:'Dort na zakázku: záloha 50 % kartou při objednávce.',f_rule_earliest:'Pro vaši objednávku nejdříve {d}.',f_rule_window:'Výdej předobjednávky: {a} – {b}.',f_err_early:'Tento dort lze připravit nejdříve na {d}. Vyberte prosím pozdější den.',f_err_window:'Předobjednávku lze vyzvednout jen {a} – {b}.',f_err_soldout:'Některé položky jsou vyprodané nebo jich zbývá méně (zbývá):',ask_ttl:'Máte dotaz k ceně nebo objednávce? Napište nebo zavolejte:',f_pick_day:'Nejprve vyberte den v kalendáři.',f_pick_slot:'Vyberte prosím den a čas doručení / převzetí.',f_slot_left:'volno: {n}',f_slot_full:'obsazeno',f_slot_taken:'Vybraný termín se mezitím obsadil. Vyberte prosím jiný.',f_slot_note:'Volné termíny na 2 měsíce dopředu. Šedé dny jsou plně obsazené nebo zavřené.',f_err_items:'Některé položky v košíku už nejsou v menu nebo se změnily. Odeberte je a přidejte znovu z menu:',
+  f_submit:'Objednat',f_redirecting:'Přesměrování na platbu...',f_ok:'Děkujeme! Vaši objednávku jsme přijali.',f_err:'Chyba. Zkuste to znovu nebo zavolejte.',f_pay_builder:'Dort na zakázku: záloha 50 % kartou při objednávce.',f_rule_earliest:'Pro vaši objednávku nejdříve {d}.',f_rule_window:'Výdej předobjednávky: {a} – {b}.',f_err_early:'Tento dort lze připravit nejdříve na {d}. Vyberte prosím pozdější den.',f_err_window:'Předobjednávku lze vyzvednout jen {a} – {b}.',f_err_soldout:'Některé položky jsou vyprodané nebo jich zbývá méně (zbývá):',ask_ttl:'Máte dotaz k ceně nebo objednávce? Napište nebo zavolejte:',f_bday_optin:'Připomeňte mi narozeniny — pošlete mi e-mail {d} dní předem',f_bday_email:'E-mail',f_bday_date:'Datum narozenin',f_bday_note:'Jeden e-mail ročně. Odhlásit se můžete odkazem v každém e-mailu. Rok narození nepotřebujeme.',f_bday_day:'Den',f_bday_month:'Měsíc',f_bday_need:'Pro připomínku narozenin vyplňte e-mail, den a měsíc — nebo políčko odškrtněte.',f_pick_day:'Nejprve vyberte den v kalendáři.',f_pick_slot:'Vyberte prosím den a čas doručení / převzetí.',f_slot_left:'volno: {n}',f_slot_full:'obsazeno',f_slot_taken:'Vybraný termín se mezitím obsadil. Vyberte prosím jiný.',f_slot_note:'Volné termíny na 2 měsíce dopředu. Šedé dny jsou plně obsazené nebo zavřené.',f_err_items:'Některé položky v košíku už nejsou v menu nebo se změnily. Odeberte je a přidejte znovu z menu:',
   ft_nav:'Navigace',ft_con:'Kontakt',rights:'Všechna práva vyhrazena.'},
 en:{nav_home:'Home',nav_menu:'Menu',nav_about:'About',nav_del:'Delivery',nav_con:'Contact',tagline:'Celebrate Every Day',
   del_lbl:'Fast & Convenient',del_ttl:'Delivery',
@@ -600,7 +618,7 @@ en:{nav_home:'Home',nav_menu:'Menu',nav_about:'About',nav_del:'Delivery',nav_con
   f_table:'Table', f_type:'Order type',ot_delivery:'Home Delivery',ot_instore:'In-store Pickup',
   f_pay:'Payment Method',f_pay_cash:'Cash',f_pay_card:'Card',f_pay_split:'50% cash + 50% card',
   pay_ttl:'Payment Terms',pay_dep:'A 50% deposit is payable by bank transfer upon order confirmation. The remaining 50% is paid upon receipt.',pay_acc:'Account',
-  f_submit:'Order Now',f_redirecting:'Redirecting to payment...',f_ok:'Thank you! Your order has been received.',f_err:'Error. Please try again or call us.',f_pay_builder:'Custom cake: 50 % deposit by card when ordering.',f_rule_earliest:'For your order the earliest date is {d}.',f_rule_window:'Pre-order pickup: {a} – {b}.',f_err_early:'This cake can be ready on {d} at the earliest. Please choose a later day.',f_err_window:'The pre-order can only be picked up {a} – {b}.',f_err_soldout:'Some items are sold out or fewer are left (left):',ask_ttl:'Questions about prices or your order? Write or call us:',f_pick_day:'First choose a day in the calendar.',f_pick_slot:'Please choose a delivery / pickup day and time.',f_slot_left:'{n} left',f_slot_full:'fully booked',f_slot_taken:'This time has just been taken. Please choose another one.',f_slot_note:'Free dates for the next 2 months. Grey days are fully booked or closed.',f_err_items:'Some items in your cart are no longer on the menu or have changed. Remove them and add them again from the menu:',
+  f_submit:'Order Now',f_redirecting:'Redirecting to payment...',f_ok:'Thank you! Your order has been received.',f_err:'Error. Please try again or call us.',f_pay_builder:'Custom cake: 50 % deposit by card when ordering.',f_rule_earliest:'For your order the earliest date is {d}.',f_rule_window:'Pre-order pickup: {a} – {b}.',f_err_early:'This cake can be ready on {d} at the earliest. Please choose a later day.',f_err_window:'The pre-order can only be picked up {a} – {b}.',f_err_soldout:'Some items are sold out or fewer are left (left):',ask_ttl:'Questions about prices or your order? Write or call us:',f_bday_optin:'Remind me of my birthday — send me an e-mail {d} days before',f_bday_email:'E-mail',f_bday_date:'Birthday',f_bday_note:'One e-mail a year. You can unsubscribe with the link in every e-mail. We don’t need the year.',f_bday_day:'Day',f_bday_month:'Month',f_bday_need:'For the birthday reminder fill in the e-mail, day and month — or untick the box.',f_pick_day:'First choose a day in the calendar.',f_pick_slot:'Please choose a delivery / pickup day and time.',f_slot_left:'{n} left',f_slot_full:'fully booked',f_slot_taken:'This time has just been taken. Please choose another one.',f_slot_note:'Free dates for the next 2 months. Grey days are fully booked or closed.',f_err_items:'Some items in your cart are no longer on the menu or have changed. Remove them and add them again from the menu:',
   ft_nav:'Navigation',ft_con:'Contact',rights:'All rights reserved.'},
 uk:{nav_home:'Головна',nav_menu:'Меню',nav_about:'Про нас',nav_del:'Доставка',nav_con:'Контакти',tagline:'Святкуйте кожен день',
   del_lbl:'Швидко і зручно',del_ttl:'Доставка',
@@ -618,7 +636,7 @@ uk:{nav_home:'Головна',nav_menu:'Меню',nav_about:'Про нас',nav_
   f_table:'Стіл', f_type:'Спосіб замовлення',ot_delivery:'Доставка додому',ot_instore:'Самовивіз',
   f_pay:'Спосіб оплати',f_pay_cash:'Готівкою',f_pay_card:'Карткою',f_pay_split:'50 % готівкою + 50 % карткою',
   pay_ttl:'Умови оплати',pay_dep:'Передоплата 50 % від суми замовлення сплачується банківським переказом при підтвердженні. Решту 50 % ви сплачуєте при отриманні.',pay_acc:'Номер рахунку',
-  f_submit:'Замовити',f_redirecting:'Переходимо до оплати...',f_ok:'Дякуємо! Ваше замовлення прийнято.',f_err:'Помилка. Спробуйте ще раз або зателефонуйте.',f_pay_builder:'Торт на замовлення: передоплата 50 % карткою при оформленні.',f_rule_earliest:'Для вашого замовлення найраніше {d}.',f_rule_window:'Видача передзамовлення: {a} – {b}.',f_err_early:'Цей торт можна приготувати найраніше на {d}. Оберіть, будь ласка, пізніший день.',f_err_window:'Передзамовлення можна забрати лише {a} – {b}.',f_err_soldout:'Деякі позиції розпродано або їх залишилось менше (залишилось):',ask_ttl:'Є питання щодо ціни чи замовлення? Напишіть або зателефонуйте:',f_pick_day:'Спочатку оберіть день у календарі.',f_pick_slot:'Будь ласка, оберіть день і час доставки / отримання.',f_slot_left:'залишилось: {n}',f_slot_full:'зайнято',f_slot_taken:'Цей час щойно зайняли. Будь ласка, оберіть інший.',f_slot_note:'Вільні дати на 2 місяці вперед. Сірі дні повністю зайняті або вихідні.',f_err_items:'Деяких позицій із кошика вже немає в меню або вони змінилися. Видаліть їх і додайте знову з меню:',
+  f_submit:'Замовити',f_redirecting:'Переходимо до оплати...',f_ok:'Дякуємо! Ваше замовлення прийнято.',f_err:'Помилка. Спробуйте ще раз або зателефонуйте.',f_pay_builder:'Торт на замовлення: передоплата 50 % карткою при оформленні.',f_rule_earliest:'Для вашого замовлення найраніше {d}.',f_rule_window:'Видача передзамовлення: {a} – {b}.',f_err_early:'Цей торт можна приготувати найраніше на {d}. Оберіть, будь ласка, пізніший день.',f_err_window:'Передзамовлення можна забрати лише {a} – {b}.',f_err_soldout:'Деякі позиції розпродано або їх залишилось менше (залишилось):',ask_ttl:'Є питання щодо ціни чи замовлення? Напишіть або зателефонуйте:',f_bday_optin:'Нагадайте мені про день народження — надішліть лист за {d} днів',f_bday_email:'E-mail',f_bday_date:'День народження',f_bday_note:'Один лист на рік. Відписатися можна за посиланням у кожному листі. Рік народження не потрібен.',f_bday_day:'День',f_bday_month:'Місяць',f_bday_need:'Для нагадування про день народження вкажіть e-mail, день і місяць — або зніміть позначку.',f_pick_day:'Спочатку оберіть день у календарі.',f_pick_slot:'Будь ласка, оберіть день і час доставки / отримання.',f_slot_left:'залишилось: {n}',f_slot_full:'зайнято',f_slot_taken:'Цей час щойно зайняли. Будь ласка, оберіть інший.',f_slot_note:'Вільні дати на 2 місяці вперед. Сірі дні повністю зайняті або вихідні.',f_err_items:'Деяких позицій із кошика вже немає в меню або вони змінилися. Видаліть їх і додайте знову з меню:',
   ft_nav:'Навігація',ft_con:'Контакти',rights:'Усі права захищені.'}
 };
 
@@ -629,6 +647,7 @@ function applyLang(){
   document.documentElement.lang=lang;
   document.querySelectorAll('[data-k]').forEach(el=>{const val=t(el.dataset.k);if(val)el.textContent=val;});
   try{ renderSlots(); }catch{}  // month names and labels in the new language
+  try{ renderBday(); }catch{}
   const pi=document.getElementById('phoneInput');
   if(pi){const isDelivery=document.querySelector('.ord-type-btn.on').dataset.type==='delivery';pi.placeholder=isDelivery?'':t('f_phone_opt');pi.required=isDelivery;
     document.getElementById('orderTypeInput').value=isDelivery?t('ot_delivery'):t('ot_instore');}
@@ -811,6 +830,12 @@ document.getElementById('orderForm').addEventListener('submit',async function(e)
     document.getElementById('slotField').scrollIntoView({behavior:'smooth',block:'center'});
     return;
   }
+  const bday=bdayPayload();
+  if(bday===null){
+    msg.className='ord-msg err'; msg.style.cssText=''; msg.textContent=t('f_bday_need');
+    btn.disabled=false; btn.textContent=orig;
+    return;
+  }
   const isInstore = document.getElementById('tableField').style.display !== 'none';
   const payload={
     name:          this.querySelector('[name="name"]').value.trim(),
@@ -825,6 +850,7 @@ document.getElementById('orderForm').addEventListener('submit',async function(e)
     delivery_time: document.getElementById('deliveryTime').value,
     // What and how many; the server prices it (online payments are charged from server prices)
     cart: getCart().map(c=>({name:c.names.cs, size:c.builder?'':(c.sizeLabel||''), qty:c.qty, price:c.price, ...(c.builder?{builder:c.builder}:{})})),
+    ...bday,
   };
 
   // ── Online payment via Stripe ──
@@ -966,11 +992,45 @@ async function loadSlots(){
     renderSlots();
   }catch{}
 }
+/* ── Optional birthday reminder ── */
+let BDAY_DAYS=0;
+function renderBday(){
+  if(!BDAY_DAYS) return;
+  // No data-k on this text: the generic translation pass would bring back the "{d}" placeholder
+  document.getElementById('bdayOptinTxt').textContent=t('f_bday_optin').replace('{d}',BDAY_DAYS);
+  const loc=({cs:'cs-CZ',en:'en-GB',uk:'uk-UA'})[lang]||'cs-CZ';
+  const dSel=document.getElementById('bdayDay'), mSel=document.getElementById('bdayMonth');
+  const dv=dSel.value, mv=mSel.value;
+  dSel.innerHTML=`<option value="">${t('f_bday_day')}</option>`+[...Array(31)].map((_,i)=>`<option value="${String(i+1).padStart(2,'0')}">${i+1}</option>`).join('');
+  mSel.innerHTML=`<option value="">${t('f_bday_month')}</option>`+[...Array(12)].map((_,i)=>`<option value="${String(i+1).padStart(2,'0')}">${new Date(2024,i,1).toLocaleDateString(loc,{month:'long'})}</option>`).join('');
+  dSel.value=dv; mSel.value=mv;
+}
+async function loadBday(){
+  try{
+    const r=await fetch('/api/bday/status'); if(!r.ok) return;
+    const j=await r.json(); if(!j.on) return;
+    BDAY_DAYS=j.days;
+    document.getElementById('bdayBox').style.display='';
+    renderBday();
+  }catch{}
+}
+document.getElementById('bdayOptin').addEventListener('change',e=>{
+  document.getElementById('bdayFields').style.display=e.target.checked?'':'none';
+});
+// Returns the reminder fields for the order, or null when the input is incomplete
+function bdayPayload(){
+  if(!BDAY_DAYS||!document.getElementById('bdayOptin').checked) return {};
+  const email=document.getElementById('bdayEmail').value.trim(), d=document.getElementById('bdayDay').value, m=document.getElementById('bdayMonth').value;
+  if(!/^[^@\s]+@[^@\s]+\.[^@\s]{2,}$/.test(email)||!d||!m) return null;
+  return {bday_optin:true, bday_email:email, bday:`${m}-${d}`, lang};
+}
+
 document.getElementById('slotPrev').addEventListener('click',()=>{ slotMonthIdx--; renderSlots(); });
 document.getElementById('slotNext').addEventListener('click',()=>{ slotMonthIdx++; renderSlots(); });
 
 initLangBtns();applyLang();initFI();
 loadSlots().then(loadCartRules);
+loadBday();
 </script>
 </body>
 </html>

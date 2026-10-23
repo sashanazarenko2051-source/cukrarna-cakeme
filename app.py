@@ -104,6 +104,12 @@ def _init_tables():
             )""")
         # Where a review came from when the admin moved it over from elsewhere (google, instagram…)
         conn.execute("ALTER TABLE reviews ADD COLUMN IF NOT EXISTS source TEXT DEFAULT ''")
+        # Customers who asked for a birthday reminder when ordering (opt-in)
+        conn.execute("""
+            CREATE TABLE IF NOT EXISTS subscribers (
+                email TEXT PRIMARY KEY, name TEXT DEFAULT '', bday TEXT NOT NULL, lang TEXT DEFAULT 'cs',
+                token TEXT NOT NULL, created TEXT DEFAULT '', active BOOLEAN DEFAULT TRUE, last_sent_year INT DEFAULT 0
+            )""")
         if not os.environ.get('SECRET_KEY'):
             conn.execute("INSERT INTO settings(key,value) VALUES('secret_key',%s) ON CONFLICT(key) DO NOTHING",
                          (secrets.token_hex(32),))
@@ -136,12 +142,13 @@ async def _sec(req: Request, call_next):
         'X-XSS-Protection':       '1; mode=block',
         'Referrer-Policy':        'strict-origin-when-cross-origin',
     })
-    if req.url.path.startswith(('/api/menu-img/', '/api/review-img/')):
+    if req.url.path.startswith(('/api/menu-img/', '/api/review-img/', '/api/builder-img/')):
         pass  # set by the endpoint: long-lived, the URL changes when the photo does
     elif req.url.path.startswith('/api/'):
         resp.headers['Cache-Control'] = 'no-store'
     elif 'text/html' in resp.headers.get('content-type', ''):
         resp.headers['Cache-Control'] = 'no-cache, must-revalidate'
+    _maybe_send_birthdays()  # once a day, on whatever request comes first
     return resp
 
 @app.exception_handler(HTTPException)
@@ -1229,6 +1236,206 @@ async def api_reviews_del(review_id: int, req: Request):
         conn.execute('DELETE FROM reviews WHERE id=%s', (review_id,))
     return {'ok': True}
 
+# ── Birthday reminders ────────────────────────────────────────────────────────
+# When ordering, a customer may tick "remind me before my birthday" and give an e-mail
+# and day/month. `days_before` days ahead they get one e-mail a year inviting them to
+# order a cake. Every e-mail has an unsubscribe link. Sending needs SMTP settings:
+# SMTP_HOST, SMTP_PORT (465 = SSL, 587 = STARTTLS), SMTP_USER, SMTP_PASS, SMTP_FROM.
+import threading
+_EMAIL_RE = re.compile(r'^[^@\s]{1,64}@[^@\s]{1,190}\.[A-Za-z]{2,24}$')
+_BDAY_RE = re.compile(r'^(0[1-9]|1[0-2])-(0[1-9]|[12]\d|3[01])$')
+SITE_URL = os.environ.get('SITE_URL', 'https://cukrarna-cakeme.onrender.com').rstrip('/')
+_BDAY_DEFAULT = {
+    'enabled': True,
+    'days_before': 14,
+    'subject': {'cs': '🎂 Blíží se vaše narozeniny — dort od Cukrárny CakeMe?',
+                'uk': '🎂 Скоро ваш день народження — торт від Cukrárna CakeMe?',
+                'en': '🎂 Your birthday is coming — a cake from Cukrárna CakeMe?'},
+    'body': {'cs': 'Dobrý den, {name}!\n\nZa {days} dní máte narozeniny 🎉 Cukrárna CakeMe je tu s vámi a ráda vám připraví dort na oslavu.\nNechcete si objednat dort na svůj svátek? Stačí kliknout:\n{link}\n\nS láskou,\nCukrárna CakeMe',
+             'uk': 'Добрий день, {name}!\n\nЗа {days} днів ваш день народження 🎉 Кондитерська CakeMe з вами і з радістю приготує торт для свята.\nНе хочете замовити торт на своє свято? Достатньо натиснути:\n{link}\n\nЗ любов’ю,\nCukrárna CakeMe',
+             'en': 'Hello {name}!\n\nYour birthday is in {days} days 🎉 Cukrárna CakeMe is with you and would love to make a cake for your celebration.\nWould you like to order a cake for your day? Just click:\n{link}\n\nWith love,\nCukrárna CakeMe'},
+}
+_UNSUB_TXT = {'cs': 'Nechcete už připomínky? Odhlásit se: {url}', 'uk': 'Не хочете отримувати нагадування? Відписатися: {url}',
+              'en': 'Don’t want reminders any more? Unsubscribe: {url}'}
+_bday_lock = threading.Lock()
+_bday_checked = {'day': ''}
+
+def _smtp_ready():
+    """Sending is possible: Brevo API key (works where SMTP ports are blocked) or SMTP login."""
+    return bool(os.environ.get('BREVO_API_KEY') and (os.environ.get('MAIL_FROM') or os.environ.get('SMTP_FROM'))) \
+        or all(os.environ.get(k) for k in ('SMTP_HOST', 'SMTP_USER', 'SMTP_PASS'))
+
+def _send_email(to, subject, body):
+    if os.environ.get('BREVO_API_KEY'):
+        # Brevo (brevo.com) over HTTPS; the sender address must be verified in Brevo
+        import urllib.request
+        sender = os.environ.get('MAIL_FROM') or os.environ.get('SMTP_FROM')
+        req = urllib.request.Request('https://api.brevo.com/v3/smtp/email', method='POST',
+            data=json.dumps({'sender': {'email': sender, 'name': 'Cukrárna CakeMe'}, 'to': [{'email': to}],
+                             'subject': subject, 'textContent': body}).encode(),
+            headers={'api-key': os.environ['BREVO_API_KEY'], 'Content-Type': 'application/json', 'Accept': 'application/json'})
+        urllib.request.urlopen(req, timeout=20)
+        return
+    import smtplib, ssl
+    from email.message import EmailMessage
+    msg = EmailMessage()
+    msg['From'] = os.environ.get('SMTP_FROM') or os.environ['SMTP_USER']
+    msg['To'], msg['Subject'] = to, subject
+    msg.set_content(body)
+    host, port = os.environ['SMTP_HOST'], int(os.environ.get('SMTP_PORT') or 465)
+    if port == 465:
+        with smtplib.SMTP_SSL(host, port, context=ssl.create_default_context(), timeout=20) as s:
+            s.login(os.environ['SMTP_USER'], os.environ['SMTP_PASS']); s.send_message(msg)
+    else:
+        with smtplib.SMTP(host, port, timeout=20) as s:
+            s.starttls(context=ssl.create_default_context())
+            s.login(os.environ['SMTP_USER'], os.environ['SMTP_PASS']); s.send_message(msg)
+
+def _bday_cfg(conn):
+    row = conn.execute("SELECT value FROM settings WHERE key='bday_config'").fetchone()
+    raw = _json.loads(row[0]) if row and row[0] else {}
+    cfg = {'enabled': bool(raw.get('enabled', _BDAY_DEFAULT['enabled'])),
+           'days_before': max(1, min(60, _lead_int(raw.get('days_before')) or _BDAY_DEFAULT['days_before']))}
+    for k in ('subject', 'body'):
+        src = raw.get(k) if isinstance(raw.get(k), dict) else {}
+        cfg[k] = {lng: (str(src.get(lng) or '').strip()[:4000 if k == 'body' else 200] or _BDAY_DEFAULT[k][lng]) for lng in ('cs', 'uk', 'en')}
+    return cfg
+
+def _bday_email(cfg, sub):
+    lang = sub['lang'] if sub['lang'] in ('cs', 'uk', 'en') else 'cs'
+    name = sub['name'] or {'cs': 'zákazníku', 'uk': 'друже', 'en': 'there'}[lang]
+    body = cfg['body'][lang].replace('{name}', name).replace('{days}', str(cfg['days_before'])).replace('{link}', SITE_URL + '/menu.html')
+    body += '\n\n—\n' + _UNSUB_TXT[lang].format(url=f"{SITE_URL}/api/unsubscribe?t={sub['token']}")
+    return cfg['subject'][lang], body
+
+def _subscribe(conn, d):
+    """Save an opt-in from the order form. Returns True when stored."""
+    email = str(d.get('bday_email') or '').strip().lower()[:254]
+    bday = str(d.get('bday') or '').strip()
+    if not d.get('bday_optin') or not _EMAIL_RE.match(email) or not _BDAY_RE.match(bday):
+        return False
+    lang = d.get('lang') if d.get('lang') in ('cs', 'uk', 'en') else 'cs'
+    name = str(d.get('name') or '').strip()[:60]
+    row = conn.execute('SELECT token FROM subscribers WHERE email=%s', (email,)).fetchone()
+    if row:
+        conn.execute('UPDATE subscribers SET name=%s, bday=%s, lang=%s, active=TRUE WHERE email=%s', (name, bday, lang, email))
+    else:
+        conn.execute('INSERT INTO subscribers (email, name, bday, lang, token, created, active, last_sent_year)'
+                     ' VALUES (%s,%s,%s,%s,%s,%s,TRUE,0)',
+                     (email, name, bday, lang, secrets.token_urlsafe(16), time.strftime('%Y-%m-%dT%H:%M:%SZ', time.gmtime())))
+    return True
+
+def _send_due_birthdays(conn=None):
+    """Send today's reminders (birthday = today + days_before). Returns how many were sent."""
+    if conn is None:
+        with _get_pool().connection() as c:
+            return _send_due_birthdays(c)
+    cfg = _bday_cfg(conn)
+    if not cfg['enabled'] or not _smtp_ready():
+        return 0
+    target = _today() + _dt.timedelta(days=cfg['days_before'])
+    wanted = {target.strftime('%m-%d')}
+    if target.month == 2 and target.day == 28 and not (target.year % 4 == 0 and (target.year % 100 or target.year % 400 == 0)):
+        wanted.add('02-29')  # 29 Feb birthdays are reminded on 28 Feb in other years
+    rows = conn.execute('SELECT email, name, bday, lang, token FROM subscribers WHERE active=TRUE AND last_sent_year < %s',
+                        (target.year,)).fetchall()
+    sent = 0
+    for email, name, bday, lang, token in rows:
+        if bday not in wanted:
+            continue
+        subj, body = _bday_email(cfg, {'name': name, 'lang': lang, 'token': token})
+        try:
+            _send_email(email, subj, body)
+            conn.execute('UPDATE subscribers SET last_sent_year=%s WHERE email=%s', (target.year, email))
+            sent += 1
+        except Exception as e:
+            import sys
+            print(f'[BDAY] Error for {email}: {e}', file=sys.stderr)
+    return sent
+
+def _maybe_send_birthdays():
+    """Run the daily send at most once a day, in the background (no cron needed)."""
+    day = _today().isoformat()
+    if _bday_checked['day'] == day or not DATABASE_URL or not _smtp_ready():
+        return
+    _bday_checked['day'] = day
+    def run():
+        if not _bday_lock.acquire(blocking=False):
+            return
+        try:
+            with _get_pool().connection() as conn:
+                row = conn.execute("SELECT value FROM settings WHERE key='bday_last_run'").fetchone()
+                if row and row[0] == day:
+                    return  # another worker already did today
+                conn.execute("INSERT INTO settings(key,value) VALUES('bday_last_run',%s) ON CONFLICT(key) DO UPDATE SET value=EXCLUDED.value", (day,))
+                _send_due_birthdays(conn)
+        except Exception as e:
+            import sys
+            print(f'[BDAY] {e}', file=sys.stderr)
+        finally:
+            _bday_lock.release()
+    threading.Thread(target=run, daemon=True).start()
+
+@app.get('/api/bday/status')
+def api_bday_status():
+    """Whether the order form should offer the reminder (switched on and e-mail configured)."""
+    with _get_pool().connection() as conn:
+        cfg = _bday_cfg(conn)
+    return {'on': cfg['enabled'] and _smtp_ready(), 'days': cfg['days_before']}
+
+@app.get('/api/unsubscribe')
+def api_unsubscribe(t: str = ''):
+    with _get_pool().connection() as conn:
+        row = conn.execute('SELECT lang FROM subscribers WHERE token=%s', (t,)).fetchone()
+        if row:
+            conn.execute('UPDATE subscribers SET active=FALSE WHERE token=%s', (t,))
+    lang = row[0] if row and row[0] in ('cs', 'uk', 'en') else 'cs'
+    text = {'cs': 'Odhlášeno. Připomínky narozenin už vám nebudeme posílat.', 'uk': 'Ви відписалися. Нагадування про день народження більше не надходитимуть.',
+            'en': 'Unsubscribed. You won’t receive birthday reminders any more.'}[lang] if row else 'Link is not valid.'
+    return Response(f'<!doctype html><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">'
+                    f'<title>CakeMe</title><body style="background:#0a0a0a;color:#f5f0e8;font-family:sans-serif;display:flex;'
+                    f'align-items:center;justify-content:center;min-height:90vh;text-align:center;padding:20px">'
+                    f'<div><p style="font-size:1.2rem">{text}</p><p><a style="color:#c9a96e" href="/">Cukrárna CakeMe</a></p></div>',
+                    media_type='text/html')
+
+@app.post('/api/bday/admin')
+async def api_bday_admin(req: Request):
+    """Settings, SMTP status and subscribers for the admin tab."""
+    d = await req.json()
+    if not _verify_token(d.get('token')):
+        raise HTTPException(401, 'Unauthorized')
+    with _get_pool().connection() as conn:
+        if isinstance(d.get('config'), dict):
+            conn.execute("INSERT INTO settings(key,value) VALUES('bday_config',%s) ON CONFLICT(key) DO UPDATE SET value=EXCLUDED.value",
+                         (_json.dumps(d['config']),))
+        if d.get('deactivate'):
+            conn.execute('UPDATE subscribers SET active=FALSE WHERE email=%s', (str(d['deactivate']),))
+        cfg = _bday_cfg(conn)
+        subs = conn.execute('SELECT email, name, bday, lang, active, last_sent_year, created FROM subscribers ORDER BY bday').fetchall()
+    return {'config': cfg, 'smtp': _smtp_ready(),
+            'subscribers': [{'email': e, 'name': n, 'bday': b, 'lang': l, 'active': bool(a), 'last_sent_year': y, 'created': c}
+                            for e, n, b, l, a, y, c in subs]}
+
+@app.post('/api/bday/test')
+async def api_bday_test(req: Request):
+    """Send the reminder e-mail to the admin's own address to see how it looks."""
+    from starlette.concurrency import run_in_threadpool
+    d = await req.json()
+    if not _verify_token(d.get('token')):
+        raise HTTPException(401, 'Unauthorized')
+    if not _smtp_ready():
+        raise HTTPException(503, 'SMTP not configured')
+    to = str(d.get('email') or '').strip()
+    if not _EMAIL_RE.match(to):
+        raise HTTPException(400, 'Invalid e-mail')
+    with _get_pool().connection() as conn:
+        subj, body = _bday_email(_bday_cfg(conn), {'name': 'Jana', 'lang': d.get('lang') or 'cs', 'token': 'test'})
+    try:
+        await run_in_threadpool(_send_email, to, subj, body)
+    except Exception as e:
+        raise HTTPException(502, f'E-mail failed: {e}')
+    return {'ok': True}
+
 # ── Delivery/pickup slots ─────────────────────────────────────────────────────
 # Customers pick a day within the next `days_ahead` days (2 months) and a time
 # interval with free capacity. Capacity is counted from existing orders, so no
@@ -1420,6 +1627,7 @@ async def api_order(req: Request, bg: BackgroundTasks):
         order['attachment'] = _cart_photo(d.get('cart'))
         _clip_order(order)
         _insert_order(conn, order)
+        _subscribe(conn, d)  # birthday reminder, only if the customer ticked it
     bg.add_task(_send_ntfy, order)
     bg.add_task(_send_telegram, order)
     bg.add_task(_send_push_notifications, {
@@ -1518,6 +1726,7 @@ async def api_create_checkout(req: Request):
     _clip_order(order)
     with _get_pool().connection() as conn:
         _insert_order(conn, order)
+        _subscribe(conn, d)  # birthday reminder, only if the customer ticked it
 
     host   = req.headers.get('X-Forwarded-Host') or req.headers.get('host', '')
     scheme = req.headers.get('X-Forwarded-Proto', 'https')

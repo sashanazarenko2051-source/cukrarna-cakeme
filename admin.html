@@ -249,6 +249,20 @@ body{font-family:'Raleway',sans-serif;background:var(--bg0);color:var(--tx0)}
 .ci-btns{display:flex;gap:3px;flex-shrink:0;align-items:center}
 /* ── ANALYTICS ── */
 .analytics-wrap{padding:28px;max-width:960px;margin:0 auto}
+/* ── Birthday reminders ── */
+.bd-smtp{padding:10px 12px;margin-bottom:14px;font-size:.8rem;line-height:1.6;border:1px solid var(--bdr)}
+.bd-smtp.ok{color:#8fcc8f;border-color:#3d5a3d}.bd-smtp.no{color:#e0b080;border-color:#6a5030}
+.bd-smtp code{color:var(--gold)}
+.bd-langs{display:grid;gap:12px;margin-bottom:16px}
+.bd-lang{border:1px solid var(--bdr);padding:10px;display:flex;flex-direction:column;gap:6px}
+.bd-lang b{font-size:.7rem;letter-spacing:1px;color:var(--gold)}
+.bd-lang input,.bd-lang textarea{background:var(--bg3);border:1px solid var(--bdr);color:var(--tx0);padding:8px 10px;font:.82rem 'Raleway',sans-serif;outline:none}
+.bd-lang textarea{min-height:120px;resize:vertical}
+.bd-row{display:grid;grid-template-columns:minmax(0,1.2fr) minmax(0,1.6fr) 70px 40px minmax(0,1fr) 90px;gap:8px;align-items:center;font-size:.8rem;padding:8px 0;border-bottom:1px solid var(--bdr);color:var(--tx1)}
+.bd-row.off{opacity:.45}
+.bd-row b{color:var(--tx0);font-weight:500;overflow:hidden;text-overflow:ellipsis}
+.bd-row span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+@media(max-width:680px){ .bd-row{grid-template-columns:1fr 1fr} }
 /* ── Cake builder settings ── */
 .bld-sec{margin:18px 0;padding-top:14px;border-top:1px solid var(--bdr)}
 .bld-row{display:grid;gap:6px;align-items:center;margin-bottom:6px}
@@ -538,6 +552,7 @@ body{font-family:'Raleway',sans-serif;background:var(--bg0);color:var(--tx0)}
     <button class="amn" data-sec="menu"><span class="amn-ic">🎂</span> <span data-k="adm_menu">Menu</span></button>
     <button class="amn" data-sec="analytics"><span class="amn-ic">📊</span> <span data-k="adm_analytics">Analytika</span></button>
     <button class="amn" data-sec="schedule"><span class="amn-ic">📅</span> <span data-k="adm_schedule">Rozvrh</span></button>
+    <button class="amn" data-sec="bday"><span class="amn-ic">🎉</span> <span data-k="adm_bday">Připomínky</span></button>
     <button class="amn" data-sec="builder"><span class="amn-ic">🎂</span> <span data-k="adm_builder">Konfigurátor</span></button>
     <button class="amn" data-sec="reviews"><span class="amn-ic">⭐</span> <span data-k="adm_reviews">Recenze</span> <span class="f-cnt" id="rvNewCount" style="display:none"></span></button>
   </div>
@@ -794,6 +809,31 @@ body{font-family:'Raleway',sans-serif;background:var(--bg0);color:var(--tx0)}
     </div>
   </div>
 
+  <!-- ── BIRTHDAY REMINDERS ── -->
+  <div id="secBday" style="display:none">
+    <div class="sched-wrap">
+      <div class="menu-panel">
+        <h3><span data-k="adm_bd_title">Připomínky narozenin</span><span class="lay-saved" id="bdSaved"></span></h3>
+        <p class="lay-hint" data-k="adm_bd_hint">Zákazník při objednávce může zaškrtnout připomínku a zadat e-mail a datum narozenin. Před narozeninami mu přijde jeden e-mail s nabídkou dortu. Bez zaškrtnutí nic nepřijde.</p>
+        <div id="bdSmtp" class="bd-smtp"></div>
+        <label class="sch-check"><input type="checkbox" id="bdEnabled"> <span data-k="adm_bd_enabled">Nabízet připomínku v objednávce a posílat e-maily</span></label>
+        <div class="sch-nums"><label><span data-k="adm_bd_days">Dní před narozeninami</span><input type="number" id="bdDays" min="1" max="60"></label></div>
+        <p class="lay-hint" data-k="adm_bd_vars">V textu můžete použít: {name} — jméno, {days} — počet dní, {link} — odkaz na menu.</p>
+        <div class="bd-langs" id="bdTexts"></div>
+        <button type="button" class="btn-add-item" id="bdSave" data-k="adm_save_btn">✓ Uložit změny</button>
+        <div class="cat-add-row" style="margin-top:14px">
+          <input type="email" id="bdTestEmail" data-kp="adm_bd_test_ph" placeholder="váš e-mail pro test">
+          <button type="button" class="cat-add-btn" id="bdTest" data-k="adm_bd_test">Poslat zkušební e-mail</button>
+        </div>
+        <div class="lay-hint" id="bdTestMsg" style="margin-top:6px"></div>
+      </div>
+      <div class="menu-panel">
+        <h3><span data-k="adm_bd_subs">Přihlášení zákazníci</span> <span class="rv-adm-sum" id="bdCount"></span></h3>
+        <div id="bdList"></div>
+      </div>
+    </div>
+  </div>
+
   <!-- ── CAKE BUILDER settings ── -->
   <div id="secBuilder" style="display:none">
     <div class="sched-wrap">
@@ -1033,6 +1073,7 @@ const TA = {
     adm_drag_hint:'Pořadí položek: táhněte myší nebo použijte šipky ⤒ ▲ ▼. Stejné pořadí uvidí zákazníci.',
     adm_lay_saved:'✓ Uloženo', adm_lay_err:'Neuloženo — zkuste znovu',
     adm_tab_all:'Vše', adm_tab_fav:'Oblíbené', adm_tab_celeb:'Slavnostní dorty',
+    adm_bday:'Připomínky', adm_bd_title:'Připomínky narozenin', adm_bd_hint:'Zákazník při objednávce může zaškrtnout připomínku a zadat e-mail a datum narozenin. Před narozeninami mu přijde jeden e-mail s nabídkou dortu. Bez zaškrtnutí nic nepřijde.', adm_bd_enabled:'Nabízet připomínku v objednávce a posílat e-maily', adm_bd_days:'Dní před narozeninami', adm_bd_vars:'V textu můžete použít: {name} — jméno, {days} — počet dní, {link} — odkaz na menu.', adm_bd_test_ph:'váš e-mail pro test', adm_bd_test:'Poslat zkušební e-mail', adm_bd_test_ok:'✓ Odesláno — zkontrolujte schránku.', adm_bd_subs:'Přihlášení zákazníci', adm_bd_none:'Zatím se nikdo nepřihlásil.', adm_bd_smtp_ok:'✓ E-mail je připojen, připomínky se posílají automaticky každý den.', adm_bd_smtp_no:'⚠ E-mail pro odesílání zatím není připojen. Nejjednodušší: zdarma účet na brevo.com, ověřte v něm e-mail cukrárny a v Render → Environment přidejte <code>BREVO_API_KEY</code> a <code>MAIL_FROM</code> (ten e-mail). Nebo SMTP: <code>SMTP_HOST</code> (např. smtp.seznam.cz), <code>SMTP_PORT</code> = 465, <code>SMTP_USER</code> (e-mail), <code>SMTP_PASS</code> (heslo), <code>SMTP_FROM</code> (odesílatel). Dokud není připojen, zákazníci políčko na webu neuvidí.', adm_bd_smtp_short:'E-mail pro odesílání není připojen (viz výše).', adm_bd_sent:'odesláno {y}', adm_bd_waiting:'čeká', adm_bd_unsubscribed:'odhlášen', adm_bd_unsub:'Odhlásit', adm_bd_unsub_confirm:'Odhlásit zákazníka z připomínek?',
     adm_rv_import:'Přidat recenzi z Google / Instagramu', adm_rv_import_hint:'Jen skutečné recenze, které zákazníci napsali jinde (Google, Instagram, Facebook, osobně). Na webu se zobrazí se zdrojem. Vymyšlené recenze jsou podvod a v EU jsou zakázané.', adm_rv_stars:'Hvězdičky', adm_rv_source:'Zdroj', adm_rv_src_person:'Osobně v cukrárně', adm_rv_src_other:'Jinde', adm_rv_date:'Datum recenze', adm_rv_text:'Text recenze', adm_rv_item:'Dort (nepovinné)', adm_rv_photo:'Fotka (nepovinné)', adm_rv_import_save:'Zveřejnit recenzi', adm_rv_import_need:'Vyplňte jméno a text recenze.',
     adm_rules_lbl:'Omezení a předobjednávky', adm_lead_lbl:'Min. dní předem', adm_from_lbl:'Výdej od', adm_to_lbl:'Výdej do', adm_stock_lbl:'Zbývá kusů', adm_stock_ph:'bez omezení', adm_stock_btn:'Zbývá kusů (zobrazí se na webu)', adm_stock_prompt:'Kolik kusů „{name}“ zbývá? Na webu se zobrazí „Zbývá N“, při 0 „Vyprodáno“. Prázdné = bez omezení.', adm_stock_bad:'Zadejte celé číslo, nebo nechte prázdné.', adm_rules_hint:'Velké dorty: např. 14 dní předem. Vánoční předobjednávka: výdej 20.–23. 12. a počet krabic — zákazníci uvidí „zbývá 12“, po vyprodání „Vyprodáno“.', adm_stock_info:'Prodáno {sold} z {total}, zbývá {left}. Změna počtu spustí nové počítání.', adm_f_attachment:'Obrázek-předloha', adm_builder:'Konfigurátor', adm_bld_title:'Konfigurátor dortu na zakázku', adm_bld_hint:'Zákazník si na webu poskládá dort: příležitost → velikost → náplň → zdobení, nápis a obrázek-předloha. Cena se počítá z těchto nastavení; zaplatí zálohu 50 % kartou.', adm_bld_enabled:'Zobrazit konfigurátor na webu', adm_bld_lead:'Nejdříve za (dní)', adm_bld_mode:'Cena na webu', adm_bld_from:'od … Kč (upřesníme)', adm_bld_exact:'přesná cena', adm_bld_occasions:'Příležitosti', adm_bld_sizes:'Velikosti (počet hostů a cena)', adm_bld_fillings:'Náplně (s fotkou a příplatkem)', adm_bld_decor:'Zdobení (s cenou)', adm_bld_label:'Velikost', adm_bld_guests_from:'Hostů od', adm_bld_guests_to:'Hostů do', adm_bld_photo:'Fotka náplně',
     adm_reviews:'Recenze', adm_rv_title:'Recenze zákazníků', adm_rv_hint:'Skrývejte jen spam a urážky. Skrývání poctivých negativních recenzí klame zákazníky a v EU je zakázané. Hvězdičky ani text recenze upravit nelze — můžete odpovědět.', adm_rv_f_new:'Nové', adm_rv_f_pub:'Zveřejněné', adm_rv_f_hidden:'Skryté', adm_rv_empty:'Žádné recenze v tomto seznamu.', adm_rv_verified:'Ověřený zákazník', adm_rv_publish:'Zveřejnit', adm_rv_hide:'Skrýt', adm_rv_restore:'Vrátit mezi nové', adm_rv_reply_ph:'Odpověď cukrárny (zobrazí se pod recenzí)', adm_rv_reply_save:'Uložit odpověď', adm_rv_del_confirm:'Smazat recenzi natrvalo? (Jen pro spam.)',
@@ -1103,6 +1144,7 @@ const TA = {
     adm_drag_hint:'Item order: drag with the mouse or use the arrows ⤒ ▲ ▼. Customers see the same order.',
     adm_lay_saved:'✓ Saved', adm_lay_err:'Not saved — try again',
     adm_tab_all:'All', adm_tab_fav:'Favorites', adm_tab_celeb:'Celebration cakes',
+    adm_bday:'Reminders', adm_bd_title:'Birthday reminders', adm_bd_hint:'When ordering, a customer can tick the reminder and give an e-mail and birthday. Before the birthday they get one e-mail offering a cake. Nothing is sent without the tick.', adm_bd_enabled:'Offer the reminder in the order form and send e-mails', adm_bd_days:'Days before the birthday', adm_bd_vars:'You can use in the text: {name} — name, {days} — number of days, {link} — link to the menu.', adm_bd_test_ph:'your e-mail for a test', adm_bd_test:'Send a test e-mail', adm_bd_test_ok:'✓ Sent — check your inbox.', adm_bd_subs:'Subscribed customers', adm_bd_none:'Nobody has subscribed yet.', adm_bd_smtp_ok:'✓ E-mail is connected; reminders are sent automatically every day.', adm_bd_smtp_no:'⚠ No sending e-mail connected yet. Easiest: a free brevo.com account — verify the shop e-mail there and add <code>BREVO_API_KEY</code> and <code>MAIL_FROM</code> (that e-mail) in Render → Environment. Or SMTP: <code>SMTP_HOST</code> (e.g. smtp.seznam.cz), <code>SMTP_PORT</code> = 465, <code>SMTP_USER</code> (e-mail), <code>SMTP_PASS</code> (password), <code>SMTP_FROM</code> (sender). Until then customers won’t see the box on the site.', adm_bd_smtp_short:'No sending e-mail connected (see above).', adm_bd_sent:'sent {y}', adm_bd_waiting:'waiting', adm_bd_unsubscribed:'unsubscribed', adm_bd_unsub:'Unsubscribe', adm_bd_unsub_confirm:'Unsubscribe this customer from reminders?',
     adm_rv_import:'Add a review from Google / Instagram', adm_rv_import_hint:'Only real reviews customers wrote elsewhere (Google, Instagram, Facebook, in person). The site shows the source. Made-up reviews are fraud and forbidden in the EU.', adm_rv_stars:'Stars', adm_rv_source:'Source', adm_rv_src_person:'In person at the shop', adm_rv_src_other:'Elsewhere', adm_rv_date:'Review date', adm_rv_text:'Review text', adm_rv_item:'Cake (optional)', adm_rv_photo:'Photo (optional)', adm_rv_import_save:'Publish review', adm_rv_import_need:'Fill in the name and the review text.',
     adm_rules_lbl:'Limits and pre-orders', adm_lead_lbl:'Min. days ahead', adm_from_lbl:'Pickup from', adm_to_lbl:'Pickup until', adm_stock_lbl:'Stock left', adm_stock_ph:'unlimited', adm_stock_btn:'Pieces left (shown on the site)', adm_stock_prompt:'How many “{name}” are left? The site shows “N left”, and “Sold out” at 0. Empty = unlimited.', adm_stock_bad:'Enter a whole number, or leave it empty.', adm_rules_hint:'Big cakes: e.g. 14 days ahead. Christmas pre-order: pickup 20–23 Dec and a number of boxes — customers see “12 left”, then “Sold out”.', adm_stock_info:'Sold {sold} of {total}, {left} left. Changing the quantity restarts the count.', adm_f_attachment:'Example picture', adm_builder:'Cake builder', adm_bld_title:'Custom cake builder', adm_bld_hint:'Customers put a cake together on the site: occasion → size → filling → decor, inscription and an example picture. The price comes from these settings; they pay a 50 % deposit by card.', adm_bld_enabled:'Show the builder on the site', adm_bld_lead:'Earliest in (days)', adm_bld_mode:'Price on the site', adm_bld_from:'from … CZK (we confirm)', adm_bld_exact:'exact price', adm_bld_occasions:'Occasions', adm_bld_sizes:'Sizes (guests and price)', adm_bld_fillings:'Fillings (with photo and surcharge)', adm_bld_decor:'Decor (with price)', adm_bld_label:'Size', adm_bld_guests_from:'Guests from', adm_bld_guests_to:'Guests to', adm_bld_photo:'Filling photo',
     adm_reviews:'Reviews', adm_rv_title:'Customer reviews', adm_rv_hint:'Hide only spam and insults. Hiding honest negative reviews misleads customers and is forbidden in the EU. Stars and text can’t be edited — you can reply.', adm_rv_f_new:'New', adm_rv_f_pub:'Published', adm_rv_f_hidden:'Hidden', adm_rv_empty:'No reviews in this list.', adm_rv_verified:'Verified customer', adm_rv_publish:'Publish', adm_rv_hide:'Hide', adm_rv_restore:'Back to new', adm_rv_reply_ph:'Reply from the shop (shown under the review)', adm_rv_reply_save:'Save reply', adm_rv_del_confirm:'Delete this review permanently? (Spam only.)',
@@ -1175,6 +1217,7 @@ const TA = {
     adm_drag_hint:'Порядок позицій: перетягуйте мишкою або натискайте стрілки ⤒ ▲ ▼. Клієнти бачать такий самий порядок.',
     adm_lay_saved:'✓ Збережено', adm_lay_err:'Не збережено — спробуйте ще раз',
     adm_tab_all:'Усі', adm_tab_fav:'Улюблені', adm_tab_celeb:'Святкові торти',
+    adm_bday:'Нагадування', adm_bd_title:'Нагадування про день народження', adm_bd_hint:'При замовленні клієнт може поставити галочку й вказати e-mail та дату народження. Перед днем народження йому прийде один лист із пропозицією торта. Без галочки нічого не надсилається.', adm_bd_enabled:'Пропонувати нагадування в замовленні й надсилати листи', adm_bd_days:'Днів до дня народження', adm_bd_vars:'У тексті можна використати: {name} — ім’я, {days} — кількість днів, {link} — посилання на меню.', adm_bd_test_ph:'ваш e-mail для тесту', adm_bd_test:'Надіслати тестовий лист', adm_bd_test_ok:'✓ Надіслано — перевірте пошту.', adm_bd_subs:'Підписані клієнти', adm_bd_none:'Поки ніхто не підписався.', adm_bd_smtp_ok:'✓ Пошту підключено, нагадування надсилаються автоматично щодня.', adm_bd_smtp_no:'⚠ Пошту для відправки ще не підключено. Найпростіше: безкоштовний акаунт на brevo.com — підтвердіть там e-mail кондитерської й додайте в Render → Environment <code>BREVO_API_KEY</code> і <code>MAIL_FROM</code> (цей e-mail). Або SMTP: <code>SMTP_HOST</code> (напр. smtp.seznam.cz), <code>SMTP_PORT</code> = 465, <code>SMTP_USER</code> (e-mail), <code>SMTP_PASS</code> (пароль), <code>SMTP_FROM</code> (від кого). Поки пошту не підключено, клієнти не бачать галочку на сайті.', adm_bd_smtp_short:'Пошту для відправки не підключено (див. вище).', adm_bd_sent:'надіслано {y}', adm_bd_waiting:'очікує', adm_bd_unsubscribed:'відписаний', adm_bd_unsub:'Відписати', adm_bd_unsub_confirm:'Відписати клієнта від нагадувань?',
     adm_rv_import:'Додати відгук із Google / Instagram', adm_rv_import_hint:'Лише справжні відгуки, які клієнти написали деінде (Google, Instagram, Facebook, особисто). На сайті буде видно джерело. Вигадані відгуки — це шахрайство, і в ЄС вони заборонені.', adm_rv_stars:'Зірки', adm_rv_source:'Джерело', adm_rv_src_person:'Особисто в кондитерській', adm_rv_src_other:'Інше', adm_rv_date:'Дата відгуку', adm_rv_text:'Текст відгуку', adm_rv_item:'Торт (необов’язково)', adm_rv_photo:'Фото (необов’язково)', adm_rv_import_save:'Опублікувати відгук', adm_rv_import_need:'Вкажіть ім’я та текст відгуку.',
     adm_rules_lbl:'Обмеження та передзамовлення', adm_lead_lbl:'Мін. днів наперед', adm_from_lbl:'Видача з', adm_to_lbl:'Видача по', adm_stock_lbl:'Залишок, шт.', adm_stock_ph:'без обмежень', adm_stock_btn:'Залишок, шт. (показується на сайті)', adm_stock_prompt:'Скільки «{name}» залишилось? На сайті буде «Залишилось N», при 0 — «Розпродано». Порожньо = без обмежень.', adm_stock_bad:'Введіть ціле число або залиште порожнім.', adm_rules_hint:'Великі торти: напр. 14 днів наперед. Різдвяне передзамовлення: видача 20–23 грудня й кількість коробок — клієнти побачать «залишилось 12», потім «Розпродано».', adm_stock_info:'Продано {sold} із {total}, залишилось {left}. Зміна кількості починає підрахунок заново.', adm_f_attachment:'Картинка-приклад', adm_builder:'Конструктор', adm_bld_title:'Конструктор торта на замовлення', adm_bld_hint:'Клієнт на сайті збирає торт: привід → розмір → начинка → декор, напис і картинка-приклад. Ціна рахується з цих налаштувань; передоплата 50 % карткою.', adm_bld_enabled:'Показувати конструктор на сайті', adm_bld_lead:'Найраніше через (днів)', adm_bld_mode:'Ціна на сайті', adm_bld_from:'від … Kč (уточнимо)', adm_bld_exact:'точна ціна', adm_bld_occasions:'Приводи', adm_bld_sizes:'Розміри (кількість гостей і ціна)', adm_bld_fillings:'Начинки (з фото й доплатою)', adm_bld_decor:'Декор (з ціною)', adm_bld_label:'Розмір', adm_bld_guests_from:'Гостей від', adm_bld_guests_to:'Гостей до', adm_bld_photo:'Фото начинки',
     adm_reviews:'Відгуки', adm_rv_title:'Відгуки клієнтів', adm_rv_hint:'Ховайте лише спам і образи. Приховування чесних негативних відгуків вводить клієнтів в оману і в ЄС заборонене. Зірки й текст відгуку змінити не можна — можна відповісти.', adm_rv_f_new:'Нові', adm_rv_f_pub:'Опубліковані', adm_rv_f_hidden:'Приховані', adm_rv_empty:'У цьому списку відгуків немає.', adm_rv_verified:'Перевірений покупець', adm_rv_publish:'Опублікувати', adm_rv_hide:'Сховати', adm_rv_restore:'Повернути в нові', adm_rv_reply_ph:'Відповідь кондитерської (показується під відгуком)', adm_rv_reply_save:'Зберегти відповідь', adm_rv_del_confirm:'Видалити відгук назавжди? (Лише для спаму.)',
@@ -1220,6 +1263,7 @@ function applyAdminLang(){
   if(activeSection === 'schedule' && schCfg) renderSchedule();
   if(activeSection === 'reviews' && rvData) renderReviews();
   if(activeSection === 'builder' && bldCfg){ bldCfg = _readBuilder(); renderBuilder(); }
+  if(activeSection === 'bday' && bdData) renderBday();
 }
 
 document.querySelectorAll('.adm-lang').forEach(btn => {
@@ -1380,6 +1424,8 @@ document.querySelectorAll('.amn').forEach(btn => btn.addEventListener('click', (
   document.getElementById('secSchedule').style.display  = activeSection==='schedule'  ? '' : 'none';
   document.getElementById('secReviews').style.display   = activeSection==='reviews'   ? '' : 'none';
   document.getElementById('secBuilder').style.display   = activeSection==='builder'   ? '' : 'none';
+  document.getElementById('secBday').style.display      = activeSection==='bday'      ? '' : 'none';
+  if(activeSection==='bday') loadBday();
   if(activeSection==='builder') loadBuilder();
   if(activeSection==='schedule') loadSchedule();
   if(activeSection==='reviews') loadReviews();
@@ -3094,6 +3140,69 @@ async function saveSchedule(){
   renderSchedule();
 }
 document.getElementById('schSave').addEventListener('click', saveSchedule);
+
+/* ── Birthday reminders ── */
+var bdData = null;   // var: applyAdminLang may check it before this line runs
+
+async function _bdCall(extra){
+  const r = await fetch('/api/bday/admin', {method:'POST', headers:{'Content-Type':'application/json'},
+    body: JSON.stringify({token: sessionStorage.getItem('cm_token')||'', ...(extra||{})})});
+  if(r.status===401){ handleExpired(); return null; }
+  return r.ok ? r.json() : null;
+}
+async function loadBday(){ try{ const j = await _bdCall(); if(j){ bdData = j; renderBday(); } }catch{} }
+
+function renderBday(){
+  const c = bdData.config;
+  const smtp = document.getElementById('bdSmtp');
+  smtp.className = 'bd-smtp ' + (bdData.smtp ? 'ok' : 'no');
+  smtp.innerHTML = bdData.smtp ? t('adm_bd_smtp_ok') : t('adm_bd_smtp_no');
+  document.getElementById('bdEnabled').checked = c.enabled;
+  document.getElementById('bdDays').value = c.days_before;
+  document.getElementById('bdTexts').innerHTML = ['cs','uk','en'].map(l=>`<div class="bd-lang" data-l="${l}">
+      <b>${l==='cs'?'CZ':l==='uk'?'UA':'EN'}</b>
+      <input data-f="subject" value="${esc(c.subject[l])}">
+      <textarea data-f="body">${esc(c.body[l])}</textarea></div>`).join('');
+  const subs = bdData.subscribers || [];
+  document.getElementById('bdCount').textContent = `${subs.filter(s=>s.active).length} / ${subs.length}`;
+  const loc = SCH_LOCALE[adminLang] || 'cs-CZ';
+  document.getElementById('bdList').innerHTML = subs.length ? subs.map(s=>{
+    const [m, d] = s.bday.split('-');
+    const bd = new Date(2024, +m-1, +d).toLocaleDateString(loc, {day:'numeric', month:'long'});
+    return `<div class="bd-row${s.active?'':' off'}"><b>${esc(s.name||'—')}</b><span>${esc(s.email)}</span><span>🎂 ${esc(bd)}</span><span>${esc(s.lang.toUpperCase())}</span>
+      <span>${s.active ? (s.last_sent_year ? t('adm_bd_sent', {y: s.last_sent_year}) : t('adm_bd_waiting')) : t('adm_bd_unsubscribed')}</span>
+      ${s.active ? `<button class="cat-add-btn" onclick="bdDeactivate('${esc(s.email)}')">${t('adm_bd_unsub')}</button>` : '<span></span>'}</div>`;
+  }).join('') : `<p class="lay-empty">${t('adm_bd_none')}</p>`;
+}
+
+async function bdDeactivate(email){
+  if(!confirm(t('adm_bd_unsub_confirm'))) return;
+  const j = await _bdCall({deactivate: email}); if(j){ bdData = j; renderBday(); }
+}
+
+document.getElementById('bdSave').addEventListener('click', async ()=>{
+  const cfg = {enabled: document.getElementById('bdEnabled').checked, days_before: +document.getElementById('bdDays').value || 14, subject:{}, body:{}};
+  document.querySelectorAll('#bdTexts .bd-lang').forEach(b=>{
+    cfg.subject[b.dataset.l] = b.querySelector('[data-f=subject]').value;
+    cfg.body[b.dataset.l] = b.querySelector('[data-f=body]').value;
+  });
+  const flag = document.getElementById('bdSaved');
+  const j = await _bdCall({config: cfg}).catch(()=>null);
+  if(j){ bdData = j; renderBday(); flag.textContent = t('adm_lay_saved'); } else flag.textContent = t('adm_lay_err');
+  flag.classList.add('on'); setTimeout(()=>flag.classList.remove('on'), 1800);
+});
+
+document.getElementById('bdTest').addEventListener('click', async ()=>{
+  const msg = document.getElementById('bdTestMsg'), email = document.getElementById('bdTestEmail').value.trim();
+  msg.textContent = '…';
+  try{
+    const r = await fetch('/api/bday/test', {method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({token: sessionStorage.getItem('cm_token')||'', email, lang: adminLang})});
+    if(r.status===401){ handleExpired(); return; }
+    const j = await r.json().catch(()=>({}));
+    msg.textContent = r.ok ? t('adm_bd_test_ok') : (r.status===503 ? t('adm_bd_smtp_short') : t('adm_lay_err') + (j.error ? ' — ' + j.error : ''));
+  }catch{ msg.textContent = t('adm_lay_err'); }
+});
 
 /* ── Cake builder settings ── */
 var bldCfg = null;   // var: applyAdminLang may check it before this line runs
