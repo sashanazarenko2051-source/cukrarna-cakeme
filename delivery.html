@@ -457,6 +457,10 @@ input[type="date"]::-webkit-calendar-picker-indicator:hover{opacity:1}
           <label data-k="f_phone">Telefon</label>
           <input type="tel" name="phone" id="phoneInput">
         </div>
+        <div class="ord-field full">
+          <label data-k="f_email">E-mail</label>
+          <input type="email" name="email" id="emailInput" maxlength="254" autocomplete="email">
+        </div>
         <div class="ord-field full" id="tableField" style="display:none">
           <label data-k="f_table">Číslo stolu</label>
           <div class="table-btns">
@@ -678,7 +682,7 @@ cs:{nav_home:'Domů',nav_menu:'Menu',nav_about:'O nás',nav_del:'Doručení',nav
   i1t:'Doba doručení',i1d:'minut po objednávce',
   i2t:'Cena doručení',i2d:'mimo Prahu do 15 km · 250 Kč',i2e:'nad 15 km · dle dohody',
   oc_ttl:'Objednejte nyní',oc_sub:'Vyplňte formulář — potvrdíme do 15 minut',
-  map_btn:'🗺️ Vybrat na mapě',map_hide:'Skrýt mapu',map_me:'📍 Moje poloha',map_hint:'Klikněte na mapu nebo posuňte značku — adresa se doplní sama.',map_geo_err:'Polohu se nepodařilo zjistit — povolte přístup k poloze nebo vyberte místo na mapě.',addr_ph:'Ulice a číslo domu, město',f_name:'Jméno',f_phone:'Telefon',f_phone_opt:'nepovinné',f_addr:'Adresa doručení',
+  map_btn:'🗺️ Vybrat na mapě',map_hide:'Skrýt mapu',map_me:'📍 Moje poloha',map_hint:'Klikněte na mapu nebo posuňte značku — adresa se doplní sama.',map_geo_err:'Polohu se nepodařilo zjistit — povolte přístup k poloze nebo vyberte místo na mapě.',addr_ph:'Ulice a číslo domu, město',f_email:'E-mail',f_email_ph:'nepovinné',f_email_bad:'Zkontrolujte e-mail — nebo pole nechte prázdné.',f_name:'Jméno',f_phone:'Telefon',f_phone_opt:'nepovinné',f_addr:'Adresa doručení',
   f_date:'Datum doručení / převzetí',f_time:'Čas doručení / převzetí',f_date_note:'Objednávky na dorty přijímáme nejméně 24 hodin předem · pracovní hodiny 09:00–20:00',
   f_pay_dep_cash:'50 % hotově',f_pay_dep_card:'50 % kartou',f_pay_dep_note:'50% záloha při objednávce',
   f_cart:'Vaše objednávka',cart_total:'Celkem',cart_empty_del:'Košík je prázdný — přidejte zboží z menu',go_menu:'Přejít na menu',
@@ -696,7 +700,7 @@ en:{nav_home:'Home',nav_menu:'Menu',nav_about:'About',nav_del:'Delivery',nav_con
   i1t:'Delivery Time',i1d:'minutes after ordering',
   i2t:'Delivery Price',i2d:'outside Prague up to 15 km · 250 CZK',i2e:'over 15 km · by arrangement',
   oc_ttl:'Order Now',oc_sub:'Fill in the form — we\'ll confirm within 15 minutes',
-  map_btn:'🗺️ Pick on the map',map_hide:'Hide the map',map_me:'📍 My location',map_hint:'Click the map or drag the pin — the address fills in by itself.',map_geo_err:'Could not get your location — allow location access or pick the place on the map.',addr_ph:'Street and house number, city',f_name:'Name',f_phone:'Phone',f_phone_opt:'optional',f_addr:'Delivery Address',
+  map_btn:'🗺️ Pick on the map',map_hide:'Hide the map',map_me:'📍 My location',map_hint:'Click the map or drag the pin — the address fills in by itself.',map_geo_err:'Could not get your location — allow location access or pick the place on the map.',addr_ph:'Street and house number, city',f_email:'E-mail',f_email_ph:'optional',f_email_bad:'Please check the e-mail — or leave the field empty.',f_name:'Name',f_phone:'Phone',f_phone_opt:'optional',f_addr:'Delivery Address',
   f_date:'Delivery / Pickup Date',f_time:'Delivery / Pickup Time',f_date_note:'Cake orders require at least 24 hours notice · working hours 09:00–20:00',
   f_pay_dep_cash:'50% cash',f_pay_dep_card:'50% card',f_pay_dep_note:'50% prepayment upon ordering',
   f_cart:'Your Order',cart_total:'Total',cart_empty_del:'Cart is empty — add items from the menu',go_menu:'Go to Menu',
@@ -714,7 +718,7 @@ uk:{nav_home:'Головна',nav_menu:'Меню',nav_about:'Про нас',nav_
   i1t:'Час доставки',i1d:'хвилин після замовлення',
   i2t:'Вартість доставки',i2d:'за межами Праги до 15 км · 250 Kč',i2e:'понад 15 км · за домовленістю',
   oc_ttl:'Замовте зараз',oc_sub:'Заповніть форму — ми підтвердимо протягом 15 хвилин',
-  map_btn:'🗺️ Обрати на карті',map_hide:'Сховати карту',map_me:'📍 Моє місцезнаходження',map_hint:'Натисніть на карту або перетягніть мітку — адреса підставиться сама.',map_geo_err:'Не вдалося визначити місцезнаходження — дозвольте доступ до геолокації або оберіть місце на карті.',addr_ph:'Вулиця й номер будинку, місто',f_name:'Ім’я',f_phone:'Телефон',f_phone_opt:'необов’язково',f_addr:'Адреса доставки',
+  map_btn:'🗺️ Обрати на карті',map_hide:'Сховати карту',map_me:'📍 Моє місцезнаходження',map_hint:'Натисніть на карту або перетягніть мітку — адреса підставиться сама.',map_geo_err:'Не вдалося визначити місцезнаходження — дозвольте доступ до геолокації або оберіть місце на карті.',addr_ph:'Вулиця й номер будинку, місто',f_email:'E-mail',f_email_ph:'необов’язково',f_email_bad:'Перевірте e-mail — або залиште поле порожнім.',f_name:'Ім’я',f_phone:'Телефон',f_phone_opt:'необов’язково',f_addr:'Адреса доставки',
   f_date:'Дата доставки / отримання',f_time:'Час доставки / отримання',f_date_note:'Замовлення тортів приймаємо щонайменше за 24 години · робочі години 09:00–20:00',
   f_pay_dep_cash:'50 % готівкою',f_pay_dep_card:'50 % карткою',f_pay_dep_note:'Передоплата 50 % при замовленні',
   f_cart:'Ваше замовлення',cart_total:'Разом',cart_empty_del:'Кошик порожній — додайте товари з меню',go_menu:'Перейти до меню',
@@ -733,6 +737,7 @@ function applyLang(){
   document.querySelectorAll('[data-k]').forEach(el=>{const val=t(el.dataset.k);if(val)el.textContent=val;});
   try{ renderSlots(); }catch{}  // month names and labels in the new language
   try{ renderBday(); }catch{}
+  document.getElementById('emailInput').placeholder=t('f_email_ph');
   try{ if(dineWhen==='later') renderDine(); }catch{}
   try{ addrMapTexts(); }catch{}
   const pi=document.getElementById('phoneInput');
@@ -938,6 +943,13 @@ document.getElementById('orderForm').addEventListener('submit',async function(e)
     document.getElementById('slotField').scrollIntoView({behavior:'smooth',block:'center'});
     return;
   }
+  const em=document.getElementById('emailInput').value.trim();
+  if(em&&!/^[^@\s]+@[^@\s]+\.[^@\s]{2,}$/.test(em)){
+    msg.className='ord-msg err'; msg.style.cssText=''; msg.textContent=t('f_email_bad');
+    btn.disabled=false; btn.textContent=orig;
+    document.getElementById('emailInput').focus();
+    return;
+  }
   const bday=bdayPayload();
   if(bday===null){
     msg.className='ord-msg err'; msg.style.cssText=''; msg.textContent=t('f_bday_need');
@@ -947,6 +959,7 @@ document.getElementById('orderForm').addEventListener('submit',async function(e)
   const payload={
     name:          this.querySelector('[name="name"]').value.trim(),
     phone:         this.querySelector('[name="phone"]').value.trim(),
+    email:         document.getElementById('emailInput').value.trim(),
     address:       dineIn
       ? `${t('f_table')} №${selectedTable}`
       : type==='delivery' ? (this.querySelector('[name="address"]')||{value:''}).value.trim()+(addrLL?` · 📍 https://maps.google.com/?q=${addrLL[0].toFixed(6)},${addrLL[1].toFixed(6)}`:'') : '',
@@ -1006,6 +1019,7 @@ document.getElementById('orderForm').addEventListener('submit',async function(e)
     msg.textContent=t('f_ok');
     this.querySelector('[name="name"]').value='';
     this.querySelector('[name="phone"]').value='';
+    document.getElementById('emailInput').value='';
     const addrI=this.querySelector('[name="address"]');if(addrI)addrI.value='';
     addrLL=null; document.getElementById('addrPin').textContent='';
     saveCart([]);renderCartDel();
@@ -1262,6 +1276,8 @@ async function loadBday(){
 }
 document.getElementById('bdayOptin').addEventListener('change',e=>{
   document.getElementById('bdayFields').style.display=e.target.checked?'':'none';
+  const be=document.getElementById('bdayEmail');
+  if(e.target.checked&&!be.value.trim()) be.value=document.getElementById('emailInput').value.trim();
 });
 // Returns the reminder fields for the order, or null when the input is incomplete
 function bdayPayload(){

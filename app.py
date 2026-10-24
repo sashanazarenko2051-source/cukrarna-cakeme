@@ -88,6 +88,7 @@ def _init_tables():
         conn.execute("ALTER TABLE orders ADD COLUMN IF NOT EXISTS delivery_time TEXT DEFAULT ''")
         # Example picture uploaded with a custom cake from the builder (data: URI)
         conn.execute("ALTER TABLE orders ADD COLUMN IF NOT EXISTS attachment TEXT DEFAULT ''")
+        conn.execute("ALTER TABLE orders ADD COLUMN IF NOT EXISTS email TEXT DEFAULT ''")
         conn.execute("""
             CREATE TABLE IF NOT EXISTS menu_items (
                 id BIGINT PRIMARY KEY, data JSONB NOT NULL
@@ -676,6 +677,8 @@ def _send_telegram(order: dict):
         time_ = (order.get('delivery_time') or '').strip()
         dt    = f"{date} {time_}".strip()
         lines = ['🎂 Nová objednávka! Cukrárna CakeMe', f'Jméno: {name}', f'Telefon: {phone}']
+        if order.get('email'):
+            lines.append(f"E-mail: {order['email']}")
         if dt:
             lines.append(f'Datum: {dt}')
         if items:
@@ -1607,8 +1610,13 @@ async def api_slot_config_set(req: Request):
 # ── /api/order ────────────────────────────────────────────────────────────────
 # Orders come from a public form: cap field sizes so nobody can push megabytes
 # into the DB and the Telegram/ntfy notifications.
-_ORDER_LIMITS = {'name': 120, 'phone': 40, 'address': 400, 'order': 4000, 'payment': 60,
+_ORDER_LIMITS = {'name': 120, 'phone': 40, 'email': 254, 'address': 400, 'order': 4000, 'payment': 60,
                  'order_type': 40, 'delivery_date': 20, 'delivery_time': 20}
+
+def _order_email(d):
+    """Optional contact e-mail from the order form ('' when missing or not an address)."""
+    v = str(d.get('email') or '').strip()[:254]
+    return v if _EMAIL_RE.match(v) else ''
 
 def _clip_order(order):
     for k, limit in _ORDER_LIMITS.items():
@@ -1627,12 +1635,12 @@ def _cart_photo(cart):
 
 def _insert_order(conn, order):
     conn.execute(
-        'INSERT INTO orders (id,ts,name,phone,address,ord,payment,order_type,delivery_date,delivery_time,status,attachment)'
-        ' VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)',
+        'INSERT INTO orders (id,ts,name,phone,address,ord,payment,order_type,delivery_date,delivery_time,status,attachment,email)'
+        ' VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)',
         (order['id'], order['ts'], order['name'], order['phone'],
          order['address'], order['order'], order['payment'],
          order['order_type'], order['delivery_date'], order['delivery_time'], order['status'],
-         order.get('attachment') or ''))
+         order.get('attachment') or '', order.get('email') or ''))
 
 @app.post('/api/order')
 async def api_order(req: Request, bg: BackgroundTasks):
@@ -1642,6 +1650,7 @@ async def api_order(req: Request, bg: BackgroundTasks):
         'ts':            time.strftime('%Y-%m-%dT%H:%M:%SZ', time.gmtime()),
         'name':          (d.get('name')          or '').strip(),
         'phone':         (d.get('phone')         or '').strip(),
+        'email':         _order_email(d),
         'address':       (d.get('address')       or '').strip(),
         'order':         (d.get('order')         or '').strip(),
         'payment':       (d.get('payment')       or '').strip(),
@@ -1696,7 +1705,7 @@ async def api_orders(req: Request):
             cur.execute(
                 'SELECT id,ts,name,phone,address,ord AS "order",'
                 "payment,order_type,delivery_date,delivery_time,status,"
-                "COALESCE(attachment,'') <> '' AS has_attachment FROM orders ORDER BY id DESC"
+                "COALESCE(attachment,'') <> '' AS has_attachment, COALESCE(email,'') AS email FROM orders ORDER BY id DESC"
             )
             rows = cur.fetchall()
     return rows
@@ -1768,6 +1777,7 @@ async def api_create_checkout(req: Request):
         'id': order_id, 'ts': ts,
         'name':          (d.get('name')          or '').strip(),
         'phone':         (d.get('phone')         or '').strip(),
+        'email':         _order_email(d),
         'address':       (d.get('address')       or '').strip(),
         'order':         _priced_order_text(lines, total_czk),
         'payment':       'online',
@@ -1830,7 +1840,7 @@ def _mark_paid(order_id, bg):
             cur.execute(
                 'UPDATE orders SET status=%s WHERE id=%s AND status=%s'
                 ' RETURNING id,ts,name,phone,address,ord AS "order",'
-                'payment,order_type,delivery_date,delivery_time',
+                'payment,order_type,delivery_date,delivery_time,email',
                 ('paid', order_id, 'pending_payment')
             )
             row = cur.fetchone()
