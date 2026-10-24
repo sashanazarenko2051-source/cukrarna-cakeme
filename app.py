@@ -1620,10 +1620,13 @@ async def api_order(req: Request, bg: BackgroundTasks):
         'status':        'new',
     }
     with _get_pool().connection() as conn:
-        err = _check_slot(conn, order['delivery_date'], order['delivery_time'])
-        if err:
-            raise HTTPException(409, {'error': err})
-        rule_err = _check_item_rules(conn, d.get('cart'), order['delivery_date'])
+        if d.get('dine_in') is True:
+            order['delivery_date'] = order['delivery_time'] = ''
+        else:
+            err = _check_slot(conn, order['delivery_date'], order['delivery_time'])
+            if err:
+                raise HTTPException(409, {'error': err})
+        rule_err = _check_item_rules(conn, d.get('cart'), order['delivery_date'] or _today().isoformat())
         if rule_err:
             raise HTTPException(409, rule_err)
         # A custom cake from the builder is paid 50 % in advance by card when card payments work
@@ -1706,8 +1709,12 @@ async def api_create_checkout(req: Request):
     # The amount comes from server prices, never from the browser's total_czk
     with _get_pool().connection() as conn:
         lines, total_czk, unknown = _price_cart(conn, d.get('cart'))
-        slot_err = _check_slot(conn, (d.get('delivery_date') or '').strip(), (d.get('delivery_time') or '').strip())
-        rule_err = _check_item_rules(conn, d.get('cart'), (d.get('delivery_date') or '').strip())
+        if d.get('dine_in') is True:
+            d['delivery_date'] = d['delivery_time'] = ''
+            slot_err = None
+        else:
+            slot_err = _check_slot(conn, (d.get('delivery_date') or '').strip(), (d.get('delivery_time') or '').strip())
+        rule_err = _check_item_rules(conn, d.get('cart'), (d.get('delivery_date') or '').strip() or _today().isoformat())
     if slot_err:
         raise HTTPException(409, {'error': slot_err})
     if rule_err:
