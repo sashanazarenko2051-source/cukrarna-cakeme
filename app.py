@@ -1450,6 +1450,7 @@ async def api_bday_admin(req: Request):
                 conn.execute('UPDATE subscribers SET last_sent_year=%s WHERE email=%s',
                              (_next_bday(row[0], today).year, str(d['mark_sent'])))
         subs = conn.execute('SELECT email, name, bday, lang, active, last_sent_year, created, token FROM subscribers ORDER BY bday').fetchall()
+        order_mails = conn.execute("SELECT email, name, ts FROM orders WHERE COALESCE(email,'') <> '' ORDER BY id DESC").fetchall()
     out = []
     for e, n, b, l, a, y, c, tok in subs:
         nxt = _next_bday(b, today)
@@ -1458,7 +1459,17 @@ async def api_bday_admin(req: Request):
         out.append({'email': e, 'name': n, 'bday': b, 'lang': l, 'active': bool(a), 'last_sent_year': y, 'created': c,
                     'days_left': left, 'due': bool(a) and left <= cfg['days_before'] and (y or 0) < nxt.year,
                     'mail': {'subject': subj, 'body': body}})
-    return {'config': cfg, 'smtp': _smtp_ready(), 'subscribers': out}
+    # Everyone who left an e-mail: from orders (newest first) and from subscriptions
+    contacts = {}
+    for e, n, ts in order_mails:
+        c = contacts.setdefault(e.strip().lower(), {'email': e.strip(), 'name': n or '', 'orders': 0, 'last': ts or '', 'subscribed': False})
+        c['orders'] += 1
+    for x in out:
+        c = contacts.setdefault(x['email'].lower(), {'email': x['email'], 'name': x['name'], 'orders': 0, 'last': x['created'] or '', 'subscribed': False})
+        c['subscribed'] = x['active']
+        c['name'] = c['name'] or x['name']
+    return {'config': cfg, 'smtp': _smtp_ready(), 'subscribers': out,
+            'contacts': sorted(contacts.values(), key=lambda c: c['last'], reverse=True)}
 
 @app.post('/api/bday/test')
 async def api_bday_test(req: Request):
