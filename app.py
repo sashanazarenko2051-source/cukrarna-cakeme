@@ -1397,10 +1397,11 @@ def _maybe_send_birthdays():
 
 @app.get('/api/bday/status')
 def api_bday_status():
-    """Whether the order form should offer the reminder (switched on and e-mail configured)."""
+    """Whether the order form offers the reminder. Without a mail service the admin
+    sends the e-mails by hand from the admin tab, so only the switch matters."""
     with _get_pool().connection() as conn:
         cfg = _bday_cfg(conn)
-    return {'on': cfg['enabled'] and _smtp_ready(), 'days': cfg['days_before']}
+    return {'on': cfg['enabled'], 'days': cfg['days_before']}
 
 @app.get('/api/unsubscribe')
 def api_unsubscribe(t: str = ''):
@@ -1417,6 +1418,18 @@ def api_unsubscribe(t: str = ''):
                     f'<div><p style="font-size:1.2rem">{text}</p><p><a style="color:#c9a96e" href="/">Cukrárna CakeMe</a></p></div>',
                     media_type='text/html')
 
+def _next_bday(bday, today):
+    """Next date of a 'MM-DD' birthday from today (29 Feb -> 28 Feb in other years)."""
+    m, d = map(int, bday.split('-'))
+    for year in (today.year, today.year + 1):
+        try:
+            day = _dt.date(year, m, d)
+        except ValueError:
+            day = _dt.date(year, 2, 28)
+        if day >= today:
+            return day
+    return _dt.date(today.year + 1, m, min(d, 28))
+
 @app.post('/api/bday/admin')
 async def api_bday_admin(req: Request):
     """Settings, SMTP status and subscribers for the admin tab."""
@@ -1430,10 +1443,22 @@ async def api_bday_admin(req: Request):
         if d.get('deactivate'):
             conn.execute('UPDATE subscribers SET active=FALSE WHERE email=%s', (str(d['deactivate']),))
         cfg = _bday_cfg(conn)
-        subs = conn.execute('SELECT email, name, bday, lang, active, last_sent_year, created FROM subscribers ORDER BY bday').fetchall()
-    return {'config': cfg, 'smtp': _smtp_ready(),
-            'subscribers': [{'email': e, 'name': n, 'bday': b, 'lang': l, 'active': bool(a), 'last_sent_year': y, 'created': c}
-                            for e, n, b, l, a, y, c in subs]}
+        today = _today()
+        if d.get('mark_sent'):  # the admin sent it by hand: don't offer it again this year
+            row = conn.execute('SELECT bday FROM subscribers WHERE email=%s', (str(d['mark_sent']),)).fetchone()
+            if row:
+                conn.execute('UPDATE subscribers SET last_sent_year=%s WHERE email=%s',
+                             (_next_bday(row[0], today).year, str(d['mark_sent'])))
+        subs = conn.execute('SELECT email, name, bday, lang, active, last_sent_year, created, token FROM subscribers ORDER BY bday').fetchall()
+    out = []
+    for e, n, b, l, a, y, c, tok in subs:
+        nxt = _next_bday(b, today)
+        left = (nxt - today).days
+        subj, body = _bday_email(cfg, {'name': n, 'lang': l, 'token': tok})
+        out.append({'email': e, 'name': n, 'bday': b, 'lang': l, 'active': bool(a), 'last_sent_year': y, 'created': c,
+                    'days_left': left, 'due': bool(a) and left <= cfg['days_before'] and (y or 0) < nxt.year,
+                    'mail': {'subject': subj, 'body': body}})
+    return {'config': cfg, 'smtp': _smtp_ready(), 'subscribers': out}
 
 @app.post('/api/bday/test')
 async def api_bday_test(req: Request):
@@ -1442,13 +1467,13 @@ async def api_bday_test(req: Request):
     d = await req.json()
     if not _verify_token(d.get('token')):
         raise HTTPException(401, 'Unauthorized')
-    if not _smtp_ready():
-        raise HTTPException(503, 'SMTP not configured')
     to = str(d.get('email') or '').strip()
     if not _EMAIL_RE.match(to):
         raise HTTPException(400, 'Invalid e-mail')
     with _get_pool().connection() as conn:
         subj, body = _bday_email(_bday_cfg(conn), {'name': 'Jana', 'lang': d.get('lang') or 'cs', 'token': 'test'})
+    if not _smtp_ready():  # no mail service: the admin opens this e-mail in their own mailbox
+        return {'ok': False, 'manual': True, 'subject': subj, 'body': body}
     try:
         await run_in_threadpool(_send_email, to, subj, body)
     except Exception as e:
