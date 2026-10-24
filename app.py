@@ -678,30 +678,71 @@ def _send_telegram(order: dict):
     if not token or not chat_ids:
         return
     try:
-        name  = (order.get('name') or '').strip()
-        phone = (order.get('phone') or '').strip()
-        items = (order.get('order') or '').strip()
-        date  = (order.get('delivery_date') or '').strip()
-        time_ = (order.get('delivery_time') or '').strip()
-        dt    = f"{date} {time_}".strip()
-        lines = ['🎂 Nová objednávka! Cukrárna CakeMe', f'Jméno: {name}', f'Telefon: {phone}']
-        if order.get('email'):
-            lines.append(f"E-mail: {order['email']}")
-        if dt:
-            lines.append(f'Datum: {dt}')
-        if items:
-            lines.append(f'Objednávka: {items}')
-        if order.get('address'):
-            lines.append(f"Adresa: {order['address']}")
-        if order.get('payment'):
-            lines.append(f"Platba: {order['payment']}")
-        if order.get('attachment'):
-            lines.append('📎 Obrázek-předloha je v administraci (Objednávky)')
-        text = '\n'.join(lines)
+        text = _tg_order_text(order)
     except Exception as e:
         print(f'[TG] Error: {e}', file=sys.stderr)
         return
-    _tg_send(text, f'order: {name}')
+    _tg_send(text, f"order: {order.get('name') or ''}")
+
+# The shop reads the notices in Ukrainian; the order itself may come in any site language
+_TG_WD = ['пн', 'вт', 'ср', 'чт', 'пт', 'сб', 'нд']
+_TG_LINE_RE = re.compile(r'(.+?) x(\d+) \((\d+) Kč\)(?:, |$)')
+
+def _tg_order_kind(order):
+    t = (order.get('order_type') or '').lower()
+    addr = (order.get('address') or '').strip()
+    if any(w in t for w in ('míst', 'eat', 'місці')) or re.match(r'^(Stůl|Table|Стіл)\b', addr):
+        return '🍽 НА МІСЦІ — заздалегідь' if order.get('delivery_date') else '🍽 НА МІСЦІ — зараз'
+    if any(w in t for w in ('odběr', 'pickup', 'самовив')):
+        return '🏃 САМОВИВІЗ'
+    if any(w in t for w in ('doruč', 'deliver', 'достав')):
+        return '🚚 ДОСТАВКА'
+    return '🛍 ЗАМОВЛЕННЯ'
+
+def _tg_order_text(order):
+    sep = '━━━━━━━━━━━━'
+    name  = (order.get('name') or '').strip() or '—'
+    phone = (order.get('phone') or '').strip()
+    items = (order.get('order') or '').strip()
+    date  = (order.get('delivery_date') or '').strip()
+    tm    = (order.get('delivery_time') or '').strip().replace('-', '–')
+    addr  = (order.get('address') or '').strip()
+    pay   = (order.get('payment') or '').strip().lower()
+    out = [f'🎂 НОВЕ ЗАМОВЛЕННЯ · {_tg_order_kind(order)}', sep, f'👤 {name}']
+    if phone:
+        out.append(f'📞 {phone}')
+    if order.get('email'):
+        out.append(f"✉️ {order['email']}")
+    if date:
+        try:
+            d = _dt.date.fromisoformat(date)
+            when = f'{_TG_WD[d.weekday()]}, {d.day:02d}.{d.month:02d}.{d.year}'
+        except ValueError:
+            when = date
+        out.append(f"📅 {when}{' · ' + tm if tm else ''}")
+    if items:
+        out.append(sep)
+        body, _, total = items.partition(' | Celkem:')
+        lines = list(_TG_LINE_RE.finditer(body))
+        if lines and ''.join(m.group(0) for m in lines) == body:
+            out += [f'• {m.group(1)} × {m.group(2)} — {m.group(3)} Kč' for m in lines]
+        else:
+            out.append(body)
+        if total.strip():
+            out.append(f'💰 Разом: {total.strip()}')
+    if addr:
+        out.append(sep)
+        place, _, link = addr.partition(' · 📍 ')
+        out.append(('🪑 ' if re.match(r'^(Stůl|Table|Стіл)\b', place) else '📍 ') + place)
+        if link:
+            out.append(f'🗺 Карта для кур’єра: {link}')
+    if pay:
+        paid = order.get('status') == 'paid' or pay in ('online', 'card')
+        out.append('💳 Оплачено онлайн ✅' if paid else '💵 Оплата при отриманні' if pay == 'cash' else f'💳 {pay}')
+    if order.get('attachment'):
+        out.append('📎 Картинка-приклад — в адмінці (Замовлення)')
+    out += [sep, f'🔗 {SITE_URL}/admin.html']
+    return '\n'.join(out)
 
 def _tg_send(text, label='', env='TELEGRAM_CHAT_ID'):
     """Send a message to every chat listed in the env variable (orders: TELEGRAM_CHAT_ID)."""
@@ -1185,8 +1226,8 @@ async def api_reviews_add(req: Request, bg: BackgroundTasks):
             (rid, time.strftime('%Y-%m-%dT%H:%M:%SZ', time.gmtime()), name, stars, body, item, photo, verified))
     recent.append(now)
     _review_log[ip] = recent
-    bg.add_task(_tg_send, f"⭐ Nová recenze ({'★' * stars}{'☆' * (5 - stars)})\n{name}"
-                          f"{' · ověřený zákazník' if verified else ''}\n{body[:500]}\n\nUž je na webu. Skrýt spam: /admin.html", 'review', 'TELEGRAM_REVIEWS_CHAT_ID')
+    bg.add_task(_tg_send, f"⭐ НОВИЙ ВІДГУК ({'★' * stars}{'☆' * (5 - stars)})\n👤 {name}"
+                          f"{' · перевірений клієнт' if verified else ''}\n💬 {body[:500]}\n\nВже на сайті. Прибрати спам: {SITE_URL}/admin.html", 'review', 'TELEGRAM_REVIEWS_CHAT_ID')
     return {'ok': True}
 
 @app.get('/api/review-img/{review_id}')
