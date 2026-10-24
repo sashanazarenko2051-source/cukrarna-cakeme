@@ -1510,6 +1510,8 @@ def _slot_counts(conn, start, end):
     for date, tm, status, ts in rows:
         if status == 'pending_payment' and (ts or '') < stale:
             continue
+        if tm and '-' not in tm:
+            continue  # a table booking (single time), not a cake slot
         by_slot[(date, tm)] += 1
         by_day[date] += 1
     return by_slot, by_day
@@ -1535,6 +1537,33 @@ def _slot_days(conn, cfg):
         days.append({'date': iso, 'open': open_day and day_left > 0 and any(s['left'] for s in slots), 'slots': slots})
         d += _dt.timedelta(days=1)
     return days
+
+# Table bookings (eat in, in advance): any day up to 2 months ahead, opening hours only.
+# They don't use the cake slots and don't take their places.
+DINE_FROM, DINE_TO, DINE_STEP = '11:00', '18:00', 30
+
+def _dine_times():
+    h, m = map(int, DINE_FROM.split(':')); end = DINE_TO
+    out = []
+    while f'{h:02d}:{m:02d}' < end:
+        out.append(f'{h:02d}:{m:02d}')
+        m += DINE_STEP; h, m = h + m // 60, m % 60
+    return out
+
+def _check_dine(date, tm):
+    """None if a table can be booked for this date/time, otherwise an error code."""
+    try:
+        day = _dt.date.fromisoformat(date)
+    except ValueError:
+        return 'slot_unavailable'
+    today = _today()
+    if day < today or day > today + _dt.timedelta(days=62):
+        return 'slot_unavailable'
+    if tm not in _dine_times():
+        return 'slot_full'
+    if day == today and tm <= _dt.datetime.now(_TZ).strftime('%H:%M'):
+        return 'slot_full'
+    return None
 
 def _check_slot(conn, date, tm):
     """None if the order may take this date/time, otherwise an error code."""
@@ -1625,7 +1654,10 @@ async def api_order(req: Request, bg: BackgroundTasks):
         if d.get('dine_in') is True:
             order['delivery_date'] = order['delivery_time'] = ''
         else:
-            err = _check_slot(conn, order['delivery_date'], order['delivery_time'])
+            if d.get('dine_in') == 'later':
+                err = _check_dine(order['delivery_date'], order['delivery_time'])
+            else:
+                err = _check_slot(conn, order['delivery_date'], order['delivery_time'])
             if err:
                 raise HTTPException(409, {'error': err})
         rule_err = _check_item_rules(conn, d.get('cart'), order['delivery_date'] or _today().isoformat())
@@ -1714,6 +1746,8 @@ async def api_create_checkout(req: Request):
         if d.get('dine_in') is True:
             d['delivery_date'] = d['delivery_time'] = ''
             slot_err = None
+        elif d.get('dine_in') == 'later':
+            slot_err = _check_dine((d.get('delivery_date') or '').strip(), (d.get('delivery_time') or '').strip())
         else:
             slot_err = _check_slot(conn, (d.get('delivery_date') or '').strip(), (d.get('delivery_time') or '').strip())
         rule_err = _check_item_rules(conn, d.get('cart'), (d.get('delivery_date') or '').strip() or _today().isoformat())

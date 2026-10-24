@@ -6,7 +6,7 @@
   const RT = {
     cs: {empty_ttl:'Buďte první, kdo napíše recenzi', empty_sub:'Ochutnali jste naše dorty? Podělte se o dojem — můžete přidat i fotku. Každá recenze nám pomáhá být lepší.', lbl:'Co říkají zákazníci', ttl:'Recenze', none:'Zatím žádné recenze — buďte první!', first:'Napište první recenzi →', reviews:['recenze','recenze','recenzí'],
       write:'Napsat recenzi', more:'Zobrazit další', verified:'Ověřený zákazník', reply:'Odpověď cukrárny',
-      f_stars:'Vaše hodnocení', f_name:'Jméno', f_text:'Vaše recenze', f_item:'Co jste si objednali (nepovinné)',
+      f_more:'+ Přidat fotku nebo podrobnosti', f_text_ph:'Co vám chutnalo? Jak dort chutnal hostům?', f_stars:'Vaše hodnocení', f_name:'Jméno', f_text:'Vaše recenze', f_item:'Co jste si objednali (nepovinné)',
       f_phone:'Telefon z objednávky (nepovinné)', f_phone_hint:'Jen pro označení „Ověřený zákazník“. Nikde se nezobrazuje.',
       f_photo:'Fotka (nepovinné)', f_photo_btn:'📷 Přidat fotku', f_photo_rm:'✕ Odebrat', f_send:'Odeslat recenzi',
       f_need:'Vyberte hvězdičky, vyplňte jméno a text recenze.', f_big:'Fotka je příliš velká (max 10 MB).',
@@ -15,7 +15,7 @@
       honest:'Recenze zveřejňujeme po kontrole spamu, negativní recenze nemažeme a hodnocení neupravujeme. Označení „Ověřený zákazník“ znamená, že telefon souhlasí s objednávkou. Recenze přenesené z Google či sociálních sítí mají uvedený zdroj.'},
     en: {empty_ttl:'Be the first to leave a review', empty_sub:'Tried our cakes? Share your impression — you can add a photo too. Every review helps us get better.', lbl:'What customers say', ttl:'Reviews', none:'No reviews yet — be the first!', first:'Write the first review →', reviews:['review','reviews','reviews'],
       write:'Write a review', more:'Show more', verified:'Verified customer', reply:'Reply from the shop',
-      f_stars:'Your rating', f_name:'Name', f_text:'Your review', f_item:'What did you order (optional)',
+      f_more:'+ Add a photo or details', f_text_ph:'What did you like? How did your guests like the cake?', f_stars:'Your rating', f_name:'Name', f_text:'Your review', f_item:'What did you order (optional)',
       f_phone:'Phone used for the order (optional)', f_phone_hint:'Only for the “Verified customer” badge. Never shown.',
       f_photo:'Photo (optional)', f_photo_btn:'📷 Add a photo', f_photo_rm:'✕ Remove', f_send:'Send review',
       f_need:'Choose the stars and fill in your name and review.', f_big:'The photo is too large (max 10 MB).',
@@ -24,7 +24,7 @@
       honest:'Reviews are published after a spam check; we don’t delete negative reviews or change ratings. “Verified customer” means the phone matches an order. Reviews moved over from Google or social media show their source.'},
     uk: {empty_ttl:'Будьте першим, хто залишить відгук', empty_sub:'Куштували наші торти? Поділіться враженнями — можна додати й фото. Кожен відгук допомагає нам ставати кращими.', lbl:'Що кажуть клієнти', ttl:'Відгуки', none:'Поки що немає відгуків — будьте першим!', first:'Залиште перший відгук →', reviews:['відгук','відгуки','відгуків'],
       write:'Залишити відгук', more:'Показати ще', verified:'Перевірений покупець', reply:'Відповідь кондитерської',
-      f_stars:'Ваша оцінка', f_name:'Ім’я', f_text:'Ваш відгук', f_item:'Що ви замовляли (необов’язково)',
+      f_more:'+ Додати фото або деталі', f_text_ph:'Що вам сподобалося? Як торт смакував гостям?', f_stars:'Ваша оцінка', f_name:'Ім’я', f_text:'Ваш відгук', f_item:'Що ви замовляли (необов’язково)',
       f_phone:'Телефон із замовлення (необов’язково)', f_phone_hint:'Лише для позначки «Перевірений покупець». Ніде не показується.',
       f_photo:'Фото (необов’язково)', f_photo_btn:'📷 Додати фото', f_photo_rm:'✕ Прибрати', f_send:'Надіслати відгук',
       f_need:'Оберіть зірки, вкажіть ім’я та напишіть відгук.', f_big:'Фото завелике (макс. 10 МБ).',
@@ -74,6 +74,14 @@
 .rv-honest{text-align:center;color:var(--tx2,#666);font-size:.72rem;margin-top:22px;line-height:1.6}
 .rv-form{background:var(--bg3,#1c1c1c);border:1px solid var(--gold-d,#9a7a4a);padding:26px;margin-bottom:28px;display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:16px}
 .rv-form .full{grid-column:1/-1}
+.rv-form textarea::placeholder{color:var(--tx2,#777)}
+.rv-extra summary{cursor:pointer;color:var(--gold,#c9a96e);font-size:.8rem;letter-spacing:.5px;list-style:none;padding:4px 0;user-select:none}
+.rv-extra summary::-webkit-details-marker{display:none}
+.rv-extra summary:hover{text-decoration:underline}
+.rv-extra[open] summary{margin-bottom:14px}
+.rv-extra-in{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:16px}
+.rv-empty .rv-form{text-align:left;margin:24px 0 0;background:rgba(10,10,10,.45)}
+@media(max-width:700px){ .rv-extra-in{grid-template-columns:1fr} }
 .rv-form label{display:flex;flex-direction:column;gap:7px;font-size:.7rem;letter-spacing:1.5px;text-transform:uppercase;color:var(--tx1,#c8b898)}
 .rv-form input,.rv-form textarea{background:var(--bg2,#161616);border:1px solid var(--bdr,#242424);color:var(--tx0,#f5f0e8);padding:11px 13px;font:.9rem 'Raleway',sans-serif;outline:none;text-transform:none;letter-spacing:0}
 .rv-form input:focus,.rv-form textarea:focus{border-color:var(--gold)}
@@ -110,7 +118,15 @@
     decorate();
     // Coming from the menu's rating link: the block was empty when the browser tried to scroll
     if (location.hash === '#reviews'){ const t = document.getElementById('reviews'); if (t) t.scrollIntoView(); }
+    if (location.hash === '#write') openWrite();
   }
+
+  function openWrite(){
+    if (!document.querySelector('[data-reviews="full"]')) return;
+    if (!formOpen){ formOpen = true; render(); }
+    focusForm();
+  }
+  window.addEventListener('hashchange', () => { if (location.hash === '#write') openWrite(); });
 
   function cardHtml(rv){
     const date = new Date(rv.ts).toLocaleDateString(LOCALE[L()], {day:'numeric', month:'long', year:'numeric'});
@@ -127,11 +143,13 @@
   function formHtml(){
     return `<form class="rv-form" novalidate>
       <label class="full">${tr('f_stars')}<div class="rv-pick">${[1,2,3,4,5].map(n=>`<button type="button" data-n="${n}" class="${n <= rating ? 'on' : ''}">★</button>`).join('')}</div></label>
-      <label>${tr('f_name')}<input name="name" maxlength="60" autocomplete="name"></label>
-      <label>${tr('f_item')}<select name="ordered" class="rv-select">${itemOptions(presetItem)}</select></label>
-      <label class="full">${tr('f_text')}<textarea name="text" maxlength="1500"></textarea></label>
-      <label>${tr('f_phone')}<input name="phone" type="tel" maxlength="20" autocomplete="tel"><small>${tr('f_phone_hint')}</small></label>
-      <label>${tr('f_photo')}<div class="rv-photo-row"><button type="button" class="rv-ghost rv-add-photo">${tr('f_photo_btn')}</button><input type="file" accept="image/*" hidden></div></label>
+      <label class="full">${tr('f_text')}<textarea name="text" maxlength="1500" placeholder="${esc(tr('f_text_ph'))}"></textarea></label>
+      <label class="full">${tr('f_name')}<input name="name" maxlength="60" autocomplete="name"></label>
+      <details class="rv-extra full"><summary>${tr('f_more')}</summary><div class="rv-extra-in">
+        <label>${tr('f_photo')}<div class="rv-photo-row"><button type="button" class="rv-ghost rv-add-photo">${tr('f_photo_btn')}</button><input type="file" accept="image/*" hidden></div></label>
+        <label>${tr('f_item')}<select name="ordered" class="rv-select">${itemOptions(presetItem)}</select></label>
+        <label class="full">${tr('f_phone')}<input name="phone" type="tel" maxlength="20" autocomplete="tel"><small>${tr('f_phone_hint')}</small></label>
+      </div></details>
       <input class="rv-hp" name="website" tabindex="-1" autocomplete="off">
       <div class="full" style="display:flex;gap:16px;align-items:center;flex-wrap:wrap"><button class="rv-btn" type="submit">${tr('f_send')}</button><span class="rv-msg"></span></div>
     </form>`;
@@ -147,7 +165,7 @@
     const href = document.querySelector('[data-reviews="full"]') ? '#reviews' : 'about.html#reviews';
     el.innerHTML = s && s.count
       ? `<a class="rv-line" href="${href}">${starsHtml(s.avg)} <b>${fmtAvg(s.avg)}</b> · ${s.count} ${plural(s.count)}</a>`
-      : `<a class="rv-line" href="${href}">${starsHtml(0)} ${tr('first')}</a>`;
+      : `<a class="rv-line" href="${href.replace('#reviews', '#write')}">${starsHtml(0)} ${tr('first')}</a>`;
   }
 
   function renderFull(el){
@@ -157,25 +175,31 @@
       <div class="sec-hd fi show"><span class="sec-lbl">${tr('lbl')}</span><h2 class="sec-ttl">${tr('ttl')}</h2><div class="sec-div"></div></div>
       ${!s.count ? `<div class="rv-empty">
         <div class="rv-empty-ic">✍️</div>
-        <div class="rv-empty-stars">★★★★★</div>
         <h3>${tr('empty_ttl')}</h3><p>${tr('empty_sub')}</p>
-        <button type="button" class="rv-btn rv-open">${tr('write')}</button>
+        ${formHtml()}
       </div>` : `<div class="rv-sum">
         <div class="rv-avg"><b>${s.count ? fmtAvg(s.avg) : '—'}</b>${starsHtml(s.avg)}<small>${s.count} ${plural(s.count)}</small></div>
         <div class="rv-bars">${[5,4,3,2,1].map(n=>`<div class="rv-bar"><span>${n} ★</span><i><em style="width:${Math.round((s.dist[n]||0)/max*100)}%"></em></i><span>${s.dist[n]||0}</span></div>`).join('')}</div>
         <button type="button" class="rv-btn rv-open">${tr('write')}</button>
       </div>`}
-      <div class="rv-form-box">${formOpen ? formHtml() : ''}</div>
+      <div class="rv-form-box">${formOpen && s.count ? formHtml() : ''}</div>
       ${list.length ? `<div class="rv-list">${list.slice(0, shown).map(cardHtml).join('')}</div>` : (s.count ? `<p class="rv-none">${tr('none')}</p>` : '')}
       ${list.length > shown ? `<button type="button" class="rv-more">${tr('more')}</button>` : ''}
       <p class="rv-honest">${tr('honest')}</p>`;
-    el.querySelector('.rv-open').onclick = () => { formOpen = !formOpen; render(); if (formOpen) el.querySelector('.rv-form').scrollIntoView({behavior:'smooth', block:'center'}); };
+    const openBtn = el.querySelector('.rv-open');
+    if (openBtn) openBtn.onclick = () => { formOpen = !formOpen; render(); if (formOpen) focusForm(); };
     const more = el.querySelector('.rv-more'); if (more) more.onclick = () => { shown += 6; render(); };
     el.querySelectorAll('.rv-photo').forEach(img => img.onclick = () => {
       const lb = document.createElement('div'); lb.className = 'rv-lb'; lb.innerHTML = `<img src="${esc(img.src)}" alt="">`;
       lb.onclick = () => lb.remove(); document.body.appendChild(lb);
     });
-    if (formOpen) bindForm(el.querySelector('.rv-form'));
+    const form = el.querySelector('.rv-form'); if (form) bindForm(form);
+  }
+  // Scroll to the form and put the cursor into the text
+  function focusForm(){
+    const f = document.querySelector('[data-reviews="full"] .rv-form'); if (!f) return;
+    f.scrollIntoView({behavior: 'smooth', block: 'center'});
+    setTimeout(() => f.querySelector('textarea').focus({preventScroll: true}), 400);
   }
 
   function bindForm(form){
