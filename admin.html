@@ -173,6 +173,9 @@ body{font-family:'Raleway',sans-serif;background:var(--bg0);color:var(--tx0)}
 .amt-u.on{background:rgba(201,169,110,.15);border-color:var(--gold);color:var(--gold)}
 .amt-u.on+.amt-u{border-left:1px solid var(--gold)}
 .amt-hint{font-size:.68rem;color:var(--tx2);line-height:1.45}
+.cp-stock{display:inline-block;background:var(--gold);color:var(--bg0);font-weight:700;font-size:.58rem;letter-spacing:1px;text-transform:uppercase;padding:2px 8px;margin-bottom:6px}
+.cp-stock.out{background:#5a2a2a;color:#f0b0b0}
+.stock-info{color:var(--gold)}
 .cp-weight{font-size:.7rem;color:var(--tx2);margin-bottom:5px}
 .sizes-section input{background:var(--bg3);border:1px solid var(--bdr);color:var(--tx0);padding:9px 12px;font:.82rem 'Raleway',sans-serif;outline:none;transition:.25s}
 .sizes-section input:focus{border-color:var(--gold)}
@@ -647,16 +650,9 @@ body{font-family:'Raleway',sans-serif;background:var(--bg0);color:var(--tx0)}
         <div class="mai-grid">
           <div class="mai-sec"><i>📝</i><span data-k="adm_sec_main">Základní</span></div>
           <div class="mai-field full">
-            <label data-k="adm_name_cs_lbl">Název CZ *</label>
-            <input type="text" id="fNameCs" data-kp="adm_ph_name" placeholder="Název česky">
-          </div>
-          <div class="mai-field">
-            <label data-k="adm_name_uk_lbl">Назва UA</label>
-            <input type="text" id="fNameUk" data-kp="adm_ph_same_cs" placeholder="= CZ">
-          </div>
-          <div class="mai-field">
-            <label data-k="adm_name_en_lbl">Name EN</label>
-            <input type="text" id="fNameEn" data-kp="adm_ph_same_cs" placeholder="= CZ">
+            <label data-k="adm_name_cs_lbl">Název *</label>
+            <input type="text" id="fName" data-kp="adm_ph_name" placeholder="Název">
+            <input type="hidden" id="fNameCs"><input type="hidden" id="fNameUk"><input type="hidden" id="fNameEn">
           </div>
           <div class="mai-field">
             <label data-k="adm_cat_lbl">Kategorie *</label>
@@ -691,6 +687,12 @@ body{font-family:'Raleway',sans-serif;background:var(--bg0);color:var(--tx0)}
             <div class="amt-hint" id="amtHint"></div>
             <div class="sizes-list" id="sizesList"></div>
           </div>
+          <div class="mai-field full">
+            <label data-k="adm_stock_lbl">Počet kusů na skladě</label>
+            <input type="number" id="fStock" min="0" inputmode="numeric" data-kp="adm_stock_ph" placeholder="bez omezení">
+            <div class="amt-hint" data-k="adm_stock_hint"></div>
+            <div class="amt-hint stock-info" id="stockInfo"></div>
+          </div>
           <div class="mai-sec"><i>✍️</i><span data-k="adm_sec_desc">Popis</span></div>
           <div class="mai-field full">
             <label data-k="adm_desc_lbl">Popis — pište v jakémkoli jazyce, při uložení ho přeložíme do CZ / UA / EN</label>
@@ -717,10 +719,8 @@ body{font-family:'Raleway',sans-serif;background:var(--bg0);color:var(--tx0)}
               <label><span data-k="adm_lead_lbl">Min. dní předem</span><input type="number" id="fLead" min="0" max="120" placeholder="0"></label>
               <label><span data-k="adm_from_lbl">Výdej od</span><input type="date" id="fAvailFrom"></label>
               <label><span data-k="adm_to_lbl">Výdej do</span><input type="date" id="fAvailTo"></label>
-              <label><span data-k="adm_stock_lbl">Zbývá kusů</span><input type="number" id="fStock" min="0" data-kp="adm_stock_ph" placeholder="bez omezení"></label>
             </div>
             <div class="amt-hint" id="rulesHint" data-k="adm_rules_hint">Velké dorty: např. 14 dní předem. Vánoční předobjednávka: výdej 20.–23. 12. a počet krabic — zákazníci uvidí „zbývá 12“, po vyprodání „Vyprodáno“.</div>
-            <div class="amt-hint" id="stockInfo"></div>
           </div>
 
         </div>
@@ -735,6 +735,7 @@ body{font-family:'Raleway',sans-serif;background:var(--bg0);color:var(--tx0)}
               <div class="cp-badge" id="cpBadge"></div>
               <div class="cp-name" id="cpName">Název položky</div>
               <div class="cp-weight" id="cpWeight"></div>
+              <div class="cp-stock" id="cpStock" style="display:none"></div>
               <div class="cp-desc" id="cpDesc">Popis…</div>
               <div class="cp-sizes" id="cpSizes" style="display:none"></div>
               <div class="cp-ft">
@@ -1030,7 +1031,7 @@ const TA = {
     adm_clear_done:'Smazat hotové',
     adm_add_title:'Přidat položku do menu',
     adm_cat_lbl:'Kategorie *', adm_price_lbl:'Cena * (např. 133 Kč)',
-    adm_name_cs_lbl:'Název CZ *', adm_name_uk_lbl:'Název ukrajinsky', adm_name_en_lbl:'Název anglicky',
+    adm_name_cs_lbl:'Název * — v jakémkoli jazyce, při uložení ho přeložíme do CZ / UA / EN', adm_name_uk_lbl:'Název ukrajinsky', adm_name_en_lbl:'Název anglicky',
     adm_badge_lbl:'Badge (Nové, Bestseller…)',
     adm_qty_ctrl_lbl:'Výběr množství', adm_qty_ctrl_hint:'Počet kusů (+/−) na kartě',
     adm_qty_min_lbl:'Minimální počet kusů',
@@ -1083,10 +1084,10 @@ const TA = {
     adm_tab_all:'Vše', adm_tab_fav:'Oblíbené', adm_tab_celeb:'Slavnostní dorty',
     adm_bday:'Připomínky', adm_bd_title:'Připomínky narozenin', adm_bd_hint:'Zákazník při objednávce může zaškrtnout připomínku a zadat e-mail a datum narozenin. Před narozeninami mu přijde jeden e-mail s nabídkou dortu. Bez zaškrtnutí nic nepřijde.', adm_bd_enabled:'Nabízet připomínku v objednávce a posílat e-maily', adm_bd_days:'Dní před narozeninami', adm_bd_vars:'V textu můžete použít: {name} — jméno, {days} — počet dní, {link} — odkaz na menu.', adm_bd_test_ph:'váš e-mail pro test', adm_bd_test:'Poslat zkušební e-mail', adm_bd_test_ok:'✓ Odesláno — zkontrolujte schránku.', adm_bd_due:'Čas napsat — narozeniny za {n} dní', adm_bd_gmail:'✉️ Gmail', adm_bd_mailapp:'✉️ Jiná pošta', adm_bd_mark:'✓ Odesláno', adm_bd_manual:'Pošta pro automatické odesílání není připojena — otevřete hotový e-mail a odešlete ho sami:', adm_bd_manual_hint:'Bez připojené pošty to funguje taky: zákazníci se přihlašují, a když se blíží jejich narozeniny, nahoře v seznamu uvidíte „Čas napsat“ — hotový e-mail otevřete jedním kliknutím (Gmail nebo jiná pošta) a odešlete.', adm_bd_subs:'Přihlášení zákazníci', adm_bd_none:'Zatím se nikdo nepřihlásil.', adm_bd_tpl:'Jaký e-mail otevřít:', adm_bd_tpl_auto:'Auto (jazyk zákazníka)', adm_bd_tpl_empty:'✍️ Prázdný', adm_bd_contacts:'E-maily zákazníků', adm_bd_contacts_hint:'Všechny e-maily z objednávek a přihlášek. Tlačítko otevře nový e-mail tomuto zákazníkovi. Hromadné nabídky posílejte jen přihlášeným (🎂) — ostatní dali e-mail kvůli objednávce.', adm_bd_contacts_none:'Zatím nikdo nezadal e-mail.', adm_bd_orders_n:'objednávek: {n}', adm_bd_subscribed:'🎂 přihlášen', adm_bd_all_subs:'✉️ Napsat všem přihlášeným (Gmail)', adm_bd_copy:'📋 Kopírovat e-maily', adm_bd_copied:'✓ Zkopírováno', adm_bd_hello:'Dobrý den', adm_bd_smtp_ok:'✓ E-mail je připojen, připomínky se posílají automaticky každý den.', adm_bd_smtp_no:'⚠ E-mail pro odesílání zatím není připojen. Nejjednodušší: zdarma účet na brevo.com, ověřte v něm e-mail cukrárny a v Render → Environment přidejte <code>BREVO_API_KEY</code> a <code>MAIL_FROM</code> (ten e-mail). Nebo SMTP: <code>SMTP_HOST</code> (např. smtp.seznam.cz), <code>SMTP_PORT</code> = 465, <code>SMTP_USER</code> (e-mail), <code>SMTP_PASS</code> (heslo), <code>SMTP_FROM</code> (odesílatel). Dokud není připojen, zákazníci políčko na webu neuvidí.', adm_bd_smtp_short:'E-mail pro odesílání není připojen (viz výše).', adm_bd_sent:'odesláno {y}', adm_bd_waiting:'čeká', adm_bd_unsubscribed:'odhlášen', adm_bd_unsub:'Odhlásit', adm_bd_unsub_confirm:'Odhlásit zákazníka z připomínek?',
     adm_rv_import:'Přidat recenzi z Google / Instagramu', adm_rv_import_hint:'Jen skutečné recenze, které zákazníci napsali jinde (Google, Instagram, Facebook, osobně). Na webu se zobrazí se zdrojem. Vymyšlené recenze jsou podvod a v EU jsou zakázané.', adm_rv_stars:'Hvězdičky', adm_rv_source:'Zdroj', adm_rv_src_person:'Osobně v cukrárně', adm_rv_src_other:'Jinde', adm_rv_date:'Datum recenze', adm_rv_text:'Text recenze', adm_rv_item:'Dort (nepovinné)', adm_rv_photo:'Fotka (nepovinné)', adm_rv_import_save:'Zveřejnit recenzi', adm_rv_import_need:'Vyplňte jméno a text recenze.',
-    adm_rules_lbl:'Omezení a předobjednávky', adm_lead_lbl:'Min. dní předem', adm_from_lbl:'Výdej od', adm_to_lbl:'Výdej do', adm_stock_lbl:'Zbývá kusů', adm_stock_ph:'bez omezení', adm_stock_btn:'Zbývá kusů (zobrazí se na webu)', adm_stock_prompt:'Kolik kusů „{name}“ zbývá? Na webu se zobrazí „Zbývá N“, při 0 „Vyprodáno“. Prázdné = bez omezení.', adm_stock_bad:'Zadejte celé číslo, nebo nechte prázdné.', adm_rules_hint:'Velké dorty: např. 14 dní předem. Vánoční předobjednávka: výdej 20.–23. 12. a počet krabic — zákazníci uvidí „zbývá 12“, po vyprodání „Vyprodáno“.', adm_stock_info:'Prodáno {sold} z {total}, zbývá {left}. Změna počtu spustí nové počítání.', adm_f_attachment:'Obrázek-předloha', adm_builder:'Konfigurátor', adm_bld_title:'Konfigurátor dortu na zakázku', adm_bld_hint:'Zákazník si na webu poskládá dort: příležitost → velikost → náplň → zdobení, nápis a obrázek-předloha. Cena se počítá z těchto nastavení; zaplatí zálohu 50 % kartou.', adm_bld_enabled:'Zobrazit konfigurátor na webu', adm_bld_lead:'Nejdříve za (dní)', adm_bld_mode:'Cena na webu', adm_bld_from:'od … Kč (upřesníme)', adm_bld_exact:'přesná cena', adm_bld_occasions:'Příležitosti', adm_bld_sizes:'Velikosti (počet hostů a cena)', adm_bld_fillings:'Náplně (s fotkou a příplatkem)', adm_bld_decor:'Zdobení (s cenou)', adm_bld_label:'Velikost', adm_bld_guests_from:'Hostů od', adm_bld_guests_to:'Hostů do', adm_bld_photo:'Fotka náplně', adm_bld_name:'Název', adm_bld_photo_h:'Fotka',
+    adm_rules_lbl:'Omezení a předobjednávky', adm_lead_lbl:'Min. dní předem', adm_from_lbl:'Výdej od', adm_to_lbl:'Výdej do', adm_stock_lbl:'Počet kusů na skladě', adm_stock_ph:'bez omezení', adm_stock_hint:'Na kartě se zobrazí „Zbývá N ks“, po vyprodání „Vyprodáno“ a nejde objednat. Prázdné = bez omezení.', adm_prev_left:'Zbývá {n} ks', adm_prev_sold:'Vyprodáno', adm_stock_btn:'Zbývá kusů (zobrazí se na webu)', adm_stock_prompt:'Kolik kusů „{name}“ zbývá? Na webu se zobrazí „Zbývá N“, při 0 „Vyprodáno“. Prázdné = bez omezení.', adm_stock_bad:'Zadejte celé číslo, nebo nechte prázdné.', adm_rules_hint:'Velké dorty: např. 14 dní předem. Vánoční předobjednávka: výdej 20.–23. 12. a počet krabic — zákazníci uvidí „zbývá 12“, po vyprodání „Vyprodáno“.', adm_stock_info:'Prodáno {sold} z {total}, zbývá {left}. Změna počtu spustí nové počítání.', adm_f_attachment:'Obrázek-předloha', adm_builder:'Konfigurátor', adm_bld_title:'Konfigurátor dortu na zakázku', adm_bld_hint:'Zákazník si na webu poskládá dort: příležitost → velikost → náplň → zdobení, nápis a obrázek-předloha. Cena se počítá z těchto nastavení; zaplatí zálohu 50 % kartou.', adm_bld_enabled:'Zobrazit konfigurátor na webu', adm_bld_lead:'Nejdříve za (dní)', adm_bld_mode:'Cena na webu', adm_bld_from:'od … Kč (upřesníme)', adm_bld_exact:'přesná cena', adm_bld_occasions:'Příležitosti', adm_bld_sizes:'Velikosti (počet hostů a cena)', adm_bld_fillings:'Náplně (s fotkou a příplatkem)', adm_bld_decor:'Zdobení (s cenou)', adm_bld_label:'Velikost', adm_bld_guests_from:'Hostů od', adm_bld_guests_to:'Hostů do', adm_bld_photo:'Fotka náplně', adm_bld_name:'Název', adm_bld_photo_h:'Fotka',
     adm_reviews:'Recenze', adm_rv_title:'Recenze zákazníků', adm_rv_hint:'Skrývejte jen spam a urážky. Skrývání poctivých negativních recenzí klame zákazníky a v EU je zakázané. Hvězdičky ani text recenze upravit nelze — můžete odpovědět.', adm_rv_f_new:'Nové', adm_rv_f_pub:'Zveřejněné', adm_rv_f_hidden:'Skryté', adm_rv_empty:'Žádné recenze v tomto seznamu.', adm_rv_verified:'Ověřený zákazník', adm_rv_publish:'Zveřejnit', adm_rv_hide:'Skrýt', adm_rv_restore:'Vrátit mezi nové', adm_rv_reply_ph:'Odpověď cukrárny (zobrazí se pod recenzí)', adm_rv_reply_save:'Uložit odpověď', adm_rv_del_confirm:'Smazat recenzi natrvalo? (Jen pro spam.)',
     adm_schedule:'Rozvrh', adm_sch_title:'Termíny doručení a převzetí', adm_sch_enabled:'Zákazník vybírá den a čas z volných termínů', adm_sch_weekdays:'Pracovní dny', adm_sch_times:'Časové intervaly', adm_sch_per_slot:'Objednávek na interval', adm_sch_per_day:'Objednávek za den', adm_sch_ahead:'Dní dopředu', adm_sch_lead:'Nejdříve za (dní)', adm_sch_cal:'Obsazenost', adm_sch_cal_hint:'2 měsíce zpět a 2 měsíce dopředu. Klikněte na den: uvidíte objednávky a můžete den zavřít nebo otevřít.', adm_sch_l_free:'volno', adm_sch_l_mid:'částečně', adm_sch_l_full:'plno', adm_sch_l_closed:'zavřeno', adm_sch_orders:'objednávek: {n}', adm_sch_no_orders:'Na tento den nejsou žádné objednávky.', adm_sch_off_day:'Tento den v týdnu je nepracovní (nastavení výše).', adm_sch_open:'Otevřít den', adm_sch_close:'Zavřít den',
-    adm_ph_name:'Název česky', adm_ph_desc:'Krátký popis česky', adm_ph_section:'Název sekce (např. Sezónní)', adm_ph_size:'Název velikosti', adm_prev_name:'Název položky', adm_prev_desc:'Popis…', adm_tt_pieces:'Prodej na kusy (+/−)', adm_tt_rot_l:'Otočit doleva', adm_tt_rot_r:'Otočit doprava', adm_tt_push_test:'Otestovat notifikaci', adm_tt_push_on:'Zapnout notifikace o nových objednávkách', adm_tt_push_denied:'Notifikace zablokovány v prohlížeči — povolte v nastavení prohlížeče', adm_tt_push_both:'Notifikace zapnuty (Push + kontrola) — klikněte pro vypnutí push', adm_tt_push_polling:'Notifikace zapnuty (kontrola) — klikněte pro zapnutí push', adm_err_prefix:'Chyba: ', adm_push_ok_title:'Notifikace zapnuty! 🔔', adm_push_ok_body:'Budete dostávat upozornění o nových objednávkách.', adm_push_err:'Chyba při zapínání notifikací: ', adm_push_blocked:'Notifikace jsou zablokovány v prohlížeči. Povolte je v nastavení prohlížeče a obnovte stránku.',
+    adm_ph_name:'Např. Medovník', adm_ph_desc:'Krátký popis česky', adm_ph_section:'Název sekce (např. Sezónní)', adm_ph_size:'Název velikosti', adm_prev_name:'Název položky', adm_prev_desc:'Popis…', adm_tt_pieces:'Prodej na kusy (+/−)', adm_tt_rot_l:'Otočit doleva', adm_tt_rot_r:'Otočit doprava', adm_tt_push_test:'Otestovat notifikaci', adm_tt_push_on:'Zapnout notifikace o nových objednávkách', adm_tt_push_denied:'Notifikace zablokovány v prohlížeči — povolte v nastavení prohlížeče', adm_tt_push_both:'Notifikace zapnuty (Push + kontrola) — klikněte pro vypnutí push', adm_tt_push_polling:'Notifikace zapnuty (kontrola) — klikněte pro zapnutí push', adm_err_prefix:'Chyba: ', adm_push_ok_title:'Notifikace zapnuty! 🔔', adm_push_ok_body:'Budete dostávat upozornění o nových objednávkách.', adm_push_err:'Chyba při zapínání notifikací: ', adm_push_blocked:'Notifikace jsou zablokovány v prohlížeči. Povolte je v nastavení prohlížeče a obnovte stránku.',
     adm_feat_title:'Doporučujeme — úplně nahoře v menu',
     adm_feat_hint:'Velké karty nad všemi sekcemi — zákazník je uvidí jako první. Přidat: vyberte níže a „+ Přidat“, nebo ⭐ u položky. Odebrat: ✕.',
     adm_feat_empty:'Nic — nahoře v menu se nic nezobrazuje. Přidejte položky tlačítkem ⭐.',
@@ -1103,7 +1104,7 @@ const TA = {
     adm_clear_done:'Delete completed',
     adm_add_title:'Add menu item',
     adm_cat_lbl:'Category *', adm_price_lbl:'Price * (e.g. 133 Kč)',
-    adm_name_cs_lbl:'Name in Czech *', adm_name_uk_lbl:'Name in Ukrainian', adm_name_en_lbl:'Name in English',
+    adm_name_cs_lbl:'Name * — any language, translated to CZ / UA / EN when you save', adm_name_uk_lbl:'Name in Ukrainian', adm_name_en_lbl:'Name in English',
     adm_badge_lbl:'Badge (New, Bestseller…)',
     adm_qty_min_lbl:'Minimum quantity',
     adm_sec_main:'Basics', adm_ph_desc_any:'Short description — ingredients, taste, weight', adm_sec_price:'Price and sizes', adm_sec_desc:'Description', adm_sec_photo:'Photo', adm_sec_rules:'Limits and pre-orders', adm_desc_lbl:'Description — write in any language, it is translated to CZ / UA / EN when you save', adm_desc_tr:'Translating…', adm_desc_cs_lbl:'Description in Czech', adm_desc_uk_lbl:'Description in Ukrainian', adm_desc_en_lbl:'Description in English',
@@ -1154,10 +1155,10 @@ const TA = {
     adm_tab_all:'All', adm_tab_fav:'Favorites', adm_tab_celeb:'Celebration cakes',
     adm_bday:'Reminders', adm_bd_title:'Birthday reminders', adm_bd_hint:'When ordering, a customer can tick the reminder and give an e-mail and birthday. Before the birthday they get one e-mail offering a cake. Nothing is sent without the tick.', adm_bd_enabled:'Offer the reminder in the order form and send e-mails', adm_bd_days:'Days before the birthday', adm_bd_vars:'You can use in the text: {name} — name, {days} — number of days, {link} — link to the menu.', adm_bd_test_ph:'your e-mail for a test', adm_bd_test:'Send a test e-mail', adm_bd_test_ok:'✓ Sent — check your inbox.', adm_bd_due:'Time to write — birthday in {n} days', adm_bd_gmail:'✉️ Gmail', adm_bd_mailapp:'✉️ Other mail', adm_bd_mark:'✓ Sent', adm_bd_manual:'Automatic sending isn’t connected — open the ready e-mail and send it yourself:', adm_bd_manual_hint:'It works without a connected mail service too: customers subscribe, and when a birthday is near you see “Time to write” at the top of the list — open the ready e-mail with one click (Gmail or another mail app) and send it.', adm_bd_subs:'Subscribed customers', adm_bd_none:'Nobody has subscribed yet.', adm_bd_tpl:'Which e-mail to open:', adm_bd_tpl_auto:'Auto (customer’s language)', adm_bd_tpl_empty:'✍️ Empty', adm_bd_contacts:'Customer e-mails', adm_bd_contacts_hint:'Every e-mail from orders and subscriptions. The button opens a new e-mail to that customer. Send promotions to subscribers only (🎂) — the others gave their e-mail for an order.', adm_bd_contacts_none:'Nobody has left an e-mail yet.', adm_bd_orders_n:'orders: {n}', adm_bd_subscribed:'🎂 subscribed', adm_bd_all_subs:'✉️ Write to all subscribers (Gmail)', adm_bd_copy:'📋 Copy e-mails', adm_bd_copied:'✓ Copied', adm_bd_hello:'Hello', adm_bd_smtp_ok:'✓ E-mail is connected; reminders are sent automatically every day.', adm_bd_smtp_no:'⚠ No sending e-mail connected yet. Easiest: a free brevo.com account — verify the shop e-mail there and add <code>BREVO_API_KEY</code> and <code>MAIL_FROM</code> (that e-mail) in Render → Environment. Or SMTP: <code>SMTP_HOST</code> (e.g. smtp.seznam.cz), <code>SMTP_PORT</code> = 465, <code>SMTP_USER</code> (e-mail), <code>SMTP_PASS</code> (password), <code>SMTP_FROM</code> (sender). Until then customers won’t see the box on the site.', adm_bd_smtp_short:'No sending e-mail connected (see above).', adm_bd_sent:'sent {y}', adm_bd_waiting:'waiting', adm_bd_unsubscribed:'unsubscribed', adm_bd_unsub:'Unsubscribe', adm_bd_unsub_confirm:'Unsubscribe this customer from reminders?',
     adm_rv_import:'Add a review from Google / Instagram', adm_rv_import_hint:'Only real reviews customers wrote elsewhere (Google, Instagram, Facebook, in person). The site shows the source. Made-up reviews are fraud and forbidden in the EU.', adm_rv_stars:'Stars', adm_rv_source:'Source', adm_rv_src_person:'In person at the shop', adm_rv_src_other:'Elsewhere', adm_rv_date:'Review date', adm_rv_text:'Review text', adm_rv_item:'Cake (optional)', adm_rv_photo:'Photo (optional)', adm_rv_import_save:'Publish review', adm_rv_import_need:'Fill in the name and the review text.',
-    adm_rules_lbl:'Limits and pre-orders', adm_lead_lbl:'Min. days ahead', adm_from_lbl:'Pickup from', adm_to_lbl:'Pickup until', adm_stock_lbl:'Stock left', adm_stock_ph:'unlimited', adm_stock_btn:'Pieces left (shown on the site)', adm_stock_prompt:'How many “{name}” are left? The site shows “N left”, and “Sold out” at 0. Empty = unlimited.', adm_stock_bad:'Enter a whole number, or leave it empty.', adm_rules_hint:'Big cakes: e.g. 14 days ahead. Christmas pre-order: pickup 20–23 Dec and a number of boxes — customers see “12 left”, then “Sold out”.', adm_stock_info:'Sold {sold} of {total}, {left} left. Changing the quantity restarts the count.', adm_f_attachment:'Example picture', adm_builder:'Cake builder', adm_bld_title:'Custom cake builder', adm_bld_hint:'Customers put a cake together on the site: occasion → size → filling → decor, inscription and an example picture. The price comes from these settings; they pay a 50 % deposit by card.', adm_bld_enabled:'Show the builder on the site', adm_bld_lead:'Earliest in (days)', adm_bld_mode:'Price on the site', adm_bld_from:'from … CZK (we confirm)', adm_bld_exact:'exact price', adm_bld_occasions:'Occasions', adm_bld_sizes:'Sizes (guests and price)', adm_bld_fillings:'Fillings (with photo and surcharge)', adm_bld_decor:'Decor (with price)', adm_bld_label:'Size', adm_bld_guests_from:'Guests from', adm_bld_guests_to:'Guests to', adm_bld_photo:'Filling photo', adm_bld_name:'Name', adm_bld_photo_h:'Photo',
+    adm_rules_lbl:'Limits and pre-orders', adm_lead_lbl:'Min. days ahead', adm_from_lbl:'Pickup from', adm_to_lbl:'Pickup until', adm_stock_lbl:'Quantity in stock', adm_stock_ph:'unlimited', adm_stock_hint:'The card shows “N pcs left”, and “Sold out” when all are sold (it can no longer be ordered). Empty = unlimited.', adm_prev_left:'{n} pcs left', adm_prev_sold:'Sold out', adm_stock_btn:'Pieces left (shown on the site)', adm_stock_prompt:'How many “{name}” are left? The site shows “N left”, and “Sold out” at 0. Empty = unlimited.', adm_stock_bad:'Enter a whole number, or leave it empty.', adm_rules_hint:'Big cakes: e.g. 14 days ahead. Christmas pre-order: pickup 20–23 Dec and a number of boxes — customers see “12 left”, then “Sold out”.', adm_stock_info:'Sold {sold} of {total}, {left} left. Changing the quantity restarts the count.', adm_f_attachment:'Example picture', adm_builder:'Cake builder', adm_bld_title:'Custom cake builder', adm_bld_hint:'Customers put a cake together on the site: occasion → size → filling → decor, inscription and an example picture. The price comes from these settings; they pay a 50 % deposit by card.', adm_bld_enabled:'Show the builder on the site', adm_bld_lead:'Earliest in (days)', adm_bld_mode:'Price on the site', adm_bld_from:'from … CZK (we confirm)', adm_bld_exact:'exact price', adm_bld_occasions:'Occasions', adm_bld_sizes:'Sizes (guests and price)', adm_bld_fillings:'Fillings (with photo and surcharge)', adm_bld_decor:'Decor (with price)', adm_bld_label:'Size', adm_bld_guests_from:'Guests from', adm_bld_guests_to:'Guests to', adm_bld_photo:'Filling photo', adm_bld_name:'Name', adm_bld_photo_h:'Photo',
     adm_reviews:'Reviews', adm_rv_title:'Customer reviews', adm_rv_hint:'Hide only spam and insults. Hiding honest negative reviews misleads customers and is forbidden in the EU. Stars and text can’t be edited — you can reply.', adm_rv_f_new:'New', adm_rv_f_pub:'Published', adm_rv_f_hidden:'Hidden', adm_rv_empty:'No reviews in this list.', adm_rv_verified:'Verified customer', adm_rv_publish:'Publish', adm_rv_hide:'Hide', adm_rv_restore:'Back to new', adm_rv_reply_ph:'Reply from the shop (shown under the review)', adm_rv_reply_save:'Save reply', adm_rv_del_confirm:'Delete this review permanently? (Spam only.)',
     adm_schedule:'Schedule', adm_sch_title:'Delivery and pickup times', adm_sch_enabled:'Customers choose a day and time from free slots', adm_sch_weekdays:'Working days', adm_sch_times:'Time intervals', adm_sch_per_slot:'Orders per interval', adm_sch_per_day:'Orders per day', adm_sch_ahead:'Days ahead', adm_sch_lead:'Earliest in (days)', adm_sch_cal:'Occupancy', adm_sch_cal_hint:'2 months back and 2 months ahead. Click a day to see its orders and to close or open it.', adm_sch_l_free:'free', adm_sch_l_mid:'partly booked', adm_sch_l_full:'full', adm_sch_l_closed:'closed', adm_sch_orders:'orders: {n}', adm_sch_no_orders:'No orders for this day.', adm_sch_off_day:'This weekday is a day off (settings above).', adm_sch_open:'Open day', adm_sch_close:'Close day',
-    adm_ph_name:'Name in Czech', adm_ph_desc:'Short description in Czech', adm_ph_section:'Section name (e.g. Seasonal)', adm_ph_size:'Size name', adm_prev_name:'Item name', adm_prev_desc:'Description…', adm_tt_pieces:'Sold by the piece (+/−)', adm_tt_rot_l:'Rotate left', adm_tt_rot_r:'Rotate right', adm_tt_push_test:'Test notification', adm_tt_push_on:'Turn on new-order notifications', adm_tt_push_denied:'Notifications are blocked in the browser — allow them in browser settings', adm_tt_push_both:'Notifications on (push + polling) — click to turn push off', adm_tt_push_polling:'Notifications on (polling) — click to turn push on', adm_err_prefix:'Error: ', adm_push_ok_title:'Notifications on! 🔔', adm_push_ok_body:'You will be notified about new orders.', adm_push_err:'Could not turn on notifications: ', adm_push_blocked:'Notifications are blocked in the browser. Allow them in browser settings and reload the page.',
+    adm_ph_name:'E.g. Honey cake', adm_ph_desc:'Short description in Czech', adm_ph_section:'Section name (e.g. Seasonal)', adm_ph_size:'Size name', adm_prev_name:'Item name', adm_prev_desc:'Description…', adm_tt_pieces:'Sold by the piece (+/−)', adm_tt_rot_l:'Rotate left', adm_tt_rot_r:'Rotate right', adm_tt_push_test:'Test notification', adm_tt_push_on:'Turn on new-order notifications', adm_tt_push_denied:'Notifications are blocked in the browser — allow them in browser settings', adm_tt_push_both:'Notifications on (push + polling) — click to turn push off', adm_tt_push_polling:'Notifications on (polling) — click to turn push on', adm_err_prefix:'Error: ', adm_push_ok_title:'Notifications on! 🔔', adm_push_ok_body:'You will be notified about new orders.', adm_push_err:'Could not turn on notifications: ', adm_push_blocked:'Notifications are blocked in the browser. Allow them in browser settings and reload the page.',
     adm_feat_title:'We recommend — at the very top of the menu',
     adm_feat_hint:'Large cards above all sections — customers see them first. Add: pick below and “+ Add”, or ⭐ on an item. Remove: ✕.',
     adm_feat_empty:'Nothing — the top of the menu is empty. Add items with ⭐.',
@@ -1174,7 +1175,7 @@ const TA = {
     adm_clear_done:'Видалити готові',
     adm_add_title:'Додати позицію в меню',
     adm_cat_lbl:'Категорія *', adm_price_lbl:'Ціна * (напр. 133 Kč)',
-    adm_name_cs_lbl:'Назва чеською *', adm_name_uk_lbl:'Назва українською', adm_name_en_lbl:'Назва англійською',
+    adm_name_cs_lbl:'Назва * — будь-якою мовою, при збереженні перекладемо на CZ / UA / EN', adm_name_uk_lbl:'Назва українською', adm_name_en_lbl:'Назва англійською',
     adm_badge_lbl:'Бейдж (Новинка, Бестселер…)',
     adm_qty_ctrl_lbl:'Вибір кількості', adm_qty_ctrl_hint:'Кількість штук (+/−) на картці',
     adm_qty_min_lbl:'Мінімальна кількість штук',
@@ -1227,10 +1228,10 @@ const TA = {
     adm_tab_all:'Усі', adm_tab_fav:'Улюблені', adm_tab_celeb:'Святкові торти',
     adm_bday:'Нагадування', adm_bd_title:'Нагадування про день народження', adm_bd_hint:'При замовленні клієнт може поставити галочку й вказати e-mail та дату народження. Перед днем народження йому прийде один лист із пропозицією торта. Без галочки нічого не надсилається.', adm_bd_enabled:'Пропонувати нагадування в замовленні й надсилати листи', adm_bd_days:'Днів до дня народження', adm_bd_vars:'У тексті можна використати: {name} — ім’я, {days} — кількість днів, {link} — посилання на меню.', adm_bd_test_ph:'ваш e-mail для тесту', adm_bd_test:'Надіслати тестовий лист', adm_bd_test_ok:'✓ Надіслано — перевірте пошту.', adm_bd_due:'Пора написати — день народження через {n} дн.', adm_bd_gmail:'✉️ Gmail', adm_bd_mailapp:'✉️ Інша пошта', adm_bd_mark:'✓ Надіслано', adm_bd_manual:'Автоматичну відправку не підключено — відкрийте готовий лист і надішліть його самі:', adm_bd_manual_hint:'Працює й без підключеної пошти: клієнти підписуються, а коли наближається день народження, вгорі списку з’явиться «Пора написати» — готовий лист відкривається одним кліком (Gmail або інша пошта), вам лишається натиснути «Надіслати».', adm_bd_subs:'Підписані клієнти', adm_bd_none:'Поки ніхто не підписався.', adm_bd_tpl:'Який лист відкривати:', adm_bd_tpl_auto:'Авто (мова клієнта)', adm_bd_tpl_empty:'✍️ Порожній', adm_bd_contacts:'Пошти клієнтів', adm_bd_contacts_hint:'Усі e-mail із замовлень і підписок. Кнопка відкриває новий лист цьому клієнту. Масові пропозиції надсилайте лише підписаним (🎂) — інші залишили пошту заради замовлення.', adm_bd_contacts_none:'Поки ніхто не залишив e-mail.', adm_bd_orders_n:'замовлень: {n}', adm_bd_subscribed:'🎂 підписаний', adm_bd_all_subs:'✉️ Написати всім підписаним (Gmail)', adm_bd_copy:'📋 Копіювати пошти', adm_bd_copied:'✓ Скопійовано', adm_bd_hello:'Добрий день', adm_bd_smtp_ok:'✓ Пошту підключено, нагадування надсилаються автоматично щодня.', adm_bd_smtp_no:'⚠ Пошту для відправки ще не підключено. Найпростіше: безкоштовний акаунт на brevo.com — підтвердіть там e-mail кондитерської й додайте в Render → Environment <code>BREVO_API_KEY</code> і <code>MAIL_FROM</code> (цей e-mail). Або SMTP: <code>SMTP_HOST</code> (напр. smtp.seznam.cz), <code>SMTP_PORT</code> = 465, <code>SMTP_USER</code> (e-mail), <code>SMTP_PASS</code> (пароль), <code>SMTP_FROM</code> (від кого). Поки пошту не підключено, клієнти не бачать галочку на сайті.', adm_bd_smtp_short:'Пошту для відправки не підключено (див. вище).', adm_bd_sent:'надіслано {y}', adm_bd_waiting:'очікує', adm_bd_unsubscribed:'відписаний', adm_bd_unsub:'Відписати', adm_bd_unsub_confirm:'Відписати клієнта від нагадувань?',
     adm_rv_import:'Додати відгук із Google / Instagram', adm_rv_import_hint:'Лише справжні відгуки, які клієнти написали деінде (Google, Instagram, Facebook, особисто). На сайті буде видно джерело. Вигадані відгуки — це шахрайство, і в ЄС вони заборонені.', adm_rv_stars:'Зірки', adm_rv_source:'Джерело', adm_rv_src_person:'Особисто в кондитерській', adm_rv_src_other:'Інше', adm_rv_date:'Дата відгуку', adm_rv_text:'Текст відгуку', adm_rv_item:'Торт (необов’язково)', adm_rv_photo:'Фото (необов’язково)', adm_rv_import_save:'Опублікувати відгук', adm_rv_import_need:'Вкажіть ім’я та текст відгуку.',
-    adm_rules_lbl:'Обмеження та передзамовлення', adm_lead_lbl:'Мін. днів наперед', adm_from_lbl:'Видача з', adm_to_lbl:'Видача по', adm_stock_lbl:'Залишок, шт.', adm_stock_ph:'без обмежень', adm_stock_btn:'Залишок, шт. (показується на сайті)', adm_stock_prompt:'Скільки «{name}» залишилось? На сайті буде «Залишилось N», при 0 — «Розпродано». Порожньо = без обмежень.', adm_stock_bad:'Введіть ціле число або залиште порожнім.', adm_rules_hint:'Великі торти: напр. 14 днів наперед. Різдвяне передзамовлення: видача 20–23 грудня й кількість коробок — клієнти побачать «залишилось 12», потім «Розпродано».', adm_stock_info:'Продано {sold} із {total}, залишилось {left}. Зміна кількості починає підрахунок заново.', adm_f_attachment:'Картинка-приклад', adm_builder:'Конструктор', adm_bld_title:'Конструктор торта на замовлення', adm_bld_hint:'Клієнт на сайті збирає торт: привід → розмір → начинка → декор, напис і картинка-приклад. Ціна рахується з цих налаштувань; передоплата 50 % карткою.', adm_bld_enabled:'Показувати конструктор на сайті', adm_bld_lead:'Найраніше через (днів)', adm_bld_mode:'Ціна на сайті', adm_bld_from:'від … Kč (уточнимо)', adm_bld_exact:'точна ціна', adm_bld_occasions:'Приводи', adm_bld_sizes:'Розміри (кількість гостей і ціна)', adm_bld_fillings:'Начинки (з фото й доплатою)', adm_bld_decor:'Декор (з ціною)', adm_bld_label:'Розмір', adm_bld_guests_from:'Гостей від', adm_bld_guests_to:'Гостей до', adm_bld_photo:'Фото начинки', adm_bld_name:'Назва', adm_bld_photo_h:'Фото',
+    adm_rules_lbl:'Обмеження та передзамовлення', adm_lead_lbl:'Мін. днів наперед', adm_from_lbl:'Видача з', adm_to_lbl:'Видача по', adm_stock_lbl:'Кількість у наявності, шт.', adm_stock_ph:'без обмежень', adm_stock_hint:'На картці буде «Залишилось N шт.», коли все продано — «Розпродано» і замовити вже не можна. Порожньо = без обмежень.', adm_prev_left:'Залишилось {n} шт.', adm_prev_sold:'Розпродано', adm_stock_btn:'Залишок, шт. (показується на сайті)', adm_stock_prompt:'Скільки «{name}» залишилось? На сайті буде «Залишилось N», при 0 — «Розпродано». Порожньо = без обмежень.', adm_stock_bad:'Введіть ціле число або залиште порожнім.', adm_rules_hint:'Великі торти: напр. 14 днів наперед. Різдвяне передзамовлення: видача 20–23 грудня й кількість коробок — клієнти побачать «залишилось 12», потім «Розпродано».', adm_stock_info:'Продано {sold} із {total}, залишилось {left}. Зміна кількості починає підрахунок заново.', adm_f_attachment:'Картинка-приклад', adm_builder:'Конструктор', adm_bld_title:'Конструктор торта на замовлення', adm_bld_hint:'Клієнт на сайті збирає торт: привід → розмір → начинка → декор, напис і картинка-приклад. Ціна рахується з цих налаштувань; передоплата 50 % карткою.', adm_bld_enabled:'Показувати конструктор на сайті', adm_bld_lead:'Найраніше через (днів)', adm_bld_mode:'Ціна на сайті', adm_bld_from:'від … Kč (уточнимо)', adm_bld_exact:'точна ціна', adm_bld_occasions:'Приводи', adm_bld_sizes:'Розміри (кількість гостей і ціна)', adm_bld_fillings:'Начинки (з фото й доплатою)', adm_bld_decor:'Декор (з ціною)', adm_bld_label:'Розмір', adm_bld_guests_from:'Гостей від', adm_bld_guests_to:'Гостей до', adm_bld_photo:'Фото начинки', adm_bld_name:'Назва', adm_bld_photo_h:'Фото',
     adm_reviews:'Відгуки', adm_rv_title:'Відгуки клієнтів', adm_rv_hint:'Ховайте лише спам і образи. Приховування чесних негативних відгуків вводить клієнтів в оману і в ЄС заборонене. Зірки й текст відгуку змінити не можна — можна відповісти.', adm_rv_f_new:'Нові', adm_rv_f_pub:'Опубліковані', adm_rv_f_hidden:'Приховані', adm_rv_empty:'У цьому списку відгуків немає.', adm_rv_verified:'Перевірений покупець', adm_rv_publish:'Опублікувати', adm_rv_hide:'Сховати', adm_rv_restore:'Повернути в нові', adm_rv_reply_ph:'Відповідь кондитерської (показується під відгуком)', adm_rv_reply_save:'Зберегти відповідь', adm_rv_del_confirm:'Видалити відгук назавжди? (Лише для спаму.)',
     adm_schedule:'Розклад', adm_sch_title:'Дати й час доставки та отримання', adm_sch_enabled:'Клієнт обирає день і час із вільних слотів', adm_sch_weekdays:'Робочі дні', adm_sch_times:'Часові інтервали', adm_sch_per_slot:'Замовлень на інтервал', adm_sch_per_day:'Замовлень на день', adm_sch_ahead:'Днів наперед', adm_sch_lead:'Найраніше через (днів)', adm_sch_cal:'Зайнятість', adm_sch_cal_hint:'2 місяці назад і 2 місяці вперед. Натисніть на день: побачите замовлення й зможете закрити або відкрити день.', adm_sch_l_free:'вільно', adm_sch_l_mid:'частково', adm_sch_l_full:'зайнято', adm_sch_l_closed:'зачинено', adm_sch_orders:'замовлень: {n}', adm_sch_no_orders:'На цей день замовлень немає.', adm_sch_off_day:'Цей день тижня вихідний (налаштування вище).', adm_sch_open:'Відкрити день', adm_sch_close:'Закрити день',
-    adm_ph_name:'Назва чеською', adm_ph_desc:'Короткий опис чеською', adm_ph_section:'Назва розділу (напр. Сезонне)', adm_ph_size:'Назва розміру', adm_prev_name:'Назва позиції', adm_prev_desc:'Опис…', adm_tt_pieces:'Продаж поштучно (+/−)', adm_tt_rot_l:'Повернути ліворуч', adm_tt_rot_r:'Повернути праворуч', adm_tt_push_test:'Перевірити сповіщення', adm_tt_push_on:'Увімкнути сповіщення про нові замовлення', adm_tt_push_denied:'Сповіщення заблоковані в браузері — дозвольте їх у налаштуваннях браузера', adm_tt_push_both:'Сповіщення увімкнені (push + перевірка) — натисніть, щоб вимкнути push', adm_tt_push_polling:'Сповіщення увімкнені (перевірка) — натисніть, щоб увімкнути push', adm_err_prefix:'Помилка: ', adm_push_ok_title:'Сповіщення увімкнено! 🔔', adm_push_ok_body:'Ви отримуватимете сповіщення про нові замовлення.', adm_push_err:'Не вдалося увімкнути сповіщення: ', adm_push_blocked:'Сповіщення заблоковані в браузері. Дозвольте їх у налаштуваннях браузера й оновіть сторінку.',
+    adm_ph_name:'Напр. Медовик', adm_ph_desc:'Короткий опис чеською', adm_ph_section:'Назва розділу (напр. Сезонне)', adm_ph_size:'Назва розміру', adm_prev_name:'Назва позиції', adm_prev_desc:'Опис…', adm_tt_pieces:'Продаж поштучно (+/−)', adm_tt_rot_l:'Повернути ліворуч', adm_tt_rot_r:'Повернути праворуч', adm_tt_push_test:'Перевірити сповіщення', adm_tt_push_on:'Увімкнути сповіщення про нові замовлення', adm_tt_push_denied:'Сповіщення заблоковані в браузері — дозвольте їх у налаштуваннях браузера', adm_tt_push_both:'Сповіщення увімкнені (push + перевірка) — натисніть, щоб вимкнути push', adm_tt_push_polling:'Сповіщення увімкнені (перевірка) — натисніть, щоб увімкнути push', adm_err_prefix:'Помилка: ', adm_push_ok_title:'Сповіщення увімкнено! 🔔', adm_push_ok_body:'Ви отримуватимете сповіщення про нові замовлення.', adm_push_err:'Не вдалося увімкнути сповіщення: ', adm_push_blocked:'Сповіщення заблоковані в браузері. Дозвольте їх у налаштуваннях браузера й оновіть сторінку.',
     adm_feat_title:'Рекомендуємо — на самому верху меню',
     adm_feat_hint:'Великі картки над усіма розділами — клієнт побачить їх першими. Додати: оберіть нижче і «+ Додати» або ⭐ біля позиції. Прибрати: ✕.',
     adm_feat_empty:'Порожньо — нагорі меню нічого не показується. Додайте позиції кнопкою ⭐.',
@@ -2300,8 +2301,8 @@ function duplicateStatic(idx){
   document.getElementById('fCat').value    = item.cat || 'desserts';
   document.getElementById('fPrice').value  = itemPrice(item);
   document.getElementById('fNameCs').value = (item.name?.cs || '') + ' (kopie)';
-  document.getElementById('fNameUk').value = (item.name?.uk || '') + ' (копія)';
-  document.getElementById('fNameEn').value = (item.name?.en || '') + ' (copy)';
+  document.getElementById('fNameUk').value = _ownText(item.name, 'uk') && _ownText(item.name, 'uk') + ' (копія)';
+  document.getElementById('fNameEn').value = _ownText(item.name, 'en') && _ownText(item.name, 'en') + ' (copy)';
   document.getElementById('fBadge').value  = item.badge || '';
   document.getElementById('fDescCs').value = item.desc?.cs || '';
   document.getElementById('fDescUk').value = _ownText(item.desc, 'uk');
@@ -2432,6 +2433,8 @@ function _setRulesFields(item){
   document.getElementById('fAvailFrom').value = item.avail_from || '';
   document.getElementById('fAvailTo').value = item.avail_to || '';
   document.getElementById('fStock').value = item.stock_total ?? '';
+  // the preview shows what is really left while the quantity is not changed
+  document.getElementById('fStock').dataset.left = item.stock_total != null && item.stock_left != null ? item.stock_total + ':' + item.stock_left : '';
   const info = document.getElementById('stockInfo');
   if(item.stock_total != null && item.stock_left != null){
     info.textContent = t('adm_stock_info', {sold: item.stock_total - item.stock_left, total: item.stock_total, left: item.stock_left});
@@ -2476,20 +2479,26 @@ function _autoTranslate(srcId, ukId, enId){
 function _clearAutoTr(){
   document.querySelectorAll('.auto-tr').forEach(el=>{ delete el.dataset.auto; el.classList.remove('auto-tr'); el.title=''; });
 }
-_autoTranslate('fNameCs', 'fNameUk', 'fNameEn');
 // One description field: shows the text in the admin's language; when it is changed,
 // saving translates it (any source language) into all three
-function _descShow(){
+// (the name works the same way)
+function _oneShow(base){
   const v = id => document.getElementById(id).value;
-  const f = document.getElementById('fDesc');
-  f.value = (adminLang==='uk' && v('fDescUk')) || (adminLang==='en' && v('fDescEn')) || v('fDescCs');
+  const f = document.getElementById(base);
+  f.value = (adminLang==='uk' && v(base+'Uk')) || (adminLang==='en' && v(base+'En')) || v(base+'Cs');
   delete f.dataset.dirty;
+}
+function _descShow(){
+  _oneShow('fName'); _oneShow('fDesc');
   updateCardPreview();
 }
-document.getElementById('fDesc').addEventListener('input', e=>{ e.target.dataset.dirty = '1'; });
+['fName','fDesc'].forEach(id=>document.getElementById(id).addEventListener('input', e=>{ e.target.dataset.dirty = '1'; }));
 async function _descTranslate(){
-  const f = document.getElementById('fDesc'), text = f.value.trim();
-  const set = (cs, uk, en)=>{ document.getElementById('fDescCs').value = cs; document.getElementById('fDescUk').value = uk; document.getElementById('fDescEn').value = en; };
+  await Promise.all([_oneTranslate('fName'), _oneTranslate('fDesc')]);
+}
+async function _oneTranslate(base){
+  const f = document.getElementById(base), text = f.value.trim();
+  const set = (cs, uk, en)=>{ document.getElementById(base+'Cs').value = cs; document.getElementById(base+'Uk').value = uk; document.getElementById(base+'En').value = en; };
   if(!text){ set('', '', ''); return; }
   if(!f.dataset.dirty) return;
   try{
@@ -2570,7 +2579,7 @@ function cancelEdit(){
   document.getElementById('addItemBtn').textContent = t('adm_add_btn');
   document.getElementById('editModeBanner').classList.remove('show');
   document.getElementById('cancelEditBtn').classList.remove('show');
-  ['fNameCs','fNameUk','fNameEn','fPrice','fBadge','fDesc','fDescCs','fDescUk','fDescEn']
+  ['fName','fNameCs','fNameUk','fNameEn','fPrice','fBadge','fDesc','fDescCs','fDescUk','fDescEn']
     .forEach(id=>{ const el=document.getElementById(id); if(el) el.value=''; });
   _setAmountFields({});
   _clearAutoTr();
@@ -2583,11 +2592,12 @@ document.getElementById('cancelEditBtn').addEventListener('click', cancelEdit);
 /* ── Add / Save button ── */
 document.getElementById('addItemBtn').addEventListener('click', async ()=>{
   const btn = document.getElementById('addItemBtn');
-  const nameCs = document.getElementById('fNameCs').value.trim();
   const price  = document.getElementById('fPrice').value.trim();
-  if(!nameCs || (!price && !formSizes.length)){ showAddMsg(t('adm_fill_req'), 'err'); return; }
-  btn.disabled = true; btn.textContent = document.getElementById('fDesc').dataset.dirty ? t('adm_desc_tr') : '…';
+  if(!document.getElementById('fName').value.trim() || (!price && !formSizes.length)){ showAddMsg(t('adm_fill_req'), 'err'); return; }
+  btn.disabled = true;
+  btn.textContent = (document.getElementById('fName').dataset.dirty || document.getElementById('fDesc').dataset.dirty) ? t('adm_desc_tr') : '…';
   await _descTranslate();
+  const nameCs = document.getElementById('fNameCs').value.trim();
   const payload = {
     token:   sessionStorage.getItem('cm_token')||'',
     cat:     document.getElementById('fCat').value,
@@ -2869,13 +2879,13 @@ function resetImg(){
   updateCardPreview();
 }
 
-['fNameCs','fDesc','fPrice','fBadge'].forEach(id => {
+['fName','fDesc','fPrice','fBadge','fStock'].forEach(id => {
   const el = document.getElementById(id);
   if(el) el.addEventListener('input', updateCardPreview);
 });
 
 function updateCardPreview(){
-  const name  = document.getElementById('fNameCs').value.trim() || t('adm_prev_name');
+  const name  = document.getElementById('fName').value.trim() || t('adm_prev_name');
   const desc  = document.getElementById('fDesc').value.trim() || t('adm_prev_desc');
   const price = document.getElementById('fPrice').value.trim();
   const badge = document.getElementById('fBadge').value.trim();
@@ -2884,6 +2894,12 @@ function updateCardPreview(){
   const amtText = amtUnit==='ks' ? '+/− · min. ' + (parseInt(_amountValue())||5) + ' ks' : (_weightValue() ? '⚖ ' + _weightValue() : '');
   weightEl.textContent = amtText;
   weightEl.style.display = amtText ? '' : 'none';
+  const stockEl = document.getElementById('cpStock'), stockIn = document.getElementById('fStock');
+  const [lTotal, lLeft] = (stockIn.dataset.left || '').split(':');
+  const stockV = lTotal && stockIn.value.trim() === lTotal ? lLeft : stockIn.value.trim();
+  stockEl.style.display = stockV === '' ? 'none' : 'inline-block';
+  stockEl.classList.toggle('out', stockV !== '' && +stockV <= 0);
+  stockEl.textContent = +stockV > 0 ? t('adm_prev_left', {n: +stockV}) : t('adm_prev_sold');
   document.getElementById('cpDesc').textContent = desc;
   const badgeEl = document.getElementById('cpBadge');
   badgeEl.textContent = badge;
