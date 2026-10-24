@@ -105,6 +105,8 @@ def _init_tables():
             )""")
         # Where a review came from when the admin moved it over from elsewhere (google, instagram…)
         conn.execute("ALTER TABLE reviews ADD COLUMN IF NOT EXISTS source TEXT DEFAULT ''")
+        # Reviews are now published at once; ones still waiting from before go live too
+        conn.execute("UPDATE reviews SET status='published' WHERE status='new'")
         # Customers who asked for a birthday reminder when ordering (opt-in)
         conn.execute("""
             CREATE TABLE IF NOT EXISTS subscribers (
@@ -695,11 +697,11 @@ def _send_telegram(order: dict):
         return
     _tg_send(text, f'order: {name}')
 
-def _tg_send(text, label=''):
-    """Send a message to every chat in TELEGRAM_CHAT_ID."""
+def _tg_send(text, label='', env='TELEGRAM_CHAT_ID'):
+    """Send a message to every chat listed in the env variable (orders: TELEGRAM_CHAT_ID)."""
     import sys, urllib.request, urllib.parse
     token    = os.environ.get('TELEGRAM_TOKEN', '')
-    chat_ids = [c.strip() for c in os.environ.get('TELEGRAM_CHAT_ID', '').split(',') if c.strip()]
+    chat_ids = [c.strip() for c in os.environ.get(env, '').split(',') if c.strip()]
     if not token or not chat_ids:
         return
     text = text[:4000]  # Telegram rejects messages over 4096 chars
@@ -1172,12 +1174,12 @@ async def api_reviews_add(req: Request, bg: BackgroundTasks):
             verified = any(_digits(p[0]) == phone for p in phones)
         conn.execute(
             'INSERT INTO reviews (id, ts, name, stars, body, item, photo, status, verified, reply)'
-            " VALUES (%s,%s,%s,%s,%s,%s,%s,'new',%s,'')",
+            " VALUES (%s,%s,%s,%s,%s,%s,%s,'published',%s,'')",
             (rid, time.strftime('%Y-%m-%dT%H:%M:%SZ', time.gmtime()), name, stars, body, item, photo, verified))
     recent.append(now)
     _review_log[ip] = recent
     bg.add_task(_tg_send, f"⭐ Nová recenze ({'★' * stars}{'☆' * (5 - stars)})\n{name}"
-                          f"{' · ověřený zákazník' if verified else ''}\n{body[:500]}\n\nZveřejnit: /admin.html", 'review')
+                          f"{' · ověřený zákazník' if verified else ''}\n{body[:500]}\n\nUž je na webu. Skrýt spam: /admin.html", 'review', 'TELEGRAM_REVIEWS_CHAT_ID')
     return {'ok': True}
 
 @app.get('/api/review-img/{review_id}')

@@ -10,27 +10,27 @@
       f_phone:'Telefon z objednávky (nepovinné)', f_phone_hint:'Jen pro označení „Ověřený zákazník“. Nikde se nezobrazuje.',
       f_photo:'Fotka (nepovinné)', f_photo_btn:'📷 Přidat fotku', f_photo_rm:'✕ Odebrat', f_send:'Odeslat recenzi',
       f_need:'Vyberte hvězdičky, vyplňte jméno a text recenze.', f_big:'Fotka je příliš velká (max 10 MB).',
-      f_ok:'Děkujeme! Recenze se zobrazí po kontrole.', f_err:'Nepodařilo se odeslat. Zkuste to prosím znovu.', f_limit:'Příliš mnoho recenzí za krátkou dobu. Zkuste to později.',
+      f_ok:'Děkujeme! Vaše recenze je na webu.', f_err:'Nepodařilo se odeslat. Zkuste to prosím znovu.', f_limit:'Příliš mnoho recenzí za krátkou dobu. Zkuste to později.',
       src_google:'z Google', src_instagram:'z Instagramu', src_facebook:'z Facebooku', src_in_person:'osobně v cukrárně', src_other:'jinde',
-      honest:'Recenze zveřejňujeme po kontrole spamu, negativní recenze nemažeme a hodnocení neupravujeme. Označení „Ověřený zákazník“ znamená, že telefon souhlasí s objednávkou. Recenze přenesené z Google či sociálních sítí mají uvedený zdroj.'},
+      honest:'Recenze se zobrazí hned; mažeme jen spam a urážky, negativní recenze nemažeme a hodnocení neupravujeme. Označení „Ověřený zákazník“ znamená, že telefon souhlasí s objednávkou. Recenze přenesené z Google či sociálních sítí mají uvedený zdroj.'},
     en: {empty_ttl:'Be the first to leave a review', empty_sub:'Tried our cakes? Share your impression — you can add a photo too. Every review helps us get better.', lbl:'What customers say', ttl:'Reviews', none:'No reviews yet — be the first!', first:'Write the first review →', reviews:['review','reviews','reviews'],
       write:'Write a review', more:'Show more', verified:'Verified customer', reply:'Reply from the shop',
       f_more:'+ Add a photo or details', f_text_ph:'What did you like? How did your guests like the cake?', f_stars:'Your rating', f_name:'Name', f_text:'Your review', f_item:'What did you order (optional)',
       f_phone:'Phone used for the order (optional)', f_phone_hint:'Only for the “Verified customer” badge. Never shown.',
       f_photo:'Photo (optional)', f_photo_btn:'📷 Add a photo', f_photo_rm:'✕ Remove', f_send:'Send review',
       f_need:'Choose the stars and fill in your name and review.', f_big:'The photo is too large (max 10 MB).',
-      f_ok:'Thank you! Your review will appear after a check.', f_err:'Could not send. Please try again.', f_limit:'Too many reviews in a short time. Please try later.',
+      f_ok:'Thank you! Your review is on the site.', f_err:'Could not send. Please try again.', f_limit:'Too many reviews in a short time. Please try later.',
       src_google:'from Google', src_instagram:'from Instagram', src_facebook:'from Facebook', src_in_person:'in person', src_other:'elsewhere',
-      honest:'Reviews are published after a spam check; we don’t delete negative reviews or change ratings. “Verified customer” means the phone matches an order. Reviews moved over from Google or social media show their source.'},
+      honest:'Reviews appear right away; we remove only spam and insults, we don’t delete negative reviews or change ratings. “Verified customer” means the phone matches an order. Reviews moved over from Google or social media show their source.'},
     uk: {empty_ttl:'Будьте першим, хто залишить відгук', empty_sub:'Куштували наші торти? Поділіться враженнями — можна додати й фото. Кожен відгук допомагає нам ставати кращими.', lbl:'Що кажуть клієнти', ttl:'Відгуки', none:'Поки що немає відгуків — будьте першим!', first:'Залиште перший відгук →', reviews:['відгук','відгуки','відгуків'],
       write:'Залишити відгук', more:'Показати ще', verified:'Перевірений покупець', reply:'Відповідь кондитерської',
       f_more:'+ Додати фото або деталі', f_text_ph:'Що вам сподобалося? Як торт смакував гостям?', f_stars:'Ваша оцінка', f_name:'Ім’я', f_text:'Ваш відгук', f_item:'Що ви замовляли (необов’язково)',
       f_phone:'Телефон із замовлення (необов’язково)', f_phone_hint:'Лише для позначки «Перевірений покупець». Ніде не показується.',
       f_photo:'Фото (необов’язково)', f_photo_btn:'📷 Додати фото', f_photo_rm:'✕ Прибрати', f_send:'Надіслати відгук',
       f_need:'Оберіть зірки, вкажіть ім’я та напишіть відгук.', f_big:'Фото завелике (макс. 10 МБ).',
-      f_ok:'Дякуємо! Відгук з’явиться після перевірки.', f_err:'Не вдалося надіслати. Спробуйте ще раз.', f_limit:'Забагато відгуків за короткий час. Спробуйте пізніше.',
+      f_ok:'Дякуємо! Ваш відгук уже на сайті.', f_err:'Не вдалося надіслати. Спробуйте ще раз.', f_limit:'Забагато відгуків за короткий час. Спробуйте пізніше.',
       src_google:'з Google', src_instagram:'з Instagram', src_facebook:'з Facebook', src_in_person:'особисто в кондитерській', src_other:'з інших джерел',
-      honest:'Відгуки публікуються після перевірки на спам; ми не видаляємо негативні відгуки й не змінюємо оцінки. «Перевірений покупець» — телефон збігається із замовленням. Відгуки, перенесені з Google чи соцмереж, мають позначку джерела.'},
+      honest:'Відгуки з’являються одразу; ми прибираємо лише спам і образи, не видаляємо негативні відгуки й не змінюємо оцінки. «Перевірений покупець» — телефон збігається із замовленням. Відгуки, перенесені з Google чи соцмереж, мають позначку джерела.'},
   };
   const LOCALE = {cs:'cs-CZ', en:'en-GB', uk:'uk-UA'};
   const L = () => (typeof lang !== 'undefined' && RT[lang]) ? lang : 'cs';
@@ -239,7 +239,8 @@
         const r = await fetch('/api/reviews', {method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({
           stars: rating, name: v('name'), text: v('text'), item: v('ordered'), phone: v('phone'), photo: photoData, website: v('website')})});
         if (r.ok){ rating = 0; photoData = ''; form.reset(); showPhoto(); form.querySelectorAll('.rv-pick button').forEach(x => x.classList.remove('on')); msg = ['ok', 'f_ok'];
-          const s = form.querySelector('select[name=ordered]'); if (s) s.value = presetItem; }
+          const s = form.querySelector('select[name=ordered]'); if (s) s.value = presetItem;
+          formOpen = false; await load(); return; }
         else msg = ['err', r.status === 429 ? 'f_limit' : 'f_err'];
       }catch{ msg = ['err', 'f_err']; }
       btn.disabled = false; msgEl.className = 'rv-msg ' + msg[0]; msgEl.textContent = tr(msg[1]);

@@ -878,8 +878,7 @@ body{font-family:'Raleway',sans-serif;background:var(--bg0);color:var(--tx0)}
           <div style="display:flex;gap:10px;align-items:center;margin:10px 0 18px"><button type="button" class="btn-add-item" id="rviSave" style="margin:0" data-k="adm_rv_import_save">Zveřejnit recenzi</button><span class="lay-hint" id="rviMsg" style="margin:0"></span></div>
         </div>
         <div class="ci-filters" id="rvFilters">
-          <button class="ci-flt on" data-rvf="new" data-k="adm_rv_f_new">Nové</button>
-          <button class="ci-flt" data-rvf="published" data-k="adm_rv_f_pub">Zveřejněné</button>
+          <button class="ci-flt on" data-rvf="published" data-k="adm_rv_f_pub">Zveřejněné</button>
           <button class="ci-flt" data-rvf="hidden" data-k="adm_rv_f_hidden">Skryté</button>
           <button class="ci-flt" data-rvf="all" data-k="adm_filter_all">Vše</button>
         </div>
@@ -3291,7 +3290,7 @@ document.getElementById('bldSave').addEventListener('click', async ()=>{
 
 /* ── Reviews ── */
 var rvData = null;   // var: applyAdminLang may check it before this line runs
-let rvFilter = 'new';
+let rvFilter = 'published';
 
 async function loadReviews(){
   try{
