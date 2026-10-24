@@ -319,10 +319,10 @@ def _check_item_rules(conn, cart, date):
 # ── /api/translate ────────────────────────────────────────────────────────────
 # Draft UA/EN translation of a Czech menu text for the admin form. The admin sees
 # it in the form and can fix it before saving (short names are often mistranslated).
-def _gtranslate(text, target):
+def _gtranslate(text, target, source='cs'):
     import urllib.request, urllib.parse
-    url = ('https://translate.googleapis.com/translate_a/single?client=gtx&sl=cs&tl=%s&dt=t&q=%s'
-           % (target, urllib.parse.quote(text)))
+    url = ('https://translate.googleapis.com/translate_a/single?client=gtx&sl=%s&tl=%s&dt=t&q=%s'
+           % (source, target, urllib.parse.quote(text)))
     try:
         data = json.loads(urllib.request.urlopen(url, timeout=6).read().decode('utf-8'))
         return ''.join(seg[0] for seg in data[0] if seg and seg[0]).strip()
@@ -338,6 +338,12 @@ async def api_translate(req: Request):
     text = str(d.get('text') or '').strip()[:3000]
     if not text:
         return {'uk': '', 'en': ''}
+    if d.get('source') == 'auto':
+        # Text written in any language (one description field): all three versions
+        out = {}
+        for lang in ('cs', 'uk', 'en'):
+            out[lang] = await run_in_threadpool(_gtranslate, text, lang, 'auto') or text
+        return out
     uk = await run_in_threadpool(_gtranslate, text, 'uk')
     en = await run_in_threadpool(_gtranslate, text, 'en')
     return {'uk': uk, 'en': en}

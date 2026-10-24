@@ -126,6 +126,12 @@ body{font-family:'Raleway',sans-serif;background:var(--bg0);color:var(--tx0)}
 .mai-field input,.mai-field select{background:var(--bg3);border:1px solid var(--bdr);color:var(--tx0);padding:10px 12px;font:.85rem 'Raleway',sans-serif;outline:none;transition:.25s;width:100%}
 .mai-field input:focus,.mai-field select:focus{border-color:var(--gold)}
 .mai-field select option{background:var(--bg2)}
+.mai-sec{grid-column:1/-1;display:flex;align-items:center;gap:10px;margin:16px 0 0;font:600 .72rem 'Raleway',sans-serif;letter-spacing:2px;text-transform:uppercase;color:var(--gold)}
+.mai-sec:first-child{margin-top:0}
+.mai-sec::after{content:'';flex:1;height:1px;background:linear-gradient(90deg,var(--gold-d),transparent)}
+.mai-sec i{font-style:normal;width:30px;height:30px;border-radius:50%;border:1px solid var(--gold-d);background:rgba(201,169,110,.1);display:flex;align-items:center;justify-content:center;font-size:.9rem;letter-spacing:0}
+.mai-field textarea{background:var(--bg3);border:1px solid var(--bdr);color:var(--tx0);padding:10px 12px;font:.88rem/1.55 'Raleway',sans-serif;outline:none;transition:.25s;width:100%;resize:vertical;min-height:84px}
+.mai-field textarea:focus{border-color:var(--gold)}
 .btn-add-item{width:100%;background:var(--gold);color:var(--bg0);border:none;padding:12px;font:.76rem 'Raleway',sans-serif;font-weight:700;letter-spacing:2px;text-transform:uppercase;cursor:pointer;transition:.25s;margin-bottom:10px}
 .btn-add-item:hover{background:var(--gold-l)}
 .btn-add-item:disabled{opacity:.6;cursor:default}
@@ -172,15 +178,16 @@ body{font-family:'Raleway',sans-serif;background:var(--bg0);color:var(--tx0)}
 .sizes-section input:focus{border-color:var(--gold)}
 .btn-add-size{background:transparent;border:1px solid var(--gold-d);color:var(--gold);padding:9px 14px;cursor:pointer;font:.72rem 'Raleway',sans-serif;letter-spacing:1px;white-space:nowrap;transition:.25s}
 .btn-add-size:hover{background:rgba(201,169,110,.1)}
-.ci-card{display:flex;align-items:center;gap:12px;padding:12px 0;border-bottom:1px solid var(--bdr)}
-.ci-card:last-child{border-bottom:none}
-.ci-thumb{width:48px;height:48px;object-fit:cover;flex-shrink:0;background:var(--bg3)}
-.ci-no-img{width:48px;height:48px;background:var(--bg3);display:flex;align-items:center;justify-content:center;color:var(--tx2);font-size:1.4rem;flex-shrink:0}
-.ci-info{display:flex;align-items:center;gap:12px;flex:1;min-width:0}
-.ci-name{font-size:.88rem;color:var(--tx0);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ci-card{display:flex;flex-wrap:wrap;align-items:center;gap:10px 14px;padding:12px;margin-bottom:8px;background:var(--bg3);border:1px solid var(--bdr);border-radius:10px;transition:border-color .2s,background .2s}
+.ci-card:hover{border-color:var(--gold-d);background:rgba(201,169,110,.04)}
+.ci-thumb{width:68px;height:68px;object-fit:cover;flex-shrink:0;background:var(--bg2);border-radius:8px}
+.ci-no-img{width:68px;height:68px;background:var(--bg2);border-radius:8px;display:flex;align-items:center;justify-content:center;color:var(--tx2);font-size:1.6rem;flex-shrink:0}
+.ci-info{display:flex;align-items:center;gap:12px;flex:1;min-width:150px}
+.ci-name{font-family:'Playfair Display',serif;font-size:1rem;line-height:1.3;color:var(--tx0);display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.ci-price{font-family:'Playfair Display',serif;color:var(--gold);font-size:.92rem;margin-top:4px}
 .ci-meta{font-size:.72rem;color:var(--tx2);margin-top:2px}
 .ci-sizes{display:flex;flex-wrap:wrap;gap:3px;margin-top:4px}
-.ci-sz-tag{font-size:.65rem;background:var(--bg3);border:1px solid var(--bdr);color:var(--tx1);padding:1px 6px;white-space:nowrap}
+.ci-sz-tag{font-size:.66rem;background:rgba(201,169,110,.08);border:1px solid rgba(201,169,110,.3);color:var(--gold);padding:2px 7px;white-space:nowrap;border-radius:20px}
 .ci-del{background:transparent;border:1px solid transparent;color:var(--tx2);width:30px;height:30px;cursor:pointer;font-size:.9rem;transition:.2s;flex-shrink:0;display:flex;align-items:center;justify-content:center}
 .ci-del:hover{border-color:#e08080;color:#e08080}
 .ci-fav{background:transparent;border:1px solid transparent;width:30px;height:30px;cursor:pointer;font-size:1rem;transition:.2s;flex-shrink:0;display:flex;align-items:center;justify-content:center;color:var(--tx2)}
@@ -245,7 +252,7 @@ body{font-family:'Raleway',sans-serif;background:var(--bg0);color:var(--tx0)}
 .ci-ks{background:transparent;border:1px solid transparent;color:var(--tx2);width:30px;height:30px;cursor:pointer;font-size:.62rem;letter-spacing:.5px;font-family:'Raleway',sans-serif;font-weight:700;text-transform:uppercase;transition:.2s;flex-shrink:0;display:flex;align-items:center;justify-content:center}
 .ci-ks:hover{border-color:var(--gold-d);color:var(--gold)}
 .ci-ks.on{color:var(--gold);border-color:var(--gold)}
-.ci-btns{display:flex;gap:3px;flex-shrink:0;align-items:center}
+.ci-btns{display:flex;flex-wrap:wrap;gap:2px;flex-shrink:0;align-items:center;margin-left:auto;background:rgba(0,0,0,.25);border:1px solid var(--bdr);border-radius:8px;padding:3px}
 /* ── ANALYTICS ── */
 .analytics-wrap{padding:28px;max-width:960px;margin:0 auto}
 /* ── Birthday reminders ── */
@@ -630,6 +637,19 @@ body{font-family:'Raleway',sans-serif;background:var(--bg0);color:var(--tx0)}
         <h3 id="formTitle" data-k="adm_add_title">Přidat položku do menu</h3>
         <div class="edit-mode-banner" id="editModeBanner"></div>
         <div class="mai-grid">
+          <div class="mai-sec"><i>📝</i><span data-k="adm_sec_main">Základní</span></div>
+          <div class="mai-field full">
+            <label data-k="adm_name_cs_lbl">Název CZ *</label>
+            <input type="text" id="fNameCs" data-kp="adm_ph_name" placeholder="Název česky">
+          </div>
+          <div class="mai-field">
+            <label data-k="adm_name_uk_lbl">Назва UA</label>
+            <input type="text" id="fNameUk" data-kp="adm_ph_same_cs" placeholder="= CZ">
+          </div>
+          <div class="mai-field">
+            <label data-k="adm_name_en_lbl">Name EN</label>
+            <input type="text" id="fNameEn" data-kp="adm_ph_same_cs" placeholder="= CZ">
+          </div>
           <div class="mai-field">
             <label data-k="adm_cat_lbl">Kategorie *</label>
             <select id="fCat">
@@ -640,6 +660,11 @@ body{font-family:'Raleway',sans-serif;background:var(--bg0);color:var(--tx0)}
             </select>
           </div>
           <div class="mai-field">
+            <label data-k="adm_badge_lbl">Badge (Nové, Bestseller…)</label>
+            <input type="text" id="fBadge" placeholder="">
+          </div>
+          <div class="mai-sec"><i>💰</i><span data-k="adm_sec_price">Cena a velikosti</span></div>
+          <div class="mai-field full">
             <label data-k="adm_price_lbl">Cena * (např. 133 Kč)</label>
             <input type="text" id="fPrice" placeholder="133 Kč">
           </div>
@@ -658,47 +683,14 @@ body{font-family:'Raleway',sans-serif;background:var(--bg0);color:var(--tx0)}
             <div class="amt-hint" id="amtHint"></div>
             <div class="sizes-list" id="sizesList"></div>
           </div>
+          <div class="mai-sec"><i>✍️</i><span data-k="adm_sec_desc">Popis</span></div>
           <div class="mai-field full">
-            <label data-k="adm_rules_lbl">Omezení a předobjednávky</label>
-            <div class="rules-grid">
-              <label><span data-k="adm_lead_lbl">Min. dní předem</span><input type="number" id="fLead" min="0" max="120" placeholder="0"></label>
-              <label><span data-k="adm_from_lbl">Výdej od</span><input type="date" id="fAvailFrom"></label>
-              <label><span data-k="adm_to_lbl">Výdej do</span><input type="date" id="fAvailTo"></label>
-              <label><span data-k="adm_stock_lbl">Zbývá kusů</span><input type="number" id="fStock" min="0" data-kp="adm_stock_ph" placeholder="bez omezení"></label>
-            </div>
-            <div class="amt-hint" id="rulesHint" data-k="adm_rules_hint">Velké dorty: např. 14 dní předem. Vánoční předobjednávka: výdej 20.–23. 12. a počet krabic — zákazníci uvidí „zbývá 12“, po vyprodání „Vyprodáno“.</div>
-            <div class="amt-hint" id="stockInfo"></div>
+            <label data-k="adm_desc_lbl">Popis — pište v jakémkoli jazyce, při uložení ho přeložíme do CZ / UA / EN</label>
+            <textarea id="fDesc" rows="3" data-kp="adm_ph_desc_any" placeholder="Krátký popis"></textarea>
+            <input type="hidden" id="fDescCs"><input type="hidden" id="fDescUk"><input type="hidden" id="fDescEn">
           </div>
+          <div class="mai-sec"><i>📷</i><span data-k="adm_sec_photo">Fotka</span></div>
           <div class="mai-field full">
-            <label data-k="adm_name_cs_lbl">Název CZ *</label>
-            <input type="text" id="fNameCs" data-kp="adm_ph_name" placeholder="Název česky">
-          </div>
-          <div class="mai-field">
-            <label data-k="adm_name_uk_lbl">Назва UA</label>
-            <input type="text" id="fNameUk" data-kp="adm_ph_same_cs" placeholder="= CZ">
-          </div>
-          <div class="mai-field">
-            <label data-k="adm_name_en_lbl">Name EN</label>
-            <input type="text" id="fNameEn" data-kp="adm_ph_same_cs" placeholder="= CZ">
-          </div>
-          <div class="mai-field">
-            <label data-k="adm_badge_lbl">Badge (Nové, Bestseller…)</label>
-            <input type="text" id="fBadge" placeholder="">
-          </div>
-          <div class="mai-field full">
-            <label data-k="adm_desc_cs_lbl">Popis CZ</label>
-            <input type="text" id="fDescCs" data-kp="adm_ph_desc" placeholder="Krátký popis česky">
-          </div>
-          <div class="mai-field full">
-            <label data-k="adm_desc_uk_lbl">Опис UA</label>
-            <input type="text" id="fDescUk" data-kp="adm_ph_same_cs" placeholder="= CZ">
-          </div>
-          <div class="mai-field full">
-            <label data-k="adm_desc_en_lbl">Description EN</label>
-            <input type="text" id="fDescEn" data-kp="adm_ph_same_cs" placeholder="= CZ">
-          </div>
-          <div class="mai-field full">
-            <label data-k="adm_img_lbl">Obrázek</label>
             <input type="file" id="fImgFile" accept="image/*" style="display:none">
             <div class="img-upload-zone" id="uploadZone">
               <span class="img-upload-ico">🖼️</span>
@@ -711,7 +703,18 @@ body{font-family:'Raleway',sans-serif;background:var(--bg0);color:var(--tx0)}
               <button type="button" class="img-rotate-btn" id="rotateLeftBtn" data-kt="adm_tt_rot_l" title="Otočit doleva">↺</button>
               <button type="button" class="img-rotate-btn" id="rotateRightBtn" data-kt="adm_tt_rot_r" title="Otočit doprava">↻</button>
             </div>
+          </div>          <div class="mai-sec"><i>⏳</i><span data-k="adm_sec_rules">Omezení a předobjednávky</span></div>
+          <div class="mai-field full">
+            <div class="rules-grid">
+              <label><span data-k="adm_lead_lbl">Min. dní předem</span><input type="number" id="fLead" min="0" max="120" placeholder="0"></label>
+              <label><span data-k="adm_from_lbl">Výdej od</span><input type="date" id="fAvailFrom"></label>
+              <label><span data-k="adm_to_lbl">Výdej do</span><input type="date" id="fAvailTo"></label>
+              <label><span data-k="adm_stock_lbl">Zbývá kusů</span><input type="number" id="fStock" min="0" data-kp="adm_stock_ph" placeholder="bez omezení"></label>
+            </div>
+            <div class="amt-hint" id="rulesHint" data-k="adm_rules_hint">Velké dorty: např. 14 dní předem. Vánoční předobjednávka: výdej 20.–23. 12. a počet krabic — zákazníci uvidí „zbývá 12“, po vyprodání „Vyprodáno“.</div>
+            <div class="amt-hint" id="stockInfo"></div>
           </div>
+
         </div>
         <div class="card-prev-wrap">
           <span class="card-prev-lbl" data-k="adm_card_prev">Náhled karty</span>
@@ -1040,7 +1043,7 @@ const TA = {
     adm_qty_ctrl_lbl:'Výběr množství', adm_qty_ctrl_hint:'Počet kusů (+/−) na kartě',
     adm_qty_min_lbl:'Minimální počet kusů',
     adm_img_pos_lbl:'Poloha obrázku',
-    adm_desc_cs_lbl:'Popis CZ', adm_desc_uk_lbl:'Popis ukrajinsky', adm_desc_en_lbl:'Popis anglicky',
+    adm_sec_main:'Základní', adm_ph_desc_any:'Krátký popis — složení, chuť, hmotnost', adm_sec_price:'Cena a velikosti', adm_sec_desc:'Popis', adm_sec_photo:'Fotka', adm_sec_rules:'Omezení a předobjednávky', adm_desc_lbl:'Popis — pište v jakémkoli jazyce, při uložení ho přeložíme do CZ / UA / EN', adm_desc_tr:'Překládám…', adm_desc_cs_lbl:'Popis CZ', adm_desc_uk_lbl:'Popis ukrajinsky', adm_desc_en_lbl:'Popis anglicky',
     adm_img_lbl:'Obrázek', adm_img_click:'Klikněte nebo přetáhněte soubor',
     adm_img_hint:'JPG, PNG, WebP · max 3 MB · automaticky zkomprimováno',
     adm_img_remove:'✕ Odebrat obrázek', adm_card_prev:'Náhled karty',
@@ -1111,7 +1114,7 @@ const TA = {
     adm_name_cs_lbl:'Name in Czech *', adm_name_uk_lbl:'Name in Ukrainian', adm_name_en_lbl:'Name in English',
     adm_badge_lbl:'Badge (New, Bestseller…)',
     adm_qty_min_lbl:'Minimum quantity',
-    adm_desc_cs_lbl:'Description in Czech', adm_desc_uk_lbl:'Description in Ukrainian', adm_desc_en_lbl:'Description in English',
+    adm_sec_main:'Basics', adm_ph_desc_any:'Short description — ingredients, taste, weight', adm_sec_price:'Price and sizes', adm_sec_desc:'Description', adm_sec_photo:'Photo', adm_sec_rules:'Limits and pre-orders', adm_desc_lbl:'Description — write in any language, it is translated to CZ / UA / EN when you save', adm_desc_tr:'Translating…', adm_desc_cs_lbl:'Description in Czech', adm_desc_uk_lbl:'Description in Ukrainian', adm_desc_en_lbl:'Description in English',
     adm_img_lbl:'Image', adm_img_click:'Click or drag a file here',
     adm_img_hint:'JPG, PNG, WebP · max 3 MB · auto-compressed',
     adm_img_remove:'✕ Remove image', adm_card_prev:'Card preview',
@@ -1184,7 +1187,7 @@ const TA = {
     adm_qty_ctrl_lbl:'Вибір кількості', adm_qty_ctrl_hint:'Кількість штук (+/−) на картці',
     adm_qty_min_lbl:'Мінімальна кількість штук',
     adm_img_pos_lbl:'Положення фото',
-    adm_desc_cs_lbl:'Опис чеською', adm_desc_uk_lbl:'Опис українською', adm_desc_en_lbl:'Опис англійською',
+    adm_sec_main:'Основне', adm_ph_desc_any:'Короткий опис — склад, смак, вага', adm_sec_price:'Ціна та розміри', adm_sec_desc:'Опис', adm_sec_photo:'Фото', adm_sec_rules:'Обмеження і передзамовлення', adm_desc_lbl:'Опис — пишіть будь-якою мовою, при збереженні перекладемо на CZ / UA / EN', adm_desc_tr:'Перекладаю…', adm_desc_cs_lbl:'Опис чеською', adm_desc_uk_lbl:'Опис українською', adm_desc_en_lbl:'Опис англійською',
     adm_img_lbl:'Фото', adm_img_click:'Натисніть або перетягніть файл',
     adm_img_hint:'JPG, PNG, WebP · макс. 3 МБ · стискається автоматично',
     adm_img_remove:'✕ Прибрати фото', adm_card_prev:'Попередній перегляд картки',
@@ -1990,7 +1993,7 @@ function renderMenuItems(customItems){
       <div class="ci-info"><div style="min-width:0">
         <div class="ci-name">${esc(name)}</div>
         <div class="ci-meta">${esc(catLabel(item.cat))}${item.badge?' · '+esc(item.badge):''}${item.stock_total!=null&&item.stock_left!=null?` · 📦 ${item.stock_left}/${item.stock_total}`:''}${item.lead_days?` · ⏳ ${item.lead_days} d`:''}${item.avail_from||item.avail_to?` · 📅 ${esc(item.avail_from||'…')} – ${esc(item.avail_to||'…')}`:''}</div>
-        ${(item.sizes&&item.sizes.length)?`<div class="ci-sizes">${item.sizes.map(sz=>`<span class="ci-sz-tag">${esc(sz.label||'?')} — ${sz.price} Kč</span>`).join('')}</div>`:`<div class="ci-meta">${esc(price)}</div>`}
+        ${(item.sizes&&item.sizes.length)?`<div class="ci-sizes">${item.sizes.map(sz=>`<span class="ci-sz-tag">${esc(sz.label||'?')} — ${sz.price} Kč</span>`).join('')}</div>`:`<div class="ci-price">${esc(price)}</div>`}
       </div></div>
       ${actions}
     </div>`;
@@ -2282,6 +2285,7 @@ function startEditStatic(idx){
   document.getElementById('fDescCs').value = item.desc?.cs || '';
   document.getElementById('fDescUk').value = _ownText(item.desc, 'uk');
   document.getElementById('fDescEn').value = _ownText(item.desc, 'en');
+  _descShow();
   _setAmountFields(item);
   _clearAutoTr();
   if(item.img){ _loadImgForEdit(item.img); } else { resetImg(); }
@@ -2310,6 +2314,7 @@ function duplicateStatic(idx){
   document.getElementById('fDescCs').value = item.desc?.cs || '';
   document.getElementById('fDescUk').value = _ownText(item.desc, 'uk');
   document.getElementById('fDescEn').value = _ownText(item.desc, 'en');
+  _descShow();
   _setAmountFields(item);
   _clearAutoTr();
   if(item.img){ _loadImgForEdit(item.img); } else { resetImg(); }
@@ -2336,6 +2341,7 @@ function startEdit(item){
   document.getElementById('fDescCs').value     = item.desc?.cs || '';
   document.getElementById('fDescUk').value     = _ownText(item.desc, 'uk');
   document.getElementById('fDescEn').value     = _ownText(item.desc, 'en');
+  _descShow();
   _setAmountFields(item);
   _clearAutoTr();
   const _imgSrc = item.img || STATIC_ITEMS.find(si=>
@@ -2479,7 +2485,29 @@ function _clearAutoTr(){
   document.querySelectorAll('.auto-tr').forEach(el=>{ delete el.dataset.auto; el.classList.remove('auto-tr'); el.title=''; });
 }
 _autoTranslate('fNameCs', 'fNameUk', 'fNameEn');
-_autoTranslate('fDescCs', 'fDescUk', 'fDescEn');
+// One description field: shows the text in the admin's language; when it is changed,
+// saving translates it (any source language) into all three
+function _descShow(){
+  const v = id => document.getElementById(id).value;
+  const f = document.getElementById('fDesc');
+  f.value = (adminLang==='uk' && v('fDescUk')) || (adminLang==='en' && v('fDescEn')) || v('fDescCs');
+  delete f.dataset.dirty;
+  updateCardPreview();
+}
+document.getElementById('fDesc').addEventListener('input', e=>{ e.target.dataset.dirty = '1'; });
+async function _descTranslate(){
+  const f = document.getElementById('fDesc'), text = f.value.trim();
+  const set = (cs, uk, en)=>{ document.getElementById('fDescCs').value = cs; document.getElementById('fDescUk').value = uk; document.getElementById('fDescEn').value = en; };
+  if(!text){ set('', '', ''); return; }
+  if(!f.dataset.dirty) return;
+  try{
+    const r = await fetch('/api/translate', {method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({token: sessionStorage.getItem('cm_token')||'', text, source:'auto'})});
+    const j = r.ok ? await r.json() : {};
+    set(j.cs || text, j.uk || '', j.en || '');
+  }catch{ set(text, '', ''); }
+  delete f.dataset.dirty;
+}
 
 /* ── Sizes ── */
 let formSizes = [];
@@ -2550,7 +2578,7 @@ function cancelEdit(){
   document.getElementById('addItemBtn').textContent = t('adm_add_btn');
   document.getElementById('editModeBanner').classList.remove('show');
   document.getElementById('cancelEditBtn').classList.remove('show');
-  ['fNameCs','fNameUk','fNameEn','fPrice','fBadge','fDescCs','fDescUk','fDescEn']
+  ['fNameCs','fNameUk','fNameEn','fPrice','fBadge','fDesc','fDescCs','fDescUk','fDescEn']
     .forEach(id=>{ const el=document.getElementById(id); if(el) el.value=''; });
   _setAmountFields({});
   _clearAutoTr();
@@ -2566,7 +2594,8 @@ document.getElementById('addItemBtn').addEventListener('click', async ()=>{
   const nameCs = document.getElementById('fNameCs').value.trim();
   const price  = document.getElementById('fPrice').value.trim();
   if(!nameCs || (!price && !formSizes.length)){ showAddMsg(t('adm_fill_req'), 'err'); return; }
-  btn.disabled = true; btn.textContent = '…';
+  btn.disabled = true; btn.textContent = document.getElementById('fDesc').dataset.dirty ? t('adm_desc_tr') : '…';
+  await _descTranslate();
   const payload = {
     token:   sessionStorage.getItem('cm_token')||'',
     cat:     document.getElementById('fCat').value,
@@ -2827,14 +2856,14 @@ function resetImg(){
   updateCardPreview();
 }
 
-['fNameCs','fDescCs','fPrice','fBadge'].forEach(id => {
+['fNameCs','fDesc','fPrice','fBadge'].forEach(id => {
   const el = document.getElementById(id);
   if(el) el.addEventListener('input', updateCardPreview);
 });
 
 function updateCardPreview(){
   const name  = document.getElementById('fNameCs').value.trim() || t('adm_prev_name');
-  const desc  = document.getElementById('fDescCs').value.trim() || t('adm_prev_desc');
+  const desc  = document.getElementById('fDesc').value.trim() || t('adm_prev_desc');
   const price = document.getElementById('fPrice').value.trim();
   const badge = document.getElementById('fBadge').value.trim();
   document.getElementById('cpName').textContent = name;
