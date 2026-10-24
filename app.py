@@ -1000,12 +1000,13 @@ _BUILDER_DEFAULT = {
     ],
 }
 _ID_RE = re.compile(r'^[a-z0-9_-]{1,32}$')
-# Photos of the shop's own cakes (from the menu) for the sample fillings, used until the admin uploads others
+# Photo of the main ingredient for the sample fillings, used until the admin uploads others
+# (CC0 / public-domain photos from Wikimedia Commons, stored with the site)
 _BUILDER_DEFAULT_IMGS = {
-    'choco': 'https://imageproxy.wolt.com/assets/697228caf1232b338e039780',
-    'rasp': 'https://imageproxy.wolt.com/assets/697228caf1232b338e039784',
-    'cheese': 'https://imageproxy.wolt.com/assets/697228caf1232b338e039779',
-    'pist': 'https://imageproxy.wolt.com/assets/697228caf1232b338e039771',
+    'choco': '/fill-choco.jpg',
+    'rasp': '/fill-rasp.jpg',
+    'cheese': '/fill-cheese.jpg',
+    'pist': '/fill-pist.jpg',
 }
 
 def _clean_names(raw):
