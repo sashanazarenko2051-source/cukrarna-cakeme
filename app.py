@@ -1964,9 +1964,42 @@ async def api_stripe_webhook(req: Request, bg: BackgroundTasks):
 def api_pageviews():
     with _get_pool().connection() as conn:
         row = conn.execute("SELECT value FROM settings WHERE key='pageviews_daily'").fetchone()
-        return {'daily': _json.loads(row[0]) if row and row[0] else {}}
+        src = conn.execute("SELECT value FROM settings WHERE key='traffic_daily'").fetchone()
+        return {'daily': _json.loads(row[0]) if row and row[0] else {},
+                'sources': _json.loads(src[0]) if src and src[0] else {}}
 
-def _inc_pageviews():
+# Where a visitor came from: ?utm_source=… wins, then ad click ids, then the Referer
+# host. Moving between the site's own pages is not a new visit and is not counted.
+_TRAFFIC_HOSTS = [('instagram', 'instagram'), ('facebook', 'facebook'), ('fb.com', 'facebook'), ('fb.me', 'facebook'),
+                  ('messenger', 'facebook'), ('tiktok', 'tiktok'), ('t.me', 'telegram'), ('telegram', 'telegram'),
+                  ('whatsapp', 'whatsapp'), ('wa.me', 'whatsapp'), ('wolt', 'wolt'), ('youtube', 'youtube'),
+                  ('google.', 'google'), ('seznam', 'seznam'), ('mapy.', 'seznam'), ('bing.', 'search'),
+                  ('duckduckgo', 'search'), ('yahoo.', 'search'), ('yandex', 'search')]
+_TRAFFIC_UTM = {'ig': 'instagram', 'insta': 'instagram', 'fb': 'facebook', 'tg': 'telegram', 'wa': 'whatsapp', 'tt': 'tiktok'}
+
+def _traffic_source(req):
+    if req is None:
+        return None
+    q = req.query_params
+    utm = re.sub(r'[^a-z0-9_-]', '', (q.get('utm_source') or '').lower())[:20]
+    if utm:
+        utm = _TRAFFIC_UTM.get(utm, utm)
+        return next((v for k, v in _TRAFFIC_HOSTS if k.rstrip('.') in utm), utm)
+    if q.get('fbclid'):
+        return 'facebook'
+    if q.get('gclid'):
+        return 'google'
+    ref = req.headers.get('referer') or ''
+    if not ref:
+        return 'direct'
+    from urllib.parse import urlparse
+    host = (urlparse(ref).hostname or '').lower()
+    own = (req.headers.get('host') or '').split(':')[0].lower()
+    if not host or host == own:
+        return None
+    return next((v for k, v in _TRAFFIC_HOSTS if k in host), 'other')
+
+def _inc_pageviews(req=None):
     try:
         pool = _get_pool()
         if not pool:
@@ -1984,6 +2017,18 @@ def _inc_pageviews():
                 " ON CONFLICT(key) DO UPDATE SET value=EXCLUDED.value",
                 (_json.dumps(data),)
             )
+            src = _traffic_source(req)
+            if src:
+                row = conn.execute("SELECT value FROM settings WHERE key='traffic_daily'").fetchone()
+                tr = _json.loads(row[0]) if row and row[0] else {}
+                day = tr.setdefault(today, {})
+                day[src] = day.get(src, 0) + 1
+                tr = {k: v for k, v in tr.items() if time.mktime(time.strptime(k, '%Y-%m-%d')) >= cutoff}
+                conn.execute(
+                    "INSERT INTO settings(key,value) VALUES('traffic_daily',%s)"
+                    " ON CONFLICT(key) DO UPDATE SET value=EXCLUDED.value",
+                    (_json.dumps(tr),)
+                )
     except:
         pass
 
@@ -1996,8 +2041,8 @@ _BLOCKED = {
 _NO_TRACK = {'admin.html', 'success.html', 'cancel.html'}
 
 @app.get('/')
-def _index():
-    _inc_pageviews()
+def _index(req: Request):
+    _inc_pageviews(req)
     return FileResponse('index.html')
 
 @app.get('/success')
@@ -2013,7 +2058,7 @@ def _cancel():
 _STATIC_EXT = {'.html', '.js', '.css', '.svg', '.webp', '.png', '.jpg', '.jpeg', '.gif', '.ico', '.woff', '.woff2'}
 
 @app.get('/{path:path}')
-def _static(path: str):
+def _static(path: str, req: Request):
     norm = os.path.normpath(path).replace(os.sep, '/')
     if (norm.startswith('..') or os.path.isabs(norm) or norm in _BLOCKED
             or any(part.startswith(('.', '_')) for part in norm.split('/'))
@@ -2021,6 +2066,6 @@ def _static(path: str):
         raise HTTPException(404)
     if os.path.isfile(norm):
         if norm.endswith('.html') and norm not in _NO_TRACK:
-            _inc_pageviews()
+            _inc_pageviews(req)
         return FileResponse(norm)
     raise HTTPException(404)

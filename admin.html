@@ -381,6 +381,14 @@ body{font-family:'Raleway',sans-serif;background:var(--bg0);color:var(--tx0)}
 .an-cat-fill-cakes{background:#c9a96e}
 .an-cat-fill-desserts{background:#9e7fc0}
 .an-cat-fill-drinks{background:#5b9bd5}
+.an-src{background:var(--bg2);border:1px solid var(--bdr);padding:18px 20px;margin-bottom:20px}
+.an-src-title{font-size:.66rem;letter-spacing:2px;text-transform:uppercase;color:var(--gold);margin-bottom:12px}
+.an-src-row{display:grid;grid-template-columns:minmax(0,190px) minmax(0,1fr) 46px 46px;gap:12px;align-items:center;padding:7px 0;font-size:.84rem;color:var(--tx0)}
+.an-src-row .an-cat-bar{height:8px;border-radius:4px}
+.an-src-row b{font-family:'Playfair Display',serif;color:var(--gold);text-align:right;font-weight:400}
+.an-src-row small{color:var(--tx2);text-align:right}
+.an-src-hint{font-size:.72rem;color:var(--tx2);margin-top:10px;line-height:1.6}
+.an-src-hint code{color:var(--gold)}
 /* ── NTFY SETUP CARD ── */
 .ntfy-card{background:var(--bg2);border:1px solid var(--gold-d);padding:18px 20px;margin:16px 28px 0;position:relative;display:none}
 .ntfy-card.show{display:block}
@@ -920,29 +928,13 @@ body{font-family:'Raleway',sans-serif;background:var(--bg0);color:var(--tx0)}
         <div class="an-stat"><span class="an-val" id="anItems">—</span><span class="an-lbl" data-k="adm_an_items">Позицій</span></div>
         <div class="an-stat"><span class="an-val" id="anAvg">—</span><span class="an-lbl" data-k="adm_an_avg">Сер. чек (Kč)</span></div>
       </div>
-      <div class="an-cats">
-        <div class="an-cat">
-          <div class="an-cat-head">
-            <span class="an-cat-label">🎂 <span data-k="adm_cat_cakes">Торти</span></span>
-            <span class="an-cat-count" id="anCatCakes">—</span>
-          </div>
-          <div class="an-cat-bar"><div class="an-cat-fill an-cat-fill-cakes" id="anCatCakesBar" style="width:0%"></div></div>
-        </div>
-        <div class="an-cat">
-          <div class="an-cat-head">
-            <span class="an-cat-label">🍮 <span data-k="adm_cat_desserts">Десерти</span></span>
-            <span class="an-cat-count" id="anCatDesserts">—</span>
-          </div>
-          <div class="an-cat-bar"><div class="an-cat-fill an-cat-fill-desserts" id="anCatDessertsBar" style="width:0%"></div></div>
-        </div>
-        <div class="an-cat">
-          <div class="an-cat-head">
-            <span class="an-cat-label">🥤 <span data-k="adm_cat_drinks">Напої</span></span>
-            <span class="an-cat-count" id="anCatDrinks">—</span>
-          </div>
-          <div class="an-cat-bar"><div class="an-cat-fill an-cat-fill-drinks" id="anCatDrinksBar" style="width:0%"></div></div>
-        </div>
+      <div class="an-src">
+        <div class="an-src-title"><span data-k="adm_an_src">Odkud lidé přicházejí</span></div>
+        <div id="anSources"></div>
+        <p class="an-src-hint" data-k="adm_an_src_hint">Návštěvy z jiných webů a aplikací.</p>
       </div>
+      <div class="an-src-title" data-k="adm_an_by_cat">Prodej podle sekcí</div>
+      <div class="an-cats" id="anCats"></div>
       <table class="analytics-table">
         <thead>
           <tr>
@@ -1071,7 +1063,7 @@ const TA = {
     adm_copy_item:'Přidat jako nový (originál zůstane)', adm_copy_as_new:'přidat jako nový',
     adm_analytics:'Analytika',
     adm_ap_7:'7 dní', adm_ap_30:'30 dní', adm_ap_90:'90 dní', adm_ap_all:'Vše',
-    adm_an_views:'Zobrazení', adm_an_orders:'Objednávky', adm_an_revenue:'Příjem (Kč)',
+    adm_an_src:'Odkud lidé přicházejí', adm_an_src_hint:'Návštěvy z jiných webů a aplikací (přechody mezi stránkami webu se nepočítají). Aby byl Instagram vidět přesně, dejte do profilu odkaz s ?utm_source=instagram — např. cukrarna-cakeme.onrender.com/?utm_source=instagram.', adm_an_src_none:'Zatím žádná data — začnou se sbírat od teď.', adm_an_src_direct:'Přímo / záložky', adm_an_src_other:'Jiné weby', adm_an_src_search:'Jiné vyhledávače', adm_an_by_cat:'Prodej podle sekcí', adm_an_cat_other:'Ostatní', adm_an_views:'Zobrazení', adm_an_orders:'Objednávky', adm_an_revenue:'Příjem (Kč)',
     adm_an_items:'Pozice', adm_an_avg:'Průměr (Kč)',
     adm_an_product:'Produkt', adm_an_qty:'Počet', adm_an_rev:'Příjem', adm_an_share:'Podíl',
     adm_an_no_data:'Žádná data pro toto období.',
@@ -1142,7 +1134,7 @@ const TA = {
     adm_copy_item:'Add as new (original stays)', adm_copy_as_new:'add as new',
     adm_analytics:'Analytics',
     adm_ap_7:'7 days', adm_ap_30:'30 days', adm_ap_90:'90 days', adm_ap_all:'All',
-    adm_an_views:'Views', adm_an_orders:'Orders', adm_an_revenue:'Revenue (Kč)',
+    adm_an_src:'Where visitors come from', adm_an_src_hint:'Visits from other sites and apps (moving between pages of the site isn’t counted). For exact Instagram numbers put a link with ?utm_source=instagram in the profile — e.g. cukrarna-cakeme.onrender.com/?utm_source=instagram.', adm_an_src_none:'No data yet — collected from now on.', adm_an_src_direct:'Direct / bookmarks', adm_an_src_other:'Other websites', adm_an_src_search:'Other search engines', adm_an_by_cat:'Sales by section', adm_an_cat_other:'Other', adm_an_views:'Views', adm_an_orders:'Orders', adm_an_revenue:'Revenue (Kč)',
     adm_an_items:'Items', adm_an_avg:'Avg. order (Kč)',
     adm_an_product:'Product', adm_an_qty:'Qty', adm_an_rev:'Revenue', adm_an_share:'Share',
     adm_an_no_data:'No data for this period.',
@@ -1215,7 +1207,7 @@ const TA = {
     adm_copy_item:'Додати як нову (оригінал залишиться)', adm_copy_as_new:'додати як нову',
     adm_analytics:'Аналітика',
     adm_ap_7:'7 днів', adm_ap_30:'30 днів', adm_ap_90:'90 днів', adm_ap_all:'Усі',
-    adm_an_views:'Перегляди', adm_an_orders:'Замовлення', adm_an_revenue:'Дохід (Kč)',
+    adm_an_src:'Звідки приходять', adm_an_src_hint:'Заходи з інших сайтів і застосунків (переходи між сторінками сайту не рахуються). Щоб Instagram рахувався точно, поставте в профілі посилання з ?utm_source=instagram — напр. cukrarna-cakeme.onrender.com/?utm_source=instagram.', adm_an_src_none:'Поки немає даних — збираються від сьогодні.', adm_an_src_direct:'Напряму / закладки', adm_an_src_other:'Інші сайти', adm_an_src_search:'Інші пошуковики', adm_an_by_cat:'Продажі за розділами', adm_an_cat_other:'Інше', adm_an_views:'Перегляди', adm_an_orders:'Замовлення', adm_an_revenue:'Дохід (Kč)',
     adm_an_items:'Позицій', adm_an_avg:'Сер. чек (Kč)',
     adm_an_product:'Товар', adm_an_qty:'Кількість', adm_an_rev:'Дохід', adm_an_share:'Частка',
     adm_an_no_data:'Немає даних за цей період.',
@@ -2659,10 +2651,14 @@ document.getElementById('exportBtn').addEventListener('click', async ()=>{
 
 /* ── Analytics ── */
 function parseOrderItems(orderText){
-  // Parse "Name × qty\nName × qty" format written by the cart
-  const lines = (orderText||'').split(/\n|,/).map(s=>s.trim()).filter(Boolean);
+  // Server-priced: "Name (size) x2 (180 Kč), … | Celkem: 924 Kč" (180 = the line total)
+  const body = (orderText||'').replace(/\s*\|\s*Celkem:.*$/s, '');
+  const lines = body.split(/\n|,(?![^(]*\))/).map(s=>s.trim()).filter(Boolean);
   const result = [];
   for(const line of lines){
+    const p = line.match(/^(.+?)(?:\s+\([^)]*\))?\s+x(\d+)(?:\s+\((\d[\d\s]*)\s*Kč\))?$/);
+    if(p){ result.push({name: p[1].trim(), qty: parseInt(p[2]), total: p[3] ? parseInt(p[3].replace(/\s/g,'')) : null}); continue; }
+    // Older orders: "Name × qty — unit price Kč"
     const m = line.match(/^(.+?)\s*[×x]\s*(\d+)\s*(?:—\s*([\d\s]+)\s*Kč)?$/i);
     if(m){
       const qty = parseInt(m[2]);
@@ -2681,6 +2677,20 @@ function _analyticsTot(order){
   return null;
 }
 
+const AN_SRC = {instagram:'📸 Instagram', facebook:'📘 Facebook', google:'🔍 Google', seznam:'🔎 Seznam', tiktok:'🎵 TikTok',
+  telegram:'✈️ Telegram', whatsapp:'💬 WhatsApp', wolt:'🛵 Wolt', youtube:'▶️ YouTube'};
+function renderSources(_, cutoffDate){
+  const src = window._anSources || {}, sum = {};
+  Object.entries(src).filter(([d])=>d>=cutoffDate).forEach(([, day])=>Object.entries(day).forEach(([k, v])=>sum[k]=(sum[k]||0)+v));
+  const rows = Object.entries(sum).sort((a,b)=>b[1]-a[1]);
+  const total = rows.reduce((a, r)=>a+r[1], 0), max = Math.max(1, ...rows.map(r=>r[1]));
+  const label = k => AN_SRC[k] || (k==='direct' ? '🔗 ' + t('adm_an_src_direct') : k==='other' ? '🌐 ' + t('adm_an_src_other') : k==='search' ? '🔎 ' + t('adm_an_src_search') : '🏷 ' + k);
+  document.getElementById('anSources').innerHTML = rows.length ? rows.map(([k, v])=>`<div class="an-src-row"><span>${esc(label(k))}</span>
+      <div class="an-cat-bar"><div class="an-cat-fill an-cat-fill-cakes" style="width:${Math.round(v/max*100)}%"></div></div>
+      <b>${v}</b><small>${Math.round(v/total*100)}%</small></div>`).join('')
+    : `<p class="an-src-hint" style="margin:0">${t('adm_an_src_none')}</p>`;
+}
+
 async function renderAnalytics(){
   const now = Date.now();
   const cutoff = analyticsPeriod > 0 ? now - analyticsPeriod*86400000 : 0;
@@ -2693,12 +2703,14 @@ async function renderAnalytics(){
   try{
     const r = await fetch('/api/pageviews');
     if(r.ok){
-      const {daily} = await r.json();
+      const {daily, sources} = await r.json();
+      window._anSources = sources || {};
       const cutoffDate = cutoff ? new Date(cutoff).toISOString().slice(0,10) : '0000-00-00';
       const total = Object.entries(daily||{})
         .filter(([d])=>d>=cutoffDate)
         .reduce((s,[,v])=>s+v, 0);
       document.getElementById('anViews').textContent = total || '0';
+      renderSources(null, cutoffDate);
     }
   }catch{ document.getElementById('anViews').textContent = '—'; }
 
@@ -2728,20 +2740,21 @@ async function renderAnalytics(){
   document.getElementById('anAvg').textContent     = orders.length > 0 && totalRevenue > 0
     ? Math.round(totalRevenue/orders.length).toLocaleString('cs-CZ') : '—';
 
-  // Category breakdown
+  // Sales by the real menu sections (custom cakes from the builder have their own card)
   const allMenuItems = [...STATIC_ITEMS, ...(cachedMenuItems||[])];
-  const catQty = {cakes:0, desserts:0, drinks:0};
+  const catQty = {};
   for(const [name, data] of Object.entries(itemMap)){
     const found = allMenuItems.find(i=>i.name?.cs===name||i.name?.uk===name||i.name?.en===name);
-    if(found && catQty.hasOwnProperty(found.cat)) catQty[found.cat] += data.qty;
+    const cat = found ? found.cat : (name === 'Dort na zakázku' ? '_builder' : '_other');
+    catQty[cat] = (catQty[cat]||0) + data.qty;
   }
-  const maxCat = Math.max(catQty.cakes, catQty.desserts, catQty.drinks, 1);
-  document.getElementById('anCatCakes').textContent    = catQty.cakes    || '0';
-  document.getElementById('anCatDesserts').textContent = catQty.desserts || '0';
-  document.getElementById('anCatDrinks').textContent   = catQty.drinks   || '0';
-  document.getElementById('anCatCakesBar').style.width    = Math.round(catQty.cakes/maxCat*100)+'%';
-  document.getElementById('anCatDessertsBar').style.width = Math.round(catQty.desserts/maxCat*100)+'%';
-  document.getElementById('anCatDrinksBar').style.width   = Math.round(catQty.drinks/maxCat*100)+'%';
+  const catRows = Object.entries(catQty).sort((a,b)=>b[1]-a[1]);
+  const maxCat = Math.max(1, ...catRows.map(r=>r[1]));
+  const catName = c => c==='_builder' ? '🎂 ' + t('adm_builder') : c==='_other' ? t('adm_an_cat_other') : catLabel(c);
+  document.getElementById('anCats').innerHTML = catRows.length ? catRows.map(([c, q])=>`<div class="an-cat">
+      <div class="an-cat-head"><span class="an-cat-label">${esc(catName(c))}</span><span class="an-cat-count">${q}</span></div>
+      <div class="an-cat-bar"><div class="an-cat-fill an-cat-fill-cakes" style="width:${Math.round(q/maxCat*100)}%"></div></div></div>`).join('')
+    : `<div class="an-cat"><span class="an-cat-label">${t('adm_an_no_data')}</span></div>`;
 
   const tbody = document.getElementById('analyticsBody');
   const sorted = Object.values(itemMap).sort((a,b)=>b.qty-a.qty);
