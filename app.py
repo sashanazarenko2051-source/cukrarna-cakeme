@@ -146,7 +146,9 @@ async def _sec(req: Request, call_next):
         pass  # set by the endpoint: long-lived, the URL changes when the photo does
     elif req.url.path.startswith('/api/'):
         resp.headers['Cache-Control'] = 'no-store'
-    elif 'text/html' in resp.headers.get('content-type', ''):
+    elif any(t in resp.headers.get('content-type', '') for t in ('text/html', 'javascript', 'text/css')):
+        # Pages and their scripts are re-checked every time (cheap 304 via ETag), so
+        # visitors never get a new page with an old builder.js / reviews.js
         resp.headers['Cache-Control'] = 'no-cache, must-revalidate'
     _maybe_send_birthdays()  # once a day, on whatever request comes first
     return resp
