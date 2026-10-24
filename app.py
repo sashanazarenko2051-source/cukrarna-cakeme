@@ -1970,34 +1970,55 @@ def api_pageviews():
 
 # Where a visitor came from: ?utm_source=… wins, then ad click ids, then the Referer
 # host. Moving between the site's own pages is not a new visit and is not counted.
+# Paid clicks get an "_ads" suffix (google_ads, facebook_ads, …): ad click ids that only
+# ads add (gclid, ttclid, …) or utm_medium=cpc/paid.
 _TRAFFIC_HOSTS = [('instagram', 'instagram'), ('facebook', 'facebook'), ('fb.com', 'facebook'), ('fb.me', 'facebook'),
                   ('messenger', 'facebook'), ('tiktok', 'tiktok'), ('t.me', 'telegram'), ('telegram', 'telegram'),
                   ('whatsapp', 'whatsapp'), ('wa.me', 'whatsapp'), ('wolt', 'wolt'), ('youtube', 'youtube'),
                   ('google.', 'google'), ('seznam', 'seznam'), ('mapy.', 'seznam'), ('bing.', 'search'),
-                  ('duckduckgo', 'search'), ('yahoo.', 'search'), ('yandex', 'search')]
-_TRAFFIC_UTM = {'ig': 'instagram', 'insta': 'instagram', 'fb': 'facebook', 'tg': 'telegram', 'wa': 'whatsapp', 'tt': 'tiktok'}
+                  ('duckduckgo', 'search'), ('yahoo.', 'search'), ('yandex', 'search'), ('firmy.cz', 'seznam'),
+                  ('pinterest', 'pinterest'), ('linkedin', 'linkedin'), ('lnkd.in', 'linkedin'), ('twitter', 'x'),
+                  ('threads.', 'threads'), ('viber', 'viber'), ('reddit', 'reddit')]
+_TRAFFIC_EXACT = {'x.com': 'x', 't.co': 'x', 'bing.com': 'bing', 'www.bing.com': 'bing'}
+_TRAFFIC_PAID_MEDIUM = {'cpc', 'ppc', 'paid', 'paidsocial', 'paid_social', 'paid-social', 'ads', 'ad', 'cpm', 'sponsored', 'display'}
+# click ids added only by ad networks (fbclid is not here: Facebook adds it to ordinary shared links too)
+_TRAFFIC_AD_IDS = [('gclid', 'google'), ('gbraid', 'google'), ('wbraid', 'google'), ('gad_source', 'google'),
+                   ('ttclid', 'tiktok'), ('sznclid', 'seznam'), ('msclkid', 'bing'), ('twclid', 'x')]
+_TRAFFIC_UTM = {'ig': 'instagram', 'insta': 'instagram', 'fb': 'facebook', 'tg': 'telegram', 'wa': 'whatsapp', 'tt': 'tiktok',
+                'sklik': 'seznam', 'adwords': 'google', 'twitter': 'x', 'meta': 'facebook'}
+
+def _traffic_host(host):
+    if host in _TRAFFIC_EXACT:
+        return _TRAFFIC_EXACT[host]
+    return next((v for k, v in _TRAFFIC_HOSTS if k in host), None)
 
 def _traffic_source(req):
     if req is None:
         return None
     q = req.query_params
+    from urllib.parse import urlparse
+    ref = req.headers.get('referer') or ''
+    host = (urlparse(ref).hostname or '').lower() if ref else ''
+    own = (req.headers.get('host') or '').split(':')[0].lower()
+    medium = (q.get('utm_medium') or '').lower().strip()
+    paid = medium in _TRAFFIC_PAID_MEDIUM
     utm = re.sub(r'[^a-z0-9_-]', '', (q.get('utm_source') or '').lower())[:20]
     if utm:
         utm = _TRAFFIC_UTM.get(utm, utm)
-        return next((v for k, v in _TRAFFIC_HOSTS if k.rstrip('.') in utm), utm)
+        src = _TRAFFIC_EXACT.get(utm) or next((v for k, v in _TRAFFIC_HOSTS if k.rstrip('.') in utm), utm)
+        return src + '_ads' if paid and not src.endswith('_ads') else src
+    ad = next((v for k, v in _TRAFFIC_AD_IDS if q.get(k)), None)
+    if ad:
+        return ad + '_ads'
     if q.get('fbclid'):
-        return 'facebook'
-    if q.get('gclid'):
-        return 'google'
-    ref = req.headers.get('referer') or ''
+        # Meta adds fbclid on Instagram too; the referer tells which app it was
+        return ('instagram' if 'instagram' in host else 'facebook') + ('_ads' if paid else '')
     if not ref:
         return 'direct'
-    from urllib.parse import urlparse
-    host = (urlparse(ref).hostname or '').lower()
-    own = (req.headers.get('host') or '').split(':')[0].lower()
     if not host or host == own:
         return None
-    return next((v for k, v in _TRAFFIC_HOSTS if k in host), 'other')
+    src = _traffic_host(host) or 'other'
+    return src + '_ads' if paid else src
 
 def _inc_pageviews(req=None):
     try:
