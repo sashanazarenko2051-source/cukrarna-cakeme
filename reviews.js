@@ -4,7 +4,7 @@
    then CakeReviews.refresh() after a language change. */
 (function(){
   const RT = {
-    cs: {lbl:'Co říkají zákazníci', ttl:'Recenze', none:'Zatím žádné recenze — buďte první!', first:'Napište první recenzi →', reviews:['recenze','recenze','recenzí'],
+    cs: {empty_ttl:'Buďte první, kdo napíše recenzi', empty_sub:'Ochutnali jste naše dorty? Podělte se o dojem — můžete přidat i fotku. Každá recenze nám pomáhá být lepší.', lbl:'Co říkají zákazníci', ttl:'Recenze', none:'Zatím žádné recenze — buďte první!', first:'Napište první recenzi →', reviews:['recenze','recenze','recenzí'],
       write:'Napsat recenzi', more:'Zobrazit další', verified:'Ověřený zákazník', reply:'Odpověď cukrárny',
       f_stars:'Vaše hodnocení', f_name:'Jméno', f_text:'Vaše recenze', f_item:'Co jste si objednali (nepovinné)',
       f_phone:'Telefon z objednávky (nepovinné)', f_phone_hint:'Jen pro označení „Ověřený zákazník“. Nikde se nezobrazuje.',
@@ -13,7 +13,7 @@
       f_ok:'Děkujeme! Recenze se zobrazí po kontrole.', f_err:'Nepodařilo se odeslat. Zkuste to prosím znovu.', f_limit:'Příliš mnoho recenzí za krátkou dobu. Zkuste to později.',
       src_google:'z Google', src_instagram:'z Instagramu', src_facebook:'z Facebooku', src_in_person:'osobně v cukrárně', src_other:'jinde',
       honest:'Recenze zveřejňujeme po kontrole spamu, negativní recenze nemažeme a hodnocení neupravujeme. Označení „Ověřený zákazník“ znamená, že telefon souhlasí s objednávkou. Recenze přenesené z Google či sociálních sítí mají uvedený zdroj.'},
-    en: {lbl:'What customers say', ttl:'Reviews', none:'No reviews yet — be the first!', first:'Write the first review →', reviews:['review','reviews','reviews'],
+    en: {empty_ttl:'Be the first to leave a review', empty_sub:'Tried our cakes? Share your impression — you can add a photo too. Every review helps us get better.', lbl:'What customers say', ttl:'Reviews', none:'No reviews yet — be the first!', first:'Write the first review →', reviews:['review','reviews','reviews'],
       write:'Write a review', more:'Show more', verified:'Verified customer', reply:'Reply from the shop',
       f_stars:'Your rating', f_name:'Name', f_text:'Your review', f_item:'What did you order (optional)',
       f_phone:'Phone used for the order (optional)', f_phone_hint:'Only for the “Verified customer” badge. Never shown.',
@@ -22,7 +22,7 @@
       f_ok:'Thank you! Your review will appear after a check.', f_err:'Could not send. Please try again.', f_limit:'Too many reviews in a short time. Please try later.',
       src_google:'from Google', src_instagram:'from Instagram', src_facebook:'from Facebook', src_in_person:'in person', src_other:'elsewhere',
       honest:'Reviews are published after a spam check; we don’t delete negative reviews or change ratings. “Verified customer” means the phone matches an order. Reviews moved over from Google or social media show their source.'},
-    uk: {lbl:'Що кажуть клієнти', ttl:'Відгуки', none:'Поки що немає відгуків — будьте першим!', first:'Залиште перший відгук →', reviews:['відгук','відгуки','відгуків'],
+    uk: {empty_ttl:'Будьте першим, хто залишить відгук', empty_sub:'Куштували наші торти? Поділіться враженнями — можна додати й фото. Кожен відгук допомагає нам ставати кращими.', lbl:'Що кажуть клієнти', ttl:'Відгуки', none:'Поки що немає відгуків — будьте першим!', first:'Залиште перший відгук →', reviews:['відгук','відгуки','відгуків'],
       write:'Залишити відгук', more:'Показати ще', verified:'Перевірений покупець', reply:'Відповідь кондитерської',
       f_stars:'Ваша оцінка', f_name:'Ім’я', f_text:'Ваш відгук', f_item:'Що ви замовляли (необов’язково)',
       f_phone:'Телефон із замовлення (необов’язково)', f_phone_hint:'Лише для позначки «Перевірений покупець». Ніде не показується.',
@@ -63,6 +63,13 @@
 .rv-photo{width:100%;max-height:260px;object-fit:cover;cursor:zoom-in;border:1px solid var(--bdr,#242424)}
 .rv-reply{border-left:2px solid var(--gold-d,#9a7a4a);padding:6px 0 6px 12px;font-size:.8rem;color:var(--tx2,#999)}.rv-reply b{display:block;color:var(--gold);font-size:.7rem;letter-spacing:1px;text-transform:uppercase;margin-bottom:3px}
 .rv-more{display:block;margin:22px auto 0;background:none;border:1px solid var(--gold-d,#9a7a4a);color:var(--gold);padding:10px 22px;cursor:pointer;font:.72rem 'Raleway',sans-serif;letter-spacing:1.5px;text-transform:uppercase}
+.rv-empty{position:relative;max-width:720px;margin:0 auto 28px;text-align:center;padding:44px 32px;border:1px solid var(--gold-d,#8a7048);
+  background:radial-gradient(ellipse at top,rgba(201,169,110,.14),rgba(201,169,110,.02) 65%)}
+.rv-empty-ic{width:74px;height:74px;margin:0 auto 14px;border-radius:50%;border:1px solid var(--gold-d,#8a7048);display:flex;align-items:center;justify-content:center;font-size:2rem;background:rgba(10,10,10,.5)}
+.rv-empty-stars{color:var(--gold,#c9a96e);letter-spacing:6px;font-size:1.1rem;margin-bottom:12px}
+.rv-empty h3{font-family:'Playfair Display',serif;font-weight:400;font-size:1.6rem;color:var(--tx0,#f5f0e8);margin-bottom:10px}
+.rv-empty p{color:var(--tx1,#c8b898);font-size:.9rem;line-height:1.7;max-width:520px;margin:0 auto 22px}
+@media(max-width:600px){ .rv-empty{padding:32px 18px} .rv-empty h3{font-size:1.3rem} }
 .rv-none{text-align:center;color:var(--tx2,#777);padding:20px 0}
 .rv-honest{text-align:center;color:var(--tx2,#666);font-size:.72rem;margin-top:22px;line-height:1.6}
 .rv-form{background:var(--bg3,#1c1c1c);border:1px solid var(--gold-d,#9a7a4a);padding:26px;margin-bottom:28px;display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:16px}
@@ -81,8 +88,8 @@
 .rv-hp{position:absolute;left:-9999px;width:1px;height:1px;opacity:0}
 .rv-lb{position:fixed;inset:0;background:rgba(0,0,0,.88);z-index:3000;display:flex;align-items:center;justify-content:center;cursor:zoom-out;padding:20px}
 .rv-lb img{max-width:100%;max-height:100%}
-.rv-line{display:inline-flex;align-items:center;gap:8px;color:var(--tx1,#c8b898);font-size:.85rem;text-decoration:none;border-bottom:1px solid transparent}
-.rv-line:hover{border-bottom-color:var(--gold)}.rv-line b{color:var(--tx0,#f5f0e8)}
+.rv-line{display:inline-flex;align-items:center;gap:10px;color:var(--tx1,#c8b898);font-size:.85rem;text-decoration:none;border:1px solid rgba(201,169,110,.45);border-radius:999px;padding:8px 18px;background:rgba(201,169,110,.06);transition:.25s}
+.rv-line:hover{border-color:var(--gold);background:rgba(201,169,110,.12)}.rv-line b{color:var(--tx0,#f5f0e8)}
 @media(max-width:700px){ .rv-sum{grid-template-columns:1fr;gap:18px;padding:22px} .rv-form{grid-template-columns:1fr;padding:18px} .rv-list{grid-template-columns:1fr} }`;
   const style = document.createElement('style'); style.textContent = css; document.head.appendChild(style);
 
@@ -137,7 +144,7 @@
   function renderLine(el){
     const s = data && data.summary;
     // Jump to the reviews block on this page if there is one, otherwise to the home page
-    const href = document.querySelector('[data-reviews="full"]') ? '#reviews' : 'index.html#reviews';
+    const href = document.querySelector('[data-reviews="full"]') ? '#reviews' : 'about.html#reviews';
     el.innerHTML = s && s.count
       ? `<a class="rv-line" href="${href}">${starsHtml(s.avg)} <b>${fmtAvg(s.avg)}</b> · ${s.count} ${plural(s.count)}</a>`
       : `<a class="rv-line" href="${href}">${starsHtml(0)} ${tr('first')}</a>`;
@@ -148,13 +155,18 @@
     const max = Math.max(1, ...Object.values(s.dist || {}));
     el.innerHTML = `
       <div class="sec-hd fi show"><span class="sec-lbl">${tr('lbl')}</span><h2 class="sec-ttl">${tr('ttl')}</h2><div class="sec-div"></div></div>
-      <div class="rv-sum">
+      ${!s.count ? `<div class="rv-empty">
+        <div class="rv-empty-ic">✍️</div>
+        <div class="rv-empty-stars">★★★★★</div>
+        <h3>${tr('empty_ttl')}</h3><p>${tr('empty_sub')}</p>
+        <button type="button" class="rv-btn rv-open">${tr('write')}</button>
+      </div>` : `<div class="rv-sum">
         <div class="rv-avg"><b>${s.count ? fmtAvg(s.avg) : '—'}</b>${starsHtml(s.avg)}<small>${s.count} ${plural(s.count)}</small></div>
         <div class="rv-bars">${[5,4,3,2,1].map(n=>`<div class="rv-bar"><span>${n} ★</span><i><em style="width:${Math.round((s.dist[n]||0)/max*100)}%"></em></i><span>${s.dist[n]||0}</span></div>`).join('')}</div>
         <button type="button" class="rv-btn rv-open">${tr('write')}</button>
-      </div>
+      </div>`}
       <div class="rv-form-box">${formOpen ? formHtml() : ''}</div>
-      ${list.length ? `<div class="rv-list">${list.slice(0, shown).map(cardHtml).join('')}</div>` : `<p class="rv-none">${tr('none')}</p>`}
+      ${list.length ? `<div class="rv-list">${list.slice(0, shown).map(cardHtml).join('')}</div>` : (s.count ? `<p class="rv-none">${tr('none')}</p>` : '')}
       ${list.length > shown ? `<button type="button" class="rv-more">${tr('more')}</button>` : ''}
       <p class="rv-honest">${tr('honest')}</p>`;
     el.querySelector('.rv-open').onclick = () => { formOpen = !formOpen; render(); if (formOpen) el.querySelector('.rv-form').scrollIntoView({behavior:'smooth', block:'center'}); };

@@ -993,6 +993,13 @@ _BUILDER_DEFAULT = {
     ],
 }
 _ID_RE = re.compile(r'^[a-z0-9_-]{1,32}$')
+# Photos of the shop's own cakes (from the menu) for the sample fillings, used until the admin uploads others
+_BUILDER_DEFAULT_IMGS = {
+    'choco': 'https://imageproxy.wolt.com/assets/697228caf1232b338e039780',
+    'rasp': 'https://imageproxy.wolt.com/assets/697228caf1232b338e039784',
+    'cheese': 'https://imageproxy.wolt.com/assets/697228caf1232b338e039779',
+    'pist': 'https://imageproxy.wolt.com/assets/697228caf1232b338e039771',
+}
 
 def _clean_names(raw):
     raw = raw if isinstance(raw, dict) else {}
@@ -1039,7 +1046,8 @@ def _builder_cfg(conn):
 
 def _public_builder(cfg):
     out = dict(cfg)
-    out['fillings'] = [{**f, 'img': f"/api/builder-img/{f['id']}?v={hashlib.sha1(f['img'].encode()).hexdigest()[:10]}" if f.get('img') else ''}
+    out['fillings'] = [{**f, 'img': f"/api/builder-img/{f['id']}?v={hashlib.sha1(f['img'].encode()).hexdigest()[:10]}"
+                        if f.get('img') else _BUILDER_DEFAULT_IMGS.get(f['id'], '')}
                        for f in cfg['fillings']]
     return out
 
@@ -1061,6 +1069,9 @@ def _builder_line(cfg, b, qty):
         parts.insert(0, occasion['name']['cs'])
     if text:
         parts.append(f'nápis: „{text}“')
+    number = re.sub(r'\D', '', str(b.get('number') or ''))[:3]
+    if number:
+        parts.append(f'číslo: {number}')
     photo = str(b.get('photo') or '')
     if photo and (len(photo) > 1_500_000 or not _PHOTO_RE.match(photo)):
         photo = ''

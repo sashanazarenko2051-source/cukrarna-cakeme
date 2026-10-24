@@ -77,7 +77,11 @@ section{padding:96px 0}
 .m-img img{width:100%;height:100%;object-fit:contain;display:block;transition:transform .4s ease}
 .m-card:hover .m-img img{transform:scale(1.04)}
 .m-badge{position:absolute;top:14px;right:14px;background:var(--gold);color:var(--bg0);font:.62rem 'Raleway',sans-serif;letter-spacing:1.5px;text-transform:uppercase;padding:4px 10px;font-weight:700}
-.m-body{padding:20px}
+.m-card{display:flex;flex-direction:column}
+.m-body{padding:20px;flex:1;display:flex;flex-direction:column}
+.m-body>.m-sizes{margin-top:auto}
+.m-body>.m-ft,.m-body>.m-ft-des{margin-top:auto}
+.m-body>.m-sizes+.m-ft{margin-top:0}
 .m-name{font-family:'Playfair Display',serif;font-size:1.18rem;color:var(--tx0);margin-bottom:7px}
 .m-rules{font-size:.74rem;color:var(--tx1);line-height:1.7;margin:-3px 0 10px}
 .m-left{display:inline-block;color:var(--bg0);background:var(--gold);font-weight:700;font-size:.66rem;letter-spacing:1px;text-transform:uppercase;padding:2px 8px}
@@ -94,7 +98,8 @@ section{padding:96px 0}
 .btn-ord:hover{background:var(--gold);color:var(--bg0)}
 .m-ft-des{display:flex;flex-direction:column;gap:10px;margin-top:14px}
 .des-qty-row{display:flex;align-items:center;gap:8px}
-.des-qty-lbl{font-size:.7rem;color:#888;letter-spacing:.5px;text-transform:uppercase;flex:1;white-space:nowrap}
+.des-qty-lbl{font-size:.7rem;color:#888;letter-spacing:.5px;text-transform:uppercase;flex:1;min-width:0;line-height:1.3}
+.des-qty-row .m-price{white-space:nowrap;margin-left:6px}
 .dq-btn{width:28px;height:28px;border:1px solid var(--gold-d);background:transparent;color:var(--gold);font-size:1.15rem;cursor:pointer;border-radius:3px;line-height:1;transition:.2s;display:inline-flex;align-items:center;justify-content:center}
 .dq-btn:hover{background:var(--gold);color:var(--bg0)}
 .dq-num{min-width:22px;text-align:center;font-size:.9rem;color:#fff}
@@ -118,7 +123,6 @@ section{padding:96px 0}
 .pop-img{height:140px;position:relative;overflow:hidden;background:#111}
 .pop-img img{width:100%;height:100%;object-fit:contain;display:block}
 .pop-img .m-badge{top:10px;right:10px}
-.pop-rank{position:absolute;top:10px;left:10px;width:26px;height:26px;border:1px solid var(--gold);background:rgba(10,10,10,.75);color:var(--gold);font:700 .72rem 'Raleway',sans-serif;display:flex;align-items:center;justify-content:center}
 .pop-body{padding:12px 14px 14px;display:flex;flex-direction:column;gap:10px;flex:1}
 .pop-name{font-family:'Playfair Display',serif;font-size:1rem;color:var(--tx0);line-height:1.3}
 .pop-ft{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-top:auto}
@@ -296,9 +300,9 @@ footer{background:#070707;border-top:1px solid var(--bdr);padding:52px 0 28px}
       <h2 class="sec-ttl" data-k="menu_ttl">Menu</h2>
       <div class="sec-div"></div>
     </div>
-    <!-- "★ 4,9 · 12 reviews" line, links to the reviews on the home page (reviews.js) -->
+    <!-- "★ 4,9 · 12 reviews" pill, links to the reviews on the About page (reviews.js) -->
     <div data-reviews="summary" style="text-align:center;margin:-36px 0 18px"></div>
-    <div data-builder-open style="text-align:center;margin:0 0 36px;display:none"></div>
+    <div data-builder-open="banner" style="margin:0 0 40px;display:none"></div>
     <div class="feat-wrap" id="featWrap" style="display:none">
       <div class="pop-hd"><span class="pop-ttl" data-k="feat_ttl">Doporučujeme</span></div>
       <div class="m-grid" id="featGrid"></div>
@@ -320,10 +324,6 @@ footer{background:#070707;border-top:1px solid var(--bdr);padding:52px 0 28px}
   </div>
 </section>
 
-<!-- REVIEWS (filled by reviews.js) -->
-<section id="reviews" style="padding-top:0">
-  <div class="wrap" data-reviews="full"></div>
-</section>
 
 <!-- CART PANEL -->
 <div class="cart-panel" id="cartPanel">
@@ -366,7 +366,7 @@ footer{background:#070707;border-top:1px solid var(--bdr);padding:52px 0 28px}
           <a href="tel:+420770612984" class="soc" title="Telefon">
             <svg width="17" height="17" viewBox="0 0 24 24" fill="currentColor"><path d="M6.62 10.79c1.44 2.83 3.76 5.14 6.59 6.59l2.2-2.2c.27-.27.67-.36 1.02-.24 1.12.37 2.33.57 3.57.57.55 0 1 .45 1 1V20c0 .55-.45 1-1 1-9.39 0-17-7.61-17-17 0-.55.45-1 1-1h3.5c.55 0 1 .45 1 1 0 1.25.2 2.45.57 3.57.11.35.03.74-.25 1.02l-2.2 2.2z"/></svg>
           </a>
-          <a href="mailto:?to=cakeme.cukrarna@seznam.cz" class="soc" title="E-mail">
+          <a href="mailto:cakeme.cukrarna@seznam.cz" class="soc" title="E-mail">
             <svg width="17" height="17" viewBox="0 0 24 24" fill="currentColor"><path d="M20 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z"/></svg>
           </a>
         </div>
@@ -385,7 +385,7 @@ footer{background:#070707;border-top:1px solid var(--bdr);padding:52px 0 28px}
         <h4 data-k="ft_con">Kontakt</h4>
         <ul>
           <li><a href="tel:+420770612984">+420 770 612 984</a></li>
-          <li><a href="mailto:?to=cakeme.cukrarna@seznam.cz">cakeme.cukrarna@seznam.cz</a></li>
+          <li><a href="mailto:cakeme.cukrarna@seznam.cz">cakeme.cukrarna@seznam.cz</a></li>
           <li><a href="https://instagram.com/cukrarna_cakeme" target="_blank">@cukrarna_cakeme</a></li>
         </ul>
         <p style="margin-top:14px;color:var(--tx2);font-size:.8rem">Kodanská 649/20<br>Praha 10, 101 00</p>
@@ -585,7 +585,6 @@ function renderPopular(){
     return `<div class="pop-card">
       <div class="pop-img">
         ${item.img?`<img src="${item.img}" alt="${name}" loading="lazy" onerror="this.style.display='none'">`:''}
-        <span class="pop-rank">${n+1}</span>
         ${item.badge?`<span class="m-badge">${badgeText(item.badge)}</span>`:''}
       </div>
       <div class="pop-body">
@@ -803,7 +802,7 @@ function renderMenu(){
       <div data-builder-open style="margin:6px 0 18px;display:none"></div>
       <div class="celeb-cta">
         <a href="tel:+420770612984" class="btn-ord" style="text-decoration:none">Ira — +420 770 612 984</a>
-        <a href="mailto:?to=cakeme.cukrarna@seznam.cz" class="btn-ord" style="text-decoration:none;font-size:.65rem;padding:8px 14px">cakeme.cukrarna@seznam.cz</a>
+        <a href="mailto:cakeme.cukrarna@seznam.cz" class="btn-ord" style="text-decoration:none;font-size:.65rem;padding:8px 14px">cakeme.cukrarna@seznam.cz</a>
       </div>
     </div>`;
     if(window.CakeBuilder) CakeBuilder.refresh();
