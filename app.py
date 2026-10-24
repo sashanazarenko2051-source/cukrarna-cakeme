@@ -1372,10 +1372,41 @@ def _send_due_birthdays(conn=None):
             print(f'[BDAY] Error for {email}: {e}', file=sys.stderr)
     return sent
 
+def _notify_due_birthdays(conn):
+    """Tell the shop in Telegram (orders chat) about every subscriber whose birthday is
+    within days_before, once per birthday, so they can write to them. Returns how many."""
+    cfg = _bday_cfg(conn)
+    if not cfg['enabled']:
+        return 0
+    today = _today()
+    row = conn.execute("SELECT value FROM settings WHERE key='bday_tg_notified'").fetchone()
+    done = _json.loads(row[0]) if row and row[0] else {}   # email -> year of the birthday already announced
+    rows = conn.execute('SELECT email, name, bday, lang, token FROM subscribers WHERE active=TRUE AND last_sent_year < %s',
+                        (today.year + 2,)).fetchall()
+    told = 0
+    for email, name, bday, lang, token in rows:
+        nxt = _next_bday(bday, today)
+        left = (nxt - today).days
+        if left > cfg['days_before'] or done.get(email) == nxt.year:
+            continue
+        auto = _smtp_ready()
+        _tg_send(f"🎂 Через {left} дн. день народження: {name or '—'} ({nxt.strftime('%d.%m.')})\n"
+                 f"✉️ {email}\n"
+                 + ("Лист із пропозицією торта надіслано автоматично." if auto else
+                    f"Надішліть привітання з пропозицією торта: {SITE_URL}/admin.html → «🎉 Нагадування»"),
+                 'birthday')
+        done[email] = nxt.year
+        told += 1
+    if told:
+        conn.execute("INSERT INTO settings(key,value) VALUES('bday_tg_notified',%s) ON CONFLICT(key) DO UPDATE SET value=EXCLUDED.value",
+                     (_json.dumps(done),))
+    return told
+
 def _maybe_send_birthdays():
-    """Run the daily send at most once a day, in the background (no cron needed)."""
+    """Once a day, in the background (no cron needed): e-mail today's reminders when a
+    mail service is connected, and tell the shop in Telegram whose birthday is near."""
     day = _today().isoformat()
-    if _bday_checked['day'] == day or not DATABASE_URL or not _smtp_ready():
+    if _bday_checked['day'] == day or not DATABASE_URL:
         return
     _bday_checked['day'] = day
     def run():
@@ -1388,6 +1419,7 @@ def _maybe_send_birthdays():
                     return  # another worker already did today
                 conn.execute("INSERT INTO settings(key,value) VALUES('bday_last_run',%s) ON CONFLICT(key) DO UPDATE SET value=EXCLUDED.value", (day,))
                 _send_due_birthdays(conn)
+                _notify_due_birthdays(conn)
         except Exception as e:
             import sys
             print(f'[BDAY] {e}', file=sys.stderr)
