@@ -1458,6 +1458,7 @@ async def api_bday_admin(req: Request):
         subj, body = _bday_email(cfg, {'name': n, 'lang': l, 'token': tok})
         out.append({'email': e, 'name': n, 'bday': b, 'lang': l, 'active': bool(a), 'last_sent_year': y, 'created': c,
                     'days_left': left, 'due': bool(a) and left <= cfg['days_before'] and (y or 0) < nxt.year,
+                    'unsub': f"{SITE_URL}/api/unsubscribe?t={tok}" if a else '',
                     'mail': {'subject': subj, 'body': body}})
     # Everyone who left an e-mail: from orders (newest first) and from subscriptions
     contacts = {}
@@ -1468,7 +1469,9 @@ async def api_bday_admin(req: Request):
         c = contacts.setdefault(x['email'].lower(), {'email': x['email'], 'name': x['name'], 'orders': 0, 'last': x['created'] or '', 'subscribed': False})
         c['subscribed'] = x['active']
         c['name'] = c['name'] or x['name']
+        c['lang'], c['unsub'] = x['lang'], x['unsub']
     return {'config': cfg, 'smtp': _smtp_ready(), 'subscribers': out,
+            'link': SITE_URL + '/menu.html', 'unsub_txt': _UNSUB_TXT,
             'contacts': sorted(contacts.values(), key=lambda c: c['last'], reverse=True)}
 
 @app.post('/api/bday/test')
