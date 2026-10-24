@@ -1552,10 +1552,13 @@ _SLOT_DEFAULT = {
     'per_slot': 3,          # orders per interval
     'per_day': 12,          # orders per day
     'closed': [],           # YYYY-MM-DD days off
+    'holidays': {},         # red days: YYYY-MM-DD -> holiday name; closed for everything (tables too)
+    'short': {},            # short days: YYYY-MM-DD -> 'HH:MM' closing time
 }
 _SLOT_KEEP_DAYS = 60        # closed days and the admin schedule go 2 months back
 _TIME_RE = re.compile(r'^([01]\d|2[0-3]):[0-5]\d-([01]\d|2[0-3]):[0-5]\d$')
 _DATE_RE = re.compile(r'^\d{4}-\d{2}-\d{2}$')
+_HM_RE = re.compile(r'^([01]\d|2[0-3]):[0-5]\d$')
 
 def _today():
     return _dt.datetime.now(_TZ).date()
@@ -1576,6 +1579,11 @@ def _clean_slot_cfg(raw):
         cfg['times'] = sorted({t for t in times if _TIME_RE.match(t) and t[:5] < t[6:]})[:24]
     oldest = (_today() - _dt.timedelta(days=_SLOT_KEEP_DAYS)).isoformat()
     cfg['closed'] = sorted({str(c) for c in (raw.get('closed') or []) if _DATE_RE.match(str(c)) and str(c) >= oldest})
+    hol, short = raw.get('holidays'), raw.get('short')
+    cfg['holidays'] = {k: str(v or '').strip()[:60] for k, v in sorted(hol.items())
+                       if _DATE_RE.match(str(k)) and k >= oldest} if isinstance(hol, dict) else {}
+    cfg['short'] = {k: str(v) for k, v in sorted(short.items())
+                    if _DATE_RE.match(str(k)) and k >= oldest and _HM_RE.match(str(v)) and k not in cfg['holidays']} if isinstance(short, dict) else {}
     return cfg
 
 def _slot_cfg(conn):
@@ -1609,15 +1617,23 @@ def _slot_days(conn, cfg):
     days, d = [], first
     while d <= last:
         iso = d.isoformat()
-        open_day = d.weekday() in cfg['weekdays'] and iso not in cfg['closed']
+        open_day = d.weekday() in cfg['weekdays'] and iso not in cfg['closed'] and iso not in cfg['holidays']
         day_left = max(0, cfg['per_day'] - by_day[iso])
+        short = cfg['short'].get(iso)
         slots = []
         if open_day:
             for tm in cfg['times']:
                 if d == today and tm[:5] <= now_hm:
                     continue  # interval already started today
+                if short and tm[6:] > short:
+                    continue  # short day: only intervals that end by closing time
                 slots.append({'time': tm, 'left': min(day_left, max(0, cfg['per_slot'] - by_slot[(iso, tm)]))})
-        days.append({'date': iso, 'open': open_day and day_left > 0 and any(s['left'] for s in slots), 'slots': slots})
+        day = {'date': iso, 'open': open_day and day_left > 0 and any(s['left'] for s in slots), 'slots': slots}
+        if iso in cfg['holidays']:
+            day['holiday'] = cfg['holidays'][iso]
+        if short:
+            day['short'] = short
+        days.append(day)
         d += _dt.timedelta(days=1)
     return days
 
@@ -1633,8 +1649,9 @@ def _dine_times():
         m += DINE_STEP; h, m = h + m // 60, m % 60
     return out
 
-def _check_dine(date, tm):
-    """None if a table can be booked for this date/time, otherwise an error code."""
+def _check_dine(date, tm, cfg=None):
+    """None if a table can be booked for this date/time, otherwise an error code.
+    Red days are closed; on a short day only times before closing."""
     try:
         day = _dt.date.fromisoformat(date)
     except ValueError:
@@ -1645,6 +1662,10 @@ def _check_dine(date, tm):
     if tm not in _dine_times():
         return 'slot_full'
     if day == today and tm <= _dt.datetime.now(_TZ).strftime('%H:%M'):
+        return 'slot_full'
+    if cfg and date in cfg['holidays']:
+        return 'slot_unavailable'
+    if cfg and cfg['short'].get(date) and tm >= cfg['short'][date]:
         return 'slot_full'
     return None
 
@@ -1665,9 +1686,13 @@ def _check_slot(conn, date, tm):
 def api_slots():
     with _get_pool().connection() as conn:
         cfg = _slot_cfg(conn)
+        today = _today().isoformat()
+        # red and short days also apply to table bookings, which work without the slot picker
+        extra = {'holidays': {k: v for k, v in cfg['holidays'].items() if k >= today},
+                 'short': {k: v for k, v in cfg['short'].items() if k >= today}}
         if not cfg['enabled']:
-            return {'enabled': False, 'days': []}
-        return {'enabled': True, 'days': _slot_days(conn, cfg)}
+            return {'enabled': False, 'days': [], **extra}
+        return {'enabled': True, 'days': _slot_days(conn, cfg), **extra}
 
 @app.get('/api/slot-config')
 def api_slot_config_get():
@@ -1744,7 +1769,7 @@ async def api_order(req: Request, bg: BackgroundTasks):
             order['delivery_date'] = order['delivery_time'] = ''
         else:
             if d.get('dine_in') == 'later':
-                err = _check_dine(order['delivery_date'], order['delivery_time'])
+                err = _check_dine(order['delivery_date'], order['delivery_time'], _slot_cfg(conn))
             else:
                 err = _check_slot(conn, order['delivery_date'], order['delivery_time'])
             if err:
@@ -1836,7 +1861,7 @@ async def api_create_checkout(req: Request):
             d['delivery_date'] = d['delivery_time'] = ''
             slot_err = None
         elif d.get('dine_in') == 'later':
-            slot_err = _check_dine((d.get('delivery_date') or '').strip(), (d.get('delivery_time') or '').strip())
+            slot_err = _check_dine((d.get('delivery_date') or '').strip(), (d.get('delivery_time') or '').strip(), _slot_cfg(conn))
         else:
             slot_err = _check_slot(conn, (d.get('delivery_date') or '').strip(), (d.get('delivery_time') or '').strip())
         rule_err = _check_item_rules(conn, d.get('cart'), (d.get('delivery_date') or '').strip() or _today().isoformat())
