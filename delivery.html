@@ -157,6 +157,19 @@ footer{background:#070707;border-top:1px solid var(--bdr);padding:52px 0 28px}
 .dw-btn{flex:1;background:transparent;border:1px solid var(--bdr);color:var(--tx2);padding:13px 10px;cursor:pointer;font:.74rem 'Raleway',sans-serif;letter-spacing:1px;text-transform:uppercase;transition:.25s;display:flex;align-items:center;justify-content:center;gap:9px}
 .dw-btn:hover,.dw-btn.on{border-color:var(--gold);color:var(--gold);background:rgba(201,169,110,.08)}
 @media(max-width:600px){ .dine-when{flex-direction:column} }
+.addr-wrap{position:relative}
+.addr-sug{position:absolute;left:0;right:0;top:100%;z-index:30;background:var(--bg2);border:1px solid var(--gold-d);border-top:none;display:flex;flex-direction:column;box-shadow:0 12px 30px rgba(0,0,0,.5)}
+.addr-sug:empty{display:none}
+.addr-sug button{background:none;border:none;border-bottom:1px solid var(--bdr);color:var(--tx0);text-align:left;padding:11px 16px;font:.88rem 'Raleway',sans-serif;cursor:pointer}
+.addr-sug button:hover{background:rgba(201,169,110,.1);color:var(--gold)}
+.addr-tools{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-top:10px}
+.addr-btn{background:rgba(201,169,110,.06);border:1px solid var(--gold-d);color:var(--gold);padding:9px 14px;cursor:pointer;font:.78rem 'Raleway',sans-serif;letter-spacing:.5px;transition:.2s}
+.addr-btn:hover{background:var(--gold);color:var(--bg0)}
+.addr-pin{font-size:.74rem;color:var(--tx2)}
+.addr-map-box{margin-top:10px}
+#addrMap{height:340px;border:1px solid var(--gold-d);background:#111;z-index:1}
+#addrMap .leaflet-tile-pane{filter:brightness(.85) contrast(1.05)}
+@media(max-width:600px){ #addrMap{height:280px} }
 .table-btns{display:flex;gap:10px;flex-wrap:wrap;margin-top:4px}
 .table-btn{width:52px;height:52px;background:transparent;border:1px solid var(--bdr);color:var(--tx2);font:1.1rem 'Raleway',sans-serif;cursor:pointer;transition:.25s}
 .table-btn:hover,.table-btn.on{border-color:var(--gold);color:var(--gold);background:rgba(201,169,110,.1)}
@@ -468,7 +481,16 @@ input[type="date"]::-webkit-calendar-picker-indicator:hover{opacity:1}
         </div>
         <div class="ord-field full" id="addrField">
           <label data-k="f_addr">Adresa doručení</label>
-          <input type="text" name="address">
+          <div class="addr-wrap"><input type="text" name="address" id="addrInput" autocomplete="street-address"><div class="addr-sug" id="addrSug"></div></div>
+          <div class="addr-tools">
+            <button type="button" class="addr-btn" id="addrMapBtn">🗺️ Vybrat na mapě</button>
+            <button type="button" class="addr-btn" id="addrMeBtn">📍 Moje poloha</button>
+            <span class="addr-pin" id="addrPin"></span>
+          </div>
+          <div class="addr-map-box" id="addrMapBox" style="display:none">
+            <div id="addrMap"></div>
+            <span class="date-note" data-k="map_hint">Klikněte na mapu nebo posuňte značku — adresa se doplní sama.</span>
+          </div>
         </div>
         <div class="ord-field" id="dateField">
           <label data-k="f_date">Datum doručení / převzetí</label>
@@ -635,7 +657,7 @@ cs:{nav_home:'Domů',nav_menu:'Menu',nav_about:'O nás',nav_del:'Doručení',nav
   i1t:'Doba doručení',i1d:'minut po objednávce',
   i2t:'Cena doručení',i2d:'mimo Prahu do 15 km · 250 Kč',i2e:'nad 15 km · dle dohody',
   oc_ttl:'Objednejte nyní',oc_sub:'Vyplňte formulář — potvrdíme do 15 minut',
-  f_name:'Jméno',f_phone:'Telefon',f_phone_opt:'nepovinné',f_addr:'Adresa doručení',
+  map_btn:'🗺️ Vybrat na mapě',map_hide:'Skrýt mapu',map_me:'📍 Moje poloha',map_hint:'Klikněte na mapu nebo posuňte značku — adresa se doplní sama.',map_geo_err:'Polohu se nepodařilo zjistit — povolte přístup k poloze nebo vyberte místo na mapě.',addr_ph:'Ulice a číslo domu, město',f_name:'Jméno',f_phone:'Telefon',f_phone_opt:'nepovinné',f_addr:'Adresa doručení',
   f_date:'Datum doručení / převzetí',f_time:'Čas doručení / převzetí',f_date_note:'Objednávky na dorty přijímáme nejméně 24 hodin předem · pracovní hodiny 09:00–20:00',
   f_pay_dep_cash:'50 % hotově',f_pay_dep_card:'50 % kartou',f_pay_dep_note:'50% záloha při objednávce',
   f_cart:'Vaše objednávka',cart_total:'Celkem',cart_empty_del:'Košík je prázdný — přidejte zboží z menu',go_menu:'Přejít na menu',
@@ -653,7 +675,7 @@ en:{nav_home:'Home',nav_menu:'Menu',nav_about:'About',nav_del:'Delivery',nav_con
   i1t:'Delivery Time',i1d:'minutes after ordering',
   i2t:'Delivery Price',i2d:'outside Prague up to 15 km · 250 CZK',i2e:'over 15 km · by arrangement',
   oc_ttl:'Order Now',oc_sub:'Fill in the form — we\'ll confirm within 15 minutes',
-  f_name:'Name',f_phone:'Phone',f_phone_opt:'optional',f_addr:'Delivery Address',
+  map_btn:'🗺️ Pick on the map',map_hide:'Hide the map',map_me:'📍 My location',map_hint:'Click the map or drag the pin — the address fills in by itself.',map_geo_err:'Could not get your location — allow location access or pick the place on the map.',addr_ph:'Street and house number, city',f_name:'Name',f_phone:'Phone',f_phone_opt:'optional',f_addr:'Delivery Address',
   f_date:'Delivery / Pickup Date',f_time:'Delivery / Pickup Time',f_date_note:'Cake orders require at least 24 hours notice · working hours 09:00–20:00',
   f_pay_dep_cash:'50% cash',f_pay_dep_card:'50% card',f_pay_dep_note:'50% prepayment upon ordering',
   f_cart:'Your Order',cart_total:'Total',cart_empty_del:'Cart is empty — add items from the menu',go_menu:'Go to Menu',
@@ -671,7 +693,7 @@ uk:{nav_home:'Головна',nav_menu:'Меню',nav_about:'Про нас',nav_
   i1t:'Час доставки',i1d:'хвилин після замовлення',
   i2t:'Вартість доставки',i2d:'за межами Праги до 15 км · 250 Kč',i2e:'понад 15 км · за домовленістю',
   oc_ttl:'Замовте зараз',oc_sub:'Заповніть форму — ми підтвердимо протягом 15 хвилин',
-  f_name:'Ім’я',f_phone:'Телефон',f_phone_opt:'необов’язково',f_addr:'Адреса доставки',
+  map_btn:'🗺️ Обрати на карті',map_hide:'Сховати карту',map_me:'📍 Моє місцезнаходження',map_hint:'Натисніть на карту або перетягніть мітку — адреса підставиться сама.',map_geo_err:'Не вдалося визначити місцезнаходження — дозвольте доступ до геолокації або оберіть місце на карті.',addr_ph:'Вулиця й номер будинку, місто',f_name:'Ім’я',f_phone:'Телефон',f_phone_opt:'необов’язково',f_addr:'Адреса доставки',
   f_date:'Дата доставки / отримання',f_time:'Час доставки / отримання',f_date_note:'Замовлення тортів приймаємо щонайменше за 24 години · робочі години 09:00–20:00',
   f_pay_dep_cash:'50 % готівкою',f_pay_dep_card:'50 % карткою',f_pay_dep_note:'Передоплата 50 % при замовленні',
   f_cart:'Ваше замовлення',cart_total:'Разом',cart_empty_del:'Кошик порожній — додайте товари з меню',go_menu:'Перейти до меню',
@@ -690,6 +712,7 @@ function applyLang(){
   document.querySelectorAll('[data-k]').forEach(el=>{const val=t(el.dataset.k);if(val)el.textContent=val;});
   try{ renderSlots(); }catch{}  // month names and labels in the new language
   try{ renderBday(); }catch{}
+  try{ addrMapTexts(); }catch{}
   const pi=document.getElementById('phoneInput');
   if(pi){const isDelivery=orderType()==='delivery';pi.placeholder=isDelivery?'':t('f_phone_opt');pi.required=isDelivery;
     document.getElementById('orderTypeInput').value=t('ot_'+orderType());}
@@ -896,7 +919,7 @@ document.getElementById('orderForm').addEventListener('submit',async function(e)
     phone:         this.querySelector('[name="phone"]').value.trim(),
     address:       dineIn
       ? `${t('f_table')} №${selectedTable}`
-      : type==='delivery' ? (this.querySelector('[name="address"]')||{value:''}).value.trim() : '',
+      : type==='delivery' ? (this.querySelector('[name="address"]')||{value:''}).value.trim()+(addrLL?` · 📍 https://maps.google.com/?q=${addrLL[0].toFixed(6)},${addrLL[1].toFixed(6)}`:'') : '',
     dine_in:       dineNow,
     order:         document.getElementById('cartHidden').value,
     payment:       document.getElementById('paymentHidden').value,
@@ -954,6 +977,7 @@ document.getElementById('orderForm').addEventListener('submit',async function(e)
     this.querySelector('[name="name"]').value='';
     this.querySelector('[name="phone"]').value='';
     const addrI=this.querySelector('[name="address"]');if(addrI)addrI.value='';
+    addrLL=null; document.getElementById('addrPin').textContent='';
     saveCart([]);renderCartDel();
     loadSlots();  // the taken place is no longer free
   }else{
@@ -1054,6 +1078,94 @@ async function loadSlots(){
     renderSlots();
   }catch{}
 }
+/* ── Delivery address: suggestions while typing, map picker, my location.
+   OpenStreetMap tiles (Leaflet, loaded on first use) and the free Photon geocoder. ── */
+const SHOP_LL=[50.0705,14.4620];  // map starts around the shop
+let addrMap=null, addrMarker=null, addrLL=null, leafletP=null, sugT=0, sugN=0;
+const escA=x=>String(x==null?'':x).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+function addrMapTexts(){
+  const open=document.getElementById('addrMapBox').style.display!=='none';
+  document.getElementById('addrMapBtn').textContent=open?t('map_hide'):t('map_btn');
+  document.getElementById('addrMeBtn').textContent=t('map_me');
+  document.getElementById('addrInput').placeholder=t('addr_ph');
+}
+function loadLeaflet(){
+  if(leafletP) return leafletP;
+  leafletP=new Promise((res,rej)=>{
+    const css=document.createElement('link'); css.rel='stylesheet'; css.href='https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css'; document.head.appendChild(css);
+    const js=document.createElement('script'); js.src='https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js';
+    js.onload=res; js.onerror=()=>{ leafletP=null; rej(); }; document.head.appendChild(js);
+  });
+  return leafletP;
+}
+function fmtAddr(p){
+  const street=p.street?(p.street+(p.housenumber?' '+p.housenumber:'')):(p.name||'');
+  const city=[p.postcode,p.city||p.town||p.village||p.district].filter(Boolean).join(' ');
+  return [street,city].filter(Boolean).join(', ');
+}
+async function photon(url){ const r=await fetch(url); if(!r.ok) throw new Error('geo'); return (await r.json()).features||[]; }
+function setAddrLL(ll,move){
+  addrLL=ll;
+  document.getElementById('addrPin').textContent='📍 '+ll[0].toFixed(5)+', '+ll[1].toFixed(5);
+  if(!addrMap) return;
+  if(!addrMarker){
+    addrMarker=L.marker(ll,{draggable:true}).addTo(addrMap);
+    addrMarker.on('dragend',()=>{ const q=addrMarker.getLatLng(); pickLL([q.lat,q.lng]); });
+  } else addrMarker.setLatLng(ll);
+  if(move) addrMap.setView(ll,17);
+}
+async function pickLL(ll){
+  setAddrLL(ll,false);
+  try{ const f=await photon(`https://photon.komoot.io/reverse?lang=default&lat=${ll[0]}&lon=${ll[1]}`); if(f[0]) document.getElementById('addrInput').value=fmtAddr(f[0].properties); }catch{}
+}
+async function openAddrMap(forceOpen){
+  const box=document.getElementById('addrMapBox');
+  if(box.style.display!=='none'&&!forceOpen){ box.style.display='none'; addrMapTexts(); return; }
+  box.style.display=''; addrMapTexts();
+  try{ await loadLeaflet(); }catch{ box.style.display='none'; addrMapTexts(); return; }
+  if(!addrMap){
+    addrMap=L.map('addrMap').setView(addrLL||SHOP_LL, addrLL?17:13);
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19,attribution:'© OpenStreetMap'}).addTo(addrMap);
+    addrMap.on('click',e=>pickLL([e.latlng.lat,e.latlng.lng]));
+    if(addrLL) setAddrLL(addrLL,true);
+  }
+  setTimeout(()=>addrMap.invalidateSize(),60);
+}
+document.getElementById('addrMapBtn').addEventListener('click',()=>openAddrMap(false));
+document.getElementById('addrMeBtn').addEventListener('click',()=>{
+  const pin=document.getElementById('addrPin');
+  if(!navigator.geolocation){ pin.textContent=t('map_geo_err'); return; }
+  navigator.geolocation.getCurrentPosition(async pos=>{
+    const ll=[pos.coords.latitude,pos.coords.longitude];
+    await openAddrMap(true);
+    setAddrLL(ll,true); pickLL(ll);
+  },()=>{ pin.textContent=t('map_geo_err'); },{enableHighAccuracy:true,timeout:10000});
+});
+(function(){
+  const inp=document.getElementById('addrInput'), box=document.getElementById('addrSug');
+  inp.addEventListener('input',()=>{
+    addrLL=null; document.getElementById('addrPin').textContent='';
+    clearTimeout(sugT);
+    const q=inp.value.trim();
+    if(q.length<4){ box.innerHTML=''; return; }
+    sugT=setTimeout(async()=>{
+      const n=++sugN;
+      let list=[];
+      try{ list=(await photon(`https://photon.komoot.io/api/?lang=default&q=${encodeURIComponent(q)}&lat=${SHOP_LL[0]}&lon=${SHOP_LL[1]}&limit=8`))
+        .filter(f=>f.properties.countrycode==='CZ').slice(0,5); }catch{}
+      if(n!==sugN) return;
+      box.innerHTML=list.map((f,i)=>`<button type="button" data-i="${i}">${escA(fmtAddr(f.properties))}</button>`).join('');
+      box.querySelectorAll('button').forEach(b=>b.addEventListener('mousedown',e=>{
+        e.preventDefault();
+        const f=list[+b.dataset.i], c=f.geometry.coordinates;
+        inp.value=fmtAddr(f.properties); box.innerHTML='';
+        setAddrLL([c[1],c[0]],true);
+      }));
+    },350);
+  });
+  inp.addEventListener('blur',()=>setTimeout(()=>{ box.innerHTML=''; },150));
+})();
+
 /* ── Optional birthday reminder ── */
 let BDAY_DAYS=0;
 function renderBday(){
