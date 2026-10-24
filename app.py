@@ -1,6 +1,5 @@
 import base64, hashlib, hmac, json, os, re, secrets, time
 from collections import defaultdict
-import psycopg
 from psycopg.rows import dict_row
 from psycopg.types.json import Jsonb
 from psycopg_pool import ConnectionPool
@@ -16,7 +15,6 @@ ADMIN_PASS          = os.environ.get('ADMIN_PASS', 'Tort@Praha51')
 # sessions survive restarts and redeploys instead of expiring each time.
 SECRET_KEY          = os.environ.get('SECRET_KEY', '') or secrets.token_hex(32)
 STRIPE_SECRET_KEY   = os.environ.get('STRIPE_SECRET_KEY', '')
-STRIPE_PUB_KEY      = os.environ.get('STRIPE_PUBLISHABLE_KEY', '')
 TOKEN_TTL           = 12 * 3600
 
 if STRIPE_SECRET_KEY:
@@ -300,7 +298,6 @@ def _check_item_rules(conn, cart, date):
             wanted[c['name']] += _lead_int(c.get('qty')) or 0
     if not wanted:
         return None
-    today = _today().isoformat()
     for name in wanted:
         it = by_name[name]
         if it.get('lead_days'):
@@ -607,26 +604,6 @@ async def api_push_unsubscribe(req: Request):
         )
     return {'ok': True}
 
-@app.post('/api/push/test')
-async def api_push_test(req: Request, bg: BackgroundTasks):
-    d = await req.json()
-    if not _verify_token(d.get('token')):
-        raise HTTPException(401, 'Unauthorized')
-    with _get_pool().connection() as conn:
-        row = conn.execute("SELECT value FROM settings WHERE key='push_subscriptions'").fetchone()
-        subs = _json.loads(row[0]) if row and row[0] else []
-    bg.add_task(_send_ntfy, {
-        'name': 'TEST', 'phone': '', 'order': 'Testovaci zprava — notifikace fungují!'
-    })
-    if not subs:
-        return {'ok': True, 'subscribers': 0, 'note': 'ntfy sent, no web-push subscribers'}
-    bg.add_task(_send_push_notifications, {
-        'title': 'Test notifikace ✅',
-        'body':  'Push notifikace fungují správně!',
-        'url':   '/admin.html'
-    }, subs)
-    return {'ok': True, 'subscribers': len(subs)}
-
 # ── ntfy.sh notifications ────────────────────────────────────────────────────
 def _get_ntfy_topic() -> str:
     with _get_pool().connection() as conn:
@@ -672,11 +649,7 @@ def _send_ntfy(order: dict):
         print(f'[NTFY] Error: {e}', file=sys.stderr)
 
 def _send_telegram(order: dict):
-    import sys, urllib.request, urllib.parse, urllib.error
-    token    = os.environ.get('TELEGRAM_TOKEN', '')
-    chat_ids = [c.strip() for c in os.environ.get('TELEGRAM_CHAT_ID', '').split(',') if c.strip()]
-    if not token or not chat_ids:
-        return
+    import sys
     try:
         text = _tg_order_text(order)
     except Exception as e:
@@ -764,14 +737,6 @@ def _tg_send(text, label='', env='TELEGRAM_CHAT_ID'):
             print(f'[TG] Sent to {chat_id} ({label})', file=sys.stderr)
         except Exception as e:
             print(f'[TG] Error for chat {chat_id}: {e}', file=sys.stderr)
-
-@app.post('/api/notif-info')
-async def api_notif_info(req: Request):
-    d = await req.json()
-    if not _verify_token(d.get('token')):
-        raise HTTPException(401, 'Unauthorized')
-    topic = _get_ntfy_topic()
-    return {'topic': topic, 'url': f'https://ntfy.sh/{topic}'}
 
 # ── /api/categories ───────────────────────────────────────────────────────────
 # Built-in sections (cakes, kolace, desserts, doplnky) can be renamed or hidden:
@@ -2021,9 +1986,6 @@ async def api_stripe_webhook(req: Request, bg: BackgroundTasks):
         if order_id and session.get('payment_status') == 'paid':
             _mark_paid(order_id, bg)
     return {'received': True}
-
-# ── /api/order/{id} PATCH — allow 'paid' status for admin ────────────────────
-# (override to extend valid statuses)
 
 # ── /api/pageviews ────────────────────────────────────────────────────────────
 @app.get('/api/pageviews')

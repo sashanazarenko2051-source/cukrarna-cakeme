@@ -70,7 +70,7 @@ body{font-family:'Raleway',sans-serif;background-color:var(--bg0);background-ima
 .logo-crown-row::before,.logo-crown-row::after{content:'';flex:1;height:1px;background:linear-gradient(to right,transparent,rgba(201,169,110,.6),transparent)}
 .logo-crown-svg{flex-shrink:0}
 .logo-name{font-family:'Playfair Display',serif;font-size:clamp(1.8rem,4.5vw,3.6rem);font-weight:400;letter-spacing:clamp(2px,1vw,6px);color:var(--tx0);line-height:1.15;text-transform:none}
-.logo-pre{font-family:'Raleway',sans-serif;font-size:.75rem;letter-spacing:5px;color:var(--gold);text-transform:uppercase;margin-bottom:8px;font-weight:400;opacity:.85}
+
 .logo-tagline{font-size:.78rem;letter-spacing:6px;color:var(--gold);text-transform:uppercase;margin-top:12px;font-weight:400}
 
 .hero-sub{font-size:.9rem;color:var(--tx1);letter-spacing:2px;margin-bottom:36px;font-weight:300;text-align:center;width:100%}
@@ -148,7 +148,7 @@ footer{background:#070707;border-top:1px solid var(--bdr);padding:52px 0 28px}
 }
 @media(max-width:480px){
   .logo-block{padding:18px 18px}
-  .logo-pre{font-size:.65rem;letter-spacing:3px}
+
   .logo-tagline{font-size:.65rem;letter-spacing:3px}
 }
 
@@ -310,9 +310,9 @@ footer{background:#070707;border-top:1px solid var(--bdr);padding:52px 0 28px}
 
 <script>
 const T={
-cs:{nav_home:'Domů',nav_menu:'Menu',nav_about:'O nás',nav_del:'Doručení',nav_con:'Kontakt',tagline:'Oslavte každý den',hero_sub:'Prémiová cukrárna',btn_menu:'Prohlédnout menu',btn_del:'Objednat doručení',btn_call:'Zavolat',scroll:'Scroll',open:'Otevřeno',days:'Po — Ne',ft_nav:'Navigace',ft_con:'Kontakt',rights:'Všechna práva vyhrazena.'},
-en:{nav_home:'Home',nav_menu:'Menu',nav_about:'About',nav_del:'Delivery',nav_con:'Contact',tagline:'Celebrate Every Day',hero_sub:'Premium Patisserie',btn_menu:'View Menu',btn_del:'Order Delivery',btn_call:'Call Us',scroll:'Scroll',open:'Open',days:'Mon — Sun',ft_nav:'Navigation',ft_con:'Contact',rights:'All rights reserved.'},
-uk:{nav_home:'Головна',nav_menu:'Меню',nav_about:'Про нас',nav_del:'Доставка',nav_con:'Контакти',tagline:'Святкуйте кожен день',hero_sub:'Преміальна кондитерська',btn_menu:'Переглянути меню',btn_del:'Замовити доставку',btn_call:'Зателефонувати',scroll:'Гортайте',open:'Відчинено',days:'Пн — Нд',ft_nav:'Навігація',ft_con:'Контакти',rights:'Усі права захищені.'}
+cs:{nav_home:'Domů',nav_menu:'Menu',nav_about:'O nás',nav_del:'Doručení',nav_con:'Kontakt',tagline:'Oslavte každý den',hero_sub:'Prémiová cukrárna',btn_menu:'Prohlédnout menu',btn_del:'Objednat doručení',scroll:'Scroll',open:'Otevřeno',days:'Po — Ne',ft_nav:'Navigace',ft_con:'Kontakt',rights:'Všechna práva vyhrazena.'},
+en:{nav_home:'Home',nav_menu:'Menu',nav_about:'About',nav_del:'Delivery',nav_con:'Contact',tagline:'Celebrate Every Day',hero_sub:'Premium Patisserie',btn_menu:'View Menu',btn_del:'Order Delivery',scroll:'Scroll',open:'Open',days:'Mon — Sun',ft_nav:'Navigation',ft_con:'Contact',rights:'All rights reserved.'},
+uk:{nav_home:'Головна',nav_menu:'Меню',nav_about:'Про нас',nav_del:'Доставка',nav_con:'Контакти',tagline:'Святкуйте щодня',hero_sub:'Преміальна кондитерська',btn_menu:'Переглянути меню',btn_del:'Замовити доставку',scroll:'Гортайте',open:'Відчинено',days:'Пн — Нд',ft_nav:'Навігація',ft_con:'Контакти',rights:'Усі права захищено.'}
 };
 
 let lang = localStorage.getItem('cakeme_lang') || 'cs';

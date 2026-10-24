@@ -64,8 +64,6 @@ section{padding:96px 0}
 .sec-div{width:56px;height:1px;background:var(--gold);margin:0 auto}
 .fi{opacity:0;transform:translateY(28px);transition:opacity .65s,transform .65s}
 .fi.show{opacity:1;transform:translateY(0)}
-.btn-g{background:var(--gold);color:var(--bg0);padding:14px 36px;border:none;font:.8rem 'Raleway',sans-serif;letter-spacing:2px;text-transform:uppercase;font-weight:700;cursor:pointer;text-decoration:none;transition:.3s;display:inline-block}
-.btn-g:hover{background:var(--gold-l);transform:translateY(-2px)}
 
 /* ── DELIVERY ── */
 #delivery{background:transparent}
@@ -87,12 +85,6 @@ section{padding:96px 0}
 .di h4{font-family:'Playfair Display',serif;font-size:.95rem;color:var(--tx0);margin-bottom:6px}
 .di .val{font-family:'Playfair Display',serif;font-size:1.75rem;color:var(--gold);display:block;margin:8px 0 4px}
 .di p{font-size:.78rem;color:var(--tx2)}
-.ord-cta{margin-top:48px;text-align:center;padding:48px;background:var(--bg3);border:1px solid var(--bdr)}
-.ord-cta h3{font-family:'Playfair Display',serif;font-size:1.75rem;color:var(--tx0);margin-bottom:10px}
-.ord-cta>p{color:var(--tx2);margin-bottom:28px;font-size:.9rem}
-.ord-links{display:flex;justify-content:center;gap:28px;flex-wrap:wrap;margin-bottom:26px}
-.ord-link{display:flex;align-items:center;gap:10px;color:var(--gold);text-decoration:none;font-size:1.05rem;transition:.25s}
-.ord-link:hover{color:var(--gold-l)}
 
 /* ── FOOTER ── */
 footer{background:#070707;border-top:1px solid var(--bdr);padding:52px 0 28px}
@@ -241,21 +233,6 @@ input[type="date"]::-webkit-calendar-picker-indicator:hover{opacity:1}
 .slot-empty::before{content:'📅';display:block;font-size:2rem;margin-bottom:8px}
 @media(max-width:860px){ .slot-wrap{grid-template-columns:1fr} }
 @media(max-width:480px){ .slot-cal{padding:14px 10px} .slot-grid{gap:4px} .slot-day{font-size:.88rem} .slot-cal-hd{font-size:1.15rem} }
-
-/* ── PAYMENT BLOCK ── */
-.pay-block{margin-top:28px;padding:28px 36px;background:var(--bg2);border:1px solid var(--bdr);border-left:3px solid var(--gold);display:flex;gap:22px;align-items:flex-start}
-.pay-block-ico{font-size:2rem;flex-shrink:0;margin-top:2px}
-.pay-ttl{font-family:'Playfair Display',serif;font-size:1.1rem;color:var(--tx0);margin-bottom:8px}
-.pay-desc{font-size:.85rem;color:var(--tx1);line-height:1.65;margin-bottom:16px}
-.pay-rows{display:flex;flex-direction:column;gap:8px}
-.pay-row{display:flex;align-items:baseline;gap:12px}
-.pay-row-lbl{color:var(--tx2);text-transform:uppercase;font-size:.66rem;letter-spacing:1.2px;min-width:90px;flex-shrink:0}
-.pay-row-val{font-family:'Playfair Display',serif;color:var(--gold);font-size:.98rem;letter-spacing:.5px}
-@media(max-width:768px){
-  .pay-block{padding:20px 18px;flex-direction:column;gap:12px}
-  .pay-block-ico{font-size:1.6rem;margin-top:0}
-  .pay-row-lbl{min-width:76px}
-}
 
 @media(max-width:1100px){
   .nav-links{gap:22px}
@@ -607,7 +584,7 @@ input[type="date"]::-webkit-calendar-picker-indicator:hover{opacity:1}
           </svg>
         </div>
         <h4 data-k="i2t">Cena doručení</h4>
-        <span class="val">Praha 150 Kč</span>
+        <span class="val" data-k="i2v">Praha 150 Kč</span>
         <p data-k="i2d">mimo Prahu do 15 km · 250 Kč</p>
         <p data-k="i2e" style="font-size:.76rem;color:var(--tx2);margin-top:4px">nad 15 km · dle dohody</p>
       </div>
@@ -678,59 +655,59 @@ input[type="date"]::-webkit-calendar-picker-indicator:hover{opacity:1}
 <script>
 const T={
 cs:{nav_home:'Domů',nav_menu:'Menu',nav_about:'O nás',nav_del:'Doručení',nav_con:'Kontakt',tagline:'Oslavte každý den',
-  del_lbl:'Rychle a pohodlně',del_ttl:'Doručení',
+  del_lbl:'Rychle a pohodlně',
   dh_ttl:'Doručujeme přímo k vám',dh_sub:'Objednejte telefonicky nebo e-mailem — doručíme čerstvé dezerty až k vám domů',
   s1t:'Vyberte z menu',s1d:'Prohlédněte naše menu a vyberte si dezerty, které si přejete',
   s2t:'Kontaktujte nás',s2d:'Zavolejte nebo napište e-mail s objednávkou a adresou doručení',
-  s3t:'Přijměte doručení',s3d:'Váš čerstvý dort bude doručen přímo k vašim dveřím',
+  s3t:'Převezměte objednávku',s3d:'Váš čerstvý dort bude doručen přímo k vašim dveřím',
   i1t:'Doba doručení',i1d:'minut po objednávce',
-  i2t:'Cena doručení',i2d:'mimo Prahu do 15 km · 250 Kč',i2e:'nad 15 km · dle dohody',
+  i2t:'Cena doručení',i2v:'Praha 150 Kč',i2d:'mimo Prahu do 15 km · 250 Kč',i2e:'nad 15 km · dle dohody',
   oc_ttl:'Objednejte nyní',oc_sub:'Vyplňte formulář — potvrdíme do 15 minut',
   map_btn:'🗺️ Vybrat na mapě',map_hide:'Skrýt mapu',map_me:'📍 Moje poloha',map_hint:'Klikněte na mapu nebo posuňte značku — adresa se doplní sama.',map_geo_err:'Polohu se nepodařilo zjistit — povolte přístup k poloze nebo vyberte místo na mapě.',addr_ph:'Ulice a číslo domu, město',f_email:'E-mail',f_email_ph:'nepovinné',f_email_bad:'Zkontrolujte e-mail — nebo pole nechte prázdné.',f_name:'Jméno',f_phone:'Telefon',f_phone_opt:'nepovinné',f_addr:'Adresa doručení',
   f_date:'Datum doručení / převzetí',f_time:'Čas doručení / převzetí',f_date_note:'Objednávky na dorty přijímáme nejméně 24 hodin předem · pracovní hodiny 09:00–20:00',
   f_pay_dep_cash:'50 % hotově',f_pay_dep_card:'50 % kartou',f_pay_dep_note:'50% záloha při objednávce',
   f_cart:'Vaše objednávka',cart_total:'Celkem',cart_empty_del:'Košík je prázdný — přidejte zboží z menu',go_menu:'Přejít na menu',
   f_table:'Stůl', f_type:'Způsob objednávky',ot_delivery:'Doručení domů',ot_instore:'Osobní odběr',ot_dinein:'Na místě',f_dine_when:'Kdy?',f_dine_date:'Den a čas návštěvy',f_dine_time:'Čas',f_dine_hours:'Stoly rezervujeme denně 11:00–18:00.',f_dine_pick:'Vyberte den a čas návštěvy.',dine_now:'Hned teď',dine_later:'Předem — den a čas',
-  f_pay:'Způsob platby',f_pay_cash:'Hotově',f_pay_card:'Kartou',f_pay_split:'50 % hotově + 50 % kartou',
-  pay_ttl:'Platební podmínky',pay_dep:'Záloha 50 % z celkové ceny objednávky je splatná bankovním převodem při potvrzení. Zbývajících 50 % hradíte při převzetí.',pay_acc:'Číslo účtu',
+  f_pay:'Způsob platby',f_pay_cash:'Hotově',f_pay_card:'Kartou',
+  
   slot_free:'Volno',slot_few:'Poslední místa',slot_closed:'Obsazeno / zavřeno',slot_red:'Svátek — zavřeno',f_short_day:'Zkrácený den — otevřeno do {t}',f_submit:'Objednat',f_redirecting:'Přesměrování na platbu...',f_ok:'Děkujeme! Vaši objednávku jsme přijali.',f_err:'Chyba. Zkuste to znovu nebo zavolejte.',f_pay_builder:'Dort na zakázku: záloha 50 % kartou při objednávce.',f_rule_earliest:'Pro vaši objednávku nejdříve {d}.',f_rule_window:'Výdej předobjednávky: {a} – {b}.',f_err_early:'Tento dort lze připravit nejdříve na {d}. Vyberte prosím pozdější den.',f_err_window:'Předobjednávku lze vyzvednout jen {a} – {b}.',f_err_soldout:'Některé položky jsou vyprodané nebo jich zbývá méně (zbývá):',ask_ttl:'Máte dotaz k ceně nebo objednávce? Napište nebo zavolejte:',f_bday_optin:'Připomeňte mi narozeniny — pošlete mi e-mail {d} dní předem',f_bday_email:'E-mail',f_bday_date:'Datum narozenin',f_bday_note:'Jeden e-mail ročně. Odhlásit se můžete odkazem v každém e-mailu. Rok narození nepotřebujeme.',f_bday_day:'Den',f_bday_month:'Měsíc',f_bday_need:'Pro připomínku narozenin vyplňte e-mail, den a měsíc — nebo políčko odškrtněte.',f_pick_day:'Nejprve vyberte den v kalendáři.',f_pick_slot:'Vyberte prosím den a čas doručení / převzetí.',f_slot_left:'volno: {n}',f_slot_full:'obsazeno',f_slot_taken:'Vybraný termín se mezitím obsadil. Vyberte prosím jiný.',f_slot_note:'Volné termíny na 2 měsíce dopředu. Šedé dny jsou plně obsazené nebo zavřené.',f_err_items:'Některé položky v košíku už nejsou v menu nebo se změnily. Odeberte je a přidejte znovu z menu:',
   ft_nav:'Navigace',ft_con:'Kontakt',rights:'Všechna práva vyhrazena.'},
 en:{nav_home:'Home',nav_menu:'Menu',nav_about:'About',nav_del:'Delivery',nav_con:'Contact',tagline:'Celebrate Every Day',
-  del_lbl:'Fast & Convenient',del_ttl:'Delivery',
+  del_lbl:'Fast & Convenient',
   dh_ttl:'We Deliver Right to You',dh_sub:'Order by phone or email — we\'ll deliver fresh desserts to your home',
   s1t:'Choose from Menu',s1d:'Browse our menu and select the desserts you desire',
   s2t:'Contact Us',s2d:'Call or email us with your order and delivery address',
   s3t:'Receive Delivery',s3d:'Your fresh cake will be delivered right to your door',
   i1t:'Delivery Time',i1d:'minutes after ordering',
-  i2t:'Delivery Price',i2d:'outside Prague up to 15 km · 250 CZK',i2e:'over 15 km · by arrangement',
+  i2t:'Delivery Price',i2v:'Prague 150 Kč',i2d:'outside Prague up to 15 km · 250 Kč',i2e:'over 15 km · by arrangement',
   oc_ttl:'Order Now',oc_sub:'Fill in the form — we\'ll confirm within 15 minutes',
   map_btn:'🗺️ Pick on the map',map_hide:'Hide the map',map_me:'📍 My location',map_hint:'Click the map or drag the pin — the address fills in by itself.',map_geo_err:'Could not get your location — allow location access or pick the place on the map.',addr_ph:'Street and house number, city',f_email:'E-mail',f_email_ph:'optional',f_email_bad:'Please check the e-mail — or leave the field empty.',f_name:'Name',f_phone:'Phone',f_phone_opt:'optional',f_addr:'Delivery Address',
   f_date:'Delivery / Pickup Date',f_time:'Delivery / Pickup Time',f_date_note:'Cake orders require at least 24 hours notice · working hours 09:00–20:00',
   f_pay_dep_cash:'50% cash',f_pay_dep_card:'50% card',f_pay_dep_note:'50% prepayment upon ordering',
   f_cart:'Your Order',cart_total:'Total',cart_empty_del:'Cart is empty — add items from the menu',go_menu:'Go to Menu',
   f_table:'Table', f_type:'Order type',ot_delivery:'Home Delivery',ot_instore:'In-store Pickup',ot_dinein:'Eat in',f_dine_when:'When?',f_dine_date:'Day and time of your visit',f_dine_time:'Time',f_dine_hours:'Tables can be booked daily 11:00–18:00.',f_dine_pick:'Choose the day and time of your visit.',dine_now:'Right now',dine_later:'In advance — day and time',
-  f_pay:'Payment Method',f_pay_cash:'Cash',f_pay_card:'Card',f_pay_split:'50% cash + 50% card',
-  pay_ttl:'Payment Terms',pay_dep:'A 50% deposit is payable by bank transfer upon order confirmation. The remaining 50% is paid upon receipt.',pay_acc:'Account',
+  f_pay:'Payment Method',f_pay_cash:'Cash',f_pay_card:'Card',
+  
   slot_free:'Available',slot_few:'Few places left',slot_closed:'Full / closed',slot_red:'Holiday — closed',f_short_day:'Short day — open until {t}',f_submit:'Order Now',f_redirecting:'Redirecting to payment...',f_ok:'Thank you! Your order has been received.',f_err:'Error. Please try again or call us.',f_pay_builder:'Custom cake: 50 % deposit by card when ordering.',f_rule_earliest:'For your order the earliest date is {d}.',f_rule_window:'Pre-order pickup: {a} – {b}.',f_err_early:'This cake can be ready on {d} at the earliest. Please choose a later day.',f_err_window:'The pre-order can only be picked up {a} – {b}.',f_err_soldout:'Some items are sold out or fewer are left (left):',ask_ttl:'Questions about prices or your order? Write or call us:',f_bday_optin:'Remind me of my birthday — send me an e-mail {d} days before',f_bday_email:'E-mail',f_bday_date:'Birthday',f_bday_note:'One e-mail a year. You can unsubscribe with the link in every e-mail. We don’t need the year.',f_bday_day:'Day',f_bday_month:'Month',f_bday_need:'For the birthday reminder fill in the e-mail, day and month — or untick the box.',f_pick_day:'First choose a day in the calendar.',f_pick_slot:'Please choose a delivery / pickup day and time.',f_slot_left:'{n} left',f_slot_full:'fully booked',f_slot_taken:'This time has just been taken. Please choose another one.',f_slot_note:'Free dates for the next 2 months. Grey days are fully booked or closed.',f_err_items:'Some items in your cart are no longer on the menu or have changed. Remove them and add them again from the menu:',
   ft_nav:'Navigation',ft_con:'Contact',rights:'All rights reserved.'},
-uk:{nav_home:'Головна',nav_menu:'Меню',nav_about:'Про нас',nav_del:'Доставка',nav_con:'Контакти',tagline:'Святкуйте кожен день',
-  del_lbl:'Швидко і зручно',del_ttl:'Доставка',
+uk:{nav_home:'Головна',nav_menu:'Меню',nav_about:'Про нас',nav_del:'Доставка',nav_con:'Контакти',tagline:'Святкуйте щодня',
+  del_lbl:'Швидко і зручно',
   dh_ttl:'Доставляємо прямо до вас',dh_sub:'Замовте телефоном або e-mailом — ми привеземо свіжі десерти до вас додому',
   s1t:'Оберіть у меню',s1d:'Перегляньте наше меню й оберіть десерти, які вам до вподоби',
   s2t:'Зв’яжіться з нами',s2d:'Зателефонуйте або напишіть e-mail із замовленням та адресою доставки',
   s3t:'Отримайте доставку',s3d:'Ваш свіжий торт привеземо прямо до ваших дверей',
   i1t:'Час доставки',i1d:'хвилин після замовлення',
-  i2t:'Вартість доставки',i2d:'за межами Праги до 15 км · 250 Kč',i2e:'понад 15 км · за домовленістю',
+  i2t:'Вартість доставки',i2v:'Прага 150 Kč',i2d:'за межами Праги до 15 км · 250 Kč',i2e:'понад 15 км · за домовленістю',
   oc_ttl:'Замовте зараз',oc_sub:'Заповніть форму — ми підтвердимо протягом 15 хвилин',
   map_btn:'🗺️ Обрати на карті',map_hide:'Сховати карту',map_me:'📍 Моє місцезнаходження',map_hint:'Натисніть на карту або перетягніть мітку — адреса підставиться сама.',map_geo_err:'Не вдалося визначити місцезнаходження — дозвольте доступ до геолокації або оберіть місце на карті.',addr_ph:'Вулиця й номер будинку, місто',f_email:'E-mail',f_email_ph:'необов’язково',f_email_bad:'Перевірте e-mail — або залиште поле порожнім.',f_name:'Ім’я',f_phone:'Телефон',f_phone_opt:'необов’язково',f_addr:'Адреса доставки',
   f_date:'Дата доставки / отримання',f_time:'Час доставки / отримання',f_date_note:'Замовлення тортів приймаємо щонайменше за 24 години · робочі години 09:00–20:00',
   f_pay_dep_cash:'50 % готівкою',f_pay_dep_card:'50 % карткою',f_pay_dep_note:'Передоплата 50 % при замовленні',
   f_cart:'Ваше замовлення',cart_total:'Разом',cart_empty_del:'Кошик порожній — додайте товари з меню',go_menu:'Перейти до меню',
   f_table:'Стіл', f_type:'Спосіб замовлення',ot_delivery:'Доставка додому',ot_instore:'Самовивіз',ot_dinein:'Замовити на місці',f_dine_when:'Коли?',f_dine_date:'День і час візиту',f_dine_time:'Час',f_dine_hours:'Столики бронюємо щодня з 11:00 до 18:00.',f_dine_pick:'Оберіть день і час візиту.',dine_now:'Зараз',dine_later:'Заздалегідь — день і час',
-  f_pay:'Спосіб оплати',f_pay_cash:'Готівкою',f_pay_card:'Карткою',f_pay_split:'50 % готівкою + 50 % карткою',
-  pay_ttl:'Умови оплати',pay_dep:'Передоплата 50 % від суми замовлення сплачується банківським переказом при підтвердженні. Решту 50 % ви сплачуєте при отриманні.',pay_acc:'Номер рахунку',
+  f_pay:'Спосіб оплати',f_pay_cash:'Готівкою',f_pay_card:'Карткою',
+  
   slot_free:'Вільно',slot_few:'Мало місць',slot_closed:'Зайнято / вихідний',slot_red:'Свято — зачинено',f_short_day:'Короткий день — працюємо до {t}',f_submit:'Замовити',f_redirecting:'Переходимо до оплати...',f_ok:'Дякуємо! Ваше замовлення прийнято.',f_err:'Помилка. Спробуйте ще раз або зателефонуйте.',f_pay_builder:'Торт на замовлення: передоплата 50 % карткою при оформленні.',f_rule_earliest:'Для вашого замовлення найраніше {d}.',f_rule_window:'Видача передзамовлення: {a} – {b}.',f_err_early:'Цей торт можна приготувати найраніше на {d}. Оберіть, будь ласка, пізніший день.',f_err_window:'Передзамовлення можна забрати лише {a} – {b}.',f_err_soldout:'Деякі позиції розпродано або їх залишилось менше (залишилось):',ask_ttl:'Є питання щодо ціни чи замовлення? Напишіть або зателефонуйте:',f_bday_optin:'Нагадайте мені про день народження — надішліть лист за {d} днів',f_bday_email:'E-mail',f_bday_date:'День народження',f_bday_note:'Один лист на рік. Відписатися можна за посиланням у кожному листі. Рік народження не потрібен.',f_bday_day:'День',f_bday_month:'Місяць',f_bday_need:'Для нагадування про день народження вкажіть e-mail, день і місяць — або зніміть позначку.',f_pick_day:'Спочатку оберіть день у календарі.',f_pick_slot:'Будь ласка, оберіть день і час доставки / отримання.',f_slot_left:'залишилось: {n}',f_slot_full:'зайнято',f_slot_taken:'Цей час щойно зайняли. Будь ласка, оберіть інший.',f_slot_note:'Вільні дати на 2 місяці вперед. Сірі дні повністю зайняті або вихідні.',f_err_items:'Деяких позицій із кошика вже немає в меню або вони змінилися. Видаліть їх і додайте знову з меню:',
-  ft_nav:'Навігація',ft_con:'Контакти',rights:'Усі права захищені.'}
+  ft_nav:'Навігація',ft_con:'Контакти',rights:'Усі права захищено.'}
 };
 
 let lang=localStorage.getItem('cakeme_lang')||'cs';
