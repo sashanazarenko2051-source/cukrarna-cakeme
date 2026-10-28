@@ -556,7 +556,7 @@ html[data-theme] .ab-stat{background:linear-gradient(135deg,${P.bg[1]},${P.bg[3]
   filter:drop-shadow(0 0 5px currentColor) drop-shadow(0 2px 3px rgba(0,0,0,.6));animation:thGlyph 7s ease-in-out infinite}
 .th-glyph svg{display:block;width:100%;height:100%}
 :is(${CARDS}):has(>.th-cg)>.th-glyph{top:22px}
-:is(${CARDS}):hover>.th-glyph{animation-duration:1.6s}
+html.th-scrolling :is(${CARDS}){pointer-events:none}
 @keyframes thGlyph{0%,100%{transform:rotate(-12deg) scale(1)}50%{transform:rotate(12deg) scale(1.12)}}
 @keyframes thRot{to{--tha:360deg}}
 .th-halo{position:absolute;inset:0;pointer-events:none;z-index:2;box-shadow:inset 0 0 26px -6px ${b[0] === '#ffffff' ? b[1] : b[0]}88;opacity:0;animation:thHalo 5s ease-in-out infinite;animation-delay:var(--bd,0s)}
@@ -589,7 +589,6 @@ html.th-calm .th-amb,html.th-calm .th-spi{display:none}
 :is(${CARDS}):hover .th-web{opacity:.9}
 .th-spi{position:absolute;top:0;right:26px;width:20px;height:18px;z-index:7;pointer-events:none;animation:thSpi 7s ease-in-out infinite;animation-delay:var(--bd,0s);filter:drop-shadow(0 2px 2px rgba(0,0,0,.5))}
 .th-spi::before{content:'';position:absolute;left:50%;bottom:60%;width:1px;height:200px;background:linear-gradient(transparent,rgba(235,235,245,.5))}
-:is(${CARDS}):hover .th-spi{animation-duration:2.4s}
 .th-legs{animation:thLegs .5s ease-in-out infinite alternate;transform-origin:22px 22px}
 @keyframes thSpi{0%,100%{transform:translateY(-22px)}35%,55%{transform:translateY(48px)}45%{transform:translateY(40px)}}
 @keyframes thLegs{from{transform:scaleX(1)}to{transform:scaleX(.88) translateY(1px)}}
@@ -716,17 +715,24 @@ body:has(.th-vis.below) .th-logo{opacity:0;transition:opacity .4s}
     });
   }
   function tilt() {
-    if (!matchMedia('(pointer:fine)').matches) return;
-    let cur = null;
+    let cur = null, ev = null, pend = 0, tm = 0;
     const reset = () => { if (cur) { cur.style.transform = ''; cur = null; } };
-    addEventListener('pointermove', e => {
-      const c = e.target.closest && e.target.closest(CARDS);
+    // while the page scrolls the cards ignore the mouse, so the hover effects do not flicker on every card passing under the cursor
+    addEventListener('scroll', () => {
+      if (!tm) { document.documentElement.classList.add('th-scrolling'); reset(); }
+      clearTimeout(tm); tm = setTimeout(() => { tm = 0; document.documentElement.classList.remove('th-scrolling'); }, 180);
+    }, {passive: true});
+    if (!matchMedia('(pointer:fine)').matches) return;
+    const move = () => {  // at most once per frame
+      pend = 0; if (tm || !ev) return;
+      const e = ev, c = e.target.closest && e.target.closest(CARDS);
       if (c !== cur) reset();
       if (!c) return;
       cur = c; const r = c.getBoundingClientRect(), dx = (e.clientX - r.left) / r.width - .5, dy = (e.clientY - r.top) / r.height - .5;
       c.style.setProperty('--mx', (dx + .5) * 100 + '%'); c.style.setProperty('--my', (dy + .5) * 100 + '%');
       if (animOn()) c.style.transform = `perspective(900px) rotateX(${(-dy * 5).toFixed(2)}deg) rotateY(${(dx * 6).toFixed(2)}deg) translateY(-5px)`;
-    }, {passive: true});
+    };
+    addEventListener('pointermove', e => { ev = e; if (!pend) pend = requestAnimationFrame(move); }, {passive: true});
     document.addEventListener('pointerleave', reset);
   }
 
