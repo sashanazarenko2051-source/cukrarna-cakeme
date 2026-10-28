@@ -372,8 +372,10 @@
       const now = performance.now(); if (!animOn() || now - lastMove < 28) return; lastMove = now; add(e.clientX, e.clientY, 1, 22, .7, -14);
     }, {passive: true});
     addEventListener('pointerdown', e => {
-      if (e.button !== 0 || !animOn() || e.target.closest('a,button,input,select,textarea,label,.th-card')) return;
-      add(e.clientX, e.clientY, 30, 230, 1.1, 260, true);
+      if (e.button !== 0 || !animOn()) return;
+      const buy = e.target.closest('button') && e.target.closest(CARDS);  // a burst on "add to cart" too
+      if (!buy && e.target.closest('a,button,input,select,textarea,label,.th-card')) return;
+      add(e.clientX, e.clientY, buy ? 22 : 30, buy ? 180 : 230, 1.1, 260, true);
     });
   }
 
@@ -499,6 +501,22 @@
     valentine: {svg: () => BALLOONS, w: 170, h: 157, move: 'float', spark: ['💕', '✨'], says: {cs: 'S láskou! 💝', uk: 'З любов’ю! 💝', en: 'With love! 💝'}},
     easter: {svg: () => BUNNY, w: 140, h: 119, move: 'hop', spark: ['🌸', '✨'], says: {cs: 'Veselé Velikonoce! 🐣', uk: 'Світлого Великодня! 🐣', en: 'Happy Easter! 🐣'}},
   };
+  // ── card extras: a cobweb and a spider on a thread (Halloween) ──
+  const WEB = (() => {
+    const R = [14, 28, 42, 56], ang = [0, 22.5, 45, 67.5, 90].map(a => a * Math.PI / 180), pt = (r, a) => [60 - Math.sin(a) * r, Math.cos(a) * r];
+    let d = ang.map(a => { const [x, y] = pt(60, a); return `M60 0L${x.toFixed(1)} ${y.toFixed(1)}`; }).join('');
+    R.forEach(r => { d += ang.map((a, i) => { const [x, y] = pt(r, a); if (!i) return `M${x.toFixed(1)} ${y.toFixed(1)}`;
+      const [px, py] = pt(r * .82, (a + ang[i - 1]) / 2); return `Q${px.toFixed(1)} ${py.toFixed(1)} ${x.toFixed(1)} ${y.toFixed(1)}`; }).join(''); });
+    return `<svg viewBox="0 0 60 60"><path d="${d}" stroke="rgba(235,235,245,.6)" stroke-width=".7" fill="none"/></svg>`;
+  })();
+  const SPIDER = `<svg viewBox="0 0 44 40" overflow="visible"><g class="th-legs" stroke="#120d16" stroke-width="2.4" fill="none" stroke-linecap="round">
+    <path d="M18 18 Q8 8 2 14 M18 21 Q6 18 1 24 M19 24 Q8 28 4 36 M20 26 Q14 32 12 39"/>
+    <path d="M26 18 Q36 8 42 14 M26 21 Q38 18 43 24 M25 24 Q36 28 40 36 M24 26 Q30 32 32 39"/></g>
+    <ellipse cx="22" cy="26" rx="8" ry="9" fill="#141014"/><circle cx="22" cy="14" r="5.5" fill="#1d171f"/>
+    <circle cx="20" cy="13" r="1.5" fill="#ff5a3a"/><circle cx="24" cy="13" r="1.5" fill="#ff5a3a"/>
+    <path d="M18 24 q4 3 8 0" stroke="#8e4bd6" stroke-width="1.4" fill="none"/></svg>`;
+  // what floats over the card photo for each holiday
+  const AMB = {christmas: ['snow'], new_year: ['snow', 'star'], halloween: ['ember'], valentine: ['heart'], easter: ['petal']};
   // ── small line icons ──
   const GLYPH = {
     snow: '<svg viewBox="-12 -12 24 24"><g stroke="currentColor" stroke-width="1.4" fill="none" stroke-linecap="round">' + [0, 60, 120].map(a => `<path transform="rotate(${a})" d="M0-10V10M0-6.5l3-3M0-6.5l-3-3M0 6.5l3 3M0 6.5l-3 3"/>`).join('') + '</g></svg>',
@@ -529,9 +547,48 @@ html[data-theme] .ab-stat{background:linear-gradient(135deg,${P.bg[1]},${P.bg[3]
 .th-glyph{position:absolute;top:10px;left:10px;width:20px;height:20px;color:${b[0] === '#ffffff' ? b[1] : b[0]};z-index:6;pointer-events:none;opacity:.9;
   filter:drop-shadow(0 0 5px currentColor) drop-shadow(0 2px 3px rgba(0,0,0,.6));animation:thGlyph 7s ease-in-out infinite}
 .th-glyph svg{display:block;width:100%;height:100%}
+:is(${CARDS}):has(>.th-cg)>.th-glyph{top:22px}
 :is(${CARDS}):hover>.th-glyph{animation-duration:1.6s}
 @keyframes thGlyph{0%,100%{transform:rotate(-12deg) scale(1)}50%{transform:rotate(12deg) scale(1.12)}}
 @keyframes thRot{to{--tha:360deg}}
+@keyframes thBreath{0%,100%{box-shadow:0 0 0 0 transparent}50%{box-shadow:0 0 26px -8px ${b[0] === '#ffffff' ? b[1] : b[0]}77}}
+html[data-theme]:not(.th-calm) :is(${CARDS}):not(:hover){animation:thBreath 5s ease-in-out infinite;animation-delay:var(--bd,0s)}
+.th-amb{position:absolute;left:0;right:0;top:0;height:240px;max-height:70%;overflow:hidden;pointer-events:none;z-index:4;-webkit-mask-image:linear-gradient(#000 70%,transparent);mask-image:linear-gradient(#000 70%,transparent)}
+.th-amb i{position:absolute;left:var(--x);top:0;display:block;animation:var(--an) var(--t) linear infinite;animation-delay:var(--d);will-change:transform,opacity}
+:is(${CARDS}):hover .th-amb i{animation-duration:calc(var(--t) * .55)}
+html.th-calm .th-amb,html.th-calm .th-spi{display:none}
+.th-snow{--an:thFall;width:calc(5px * var(--s));height:calc(5px * var(--s));border-radius:50%;background:radial-gradient(#fff 35%,rgba(255,255,255,0) 70%);filter:drop-shadow(0 0 2px rgba(160,200,255,.8)) drop-shadow(0 1px 1px rgba(0,0,0,.4))}
+.th-amb i.th-star{--an:thTwinkle;width:calc(12px * var(--s));height:calc(12px * var(--s));top:calc(var(--s) * 90px);background:#ffe9a0;clip-path:polygon(50% 0,60% 40%,100% 50%,60% 60%,50% 100%,40% 60%,0 50%,40% 40%);filter:drop-shadow(0 0 4px #f5d67a)}
+.th-ember{--an:thRise;width:calc(4px * var(--s));height:calc(4px * var(--s));border-radius:50%;background:#ffb347;box-shadow:0 0 6px 2px #ff7a1a}
+.th-heart{--an:thRise;width:calc(13px * var(--s));height:calc(12px * var(--s));background:#ff5d8f;filter:drop-shadow(0 0 4px #ff5d8f);
+  -webkit-mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 22'%3E%3Cpath d='M12 21C-4 10 3-3 12 4c9-7 16 6 0 17z'/%3E%3C/svg%3E") center/contain no-repeat;
+  mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 22'%3E%3Cpath d='M12 21C-4 10 3-3 12 4c9-7 16 6 0 17z'/%3E%3C/svg%3E") center/contain no-repeat}
+.th-amb i.th-heart:nth-child(3n){background:#ffd1dc}.th-amb i.th-heart:nth-child(3n+1){background:#e5484d}
+.th-petal{--an:thPetal;width:calc(10px * var(--s));height:calc(13px * var(--s));border-radius:80% 0 80% 0;background:linear-gradient(135deg,#fff,#ffb3c7);opacity:.9;filter:drop-shadow(0 1px 2px rgba(0,0,0,.35))}
+.th-amb i.th-petal:nth-child(3n){background:linear-gradient(135deg,#fff,#ffd36e)}.th-amb i.th-petal:nth-child(3n+1){background:linear-gradient(135deg,#fff,#c7f0c0)}
+@keyframes thFall{from{transform:translate(0,-12px)}to{transform:translate(var(--dx),250px)}}
+@keyframes thRise{0%{transform:translate(0,250px);opacity:0}15%{opacity:1}85%{opacity:.9}100%{transform:translate(var(--dx),-10px);opacity:0}}
+@keyframes thPetal{from{transform:translate(0,-14px) rotate(0) rotateX(0)}to{transform:translate(var(--dx),250px) rotate(320deg) rotateX(540deg)}}
+@keyframes thTwinkle{0%,100%{transform:scale(0) rotate(0);opacity:0}45%{transform:scale(1) rotate(45deg);opacity:1}60%{transform:scale(.4) rotate(70deg);opacity:.4}}
+.th-cg{position:absolute;left:8px;right:8px;top:0;height:16px;z-index:7;pointer-events:none;display:flex;justify-content:space-around}
+.th-cg svg{position:absolute;left:0;top:0;width:100%;height:14px}
+.th-cg i{position:relative;width:6px;height:9px;margin-top:4px;border-radius:45% 45% 50% 50%;background:radial-gradient(circle at 35% 30%,#fff 0 14%,currentColor 45%);animation:thBulb 2.4s ease-in-out infinite}
+.th-cg i:nth-child(even){margin-top:7px}
+.th-cg i:nth-child(4n+2){color:${b[0]}}.th-cg i:nth-child(4n+3){color:${b[1]};animation-delay:.6s}.th-cg i:nth-child(4n+4){color:${b[2]};animation-delay:1.2s}.th-cg i:nth-child(4n+5){color:${b[3]};animation-delay:1.8s}
+.th-web{position:absolute;top:0;right:0;width:64px;height:64px;z-index:3;pointer-events:none;opacity:.55;transition:opacity .3s}
+.th-web svg,.th-spi svg{display:block;width:100%;height:100%}
+:is(${CARDS}):hover .th-web{opacity:.9}
+.th-spi{position:absolute;top:0;right:26px;width:20px;height:18px;z-index:7;pointer-events:none;animation:thSpi 7s ease-in-out infinite;animation-delay:var(--bd,0s);filter:drop-shadow(0 2px 2px rgba(0,0,0,.5))}
+.th-spi::before{content:'';position:absolute;left:50%;bottom:60%;width:1px;height:200px;background:linear-gradient(transparent,rgba(235,235,245,.5))}
+:is(${CARDS}):hover .th-spi{animation-duration:2.4s}
+.th-legs{animation:thLegs .5s ease-in-out infinite alternate;transform-origin:22px 22px}
+@keyframes thSpi{0%,100%{transform:translateY(-22px)}35%,55%{transform:translateY(48px)}45%{transform:translateY(40px)}}
+@keyframes thLegs{from{transform:scaleX(1)}to{transform:scaleX(.88) translateY(1px)}}
+.th-fogc{position:absolute;left:-30%;right:-30%;top:150px;height:90px;z-index:3;pointer-events:none;opacity:.55;
+  background:radial-gradient(40% 50% at 30% 60%,rgba(142,75,214,.55),transparent 70%),radial-gradient(35% 45% at 70% 50%,rgba(90,42,130,.6),transparent 70%);animation:thFog 9s ease-in-out infinite alternate}
+.pop-card .th-fogc{top:70px}
+@keyframes thFog{from{transform:translateX(-12%)}to{transform:translateX(12%)}}
+html.th-calm .th-fogc,html.th-calm .th-cg i{animation:none}
 .th-glowbg{position:fixed;inset:0;pointer-events:none;z-index:1390;background:radial-gradient(60% 45% at 8% 0%,${th.glow[0]},transparent 70%),radial-gradient(55% 40% at 95% 5%,${th.glow[1]},transparent 70%);mix-blend-mode:screen}
 .th-garland{position:absolute;left:0;right:0;bottom:-13px;height:18px;pointer-events:none;display:flex;justify-content:space-around;overflow:hidden;z-index:1}
 .th-garland svg{position:absolute;left:0;top:0;width:100%;height:8px}
@@ -624,15 +681,25 @@ body:has(.th-vis.below) .th-logo{opacity:0;transition:opacity .4s}
 @keyframes thEar{0%,70%,100%{transform:rotate(0)}80%{transform:rotate(-12deg)}90%{transform:rotate(6deg)}}
 @keyframes thPuff{50%{transform:scale(1.15)}}
 @media(max-width:600px){.th-vis.small .th-say{font-size:.72rem;top:-32px}}
-@media print{.th-glowbg,.th-garland,.th-logo,#thFx,.th-card,.th-fxbtn,.th-ribbon-wrap,.th-scene,.th-rim,.th-glare,.th-glyph,.th-vis,.th-spark{display:none}}`;
+@media print{.th-glowbg,.th-garland,.th-logo,#thFx,.th-card,.th-fxbtn,.th-ribbon-wrap,.th-scene,.th-rim,.th-glare,.th-glyph,.th-vis,.th-spark,.th-amb,.th-cg,.th-web,.th-spi,.th-fogc{display:none}}`;
   }
 
   // ── decorations on the cards: a running light rim, a glare that follows the mouse and a small holiday icon ──
+  let cardN = 0;
   function decorate(th) {
     document.querySelectorAll(CARDS).forEach(c => {
       if (c.querySelector(':scope > .th-rim')) return;
       const add = (cls, html) => { const s = document.createElement('span'); s.className = cls; if (html) s.innerHTML = html; c.appendChild(s); };
       add('th-rim'); add('th-glare'); add('th-glyph', GLYPH[th.glyph]);
+      if (QUIET) return;
+      const R = prng(1 + (++cardN) * 7919), kinds = AMB[th.id] || [];
+      add('th-amb', Array.from({length: 9}, (_, i) => {
+        const k = kinds[i % kinds.length];
+        return `<i class="th-${k}" style="--x:${(R() * 94 + 3).toFixed(1)}%;--s:${(R() * .8 + .6).toFixed(2)};--t:${(R() * 4 + 5).toFixed(1)}s;--d:-${(R() * 9).toFixed(1)}s;--dx:${((R() - .5) * 40).toFixed(0)}px"></i>`;
+      }).join(''));
+      if (th.id === 'christmas' || th.id === 'new_year') add('th-cg', '<svg viewBox="0 0 280 14" preserveAspectRatio="none"><path d="M0 2 Q20 12 40 3 T80 3 T120 3 T160 3 T200 3 T240 3 T280 3" stroke="rgba(255,255,255,.35)" stroke-width="1" fill="none"/></svg>' + '<i></i>'.repeat(7));
+      if (th.id === 'halloween') { add('th-web', WEB); add('th-spi', SPIDER); add('th-fogc'); }
+      c.style.setProperty('--bd', -(R() * 4).toFixed(1) + 's');
     });
   }
   function tilt() {
@@ -754,7 +821,9 @@ body:has(.th-vis.below) .th-logo{opacity:0;transition:opacity .4s}
   function apply(id, cfg, preview) {
     const th = THEMES[id];
     if (!th) return;
+    th.id = id;
     effects = cfg.effects !== false;
+    document.documentElement.classList.toggle('th-calm', !animOn());
     document.documentElement.dataset.theme = id;
     const st = document.createElement('style'); st.id = 'thCss'; st.textContent = css(th, id); document.head.appendChild(st);
     const gl = document.createElement('div'); gl.className = 'th-glowbg'; document.body.appendChild(gl);
@@ -781,7 +850,7 @@ body:has(.th-vis.below) .th-logo{opacity:0;transition:opacity .4s}
       if (effects) {
         const b = document.createElement('button'); b.type = 'button'; b.className = 'th-fxbtn'; b.innerHTML = `<span>${GLYPH[th.glyph]}</span>`;
         const upd = () => { const off = store('cm_fx_off') === '1'; b.classList.toggle('off', off); b.title = (UI[L()] || UI.cs).fx + (off ? ' ✕' : ' ✓'); };
-        b.onclick = () => { store('cm_fx_off', store('cm_fx_off') === '1' ? '0' : '1'); upd(); KICK.forEach(k => k()); };
+        b.onclick = () => { store('cm_fx_off', store('cm_fx_off') === '1' ? '0' : '1'); upd(); document.documentElement.classList.toggle('th-calm', !animOn()); KICK.forEach(k => k()); };
         upd(); document.body.appendChild(b);
       }
     }
