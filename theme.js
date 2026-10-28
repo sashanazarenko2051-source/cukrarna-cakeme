@@ -461,6 +461,29 @@
     <path d="M111 25 h26 v4 h-26 z" fill="#8a4bd0"/><rect x="120" y="24" width="7" height="6" rx="1" fill="none" stroke="#e8c06a" stroke-width="1.4"/>
     <path d="M133 10 l1.6 3.2 3.4 .4 -2.5 2.3 .7 3.4 -3.2 -1.7 -3 1.7 .6 -3.4 -2.4 -2.3 3.3 -.4 Z" fill="#ffd36e"/>
   </svg>`;
+  // ── the Grim Reaper (Halloween): a hooded ghost in a tattered cloak, red eyes in the dark hood, a scythe; facing left ──
+  const REAPER = `<svg viewBox="-16 0 216 150" overflow="visible"><defs>
+      <radialGradient id="thRg" cx="50%" cy="50%" r="50%"><stop offset="0" stop-color="#7dffb0" stop-opacity=".32"/><stop offset="1" stop-color="#7dffb0" stop-opacity="0"/></radialGradient>
+      <linearGradient id="thRc" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#54476e"/><stop offset=".55" stop-color="#241a30"/><stop offset="1" stop-color="#0b0810" stop-opacity=".15"/></linearGradient>
+      <linearGradient id="thRt" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#1b1424"/><stop offset="1" stop-color="#1b1424" stop-opacity="0"/></linearGradient>
+      <linearGradient id="thRb" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#ffffff"/><stop offset=".5" stop-color="#c3ccd8"/><stop offset="1" stop-color="#5d6672"/></linearGradient>
+      <radialGradient id="thRe" cx="50%" cy="50%" r="50%"><stop offset="0" stop-color="#fff2c0"/><stop offset=".35" stop-color="#ff3b2f"/><stop offset="1" stop-color="#ff1a10" stop-opacity="0"/></radialGradient></defs>
+    <ellipse class="th-rglow" cx="108" cy="76" rx="86" ry="70" fill="url(#thRg)"/>
+    <g class="th-cape"><path d="M126 58 C152 66 176 82 198 78 L186 93 L200 103 L182 109 L194 122 L170 119 L175 137 L152 125 L148 146 L132 129 L121 147 L112 127 Z" fill="url(#thRt)"/></g>
+    <path d="M108 6 C129 6 142 23 142 45 C144 72 138 101 130 128 L120 119 L114 141 L103 122 L93 137 L89 116 L77 127 C83 97 79 67 85 41 C87 20 97 6 108 6 Z" fill="url(#thRc)" stroke="#8d7bb0" stroke-width=".9" stroke-opacity=".55"/>
+    <path d="M86 44 C92 20 120 12 134 30" stroke="#55486a" stroke-width="1.6" fill="none" opacity=".7"/>
+    <path d="M111 21 C124 23 131 35 129 49 C127 61 117 66 106 64 C95 62 91 51 93 39 C95 27 101 21 111 21 Z" fill="#040205"/>
+    <g class="th-eyes"><ellipse cx="102" cy="42" rx="7" ry="4.6" fill="url(#thRe)"/><ellipse cx="117" cy="42" rx="7" ry="4.6" fill="url(#thRe)"/>
+      <circle cx="102" cy="42" r="1.7" fill="#fff6d0"/><circle cx="117" cy="42" r="1.7" fill="#fff6d0"/></g>
+    <g class="th-scy">
+      <path d="M47 26 L63 140" stroke="#5a3b22" stroke-width="4.2" stroke-linecap="round"/><path d="M47 26 L63 140" stroke="#8a6040" stroke-width="1.2" stroke-linecap="round" opacity=".7"/>
+      <path d="M48 29 C30 9 4 11 -14 33 C6 24 27 27 45 42 Z" fill="url(#thRb)" stroke="#e9eef5" stroke-width=".7"/>
+      <path d="M44 34 C28 22 10 22 -6 31" stroke="#fff" stroke-width=".9" fill="none" opacity=".8"/>
+      <path d="M93 69 C79 71 67 73 57 69 L58 80 C70 84 82 84 94 82 Z" fill="#241c2e"/>
+      <g stroke="#e8e2d4" stroke-width="2.6" stroke-linecap="round"><path d="M59 70 h-8 M59 74 h-9 M59 78 h-8"/></g>
+      <rect x="55" y="67" width="9" height="13" rx="3.5" fill="#e8e2d4"/></g>
+    <g class="th-wisp" fill="#9dffc8"><circle cx="150" cy="100" r="2.2"/><circle cx="170" cy="70" r="1.6"/><circle cx="135" cy="138" r="1.8"/><circle cx="185" cy="112" r="1.3"/></g>
+  </svg>`;
   // ── heart balloons with a gift (Valentine's) ──
   const HEARTP = 'M0 -6 C0 -16 13 -19 17 -8 C21 -19 34 -16 34 -6 C34 8 17 18 17 24 C17 18 0 8 0 -6 Z';
   const BALLOONS = `<svg viewBox="0 0 190 175" overflow="visible"><defs>
@@ -505,7 +528,7 @@
   const VISITORS = {
     new_year: {svg: () => SANTA, w: 270, h: 112, move: 'fly', spark: ['✨', '⭐'], says: {cs: 'Ho-ho-ho! Šťastný nový rok!', uk: 'Хо-хо-хо! З Новим роком!', en: 'Ho-ho-ho! Happy New Year!'}},
     christmas: {svg: () => SANTA, w: 270, h: 112, move: 'fly', spark: ['✨', '⭐'], says: {cs: 'Ho-ho-ho! Veselé Vánoce!', uk: 'Хо-хо-хо! Веселого Різдва!', en: 'Ho-ho-ho! Merry Christmas!'}},
-    halloween: {svg: () => WITCH, w: 250, h: 122, move: 'fly', spark: ['✨', '🦇', '⭐'], says: {cs: 'Sladkosti, nebo psota? 🎃', uk: 'Солодощі чи капость? 🎃', en: 'Trick or treat? 🎃'}},
+    halloween: {svg: () => REAPER, w: 216, h: 150, move: 'fly', spark: ['👻', '🦇', '✨'], says: {cs: 'Búú! Sladkosti, nebo psota? 💀', uk: 'Бу-у-у! Солодощі чи капость? 💀', en: 'Boo! Trick or treat? 💀'}},
     valentine: {svg: () => BALLOONS, w: 170, h: 157, move: 'float', spark: ['💕', '✨'], says: {cs: 'S láskou! 💝', uk: 'З любов’ю! 💝', en: 'With love! 💝'}},
     easter: {svg: () => BUNNY, w: 140, h: 119, move: 'hop', spark: ['🌸', '✨'], says: {cs: 'Veselé Velikonoce! 🐣', uk: 'Світлого Великодня! 🐣', en: 'Happy Easter! 🐣'}},
   };
@@ -671,6 +694,12 @@ body:has(.th-vis.below) .th-logo{opacity:0;transition:opacity .4s}
 .th-bristle{transform-box:fill-box;transform-origin:0 50%;animation:thCape .3s ease-in-out infinite alternate}
 .th-tail{transform-box:fill-box;transform-origin:0 100%;animation:thWave .6s ease-in-out infinite alternate}
 .th-bal{animation:thSway 2.6s ease-in-out infinite alternate}
+.th-eyes{animation:thEyes 3.2s infinite}
+@keyframes thEyes{0%,40%,56%,100%{opacity:1}46%,50%{opacity:.05}}
+.th-rglow{animation:thGlow2 2.8s ease-in-out infinite}
+.th-scy{transform-box:fill-box;transform-origin:70% 60%;animation:thSway 2s ease-in-out infinite alternate}
+.th-wisp{animation:thWisp 2.4s ease-in-out infinite}
+@keyframes thWisp{0%,100%{opacity:.2;transform:translateY(0)}50%{opacity:.9;transform:translateY(-6px)}}
 .th-ear{animation:thEar 2.4s ease-in-out infinite}.th-ear2{animation-delay:.3s}
 .th-tailb{transform-box:fill-box;transform-origin:50% 50%;animation:thPuff 1.2s ease-in-out infinite}
 .th-say{position:absolute;left:55%;top:-38px;white-space:nowrap;background:#fffaf0;color:#9a1a24;font:600 .86rem 'Playfair Display',serif;
