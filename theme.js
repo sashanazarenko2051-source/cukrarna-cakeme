@@ -368,6 +368,8 @@ html[data-theme] .ab-stat{background:linear-gradient(135deg,${P.bg[1]},${P.bg[3]
   padding:7px 13px;border-radius:14px;box-shadow:0 6px 18px rgba(0,0,0,.45);opacity:0;transform:scale(.6) translateY(8px);transform-origin:20% 100%;transition:.35s cubic-bezier(.2,1.5,.4,1)}
 .th-say::after{content:'';position:absolute;left:24px;bottom:-6px;border:7px solid transparent;border-top-color:#fffaf0;border-bottom:0}
 .th-vis.talk .th-say{opacity:1;transform:none}
+.th-vis.below .th-say{top:auto;bottom:-34px;left:18%;transform-origin:20% 0}
+.th-vis.below .th-say::after{bottom:auto;top:-6px;border-top-color:transparent;border-bottom:7px solid #fffaf0;border-top-width:0}
 .th-spark{position:fixed;z-index:1475;pointer-events:none;font-size:.8rem}
 .th-bat{position:fixed;left:0;top:0;z-index:1460;pointer-events:none;will-change:transform;filter:drop-shadow(0 4px 6px rgba(0,0,0,.6))}
 .th-wl,.th-wr{transform-box:fill-box;animation:thFlap .16s ease-in-out infinite alternate}
@@ -541,19 +543,23 @@ ${TAB_DECO()[id] ? `html[data-theme] .m-tab{position:relative}html[data-theme] .
     if (QUIET) return () => {};
     const V = VISITORS[th.id];
     if (V) {
-      // a drawn visitor comes to the logo, says hello and leaves; only while the page is at the very top
-      const fly = () => {
-        if (document.hidden || scrollY > 60 || document.querySelector('.th-vis')) return;
+      // a drawn visitor comes to the logo and says hello. On wide screens it parks in the nav left of the logo
+      // and stays there; on narrow ones it waits below the nav and leaves once the page is scrolled
+      const fly = instant => {
         const logo = document.querySelector('.nav-logo'), nav = document.getElementById('nav');
-        if (!logo || !nav) return;
-        const sc = innerWidth < 600 ? .62 : 1, w = V.w * sc, h = V.h * sc;
-        const el = document.createElement('div'); el.className = 'th-vis flying' + (sc < 1 ? ' small' : '');
+        if (!logo || !nav || document.hidden || document.querySelector('.th-vis')) return;
+        const lr0 = logo.getBoundingClientRect().left, park = (lr0 - 24) / V.w >= .5;
+        if (!park && scrollY > 60) return;
+        const sc = park ? Math.min(1, (lr0 - 24) / V.w, 78 / V.h) : innerWidth < 600 ? .62 : 1, w = V.w * sc, h = V.h * sc;
+        const el = document.createElement('div'); el.className = 'th-vis flying' + (sc < 1 ? ' small' : '') + (park ? ' below' : '');
         el.innerHTML = V.svg() + `<div class="th-say">${V.says[L()] || V.says.cs}</div>`;
         const svg = el.querySelector('svg'); svg.setAttribute('width', w); svg.setAttribute('height', h);
         document.body.appendChild(el); els.push(el);
         const W = innerWidth, lr = logo.getBoundingClientRect(), nb = nav.getBoundingClientRect().bottom;
-        const tx = Math.min(lr.right + 14, W - w - 10), ty = V.move === 'float' ? Math.max(nb - h * .55, 46) : Math.max(nb + 6, lr.bottom - h * .25);
-        const IN = V.move === 'hop' ? 5200 : 4200, STAY = 4300, OUT = 2600, t0 = performance.now();
+        const spot = r => park ? [r.left - w - 12, Math.max(3, r.top + r.height / 2 - h * .55)] : [Math.max(8, Math.min(r.left - 6, W - w - 8)),
+          V.move === 'float' ? Math.max(nb - h * .55, 46) : Math.max(nb + 6, r.bottom - h * .25)];
+        let [tx, ty] = spot(lr);
+        const IN = V.move === 'hop' ? 5200 : 4200, STAY = 4300, OUT = 2600, t0 = performance.now() - (instant ? IN : 0);
         let lastSpark = 0, tl = 0;
         const ease = k => 1 - Math.pow(1 - k, 3);
         const step = t => {
@@ -561,7 +567,7 @@ ${TAB_DECO()[id] ? `html[data-theme] .m-tab{position:relative}html[data-theme] .
           const e = t - t0;
           let x, y, rot = 0, sx = 1, sy = 1, moving = true;
           // stays by the logo while the page is at the top; leaves once the visitor scrolls down
-          if (!tl && e >= IN + STAY && (scrollY > 60 || document.hidden)) tl = t;
+          if (!park && !tl && e >= IN + STAY && (scrollY > 60 || document.hidden)) tl = t;
           if (e < IN) {
             const k = e / IN, q = ease(k);
             if (V.move === 'float') { x = W - w * .3 + (tx - W + w * .3) * q; y = innerHeight * .6 + (ty - innerHeight * .6) * q + Math.sin(k * 6) * 10 * (1 - q); }
@@ -569,6 +575,11 @@ ${TAB_DECO()[id] ? `html[data-theme] .m-tab{position:relative}html[data-theme] .
             else { x = W + 20 + (tx - W - 20) * q; y = ty - 60 * (1 - q) + Math.sin(k * 8) * 14 * (1 - q); rot = -6 * (1 - q); }
           } else if (!tl) {
             const s = e - IN;  // the greeting bubble: first 4.5 s, then again for 4 s every 15 s
+            if (park) {  // follow the logo as the nav shrinks; re-park if the window was resized
+              const r = logo.getBoundingClientRect();
+              if (Math.abs(r.left - lr0) > 30) { el.remove(); setTimeout(() => fly(true), 300); return; }
+              [tx, ty] = spot(r);
+            }
             moving = false; x = tx; y = ty + Math.sin(e / 320) * (V.move === 'float' ? 3 : 1);
             el.classList.remove('flying'); el.classList.add('stand');
             el.classList.toggle('talk', s < 4500 || s % 15000 > 11000);
@@ -590,7 +601,7 @@ ${TAB_DECO()[id] ? `html[data-theme] .m-tab{position:relative}html[data-theme] .
         };
         requestAnimationFrame(step);
       };
-      timers.push(setInterval(fly, 45000)); setTimeout(fly, 2200);
+      timers.push(setInterval(fly, 5000)); setTimeout(fly, 2200);  // comes back soon after the page is scrolled to the top
     }
     if (th.extra === 'spooky') {
       const sp = hang('', '90%', 110, 'th-spider', 0); sp.querySelector('span').innerHTML = SPIDER;
