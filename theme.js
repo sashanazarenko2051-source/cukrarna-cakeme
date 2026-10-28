@@ -1,32 +1,34 @@
 /* Seasonal look of the site (New Year, Christmas, Halloween, Valentine's, Easter), switched on in the admin.
-   Garland under the menu bar, a glow in the holiday colours, falling or rising particles with depth,
-   holiday extras (fireworks, swinging baubles, a spider and bats, hearts, a peeking bunny), a click burst,
-   a ribbon on the home page and a greeting card with a countdown.
+   A live 3D light scene at the top of the page: holiday figures made of glowing particles (a spiral tree of lights,
+   the year in sparks and a bauble, a jack-o'-lantern under the moon, beating hearts, painted eggs) that turn
+   with the mouse, plus a holiday atmosphere (snow, fireworks, embers and fog, rising hearts, petals).
+   Also a garland under the menu bar, cards with a running light rim, glare and a slight 3D tilt, a cursor trail
+   and click sparks, a ribbon on the home page and a greeting card with a live countdown.
    ?theme=<id> previews a theme without saving it (used by the admin). */
 (() => {
   const THEMES = {
-    new_year: {logo: '🥂', fx: 'snow', snowy: true, burst: ['✨', '🎉', '⭐'], bulbs: ['#f5d67a', '#ffffff', '#c9a96e', '#9fd3ff'], icon: '🎆',
-      glow: ['rgba(245,214,122,.16)', 'rgba(159,211,255,.10)'], extra: 'fireworks', date: y => new Date(y + 1, 0, 1), hold: 7,
+    new_year: {bulbs: ['#f5d67a', '#ffffff', '#c9a96e', '#9fd3ff'], glyph: 'spark', objs: ['bauble', 'year'], atm: ['snow', 'fireworks'],
+      glow: ['rgba(245,214,122,.14)', 'rgba(159,211,255,.09)'], date: y => new Date(y + 1, 0, 1), hold: 7,
       greet: {cs: 'Šťastný nový rok!', uk: 'З Новим роком!', en: 'Happy New Year!'},
       sub: {cs: 'Oslavte ho s dortem od nás — objednejte včas.', uk: 'Святкуйте з нашим тортом — замовляйте завчасно.', en: 'Celebrate with one of our cakes — order in good time.'},
       to: {cs: 'Do Nového roku', uk: 'До Нового року', en: 'New Year in'}, ribbon: {cs: 'Novoroční dorty', uk: 'Новорічні торти', en: 'New Year cakes'}},
-    christmas: {logo: '🎄', fx: 'snow', snowy: true, burst: ['❄️', '⭐', '🎁'], bulbs: ['#e5484d', '#f5d67a', '#3fa66b', '#6fb7ff'], icon: '🎄',
-      glow: ['rgba(229,72,77,.13)', 'rgba(63,166,107,.12)'], extra: 'baubles', date: y => new Date(y, 11, 24), hold: 3,
+    christmas: {bulbs: ['#e5484d', '#f5d67a', '#3fa66b', '#6fb7ff'], glyph: 'snow', objs: ['tree', 'tree'], atm: ['snow'],
+      glow: ['rgba(229,72,77,.11)', 'rgba(63,166,107,.10)'], date: y => new Date(y, 11, 24), hold: 3,
       greet: {cs: 'Veselé Vánoce!', uk: 'Веселого Різдва!', en: 'Merry Christmas!'},
       sub: {cs: 'Vánoční cukroví a dorty — objednejte si včas.', uk: 'Різдвяне печиво й торти — замовляйте завчасно.', en: 'Christmas cookies and cakes — order in good time.'},
       to: {cs: 'Do Štědrého dne', uk: 'До Святвечора', en: 'Christmas Eve in'}, ribbon: {cs: 'Vánoční cukroví a dorty', uk: 'Різдвяне печиво й торти', en: 'Christmas cookies & cakes'}},
-    halloween: {logo: '🎃', fx: ['🍂', '🍁', '🍂'], burst: ['🎃', '👻', '🦇', '🍬'], bulbs: ['#ff8a1f', '#8e4bd6', '#ffb347', '#5a2a82'], icon: '🎃',
-      glow: ['rgba(255,138,31,.15)', 'rgba(142,75,214,.14)'], extra: 'spooky', date: y => new Date(y, 9, 31), hold: 1,
+    halloween: {bulbs: ['#ff8a1f', '#8e4bd6', '#ffb347', '#5a2a82'], glyph: 'pumpkin', objs: ['moon', 'pumpkin'], atm: ['fog', 'embers'],
+      glow: ['rgba(255,138,31,.12)', 'rgba(142,75,214,.12)'], date: y => new Date(y, 9, 31), hold: 1,
       greet: {cs: 'Strašidelný Halloween!', uk: 'Моторошного Хелловіну!', en: 'Happy Halloween!'},
       sub: {cs: 'Sladkosti, nebo psota? U nás rozhodně sladkosti.', uk: 'Солодощі чи капость? У нас — точно солодощі.', en: 'Trick or treat? Here it’s definitely treats.'},
       to: {cs: 'Do Halloweenu', uk: 'До Хелловіну', en: 'Halloween in'}, ribbon: {cs: 'Halloweenské sladkosti', uk: 'Солодощі на Хелловін', en: 'Halloween treats'}},
-    valentine: {logo: '💝', fx: ['❤️', '💕', '💗', '💖'], rise: true, burst: ['❤️', '💖', '💘'], bulbs: ['#ff5d8f', '#ffd1dc', '#e5484d', '#ff9eb5'], icon: '💝',
-      glow: ['rgba(255,93,143,.16)', 'rgba(229,72,77,.10)'], extra: '', date: y => new Date(y, 1, 14), hold: 1,
+    valentine: {bulbs: ['#ff5d8f', '#ffd1dc', '#e5484d', '#ff9eb5'], glyph: 'heart', objs: ['heart', 'heart'], atm: ['hearts'],
+      glow: ['rgba(255,93,143,.13)', 'rgba(229,72,77,.09)'], date: y => new Date(y, 1, 14), hold: 1,
       greet: {cs: 'Šťastného Valentýna!', uk: 'З Днем закоханих!', en: 'Happy Valentine’s Day!'},
       sub: {cs: 'Sladký dárek pro vaše nejbližší.', uk: 'Солодкий подарунок для найрідніших.', en: 'A sweet gift for your loved ones.'},
       to: {cs: 'Do Valentýna', uk: 'До Дня закоханих', en: 'Valentine’s Day in'}, ribbon: {cs: 'Sladké dárky z lásky', uk: 'Солодкі подарунки з любов’ю', en: 'Sweet gifts with love'}},
-    easter: {logo: '🐣', fx: ['🌸', '🌼', '🌷', '🌸'], burst: ['🥚', '🐣', '🌷'], bulbs: ['#ffd36e', '#a8e6a1', '#ffb3c7', '#9fd3ff'], icon: '🐣',
-      glow: ['rgba(255,211,110,.13)', 'rgba(168,230,161,.11)'], extra: 'bunny', date: y => easter(y), hold: 2,
+    easter: {bulbs: ['#ffd36e', '#a8e6a1', '#ffb3c7', '#9fd3ff'], glyph: 'egg', objs: ['egg', 'egg2'], atm: ['petals'],
+      glow: ['rgba(255,211,110,.11)', 'rgba(168,230,161,.09)'], date: y => easter(y), hold: 2,
       greet: {cs: 'Veselé Velikonoce!', uk: 'Світлого Великодня!', en: 'Happy Easter!'},
       sub: {cs: 'Velikonoční dobroty z naší cukrárny.', uk: 'Великодні смаколики з нашої кондитерської.', en: 'Easter treats from our patisserie.'},
       to: {cs: 'Do Velikonoc', uk: 'До Великодня', en: 'Easter in'}, ribbon: {cs: 'Velikonoční dobroty', uk: 'Великодні смаколики', en: 'Easter treats'}},
@@ -39,17 +41,21 @@
     valentine: {bg: ['#12070b', '#180a10', '#1f0e15', '#27121b'], bdr: '#45202f', tint: 'rgba(255,93,143,.08)'},
     easter:    {bg: ['#0f0e09', '#15140d', '#1b1a12', '#222117'], bdr: '#3a3829', tint: 'rgba(168,230,161,.07)'},
   };
-  // the order page keeps only the static decorations: no snow, no flying Santa, no bursts over the form
+  // the order page keeps only the static decorations: no scene, no sparks over the form
   const QUIET = /delivery\.html$/.test(location.pathname);
-  const CARDS = '.m-card,.pop-card,.rv-card,.ab-stat,.step,.di,.celeb-card';
-  const UI = {cs: {menu: 'Do menu', fx: 'Efekty', close: 'Zavřít', today: 'Je to dnes! 🎉'},
-              uk: {menu: 'До меню', fx: 'Ефекти', close: 'Закрити', today: 'Це сьогодні! 🎉'},
-              en: {menu: 'See the menu', fx: 'Effects', close: 'Close', today: 'It’s today! 🎉'}};
+  const CARDS = '.m-card,.pop-card,.rv-card,.step,.di,.celeb-card';
+  const UI = {cs: {menu: 'Do menu', fx: 'Efekty', close: 'Zavřít', today: 'Je to dnes! 🎉', u: ['dny', 'hod', 'min', 's']},
+              uk: {menu: 'До меню', fx: 'Ефекти', close: 'Закрити', today: 'Це сьогодні! 🎉', u: ['дн', 'год', 'хв', 'с']},
+              en: {menu: 'See the menu', fx: 'Effects', close: 'Close', today: 'It’s today! 🎉', u: ['days', 'hrs', 'min', 'sec']}};
   const L = () => { try { return localStorage.getItem('cakeme_lang') || 'cs'; } catch { return 'cs'; } };
   const store = (k, v) => { try { if (v === undefined) return localStorage.getItem(k); localStorage.setItem(k, v); } catch { return null; } };
   const esc = s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({'&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'}[c]));
   const calm = () => store('cm_fx_off') === '1' || matchMedia('(prefers-reduced-motion: reduce)').matches;
+  let effects = true;
+  const animOn = () => effects && !calm();
   const rnd = (a, b) => a + Math.random() * (b - a);
+  const prng = seed => () => (seed = (seed * 16807) % 2147483647) / 2147483647;
+  const TAU = Math.PI * 2, GA = Math.PI * (3 - Math.sqrt(5));
 
   function easter(y) {
     const a = y % 19, b = Math.floor(y / 100), c = y % 100, d = Math.floor(b / 4), e = b % 4, f = Math.floor((b + 8) / 25),
@@ -57,650 +63,458 @@
       l = (32 + 2 * e + 2 * i - h - k) % 7, m = Math.floor((a + 11 * h + 22 * l) / 451);
     return new Date(y, Math.floor((h + l - 7 * m + 114) / 31) - 1, ((h + l - 7 * m + 114) % 31) + 1);
   }
-  // "5 dní" / "5 днів" / "5 days"
-  function days(n, l) {
-    if (l === 'cs') return n + ' ' + (n === 1 ? 'den' : n < 5 ? 'dny' : 'dní');
-    if (l === 'uk') { const t = n % 10, h = n % 100; return n + ' ' + (t === 1 && h !== 11 ? 'день' : t >= 2 && t <= 4 && (h < 12 || h > 14) ? 'дні' : 'днів'); }
-    return n + (n === 1 ? ' day' : ' days');
-  }
-  function countdown(th) {
-    const now = new Date(), today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-    // the nearest holiday that is not over yet (last year's, this year's or next year's)
-    const y = now.getFullYear();
-    const diff = [y - 1, y, y + 1].map(k => Math.round((th.date(k) - today) / 864e5)).find(n => n >= -th.hold);
-    if (diff === undefined) return '';
-    const l = L();
-    return diff <= 0 ? (UI[l] || UI.cs).today : `${th.to[l] || th.to.cs}: <b>${days(diff, l)}</b>`;
-  }
-
-  // faint snowflakes on the page background
-  const FLAKES_BG = (() => {
-    const f = (x, y, r, o) => `<g transform="translate(${x} ${y})" opacity="${o}">` + [0, 60, 120].map(a =>
-      `<path transform="rotate(${a})" d="M0 -${r}V${r}M0 -${r * .55}l${r * .25} -${r * .25}M0 -${r * .55}l-${r * .25} -${r * .25}M0 ${r * .55}l${r * .25} ${r * .25}M0 ${r * .55}l-${r * .25} ${r * .25}"/>`).join('') + '</g>';
-    const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="260" height="260"><g stroke="#fff" stroke-width="1.1" fill="none" stroke-linecap="round">`
-      + f(40, 50, 11, .08) + f(170, 30, 7, .06) + f(120, 140, 14, .07) + f(220, 190, 9, .06) + f(60, 210, 6, .05) + f(230, 95, 5, .05) + '</g></svg>';
-    return 'url("data:image/svg+xml,' + encodeURIComponent(svg) + '")';
-  })();
-  // a white snow cap with soft bumps (cards, menu tabs)
-  const CAP = 'linear-gradient(#fff,#f4f8ff) 0 0/100% 5px no-repeat,radial-gradient(ellipse 9px 6px at 9px 4px,#fff 98%,transparent) 0 0/26px 11px repeat-x,radial-gradient(ellipse 6px 4px at 6px 3px,#eef4ff 98%,transparent) 13px 2px/31px 9px repeat-x';
-  // ── realistic pine: hundreds of short needles in several greens (seeded, so it looks the same every time) ──
-  const prng = seed => () => (seed = (seed * 16807) % 2147483647) / 2147483647;
-  const GREENS_D = ['#0b331c', '#104226', '#155230', '#1b6038'], GREENS_L = ['#22703f', '#2a8249', '#349456', '#43a865'];
-  function needles(pts, R, len, dens, light) {
-    let out = '';
-    const cols = light ? GREENS_L : GREENS_D;
-    for (const [x, y] of pts) for (let k = 0; k < dens; k++) {
-      const a = R() * 6.283, l = len * (.55 + R() * .6);
-      out += `<path d="M${x.toFixed(1)} ${y.toFixed(1)}l${(Math.cos(a) * l).toFixed(1)} ${(Math.sin(a) * l).toFixed(1)}" stroke="${cols[Math.floor(R() * cols.length)]}"/>`;
+  // the nearest holiday that is not over yet (last year's, this year's or next year's): its start and whether it is on now
+  function nextDate(th) {
+    const now = new Date(), y = now.getFullYear();
+    for (const k of [y - 1, y, y + 1]) {
+      const d = th.date(k), end = new Date(d.getFullYear(), d.getMonth(), d.getDate() + th.hold + 1);
+      if (end > now) return {d, on: d <= now};
     }
-    return `<g stroke-width="${light ? 1.1 : 1.5}" stroke-linecap="round" fill="none">${out}</g>`;
-  }
-  const quad = (p0, c, p1, n, R, spread) => Array.from({length: n}, (_, i) => {
-    const t = i / (n - 1), u = 1 - t;
-    return [u * u * p0[0] + 2 * u * t * c[0] + t * t * p1[0] + (R() - .5) * spread, u * u * p0[1] + 2 * u * t * c[1] + t * t * p1[1] + (R() - .5) * spread];
-  });
-  const GRAD = `<radialGradient id="thBr" cx="35%" cy="30%" r="75%"><stop offset="0" stop-color="#ff9a9a"/><stop offset=".45" stop-color="#d4202c"/><stop offset="1" stop-color="#5a0a10"/></radialGradient>
-    <radialGradient id="thBg" cx="35%" cy="30%" r="75%"><stop offset="0" stop-color="#fff4c4"/><stop offset=".45" stop-color="#e0a83a"/><stop offset="1" stop-color="#6b4710"/></radialGradient>
-    <radialGradient id="thBb" cx="35%" cy="30%" r="75%"><stop offset="0" stop-color="#cfe6ff"/><stop offset=".45" stop-color="#2f6fd1"/><stop offset="1" stop-color="#0d2554"/></radialGradient>
-    <radialGradient id="thBs" cx="35%" cy="30%" r="75%"><stop offset="0" stop-color="#ffffff"/><stop offset=".45" stop-color="#b9c3cf"/><stop offset="1" stop-color="#4a5260"/></radialGradient>
-    <linearGradient id="thRib" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ef4a50"/><stop offset="1" stop-color="#9a141c"/></linearGradient>
-    <filter id="thGl" x="-100%" y="-100%" width="300%" height="300%"><feGaussianBlur stdDeviation="2.2"/></filter>`;
-  const BALL = (x, y, r, g) => `<line x1="${x}" y1="${y - r - 8}" x2="${x}" y2="${y - r}" stroke="#d9b56a" stroke-width=".7"/>
-    <rect x="${x - r * .32}" y="${y - r - 2.6}" width="${r * .64}" height="3.4" rx=".8" fill="#e8c77f"/>
-    <circle cx="${x}" cy="${y}" r="${r}" fill="url(#${g})"/>
-    <ellipse cx="${x - r * .36}" cy="${y - r * .38}" rx="${r * .3}" ry="${r * .17}" fill="rgba(255,255,255,.8)" transform="rotate(-35 ${x - r * .36} ${y - r * .38})"/>`;
-  const CONE = (x, y, rot) => `<g transform="translate(${x} ${y}) rotate(${rot})"><ellipse rx="3.6" ry="6.5" fill="#5c3a1c"/>
-    ${[-4, -1.5, 1, 3.5].map(v => `<path d="M-3.4 ${v}q3.4 2.4 6.8 0" stroke="#8a5a2e" stroke-width="1" fill="none"/>`).join('')}</g>`;
-  const BOW = (x, y, s) => `<g transform="translate(${x} ${y}) scale(${s})">
-    <path d="M0 0 C-14 -12 -20 2 -12 6 C-8 8 -3 4 0 0 Z M0 0 C14 -12 20 2 12 6 C8 8 3 4 0 0 Z" fill="url(#thRib)"/>
-    <path d="M-1 1 L-9 18 L-5 16 L-3 20 Z M1 1 L9 18 L5 16 L3 20 Z" fill="url(#thRib)"/><circle r="3.4" fill="#c3202a"/></g>`;
-  const LIGHT = (x, y, c, d) => `<g class="th-pl" style="animation-delay:${d}s"><circle cx="${x}" cy="${y}" r="5" fill="${c}" filter="url(#thGl)" opacity=".8"/><circle cx="${x}" cy="${y}" r="1.9" fill="#fffbe8"/></g>`;
-  // a pine garland swag over the About photo
-  const PINE = (() => {
-    const R = prng(7), A = [-6, 10], C1 = [100, 62], M = [200, 12], C2 = [300, 62], B = [406, 10];
-    const core = [...quad(A, C1, M, 150, R, 9), ...quad(M, C2, B, 150, R, 9)];
-    const top = [...quad(A, C1, M, 110, R, 6), ...quad(M, C2, B, 110, R, 6)];
-    const at = (seg, t) => { const [p0, c, p1] = seg ? [M, C2, B] : [A, C1, M], u = 1 - t; return [u * u * p0[0] + 2 * u * t * c[0] + t * t * p1[0], u * u * p0[1] + 2 * u * t * c[1] + t * t * p1[1]]; };
-    const balls = [[0, .3, 7, 'thBr'], [0, .52, 8.5, 'thBg'], [0, .74, 6.5, 'thBb'], [1, .26, 6.5, 'thBs'], [1, .48, 8.5, 'thBr'], [1, .7, 7, 'thBg']];
-    const cones = [[0, .14, 20], [0, .9, -25], [1, .1, 15], [1, .86, -20]];
-    const lights = [];
-    for (let seg = 0; seg < 2; seg++) for (let i = 1; i < 10; i++) lights.push([seg, i / 10]);
-    const cols = ['#ffd36e', '#ff7b6b', '#9fd3ff', '#ffe9a8'];
-    return `<svg viewBox="0 0 400 92" width="100%" preserveAspectRatio="xMidYMin meet" overflow="visible"><defs>${GRAD}</defs>
-      ${needles(core, R, 10, 3, false)}${needles(top, R, 7, 3, true)}
-      ${cones.map(([sg, t, r]) => { const [x, y] = at(sg, t); return CONE(x, y + 5, r); }).join('')}
-      ${lights.map(([sg, t], i) => { const [x, y] = at(sg, t); return LIGHT(x, y - 2 + (i % 2) * 5, cols[i % 4], (i % 4) * .45); }).join('')}
-      ${balls.map(([sg, t, r, g]) => { const [x, y] = at(sg, t); return BALL(x, y + 13 + r, r, g); }).join('')}
-      ${BOW(0, 8, .9)}${BOW(200, 12, .8)}${BOW(400, 8, .9)}
-    </svg>`;
-  })();
-  // a pine strand tile for the card edge (repeats sideways, used as a CSS background)
-  const STRAND = (() => {
-    const R = prng(11), pts = Array.from({length: 26}, (_, i) => [i * 2.4, 7 + (R() - .5) * 3]);
-    const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="60" height="14" viewBox="0 0 60 14">${needles(pts, R, 6, 4, false)}${needles(pts, R, 4.5, 2, true)}</svg>`;
-    return 'url("data:image/svg+xml,' + encodeURIComponent(svg) + '")';
-  })();
-  // a pine wreath with berries, two baubles and a bow (top-left of the cards)
-  const WREATH = (() => {
-    const R = prng(23), ring = r => Array.from({length: 70}, (_, i) => { const a = i / 70 * 6.283; return [32 + Math.cos(a) * r + (R() - .5) * 4, 30 + Math.sin(a) * r + (R() - .5) * 4]; });
-    const berries = [30, 95, 150, 215, 330].map(d => { const a = d * Math.PI / 180, x = 32 + Math.cos(a) * 17, y = 30 + Math.sin(a) * 17;
-      return [0, 1, 2].map(k => `<circle cx="${(x + [-2, 2, 0][k]).toFixed(1)}" cy="${(y + [0, 0, -2.4][k]).toFixed(1)}" r="1.8" fill="url(#thBr)"/>`).join(''); }).join('');
-    const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 64 64"><defs>${GRAD}</defs>
-      ${needles(ring(17), R, 7, 4, false)}${needles(ring(17), R, 5, 3, true)}${berries}
-      <circle cx="18" cy="38" r="4" fill="url(#thBg)"/><circle cx="46" cy="38" r="3.6" fill="url(#thBb)"/>${BOW(32, 47, .55)}</svg>`;
-    return `<img src="data:image/svg+xml,${encodeURIComponent(svg)}" alt="" width="60" height="60">`;
-  })();
-  // Santa in his sleigh with two reindeer, facing left (towards the logo)
-  const DEER = (x, nose) => `<g transform="translate(${x} 14)"><g class="th-rd">
-      ${nose ? '<circle class="th-nose" cx="1.5" cy="23" r="6" fill="#ff2d2d" filter="url(#thGl)"/>' : ''}
-      <g class="th-lf"><path d="M21 49 L16 66 M25 49 L25 67" stroke="#5e3a18" stroke-width="3.2" stroke-linecap="round"/></g>
-      <g class="th-lb"><path d="M40 49 L46 64 M44 48 L51 62" stroke="#5e3a18" stroke-width="3.2" stroke-linecap="round"/></g>
-      <ellipse cx="33" cy="43" rx="20" ry="10" fill="url(#thDeer)"/>
-      <path d="M19 42 C12 36 11 28 14 22 L22 23 C20 30 22 36 27 40 Z" fill="url(#thDeer)"/>
-      <ellipse cx="12" cy="20" rx="8.5" ry="5.6" fill="#a87442" transform="rotate(-14 12 20)"/>
-      <ellipse cx="5" cy="22.5" rx="4.5" ry="3.2" fill="#c49461"/>
-      <circle cx="${nose ? 1.6 : 1.8}" cy="22.6" r="${nose ? 2.8 : 1.8}" fill="${nose ? '#ff2d2d' : '#2a1a10'}"/>
-      <circle cx="11.5" cy="18.4" r="1.2" fill="#1a1010"/><path d="M17 15 q4 -3 6 1 q-3 1 -6 -1Z" fill="#8a5a2e"/>
-      <path d="M13.5 14 C12 8 9 5 5 2 M9.5 7 L4 7.5 M16 13.5 C17 7 20 4 25 1 M19.5 6 L25 7" stroke="#e8d0a8" stroke-width="1.9" stroke-linecap="round" fill="none"/>
-      <circle cx="52" cy="39" r="3.2" fill="#f5ead8"/>
-      <path d="M20 37 Q33 47 45 37" stroke="#b3202a" stroke-width="3.4" fill="none"/>
-      <circle cx="27" cy="42" r="2" fill="url(#thBg)"/><circle cx="33" cy="43.6" r="2" fill="url(#thBg)"/><circle cx="39" cy="42" r="2" fill="url(#thBg)"/>
-    </g></g>`;
-  const SANTA = `<svg viewBox="0 0 270 112" overflow="visible"><defs>${GRAD}
-      <linearGradient id="thDeer" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#b07a45"/><stop offset="1" stop-color="#6e4520"/></linearGradient>
-      <linearGradient id="thRed" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#f04a50"/><stop offset="1" stop-color="#a3141d"/></linearGradient>
-      <linearGradient id="thSl" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#d9303a"/><stop offset="1" stop-color="#760d14"/></linearGradient>
-      <radialGradient id="thSack" cx="40%" cy="35%" r="70%"><stop offset="0" stop-color="#a8773f"/><stop offset="1" stop-color="#55361a"/></radialGradient></defs>
-    ${DEER(0, true)}${DEER(64, false)}
-    <path d="M45 52 Q64 64 84 52 M109 52 Q132 70 156 68" stroke="#e8c06a" stroke-width="1.4" fill="none"/>
-    <g class="th-sleigh">
-      <path d="M220 60 C210 34 218 16 233 18 C249 20 253 38 244 60 Z" fill="url(#thSack)"/>
-      <rect x="221" y="11" width="13" height="11" rx="1.5" fill="#2f8a4f"/><path d="M227.5 11 v11 M221 16.5 h13" stroke="#f5d67a" stroke-width="1.6"/>
-      <rect x="236" y="14" width="11" height="9" rx="1.5" fill="#e5484d"/><path d="M241.5 14 v9 M236 18.5 h11" stroke="#fff" stroke-width="1.4"/>
-      <path d="M170 70 C170 46 178 36 191 36 C204 36 211 46 211 70 Z" fill="url(#thRed)"/>
-      <path d="M189 37 v30" stroke="#fff" stroke-width="3"/>
-      <g class="th-arm"><path d="M183 46 Q170 40 166 27" stroke="url(#thRed)" stroke-width="6.5" stroke-linecap="round" fill="none"/><circle cx="165.5" cy="25" r="4" fill="#2f8a4f"/><path d="M170 34 h7" stroke="#fff" stroke-width="3" transform="rotate(-55 173 34)"/></g>
-      <circle cx="190" cy="26" r="9" fill="#ffd9bd"/><circle cx="184.5" cy="28" r="2.4" fill="#ff9e9e" opacity=".7"/>
-      <path d="M180 26 C179 40 185 46 190 47 C196 46 201 40 200 26 C196 33 184 33 180 26 Z" fill="#fff"/>
-      <path d="M183 29 q4 3 7 0 q3 3 7 0" stroke="#f2f2f2" stroke-width="2.6" fill="none" stroke-linecap="round"/>
-      <circle cx="186" cy="23.5" r="1.1" fill="#222"/><circle cx="192.5" cy="23.5" r="1.1" fill="#222"/>
-      <path d="M180 20 Q186 3 206 9 Q201 13 199 20 Z" fill="url(#thRed)"/><rect x="178.5" y="17" width="23" height="6" rx="3" fill="#fff"/><circle cx="207" cy="10" r="3.8" fill="#fff"/>
-      <path d="M154 64 H236 Q248 64 250 52 L254 34 Q256 29 260 31 L256 62 Q252 84 230 84 H168 Q154 84 154 72 Z" fill="url(#thSl)" stroke="#e8c06a" stroke-width="2"/>
-      <path d="M172 74 q10 -8 20 0 q10 8 20 0 q8 -6 16 0" stroke="#e8c06a" stroke-width="1.5" fill="none"/>
-      <path d="M176 84 v10 M226 84 v10" stroke="#e8c06a" stroke-width="2.4"/>
-      <path d="M146 94 H240 Q256 94 256 84 M146 94 Q132 94 134 86 Q136 79 143 82" stroke="#e8c06a" stroke-width="3.2" fill="none" stroke-linecap="round"/>
-    </g></svg>`;
-  // ── the witch on her broom with a black cat (Halloween), facing left ──
-  const WITCH = `<svg viewBox="0 0 250 122" overflow="visible"><defs>${GRAD}
-      <linearGradient id="thWd" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#8a4bd0"/><stop offset="1" stop-color="#3a1866"/></linearGradient>
-      <linearGradient id="thWh" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#4a2a6a"/><stop offset="1" stop-color="#140a20"/></linearGradient>
-      <linearGradient id="thBroom" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#8a5a2e"/><stop offset="1" stop-color="#5a3518"/></linearGradient></defs>
-    <g class="th-cape"><path d="M124 50 C152 46 180 52 206 36 C200 62 170 78 132 74 Z" fill="#26103c"/><path d="M128 56 C152 54 172 58 196 48" stroke="#4a2470" stroke-width="1.4" fill="none"/></g>
-    <path d="M28 88 L210 98" stroke="url(#thBroom)" stroke-width="5.5" stroke-linecap="round"/>
-    <g class="th-bristle">${Array.from({length: 11}, (_, i) => `<path d="M206 97 Q224 ${90 + i * 1.5} 244 ${78 + i * 4}" stroke="${['#e2b04f', '#c48a2c', '#f0c868'][i % 3]}" stroke-width="2.4" fill="none" stroke-linecap="round"/>`).join('')}
-      <rect x="201" y="92" width="9" height="11" rx="2" fill="#8a2a2a"/></g>
-    <g class="th-cat" transform="translate(176 74)"><path class="th-tail" d="M9 13 C20 10 19 -5 12 -3" stroke="#0d0d0d" stroke-width="3.2" fill="none" stroke-linecap="round"/>
-      <ellipse cx="0" cy="13" rx="9.5" ry="7" fill="#0d0d0d"/><circle cx="-8" cy="4" r="5.8" fill="#0d0d0d"/>
-      <path d="M-13 1 L-12 -6 L-8 -1 Z M-6 -1 L-3 -7 L-2 1 Z" fill="#0d0d0d"/>
-      <circle cx="-10" cy="3.5" r="1.3" fill="#ffd34d"/><circle cx="-6" cy="3.5" r="1.3" fill="#ffd34d"/></g>
-    <path d="M110 90 L98 106" stroke="#111" stroke-width="5.4" stroke-linecap="round"/><path d="M110 90 L98 106" stroke="#ff8a1f" stroke-width="5.4" stroke-dasharray="2.4 3"/>
-    <path d="M101 105 L89 107 Q85 106 88 102" stroke="#1a1a1a" stroke-width="4.5" fill="none" stroke-linecap="round"/>
-    <path d="M102 92 C104 62 114 52 126 52 C140 52 146 66 148 92 Z" fill="url(#thWd)"/>
-    <rect x="106" y="70" width="38" height="5" fill="#1a0d28"/><rect x="121" y="69" width="7" height="7" rx="1" fill="none" stroke="#e8c06a" stroke-width="1.6"/>
-    <g class="th-arm"><path d="M116 62 Q102 70 98 86" stroke="url(#thWd)" stroke-width="7.5" stroke-linecap="round" fill="none"/><circle cx="98" cy="88" r="3.8" fill="#f3cfae"/></g>
-    <path d="M112 34 C104 46 106 58 113 63 C117 52 119 45 119 38 Z M134 36 C143 45 142 57 136 64 C132 53 130 45 130 39 Z" fill="#e8742a"/>
-    <circle cx="124" cy="38" r="10.5" fill="#f6d3b2"/><circle cx="118" cy="41" r="2.6" fill="#ff9e9e" opacity=".6"/>
-    <circle cx="120" cy="36" r="1.3" fill="#2a1a10"/><circle cx="127" cy="36" r="1.3" fill="#2a1a10"/>
-    <path d="M119 43 Q123 46 127 43" stroke="#a03a3a" stroke-width="1.4" fill="none" stroke-linecap="round"/>
-    <ellipse cx="124" cy="29" rx="20" ry="4.5" fill="url(#thWh)"/>
-    <path d="M110 29 C113 16 119 7 126 -1 C130 -7 139 -9 143 -5 C137 -3 134 5 136 13 C137 20 138 25 138 29 Z" fill="url(#thWh)"/>
-    <path d="M111 25 h26 v4 h-26 z" fill="#8a4bd0"/><rect x="120" y="24" width="7" height="6" rx="1" fill="none" stroke="#e8c06a" stroke-width="1.4"/>
-    <path d="M133 10 l1.6 3.2 3.4 .4 -2.5 2.3 .7 3.4 -3.2 -1.7 -3 1.7 .6 -3.4 -2.4 -2.3 3.3 -.4 Z" fill="#ffd36e"/>
-  </svg>`;
-  // ── heart balloons with a gift (Valentine's) ──
-  const HEARTP = 'M0 -6 C0 -16 13 -19 17 -8 C21 -19 34 -16 34 -6 C34 8 17 18 17 24 C17 18 0 8 0 -6 Z';
-  const BALLOONS = `<svg viewBox="0 0 190 175" overflow="visible"><defs>
-      <radialGradient id="thH1" cx="35%" cy="30%" r="80%"><stop offset="0" stop-color="#ffb3c7"/><stop offset=".5" stop-color="#ee2f5f"/><stop offset="1" stop-color="#7d0a28"/></radialGradient>
-      <radialGradient id="thH2" cx="35%" cy="30%" r="80%"><stop offset="0" stop-color="#ffd6e0"/><stop offset=".5" stop-color="#ff6f9c"/><stop offset="1" stop-color="#a2204e"/></radialGradient>
-      <radialGradient id="thH3" cx="35%" cy="30%" r="80%"><stop offset="0" stop-color="#ffe7ef"/><stop offset=".5" stop-color="#d9406e"/><stop offset="1" stop-color="#6a0d2a"/></radialGradient>
-      <linearGradient id="thGift" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ff7aa2"/><stop offset="1" stop-color="#b3204f"/></linearGradient></defs>
-    ${[[40, 44, 1, 'thH1', 0], [94, 26, 1.15, 'thH2', .5], [146, 50, .95, 'thH3', 1]].map(([x, y, sc, g, d]) => `
-      <path d="M${x} ${y + 26 * sc} C${x - 4} ${y + 60} ${95 + (x - 94) * .2} ${118} 95 132" stroke="rgba(255,255,255,.55)" stroke-width="1" fill="none"/>
-      <g class="th-bal" style="animation-delay:${d}s;transform-origin:95px 132px"><g transform="translate(${x - 17 * sc} ${y}) scale(${sc})">
-        <path d="${HEARTP}" fill="url(#${g})"/><ellipse cx="9" cy="-7" rx="4.5" ry="2.6" fill="rgba(255,255,255,.7)" transform="rotate(-30 9 -7)"/>
-        <path d="M15 24 L19 24 L17 28 Z" fill="#8a1033"/></g></g>`).join('')}
-    <rect x="80" y="132" width="30" height="24" rx="2" fill="url(#thGift)"/><rect x="78" y="128" width="34" height="7" rx="1.5" fill="#ff8fb2"/>
-    <path d="M95 128 v28 M78 131 h34" stroke="#ffd36e" stroke-width="3"/>
-    <path d="M95 128 C86 118 78 124 86 129 Z M95 128 C104 118 112 124 104 129 Z" fill="#ffd36e"/>
-  </svg>`;
-  // ── the Easter bunny with a basket of painted eggs, facing left ──
-  const EGGG = (x, y, r, c1, c2, rot) => `<g transform="translate(${x} ${y}) rotate(${rot})"><ellipse rx="${r * .78}" ry="${r}" fill="${c1}"/>
-    <path d="M${-r * .74} ${-r * .15} L${-r * .4} ${-r * .38} L0 ${-r * .15} L${r * .4} ${-r * .38} L${r * .74} ${-r * .15}" stroke="#fff" stroke-width="1.3" fill="none"/>
-    <path d="M${-r * .76} ${r * .25} Q0 ${r * .55} ${r * .76} ${r * .25}" stroke="${c2}" stroke-width="2" fill="none"/>
-    <ellipse cx="${-r * .3}" cy="${-r * .45}" rx="${r * .17}" ry="${r * .3}" fill="rgba(255,255,255,.45)"/></g>`;
-  const BUNNY = `<svg viewBox="0 0 160 136" overflow="visible"><defs>
-      <radialGradient id="thFur" cx="40%" cy="30%" r="80%"><stop offset="0" stop-color="#ffffff"/><stop offset=".6" stop-color="#e9e4dc"/><stop offset="1" stop-color="#b9b0a4"/></radialGradient>
-      <linearGradient id="thBas" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#c58a4a"/><stop offset="1" stop-color="#7a4a20"/></linearGradient></defs>
-    <circle class="th-tailb" cx="122" cy="84" r="10" fill="#fff"/>
-    <ellipse cx="104" cy="114" rx="22" ry="10" fill="url(#thFur)"/>
-    <ellipse cx="88" cy="92" rx="34" ry="27" fill="url(#thFur)"/><ellipse cx="74" cy="100" rx="16" ry="15" fill="#fbf8f3"/>
-    <g class="th-ear" style="transform-origin:58px 44px"><ellipse cx="50" cy="20" rx="7.5" ry="24" fill="url(#thFur)" transform="rotate(-14 50 20)"/><ellipse cx="50" cy="22" rx="3.8" ry="17" fill="#f6b8c6" transform="rotate(-14 50 22)"/></g>
-    <g class="th-ear th-ear2" style="transform-origin:66px 44px"><ellipse cx="68" cy="18" rx="7.5" ry="24" fill="url(#thFur)" transform="rotate(10 68 18)"/><ellipse cx="68" cy="20" rx="3.8" ry="17" fill="#f6b8c6" transform="rotate(10 68 20)"/></g>
-    <circle cx="56" cy="58" r="21" fill="url(#thFur)"/><circle cx="46" cy="66" r="5" fill="#ffc2cf" opacity=".7"/>
-    <circle cx="48" cy="55" r="3.6" fill="#2a1d1a"/><circle cx="47" cy="53.8" r="1.2" fill="#fff"/>
-    <path d="M35 62 q2.4 -2.4 4.8 0 q-2.4 3 -4.8 0 Z" fill="#ff8fa8"/>
-    <path d="M37 65 q0 4 -4 4 M37 65 q0 4 4 4" stroke="#b07a7a" stroke-width="1" fill="none"/>
-    <path d="M30 60 l-12 -3 M30 63 l-12 1 M30 66 l-11 4" stroke="#c9bfb3" stroke-width=".8"/>
-    <path d="M14 100 Q14 128 38 128 Q62 128 62 100 Z" fill="url(#thBas)"/>
-    <path d="M16 104 h44 M17 112 h42 M20 120 h36" stroke="#a46b33" stroke-width="1.6"/>
-    <path d="M18 100 Q38 70 58 100" stroke="#a46b33" stroke-width="3" fill="none"/>
-    ${EGGG(24, 97, 8, '#ff9eb5', '#e5484d', -15)}${EGGG(38, 94, 9, '#9fd3ff', '#2f6fd1', 5)}${EGGG(52, 97, 8, '#ffd36e', '#e08b1a', 18)}
-    <ellipse cx="62" cy="104" rx="8" ry="6" fill="url(#thFur)"/><ellipse cx="20" cy="106" rx="7" ry="5.5" fill="url(#thFur)"/>
-  </svg>`;
-  // who visits the logo on each holiday, how they move and what they say
-  const VISITORS = {
-    new_year: {svg: () => SANTA, w: 270, h: 112, move: 'fly', spark: ['✨', '⭐'], says: {cs: 'Ho-ho-ho! Šťastný nový rok!', uk: 'Хо-хо-хо! З Новим роком!', en: 'Ho-ho-ho! Happy New Year!'}},
-    christmas: {svg: () => SANTA, w: 270, h: 112, move: 'fly', spark: ['✨', '⭐'], says: {cs: 'Ho-ho-ho! Veselé Vánoce!', uk: 'Хо-хо-хо! Веселого Різдва!', en: 'Ho-ho-ho! Merry Christmas!'}},
-    halloween: {svg: () => WITCH, w: 250, h: 122, move: 'fly', spark: ['✨', '🦇', '⭐'], says: {cs: 'Sladkosti, nebo psota? 🎃', uk: 'Солодощі чи капость? 🎃', en: 'Trick or treat? 🎃'}},
-    valentine: {svg: () => BALLOONS, w: 170, h: 157, move: 'float', spark: ['💕', '✨'], says: {cs: 'S láskou! 💝', uk: 'З любов’ю! 💝', en: 'With love! 💝'}},
-    easter: {svg: () => BUNNY, w: 140, h: 119, move: 'hop', spark: ['🌸', '✨'], says: {cs: 'Veselé Velikonoce! 🐣', uk: 'Світлого Великодня! 🐣', en: 'Happy Easter! 🐣'}},
-  };
-  // ── a drawn bat and spider (Halloween) ──
-  const BAT = `<svg viewBox="0 0 70 34" width="58" height="28" overflow="visible">
-    <g class="th-wl"><path d="M33 16 C26 4 14 2 2 8 C8 10 9 14 6 18 C12 15 15 19 14 23 C20 18 26 20 30 22 Z" fill="#1b1222"/></g>
-    <g class="th-wr"><path d="M37 16 C44 4 56 2 68 8 C62 10 61 14 64 18 C58 15 55 19 56 23 C50 18 44 20 40 22 Z" fill="#1b1222"/></g>
-    <ellipse cx="35" cy="18" rx="6" ry="8" fill="#241830"/><path d="M31 11 L30 4 L34 9 Z M39 11 L40 4 L36 9 Z" fill="#241830"/>
-    <circle cx="32.6" cy="15" r="1.4" fill="#ff4d4d"/><circle cx="37.4" cy="15" r="1.4" fill="#ff4d4d"/></svg>`;
-  const SPIDER = `<svg viewBox="0 0 44 40" width="40" height="36" overflow="visible"><g class="th-legs" stroke="#1a1a1a" stroke-width="2.2" fill="none" stroke-linecap="round">
-    <path d="M18 18 Q8 8 2 14 M18 21 Q6 18 1 24 M19 24 Q8 28 4 36 M20 26 Q14 32 12 39"/>
-    <path d="M26 18 Q36 8 42 14 M26 21 Q38 18 43 24 M25 24 Q36 28 40 36 M24 26 Q30 32 32 39"/></g>
-    <ellipse cx="22" cy="26" rx="8" ry="9" fill="#141414"/><circle cx="22" cy="14" r="5.5" fill="#1d1d1d"/>
-    <circle cx="20" cy="13" r="1.4" fill="#ff4d4d"/><circle cx="24" cy="13" r="1.4" fill="#ff4d4d"/>
-    <path d="M18 24 q4 3 8 0" stroke="#5a2a7a" stroke-width="1.4" fill="none"/></svg>`;
-  // ── card decorations: a glowing jack-o'-lantern and a glossy heart ──
-  const PUMPKIN = `<svg viewBox="0 0 60 54" width="52" height="47"><defs>
-      <radialGradient id="thPk" cx="40%" cy="35%" r="75%"><stop offset="0" stop-color="#ffb347"/><stop offset=".55" stop-color="#f07a12"/><stop offset="1" stop-color="#8a3a05"/></radialGradient>
-      <radialGradient id="thFire" cx="50%" cy="60%" r="60%"><stop offset="0" stop-color="#fff6b0"/><stop offset=".5" stop-color="#ffd34d"/><stop offset="1" stop-color="#ff8a1f"/></radialGradient></defs>
-    <path d="M30 10 C31 5 34 2 38 1" stroke="#3f6b22" stroke-width="3.4" fill="none" stroke-linecap="round"/>
-    <ellipse cx="16" cy="31" rx="13" ry="18" fill="url(#thPk)"/><ellipse cx="44" cy="31" rx="13" ry="18" fill="url(#thPk)"/><ellipse cx="30" cy="31" rx="14" ry="20" fill="url(#thPk)"/>
-    <path d="M23 13 Q20 31 23 49 M37 13 Q40 31 37 49" stroke="#b9530a" stroke-width="1" fill="none" opacity=".7"/>
-    <g class="th-flame"><path d="M16 26 L22 20 L26 28 Z M44 26 L38 20 L34 28 Z" fill="url(#thFire)"/><path d="M28 32 L32 32 L30 28 Z" fill="url(#thFire)"/>
-    <path d="M14 36 Q30 50 46 36 L42 38 L39 35 L36 39 L33 36 L30 40 L27 36 L24 39 L21 35 L18 38 Z" fill="url(#thFire)"/></g></svg>`;
-  const GHEART = `<svg viewBox="-4 -22 42 50" width="40" height="46"><defs><radialGradient id="thGh" cx="35%" cy="30%" r="80%"><stop offset="0" stop-color="#ffc2d2"/><stop offset=".5" stop-color="#ee2f5f"/><stop offset="1" stop-color="#7d0a28"/></radialGradient></defs>
-    <path d="${HEARTP}" fill="url(#thGh)"/><ellipse cx="9" cy="-7" rx="4.6" ry="2.6" fill="rgba(255,255,255,.75)" transform="rotate(-30 9 -7)"/></svg>`;
-  // small icons for the menu tabs
-  const ICON = svg => 'url("data:image/svg+xml,' + encodeURIComponent(svg) + '")';
-  const TAB_DECO = () => ({
-    halloween: ICON(`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 60 60">${WEB.replace(/^<svg[^>]*>/, '').replace('</svg>', '')}</svg>`),
-    valentine: ICON(`<svg xmlns="http://www.w3.org/2000/svg" viewBox="-2 -20 38 46"><path d="${HEARTP}" fill="#ee2f5f"/><ellipse cx="9" cy="-7" rx="4" ry="2.3" fill="rgba(255,255,255,.7)" transform="rotate(-30 9 -7)"/></svg>`),
-    easter: ICON(`<svg xmlns="http://www.w3.org/2000/svg" viewBox="-12 -12 24 24">${[0, 72, 144, 216, 288].map(a => `<ellipse rx="4" ry="7" cy="-6" fill="#ffb3c7" transform="rotate(${a})"/>`).join('')}<circle r="3.6" fill="#ffd36e"/></svg>`),
-  });
-  function snowCss(th) {
-    if (!th.snowy) return '';
-    const b = th.bulbs;
-    return `
-html[data-theme] body{background-image:${FLAKES_BG},radial-gradient(ellipse 90% 60% at 50% 20%,rgba(159,211,255,.07),transparent 65%),linear-gradient(rgba(255,255,255,.018) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.018) 1px,transparent 1px);background-size:260px 260px,100% 100%,55px 55px,55px 55px;background-repeat:repeat,no-repeat,repeat,repeat}
-.th-snow{position:absolute;left:-1px;right:-1px;top:-1px;height:13px;z-index:4;pointer-events:none;background:${CAP};
-  filter:drop-shadow(0 2px 2px rgba(0,0,0,.35));transform-origin:top;animation:thSnowIn 1s ease-out both}
-.th-snow::after{content:'';position:absolute;inset:0;background:radial-gradient(circle,#fff 1px,transparent 1.5px) 0 0/19px 9px;opacity:0;animation:thTwinkle 3s ease-in-out infinite}
-@keyframes thSnowIn{from{transform:scaleY(0)}to{transform:none}}
-@keyframes thTwinkle{50%{opacity:.9}}
-html[data-theme] .m-tabs{padding-top:8px}
-html[data-theme] .m-tab{position:relative}
-html[data-theme] .m-tab::before{content:'';position:absolute;left:-1px;right:-1px;top:-7px;height:10px;background:${CAP};pointer-events:none;filter:drop-shadow(0 1px 1px rgba(0,0,0,.3))}
-html[data-theme] .m-tab:hover::before{animation:thShake .5s}
-@keyframes thShake{25%{transform:translateX(-2px)}75%{transform:translateX(2px)}}
-html[data-theme] .m-body{position:relative}
-.th-cgar{position:absolute;left:0;right:0;top:-7px;height:14px;display:flex;justify-content:space-around;pointer-events:none;z-index:4}
-.th-cgar::before{content:'';position:absolute;left:-2px;right:-2px;top:-3px;height:14px;background:${STRAND} 0 0/60px 14px repeat-x;filter:drop-shadow(0 2px 2px rgba(0,0,0,.55))}
-.th-cgar i{position:relative;z-index:1}
-.th-cgar i{width:6px;height:9px;border-radius:45% 45% 50% 50%;margin-top:3px;animation:thGlow 2.2s infinite ease-in-out}
-.th-cgar i:nth-child(odd){margin-top:5px}
-.th-cgar i:nth-child(4n+1){background:${b[0]};color:${b[0]}}
-.th-cgar i:nth-child(4n+2){background:${b[1]};color:${b[1]};animation-delay:.55s}
-.th-cgar i:nth-child(4n+3){background:${b[2]};color:${b[2]};animation-delay:1.1s}
-.th-cgar i:nth-child(4n+4){background:${b[3]};color:${b[3]};animation-delay:1.65s}
-html[data-theme] .ab-img-wrap{position:relative}
-.th-pine{position:absolute;left:-14px;right:-14px;top:-16px;z-index:5;pointer-events:none;filter:drop-shadow(0 6px 8px rgba(0,0,0,.55));animation:thSnowIn 1.2s ease-out both;transform-origin:top}
-.th-pine .th-pl{animation:thPl 1.8s ease-in-out infinite}
-@keyframes thPl{0%,100%{opacity:.35}50%{opacity:1}}
-@media(max-width:600px){.th-pine{left:-6px;right:-6px;top:-10px}}`;
-  }
-  function css(th, id) {
-    const b = th.bulbs, P = PAL[id];
-    return snowCss(th) + `
-html[data-theme]{--bg0:${P.bg[0]};--bg1:${P.bg[1]};--bg2:${P.bg[2]};--bg3:${P.bg[3]};--bdr:${P.bdr}}
-html[data-theme] body{background-color:${P.bg[0]}}
-html[data-theme] :is(${CARDS}):not(.ab-stat){background-image:linear-gradient(180deg,${P.tint},transparent 45%);border-color:${P.bdr};transition:box-shadow .35s,border-color .35s,transform .35s}
-html[data-theme] :is(${CARDS}):hover{border-color:${b[0]};box-shadow:0 0 0 1px ${b[0]}55,0 14px 34px -8px ${b[0]}66,0 0 26px -6px ${b[2]}55}
-:where(.pop-card,.rv-card,.di,.celeb-card){position:relative}
-html[data-theme] .ab-stat{background:linear-gradient(135deg,${P.bg[1]},${P.bg[3]});border-color:${b[0]};box-shadow:0 10px 30px rgba(0,0,0,.55)}
-.th-deco{position:absolute;z-index:3;pointer-events:none;line-height:0}
-.th-deco.tr{top:0;right:0}.th-deco.tl{top:5px;left:5px;z-index:6;filter:drop-shadow(0 4px 6px rgba(0,0,0,.6));animation:thWob 5s ease-in-out infinite}.th-deco.lt{top:8px;left:8px;filter:drop-shadow(0 4px 6px rgba(0,0,0,.55));animation:thWob 4s ease-in-out infinite}
-.th-deco svg{display:block}
-.th-deco.tl img{display:block;width:60px;height:60px}
-@media(max-width:600px){.th-deco.tl img{width:46px;height:46px}}
-.th-deco.em{font-size:1.35rem;line-height:1;top:8px;right:10px;filter:drop-shadow(0 3px 5px rgba(0,0,0,.55));animation:thWob 4s ease-in-out infinite}
-:is(${CARDS}):hover .th-deco.em{animation-duration:1.2s}
-.th-deco.web{opacity:.75}
-:is(${CARDS}):hover .th-deco.web{opacity:1}
-.th-vis{position:fixed;left:0;top:0;z-index:1480;pointer-events:none;will-change:transform;filter:drop-shadow(0 8px 12px rgba(0,0,0,.55))}
-.th-vis svg{display:block}
-.th-rd{animation:thBob .38s ease-in-out infinite alternate}
-.th-lf,.th-lb{transform-box:fill-box;transform-origin:50% 0}
-.th-lf{animation:thLeg .38s ease-in-out infinite alternate}
-.th-lb{animation:thLeg .38s ease-in-out infinite alternate-reverse}
-.th-sleigh{animation:thBob 1.1s ease-in-out infinite alternate}
-.th-arm{transform-box:fill-box;transform-origin:100% 100%;animation:thWave .45s ease-in-out infinite alternate}
-.th-vis.flying .th-arm{animation-duration:1.4s}
-.th-vis.stand .th-lf{animation:thStomp .42s ease-in-out infinite alternate}
-.th-vis.stand .th-lb{animation:thStomp .42s ease-in-out infinite alternate-reverse}
-.th-vis.stand .th-rd{animation:thBob .84s ease-in-out infinite alternate}
-.th-vis.stand .th-sleigh{animation:none}
-.th-nose{animation:thGlow2 1s infinite}
-.th-cape{transform-box:fill-box;transform-origin:0 50%;animation:thCape .5s ease-in-out infinite alternate}
-.th-bristle{transform-box:fill-box;transform-origin:0 50%;animation:thCape .3s ease-in-out infinite alternate}
-.th-tail{transform-box:fill-box;transform-origin:0 100%;animation:thWave .6s ease-in-out infinite alternate}
-.th-bal{animation:thSway 2.6s ease-in-out infinite alternate}
-.th-ear{animation:thEar 2.4s ease-in-out infinite}.th-ear2{animation-delay:.3s}
-.th-tailb{transform-box:fill-box;transform-origin:50% 50%;animation:thPuff 1.2s ease-in-out infinite}
-.th-say{position:absolute;left:55%;top:-38px;white-space:nowrap;background:#fffaf0;color:#9a1a24;font:600 .86rem 'Playfair Display',serif;
-  padding:7px 13px;border-radius:14px;box-shadow:0 6px 18px rgba(0,0,0,.45);opacity:0;transform:scale(.6) translateY(8px);transform-origin:20% 100%;transition:.35s cubic-bezier(.2,1.5,.4,1)}
-.th-say::after{content:'';position:absolute;left:24px;bottom:-6px;border:7px solid transparent;border-top-color:#fffaf0;border-bottom:0}
-.th-vis.talk .th-say{opacity:1;transform:none}
-.th-vis.below .th-say{top:auto;bottom:-34px;left:18%;transform-origin:20% 0}
-.th-vis.below .th-say::after{bottom:auto;top:-6px;border-top-color:transparent;border-bottom:7px solid #fffaf0;border-top-width:0}
-.th-spark{position:fixed;z-index:1475;pointer-events:none;font-size:.8rem}
-.th-bat{position:fixed;left:0;top:0;z-index:1460;pointer-events:none;will-change:transform;filter:drop-shadow(0 4px 6px rgba(0,0,0,.6))}
-.th-wl,.th-wr{transform-box:fill-box;animation:thFlap .16s ease-in-out infinite alternate}
-.th-wl{transform-origin:100% 60%}.th-wr{transform-origin:0 60%}
-.th-legs{animation:thLegs .5s ease-in-out infinite alternate;transform-origin:22px 22px}
-.th-flame{animation:thFlicker 1.6s infinite}
-.th-deco.pk{top:8px;left:10px;filter:drop-shadow(0 0 10px rgba(255,140,30,.55)) drop-shadow(0 4px 6px rgba(0,0,0,.6));animation:thWob 4s ease-in-out infinite}
-.th-deco.hb{top:8px;left:10px;filter:drop-shadow(0 4px 8px rgba(238,47,95,.5));animation:thBeat 1.3s ease-in-out infinite}
-@keyframes thBob{from{transform:translateY(0)}to{transform:translateY(-3px)}}
-@keyframes thStomp{0%,40%{transform:none}100%{transform:translateY(-3.5px) rotate(-16deg)}}
-@keyframes thLeg{from{transform:rotate(28deg)}to{transform:rotate(-24deg)}}
-@keyframes thWave{from{transform:rotate(-22deg)}to{transform:rotate(16deg)}}
-@keyframes thGlow2{0%,100%{opacity:.5}50%{opacity:1}}
-@keyframes thCape{from{transform:skewY(-4deg) scaleX(1)}to{transform:skewY(5deg) scaleX(1.06)}}
-@keyframes thSway{from{transform:rotate(-6deg)}to{transform:rotate(6deg)}}
-@keyframes thEar{0%,70%,100%{transform:rotate(0)}80%{transform:rotate(-12deg)}90%{transform:rotate(6deg)}}
-@keyframes thPuff{50%{transform:scale(1.15)}}
-@keyframes thFlap{from{transform:scaleY(1)}to{transform:scaleY(.25)}}
-@keyframes thLegs{from{transform:scaleX(1)}to{transform:scaleX(.9) translateY(1px)}}
-@keyframes thFlicker{0%,100%{opacity:1}20%{opacity:.75}40%{opacity:.95}55%{opacity:.6}70%{opacity:1}85%{opacity:.8}}
-@keyframes thBeat{0%,100%{transform:scale(1)}15%{transform:scale(1.18)}30%{transform:scale(1)}45%{transform:scale(1.12)}}
-.th-glow{position:fixed;inset:0;pointer-events:none;z-index:1390;background:radial-gradient(60% 45% at 8% 0%,${th.glow[0]},transparent 70%),radial-gradient(55% 40% at 95% 5%,${th.glow[1]},transparent 70%);mix-blend-mode:screen}
-.th-garland{position:absolute;left:0;right:0;bottom:-13px;height:18px;pointer-events:none;display:flex;justify-content:space-around;overflow:hidden;z-index:1}
-.th-garland svg{position:absolute;left:0;top:0;width:100%;height:8px}
-.th-garland i{position:relative;width:7px;height:11px;border-radius:45% 45% 50% 50%;margin-top:4px;animation:thGlow 2.6s infinite ease-in-out}
-.th-garland i::before{content:'';position:absolute;top:-3px;left:1.5px;width:4px;height:3px;background:#3a3a3a;border-radius:1px}
-.th-garland i:nth-child(odd){margin-top:6px}
-.th-garland i:nth-child(4n+1){background:${b[0]};color:${b[0]}}
-.th-garland i:nth-child(4n+2){background:${b[1]};color:${b[1]};animation-delay:.65s}
-.th-garland i:nth-child(4n+3){background:${b[2]};color:${b[2]};animation-delay:1.3s}
-.th-garland i:nth-child(4n+4){background:${b[3]};color:${b[3]};animation-delay:1.95s}
-@keyframes thGlow{0%,100%{opacity:.4;box-shadow:none}50%{opacity:1;box-shadow:0 0 10px 3px currentColor}}
-html[data-theme] .m-tab.on{box-shadow:0 0 16px -2px ${b[0]}88,inset 0 0 12px -4px ${b[0]}66;border-color:${b[0]};color:#fff}
-${TAB_DECO()[id] ? `html[data-theme] .m-tab{position:relative}html[data-theme] .m-tab::after{content:'';position:absolute;right:-7px;top:-9px;width:20px;height:20px;background:${TAB_DECO()[id]} center/contain no-repeat;pointer-events:none;filter:drop-shadow(0 2px 3px rgba(0,0,0,.5));transition:.3s}html[data-theme] .m-tab:hover::after,html[data-theme] .m-tab.on::after{transform:scale(1.25) rotate(-10deg)}` : ''}
-.nav-logo{position:relative}
-.th-logo{position:absolute;left:-10px;top:-12px;font-size:1.1rem;transform-origin:50% 90%;animation:thWob 3.2s ease-in-out infinite;pointer-events:none;filter:drop-shadow(0 2px 3px rgba(0,0,0,.5))}
-@keyframes thWob{0%,100%{transform:rotate(-16deg)}50%{transform:rotate(6deg) scale(1.08)}}
-#thFx{position:fixed;inset:0;width:100%;height:100%;pointer-events:none;z-index:1500}
-.th-hang{position:fixed;top:0;z-index:1450;pointer-events:none;display:flex;flex-direction:column;align-items:center;transform-origin:50% 0;animation:thSwing 4s ease-in-out infinite}
-.th-hang::before{content:'';width:1px;background:linear-gradient(rgba(255,255,255,.1),rgba(255,255,255,.55))}
-.th-hang span{font-size:1.6rem;line-height:0;filter:drop-shadow(0 4px 8px rgba(0,0,0,.6))}
-@keyframes thSwing{0%,100%{transform:rotate(5deg)}50%{transform:rotate(-5deg)}}
-.th-spider{animation:thSpider 7s ease-in-out infinite}
-.th-spider span{font-size:1.4rem}
-@keyframes thSpider{0%,100%{transform:translateY(-30px)}40%{transform:translateY(40px)}60%{transform:translateY(25px)}}
-.th-pop{position:fixed;z-index:1700;pointer-events:none;font-size:1.25rem;will-change:transform,opacity}
-.th-ribbon{display:inline-flex;align-items:center;gap:10px;margin:0 auto 22px;padding:9px 20px;border:1px solid ${b[0]};border-radius:999px;
-  background:linear-gradient(90deg,rgba(0,0,0,.35),rgba(255,255,255,.04),rgba(0,0,0,.35));color:#f3ead9;text-decoration:none;
-  font:600 .74rem 'Raleway',sans-serif;letter-spacing:2px;text-transform:uppercase;position:relative;overflow:hidden;animation:thIn .8s ease-out}
-.th-ribbon::after{content:'';position:absolute;inset:0;background:linear-gradient(100deg,transparent 30%,rgba(255,255,255,.18) 50%,transparent 70%);transform:translateX(-100%);animation:thShine 3.5s ease-in-out infinite}
-.th-ribbon:hover{border-color:#fff}
-.th-ribbon-wrap{text-align:center}
-@keyframes thShine{60%,100%{transform:translateX(100%)}}
-.th-card{position:fixed;left:18px;bottom:18px;z-index:1600;display:flex;gap:16px;align-items:center;max-width:400px;
-  background:radial-gradient(120% 140% at 0% 0%,${th.glow[0].replace(/[\d.]+\)$/, '.35)')},transparent 60%),linear-gradient(135deg,rgba(30,26,20,.98),rgba(16,16,16,.98));
-  border:1px solid transparent;border-image:linear-gradient(135deg,${b[0]},${b[1]},${b[2]},${b[3]}) 1;padding:16px 42px 16px 16px;
-  box-shadow:0 18px 50px rgba(0,0,0,.65);font-family:'Raleway',sans-serif;animation:thIn .7s cubic-bezier(.2,1.3,.4,1)}
-.th-card .th-ic{font-size:2.6rem;line-height:1;animation:thFloat 3s ease-in-out infinite;filter:drop-shadow(0 6px 10px rgba(0,0,0,.5))}
-@keyframes thFloat{0%,100%{transform:translateY(0) rotate(-4deg)}50%{transform:translateY(-6px) rotate(4deg)}}
-.th-card b.th-h{display:block;font:400 1.22rem 'Playfair Display',serif;color:#fbf4e6;margin-bottom:3px}
-.th-card p{font-size:.78rem;color:#c2b69f;margin:0 0 8px;line-height:1.45}
-.th-card .th-cd{font-size:.74rem;color:${b[0]};margin:0 0 9px;letter-spacing:.5px}
-.th-card .th-cd b{font-size:.95rem}
-.th-card a{display:inline-block;font-size:.68rem;letter-spacing:1.5px;text-transform:uppercase;color:#0b0b0b;background:linear-gradient(90deg,${b[0]},${b[2]});padding:7px 14px;text-decoration:none;font-weight:700;transition:.2s}
-.th-card a:hover{filter:brightness(1.15);transform:translateY(-1px)}
-.th-card .th-x{position:absolute;top:6px;right:8px;background:none;border:none;color:#8d8270;font-size:1rem;cursor:pointer;padding:4px}
-.th-card .th-x:hover{color:#fff}
-.th-fxbtn{position:fixed;right:14px;bottom:14px;z-index:1600;width:40px;height:40px;border-radius:50%;border:1px solid rgba(255,255,255,.18);
-  background:rgba(15,15,15,.85);color:#fff;font-size:1.05rem;cursor:pointer;opacity:.8;transition:.2s}
-.th-fxbtn:hover{opacity:1;transform:scale(1.08)}
-.th-fxbtn.off{filter:grayscale(1);opacity:.4}
-@keyframes thIn{from{opacity:0;transform:translateY(24px) scale(.96)}to{opacity:1;transform:none}}
-@media(max-width:600px){.th-vis.small .th-say{font-size:.72rem;top:-32px}.th-card{left:10px;right:60px;bottom:10px;max-width:none;padding:12px 34px 12px 12px;gap:12px}.th-card .th-ic{font-size:2rem}.th-card b.th-h{font-size:1.02rem}.th-hang{display:none}}
-@media print{.th-glow,.th-garland,.th-logo,#thFx,.th-card,.th-fxbtn,.th-hang,.th-bat,.th-vis,.th-ribbon-wrap{display:none}}`;
+    return null;
   }
 
-  // ── canvas: snow with depth / emoji falling or rising, and New Year fireworks ──
-  let fxStop = null, storm = () => {};
-  function startFx(th) {
-    stopFx();
-    if (calm() || QUIET) return;
-    const cv = document.createElement('canvas'); cv.id = 'thFx'; document.body.appendChild(cv);
-    const ctx = cv.getContext('2d'), dpr = Math.min(2, devicePixelRatio || 1);
-    const emoji = Array.isArray(th.fx) ? th.fx : null, rise = !!th.rise;
-    let W, H, parts = [], rockets = [], sparks = [], nextBoom = 1200, last = performance.now();
-    const size = () => { W = innerWidth; H = innerHeight; cv.width = W * dpr; cv.height = H * dpr; ctx.setTransform(dpr, 0, 0, dpr, 0, 0); };
-    size(); addEventListener('resize', size);
-    const n = Math.round(Math.min(W, 1500) / (emoji ? 55 : 14));
-    // particles come in short storms (on page load and when a menu section is picked), not all the time
-    const make = () => {
-      const z = Math.random();  // depth: 0 far … 1 near
-      return {x: rnd(-W * .35, W), y: rise ? H + rnd(10, 60) : rnd(-60, -10), z,
-        r: emoji ? 11 + z * 14 : .8 + z * 3.2, vy: (emoji ? .5 + z * 1 : .8 + z * 2.2) * (rise ? -1 : 1),
-        sw: rnd(0, 6.28), sws: rnd(.006, .02), rot: rnd(0, 6.28), e: emoji ? emoji[Math.floor(Math.random() * emoji.length)] : '',
-        a: emoji ? .5 + z * .45 : .35 + z * .6, flake: !emoji && z > .82};
-    };
-    let stormUntil = 0, stormLen = 1;
-    const flake = (p) => {  // a real six-arm snowflake for the nearest ones
-      ctx.save(); ctx.translate(p.x, p.y); ctx.rotate(p.rot); ctx.strokeStyle = '#fff'; ctx.lineWidth = 1.1;
-      const R = p.r * 2.4;
-      for (let k = 0; k < 6; k++) { ctx.rotate(Math.PI / 3); ctx.beginPath(); ctx.moveTo(0, 0); ctx.lineTo(0, R); ctx.moveTo(0, R * .55); ctx.lineTo(R * .25, R * .78); ctx.moveTo(0, R * .55); ctx.lineTo(-R * .25, R * .78); ctx.stroke(); }
-      ctx.restore();
-    };
-    const boom = () => {
-      const cols = th.bulbs;
-      rockets.push({x: rnd(W * .15, W * .85), y: H, ty: rnd(H * .12, H * .4), vy: -rnd(7, 10), c: cols[Math.floor(Math.random() * cols.length)]});
-    };
-    let raf = 0;
-    const tick = t => {
-      const dt = Math.min(50, t - last); last = t;
-      ctx.clearRect(0, 0, W, H);
-      const storming = t < stormUntil, force = storming ? (stormUntil - t) / stormLen : 0;  // 1 → 0 as the storm dies down
-      const wind = emoji ? .4 + force * 1.2 : .4 + force * 2.2;
-      if (storming && parts.length < n * (emoji ? .9 : 2.2)) for (let k = 0; k < (emoji ? 1 : 5); k++) parts.push(make());
-      parts = parts.filter(p => {
-        p.y += p.vy * (1 + force * .8); p.sw += p.sws; p.x += Math.sin(p.sw) * (emoji ? .55 : .4) + wind * (.3 + p.z); p.rot += .004;
-        if ((!rise && p.y > H + 30) || (rise && p.y < -30) || p.x > W + 40) return false;
-        const fade = rise ? 1 : Math.max(0, Math.min(1, (H * .5 - p.y) / (H * .22)));  // gone before the middle of the screen
-        if (!fade) return false;
-        ctx.globalAlpha = p.a * fade;
-        if (emoji) { ctx.save(); ctx.translate(p.x, p.y); ctx.rotate(Math.sin(p.rot) * .7); ctx.font = p.r + 'px serif'; ctx.fillText(p.e, -p.r / 2, p.r / 2); ctx.restore(); }
-        else if (p.flake) flake(p);
-        else { ctx.beginPath(); ctx.arc(p.x, p.y, p.r, 0, 6.28); ctx.fillStyle = '#fff'; ctx.fill(); }
-        return true;
-      });
-      if (th.extra === 'fireworks') {
-        nextBoom -= dt; if (nextBoom <= 0) { boom(); nextBoom = rnd(1400, 3200); }
-        ctx.globalAlpha = 1;
-        rockets = rockets.filter(r => {
-          r.y += r.vy; r.vy *= .985;
-          ctx.fillStyle = r.c; ctx.fillRect(r.x - 1, r.y, 2, 7);
-          if (r.y <= r.ty || r.vy > -1.5) {
-            const k = 46 + Math.floor(Math.random() * 24);
-            for (let i = 0; i < k; i++) { const ang = i / k * 6.28, sp = rnd(1.2, 4.2); sparks.push({x: r.x, y: r.y, vx: Math.cos(ang) * sp, vy: Math.sin(ang) * sp, life: 1, c: Math.random() < .3 ? '#ffffff' : r.c}); }
-            return false;
-          }
-          return true;
-        });
-        sparks = sparks.filter(s => {
-          s.x += s.vx; s.y += s.vy; s.vy += .045; s.vx *= .985; s.life -= .012;
-          ctx.globalAlpha = Math.max(0, s.life); ctx.fillStyle = s.c; ctx.beginPath(); ctx.arc(s.x, s.y, 1.6, 0, 6.28); ctx.fill();
-          return s.life > 0;
-        });
+  // ── glowing sprites (drawn once per colour, then stamped) ──
+  const hexA = (h, a) => { const n = parseInt(h.slice(1), 16); return `rgba(${n >> 16},${n >> 8 & 255},${n & 255},${a})`; };
+  const SPR = {};
+  const mk = (w, h, fn) => { const c = document.createElement('canvas'); c.width = w; c.height = h; fn(c.getContext('2d')); return c; };
+  const glow = c => SPR['g' + c] || (SPR['g' + c] = mk(64, 64, g => {
+    const r = g.createRadialGradient(32, 32, 0, 32, 32, 32);
+    r.addColorStop(0, 'rgba(255,255,255,.95)'); r.addColorStop(.12, hexA(c, .95)); r.addColorStop(.35, hexA(c, .32)); r.addColorStop(1, hexA(c, 0));
+    g.fillStyle = r; g.fillRect(0, 0, 64, 64);
+  }));
+  const soft = c => SPR['s' + c] || (SPR['s' + c] = mk(64, 64, g => {
+    const r = g.createRadialGradient(32, 32, 0, 32, 32, 32);
+    r.addColorStop(0, hexA(c, .9)); r.addColorStop(.5, hexA(c, .35)); r.addColorStop(1, hexA(c, 0));
+    g.fillStyle = r; g.fillRect(0, 0, 64, 64);
+  }));
+  const HEART = (g, s) => { g.beginPath(); g.moveTo(0, s * .35); g.bezierCurveTo(-s * 1.1, -s * .3, -s * .55, -s * 1.05, 0, -s * .45); g.bezierCurveTo(s * .55, -s * 1.05, s * 1.1, -s * .3, 0, s * .35); g.closePath(); };
+  const heartSpr = c => SPR['h' + c] || (SPR['h' + c] = mk(64, 64, g => {
+    g.translate(32, 36); g.shadowColor = c; g.shadowBlur = 14; g.fillStyle = c; HEART(g, 16); g.fill();
+    g.shadowBlur = 0; g.fillStyle = 'rgba(255,255,255,.55)'; g.beginPath(); g.ellipse(-7, -9, 3.5, 2.2, -.6, 0, TAU); g.fill();
+  }));
+  const petalSpr = c => SPR['p' + c] || (SPR['p' + c] = mk(48, 48, g => {
+    g.translate(24, 24); const r = g.createLinearGradient(0, -16, 0, 16); r.addColorStop(0, '#ffffff'); r.addColorStop(1, c);
+    g.fillStyle = r; g.beginPath(); g.moveTo(0, 16); g.bezierCurveTo(-14, 4, -10, -14, -2, -16); g.lineTo(0, -12); g.lineTo(2, -16);
+    g.bezierCurveTo(10, -14, 14, 4, 0, 16); g.fill();
+  }));
+
+  // ── 3D figures made of points: {pts: [{x, y, z, c, s, tw}], spin | sway} in a box about [-1, 1] ──
+  const OBJ = {
+    tree(R) {  // two spirals of lights round a cone of needles, baubles that twinkle and a star on top
+      const P = [];
+      for (let k = 0; k < 2; k++) for (let i = 0, N = 380; i < N; i++) {
+        const t = i / N, a = t * TAU * 6.5 + k * Math.PI, r = .64 * t + .02;
+        P.push({x: r * Math.cos(a), y: -1 + 2 * t, z: r * Math.sin(a), c: k ? '#ff5560' : '#ffd36e', s: 1.05});
       }
-      // nothing left on screen and no fireworks: stop drawing until the next storm
-      if (!storming && !parts.length && th.extra !== 'fireworks') { ctx.clearRect(0, 0, W, H); raf = 0; return; }
-      raf = requestAnimationFrame(tick);
-    };
-    const run = () => { if (!raf && !document.hidden) { last = performance.now(); raf = requestAnimationFrame(tick); } };
-    const vis = () => { cancelAnimationFrame(raf); raf = 0; run(); };
-    document.addEventListener('visibilitychange', vis);
-    storm = ms => { stormLen = ms; stormUntil = performance.now() + ms; run(); };
-    storm(4500); run();
-    const extras = startExtras(th);
-    fxStop = () => { cancelAnimationFrame(raf); raf = 0; storm = () => {}; removeEventListener('resize', size); document.removeEventListener('visibilitychange', vis); cv.remove(); extras(); };
-  }
-  function stopFx() { if (fxStop) { fxStop(); fxStop = null; } }
-
-  // ── DOM extras: hanging baubles, a spider and flying bats, a peeking bunny ──
-  function startExtras(th) {
-    th.id = th.id || Object.keys(THEMES).find(k => THEMES[k] === th);
-    const els = [], timers = [];
-    const hang = (emoji, left, len, cls, delay) => {
-      const h = document.createElement('div'); h.className = 'th-hang ' + (cls || '');
-      h.style.left = left; h.style.animationDelay = delay + 's';
-      h.innerHTML = `<span>${emoji}</span>`;
-      document.body.appendChild(h); els.push(h);
-      h.querySelector('span').before(Object.assign(document.createElement('i'), {style: `display:block;width:1px;height:${len}px;background:linear-gradient(rgba(255,255,255,.08),rgba(255,255,255,.5))`}));
-      return h;
-    };
-    if (QUIET) return () => {};
-    const V = VISITORS[th.id];
-    if (V) {
-      // a drawn visitor comes to the logo and says hello. On wide screens it parks in the nav left of the logo
-      // and stays there; on narrow ones it waits below the nav and leaves once the page is scrolled
-      const fly = instant => {
-        const logo = document.querySelector('.nav-logo'), nav = document.getElementById('nav');
-        if (!logo || !nav || document.hidden || document.querySelector('.th-vis')) return;
-        const lr0 = logo.getBoundingClientRect().left, park = (lr0 - 24) / V.w >= .5;
-        if (!park && scrollY > 60) return;
-        const sc = park ? Math.min(1, (lr0 - 24) / V.w, 78 / V.h) : innerWidth < 600 ? .62 : 1, w = V.w * sc, h = V.h * sc;
-        const el = document.createElement('div'); el.className = 'th-vis flying' + (sc < 1 ? ' small' : '') + (park ? ' below' : '');
-        el.innerHTML = V.svg() + `<div class="th-say">${V.says[L()] || V.says.cs}</div>`;
-        const svg = el.querySelector('svg'); svg.setAttribute('width', w); svg.setAttribute('height', h);
-        document.body.appendChild(el); els.push(el);
-        const W = innerWidth, lr = logo.getBoundingClientRect(), nb = nav.getBoundingClientRect().bottom;
-        const spot = r => park ? [r.left - w - 12, Math.max(3, r.top + r.height / 2 - h * .55)] : [Math.max(8, Math.min(r.left - 6, W - w - 8)),
-          V.move === 'float' ? Math.max(nb - h * .55, 46) : Math.max(nb + 6, r.bottom - h * .25)];
-        let [tx, ty] = spot(lr);
-        const IN = V.move === 'hop' ? 5200 : 4200, STAY = 4300, OUT = 2600, t0 = performance.now() - (instant ? IN : 0);
-        let lastSpark = 0, tl = 0;
-        const ease = k => 1 - Math.pow(1 - k, 3);
-        const step = t => {
-          if (!el.isConnected) return;
-          const e = t - t0;
-          let x, y, rot = 0, sx = 1, sy = 1, moving = true;
-          // stays by the logo while the page is at the top; leaves once the visitor scrolls down
-          if (!park && !tl && e >= IN + STAY && (scrollY > 60 || document.hidden)) tl = t;
-          if (e < IN) {
-            const k = e / IN, q = ease(k);
-            if (V.move === 'float') { x = W - w * .3 + (tx - W + w * .3) * q; y = innerHeight * .6 + (ty - innerHeight * .6) * q + Math.sin(k * 6) * 10 * (1 - q); }
-            else if (V.move === 'hop') { x = W + 10 + (tx - W - 10) * k; const ph = (k * 7) % 1; y = ty - Math.sin(ph * Math.PI) * 34 * (1 - k * .4); sy = ph < .08 || ph > .92 ? .9 : 1.04; sx = 2 - sy; }
-            else { x = W + 20 + (tx - W - 20) * q; y = ty - 60 * (1 - q) + Math.sin(k * 8) * 14 * (1 - q); rot = -6 * (1 - q); }
-          } else if (!tl) {
-            const s = e - IN;  // the greeting bubble: first 4.5 s, then again for 4 s every 15 s
-            if (park) {  // follow the logo as the nav shrinks; re-park if the window was resized
-              const r = logo.getBoundingClientRect();
-              if (Math.abs(r.left - lr0) > 30) { el.remove(); setTimeout(() => fly(true), 300); return; }
-              [tx, ty] = spot(r);
-            }
-            moving = false; x = tx; y = ty + Math.sin(e / 320) * (V.move === 'float' ? 3 : 1);
-            el.classList.remove('flying'); el.classList.add('stand');
-            el.classList.toggle('talk', s < 4500 || s % 15000 > 11000);
-          } else if (t - tl < OUT) {
-            const k = (t - tl) / OUT; el.classList.remove('talk', 'stand'); el.classList.add('flying');
-            if (V.move === 'float') { x = tx + Math.sin(k * 5) * 12; y = ty - k * k * (ty + h + 60); }
-            else if (V.move === 'hop') { x = tx - k * (tx + w + 30); const ph = (k * 5) % 1; y = ty - Math.sin(ph * Math.PI) * 30; }
-            else { x = tx - k * k * (tx + w + 40); y = ty - k * k * (ty + h + 40); rot = 10 * k; }
-          } else { el.remove(); return; }
-          el.style.transform = `translate(${x}px,${y}px) rotate(${rot}deg) scale(${sx},${sy})`;
-          if (moving && t - lastSpark > 90) {  // sparkles behind
-            lastSpark = t;
-            const sp = document.createElement('span'); sp.className = 'th-spark'; sp.textContent = V.spark[Math.floor(Math.random() * V.spark.length)];
-            sp.style.left = (x + w * (V.move === 'float' ? .5 : .92)) + 'px'; sp.style.top = (y + h * rnd(.5, .9)) + 'px'; document.body.appendChild(sp);
-            sp.animate([{opacity: 1, transform: 'scale(1)'}, {opacity: 0, transform: `translate(${rnd(10, 40)}px,${rnd(10, 35)}px) scale(.3)`}],
-                       {duration: 1100, easing: 'ease-out'}).onfinish = () => sp.remove();
-          }
-          requestAnimationFrame(step);
-        };
-        requestAnimationFrame(step);
+      for (let i = 0; i < 560; i++) {
+        const t = Math.pow(R(), .62), r = .62 * t * Math.sqrt(R()), a = R() * TAU;
+        P.push({x: r * Math.cos(a), y: -1 + 2 * t, z: r * Math.sin(a), c: ['#1f8a4c', '#2fb36a', '#6fe0a0'][i % 3], s: .75});
+      }
+      for (let i = 0; i < 38; i++) {
+        const t = .12 + .88 * R(), r = .64 * t, a = R() * TAU;
+        P.push({x: r * Math.cos(a), y: -1 + 2 * t, z: r * Math.sin(a), c: ['#ff4d5a', '#6fb7ff', '#ffd36e', '#ffffff'][i % 4], s: 2.3, tw: R() * TAU});
+      }
+      for (let i = 0; i < 26; i++) P.push({x: (R() - .5) * .14, y: 1.04 + R() * .16, z: (R() - .5) * .14, c: '#a8743c', s: .8});
+      return {pts: P, spin: .45, star: -1.1};
+    },
+    bauble(R) {  // a glass bauble with bands, hanging on a thread
+      const P = [], N = 900;
+      for (let i = 0; i < N; i++) {
+        const y = 1 - 2 * (i + .5) / N, r = Math.sqrt(1 - y * y), a = i * GA, lon = a % TAU;
+        const c = Math.abs(y) < .1 ? '#ffffff' : Math.abs(Math.abs(y) - .42 - .05 * Math.sin(lon * 8)) < .05 ? '#9fd3ff' : ['#f5d67a', '#e0b75a', '#fff1c4'][i % 3];
+        P.push({x: r * Math.cos(a) * .78, y: y * .78 + .14, z: r * Math.sin(a) * .78, c, s: .95});
+      }
+      for (let i = 0; i < 70; i++) { const a = R() * TAU, h = R(); P.push({x: Math.cos(a) * .15, y: -.62 - h * .14, z: Math.sin(a) * .15, c: '#c9a96e', s: .9}); }
+      for (let i = 0; i < 24; i++) { const a = i / 24 * TAU; P.push({x: Math.cos(a) * .07, y: -.83 + Math.sin(a) * .07, z: 0, c: '#c9a96e', s: .7}); }
+      return {pts: P, spin: .55, hang: -.9};
+    },
+    year() {  // the coming year written in sparks, with an orbit ring
+      const now = new Date(), yr = now.getFullYear() + (now.getMonth() >= 6 ? 1 : 0);
+      const W = 360, H = 150, P = [];
+      const c = mk(W, H, g => { g.fillStyle = '#fff'; g.font = 'bold 128px Georgia, "Playfair Display", serif'; g.textAlign = 'center'; g.textBaseline = 'middle'; g.fillText(String(yr), W / 2, H / 2 + 6); });
+      const d = c.getContext('2d').getImageData(0, 0, W, H).data;
+      for (let y = 0; y < H; y += 5) for (let x = (y / 5 % 2) * 2.5; x < W; x += 5) if (d[(y * W + Math.round(x)) * 4 + 3] > 140) {
+        const nx = (x - W / 2) / (W / 2), ny = (y - H / 2) / (W / 2);
+        P.push({x: nx, y: ny, z: (Math.random() - .5) * .14, c: ny < -.1 ? '#fff4d0' : ny < .1 ? '#f5d67a' : '#e0a94a', s: .75});
+      }
+      for (let i = 0; i < 150; i++) { const a = i / 150 * TAU; P.push({x: Math.cos(a) * 1.12, y: Math.sin(a) * .1 + .02, z: Math.sin(a) * .55, c: '#9fd3ff', s: .8, tw: a * 3}); }
+      return {pts: P, sway: .55};
+    },
+    pumpkin(R) {  // a ribbed jack-o'-lantern; the carved face lets the candle light through
+      const P = [], N = 1300;
+      const hole = (u, v) => {
+        const eye = cx => Math.abs(u - cx) < .17 - (v + .32) * .9 && v > -.32 && v < -.08;
+        const nose = Math.abs(u) < .09 - (v - .02) * .9 && v > .0 && v < .1;
+        const mz = .32 + .05 * Math.sign(Math.sin(u * 22));
+        const mouth = Math.abs(u) < .48 - Math.abs(v - .32) && Math.abs(v - mz) < .085;
+        return eye(-.3) || eye(.3) || nose || mouth;
       };
-      timers.push(setInterval(fly, 5000)); setTimeout(fly, 2200);  // comes back soon after the page is scrolled to the top
+      for (let i = 0; i < N; i++) {
+        const y0 = 1 - 2 * (i + .5) / N, r0 = Math.sqrt(1 - y0 * y0), a = i * GA, lon = a % TAU;
+        const m = .84 + .16 * Math.pow(Math.abs(Math.cos(lon * 4)), .55);
+        const x = r0 * Math.cos(a) * m, z = r0 * Math.sin(a) * m, y = y0 * .76;
+        if (z < -.35 && hole(x, y)) { P.push({x: x * .8, y: y * .8, z: z * .8, c: '#fff2a8', s: 1.9, tw: R() * TAU}); continue; }
+        P.push({x, y, z, c: m < .9 ? '#b8500f' : ['#ff8a1f', '#ffa040', '#f07a12'][i % 3], s: .95});
+      }
+      for (let i = 0; i < 46; i++) { const h = R(); P.push({x: (R() - .5) * .1 + h * .08, y: -.74 - h * .26, z: (R() - .5) * .1, c: '#5f8a2a', s: .9}); }
+      return {pts: P, sway: .75, core: '#ffb347'};
+    },
+    heart(R) {  // a 3D heart in layers; it beats
+      const P = [];
+      const pt = t => [16 * Math.pow(Math.sin(t), 3) / 17, -(13 * Math.cos(t) - 5 * Math.cos(2 * t) - 2 * Math.cos(3 * t) - Math.cos(4 * t)) / 17 - .12];
+      for (let l = 0; l < 15; l++) {
+        const zz = -1 + 2 * l / 14, s = Math.sqrt(1 - zz * zz * .92), n = Math.round(64 * s) + 6;
+        for (let i = 0; i < n; i++) { const [x, y] = pt(i / n * TAU + l * .4); P.push({x: x * s, y: y * s, z: zz * .4, c: zz < -.6 ? '#ff9ec0' : zz > .4 ? '#c81d4e' : '#ff5d8f', s: 1}); }
+      }
+      for (let i = 0; i < 260; i++) { const [x, y] = pt(R() * TAU), k = Math.sqrt(R()) * .9; P.push({x: x * k, y: y * k, z: (R() - .5) * .5 * (1 - k * .6), c: '#ff3d7a', s: .7}); }
+      for (let i = 0; i < 16; i++) { const [x, y] = pt(R() * TAU); P.push({x: x * .9, y: y * .9, z: (R() - .5) * .3, c: '#ffffff', s: 1.8, tw: R() * TAU}); }
+      return {pts: P, sway: .7, beat: true};
+    },
+    egg: R => egg(R, ['#fff1c9', '#ff6f91', '#5cc99a', '#6fb7ff']),
+    egg2: R => egg(R, ['#e6f3ff', '#ffb347', '#b58cff', '#ff6f91']),
+    moon() {  // drawn flat: a big moon with bats crossing it
+      const bats = Array.from({length: 3}, (_, i) => ({ph: i / 3, sp: .055 + i * .012, dy: (i - 1) * .35, k: .75 + i * .2}));
+      return {flat(g, cx, cy, S, t, al) {
+        const r = S * .78;
+        g.globalAlpha = al * .55; g.drawImage(soft('#ffcf8a'), cx - r * 2.6, cy - r * 2.6, r * 5.2, r * 5.2);
+        g.globalCompositeOperation = 'source-over'; g.globalAlpha = al;
+        const m = g.createRadialGradient(cx - r * .3, cy - r * .35, r * .1, cx, cy, r);
+        m.addColorStop(0, '#fff6dc'); m.addColorStop(.7, '#f3d79a'); m.addColorStop(1, '#d9a95c');
+        g.fillStyle = m; g.beginPath(); g.arc(cx, cy, r, 0, TAU); g.fill();
+        g.fillStyle = 'rgba(160,110,50,.22)';
+        for (const [dx, dy, rr] of [[-.3, -.2, .18], [.25, .15, .24], [-.05, .45, .12], [.38, -.38, .1], [-.45, .25, .09]]) { g.beginPath(); g.arc(cx + dx * r, cy + dy * r, rr * r, 0, TAU); g.fill(); }
+        g.fillStyle = '#0b0610';
+        for (const b of bats) {  // a bat silhouette flying across, wings flapping
+          const p = (t * b.sp + b.ph) % 1, x = cx + (p * 2 - 1) * r * 2.2, y = cy + b.dy * r + Math.sin(p * 9) * r * .12, s = r * .2 * b.k, f = Math.sin(t * 14 + b.ph * 9);
+          g.save(); g.translate(x, y); g.scale(s / 10, s / 10); g.beginPath();
+          g.moveTo(0, -1); g.quadraticCurveTo(-6, -6 - f * 6, -14, -2 - f * 8); g.quadraticCurveTo(-11, 1, -9, 3); g.quadraticCurveTo(-6, 0, -4, 3); g.quadraticCurveTo(-2, 1, 0, 4);
+          g.quadraticCurveTo(2, 1, 4, 3); g.quadraticCurveTo(6, 0, 9, 3); g.quadraticCurveTo(11, 1, 14, -2 - f * 8); g.quadraticCurveTo(6, -6 - f * 6, 0, -1); g.fill();
+          g.beginPath(); g.ellipse(0, 0, 2.2, 3.4, 0, 0, TAU); g.fill(); g.restore();
+        }
+        g.globalCompositeOperation = 'lighter';
+      }};
+    },
+  };
+  function egg(R, pal) {  // a painted egg: zigzag band, rings and dots
+    const P = [], N = 1300;
+    for (let i = 0; i < N; i++) {
+      const y0 = 1 - 2 * (i + .5) / N, r0 = Math.sqrt(1 - y0 * y0), a = i * GA, lon = a % TAU, f = (1 + .13 * y0) * .72;
+      let c = pal[0];
+      if (Math.abs(y0 - .1 * Math.sin(lon * 7)) < .075) c = pal[1];
+      else if (Math.abs(Math.abs(y0) - .45) < .04) c = pal[2];
+      else if (Math.sin(lon * 6) * Math.sin(y0 * 9) > .82) c = pal[3];
+      P.push({x: r0 * Math.cos(a) * f, y: y0 * .98, z: r0 * Math.sin(a) * f, c, s: .95});
     }
-    if (th.extra === 'spooky') {
-      const sp = hang('', '90%', 110, 'th-spider', 0); sp.querySelector('span').innerHTML = SPIDER;
-      const flyBat = () => {
-        if (document.hidden || scrollY > 200) return;
-        const b = document.createElement('div'); b.className = 'th-bat'; b.innerHTML = BAT;
-        document.body.appendChild(b); els.push(b);
-        const W = innerWidth, y0 = rnd(90, innerHeight * .3), ltr = Math.random() < .5, dur = rnd(5000, 7500), t0 = performance.now(), s2 = rnd(.6, 1.1);
-        const step = t => {
-          const k = (t - t0) / dur;
-          if (k >= 1 || !b.isConnected) { b.remove(); return; }
-          const x = ltr ? -70 + k * (W + 140) : W + 70 - k * (W + 140);
-          b.style.transform = `translate(${x}px,${y0 + Math.sin(k * 12) * 26}px) scale(${ltr ? -s2 : s2},${s2})`;
-          requestAnimationFrame(step);
-        };
-        requestAnimationFrame(step);
-      };
-      timers.push(setInterval(flyBat, 7000)); setTimeout(flyBat, 1200);
-    }
-    return () => { timers.forEach(clearInterval); els.forEach(e => e.remove()); };
+    return {pts: P, spin: .5};
   }
 
-  // ── decorations on the cards ──
-  const WEB = (() => {  // a cobweb in the top-right corner
-    const R = [14, 28, 42, 56], ang = [0, 22.5, 45, 67.5, 90].map(a => a * Math.PI / 180), pt = (r, a) => [60 - Math.sin(a) * r, Math.cos(a) * r];
-    let d = ang.map(a => { const [x, y] = pt(60, a); return `M60 0L${x.toFixed(1)} ${y.toFixed(1)}`; }).join('');
-    R.forEach(r => { d += ang.map((a, i) => { const [x, y] = pt(r, a); if (!i) return `M${x.toFixed(1)} ${y.toFixed(1)}`;
-      const [px, py] = pt(r * .82, (a + ang[i - 1]) / 2); return `Q${px.toFixed(1)} ${py.toFixed(1)} ${x.toFixed(1)} ${y.toFixed(1)}`; }).join(''); });
-    return `<svg width="58" height="58" viewBox="0 0 60 60"><path d="${d}" stroke="rgba(235,235,245,.55)" stroke-width=".7" fill="none"/><circle cx="34" cy="30" r="2.6" fill="#111"/><path d="M34 30 L60 0" stroke="rgba(235,235,245,.35)" stroke-width=".5"/></svg>`;
-  })();
-  const EGG = (c1, c2) => `<svg width="30" height="38" viewBox="0 0 30 38"><ellipse cx="15" cy="21" rx="12" ry="15.5" fill="${c1}"/>
-    <path d="M3.6 17 L8 13.5 L12 17 L16 13.5 L20 17 L24 13.5 L26.6 16" stroke="#fff" stroke-width="1.6" fill="none"/>
-    <path d="M3.2 25 Q15 30 26.8 25" stroke="${c2}" stroke-width="2.4" fill="none"/>
-    <circle cx="9" cy="31" r="1.2" fill="#fff"/><circle cx="15" cy="33" r="1.2" fill="#fff"/><circle cx="21" cy="31" r="1.2" fill="#fff"/>
-    <ellipse cx="10" cy="11" rx="2.5" ry="4" fill="rgba(255,255,255,.35)"/></svg>`;
-  const PASKA = `<svg width="40" height="44" viewBox="0 0 40 44"><rect x="8" y="19" width="24" height="22" rx="2" fill="#c58646"/>
-    <rect x="8" y="35" width="24" height="6" rx="1" fill="#a86d34"/>
-    <path d="M6 21 Q20 1 34 21 Q31 26 28 21.5 Q25 27 21 22 Q17 27 13 22 Q10 26 6 21 Z" fill="#fffaf0"/>
-    <circle cx="14" cy="13" r="1.3" fill="#e5484d"/><circle cx="20" cy="9" r="1.3" fill="#ffd36e"/><circle cx="26" cy="13" r="1.3" fill="#6fb7ff"/>
-    <circle cx="17" cy="16" r="1.1" fill="#a8e6a1"/><circle cx="23" cy="16" r="1.1" fill="#ff9eb5"/>
-    <path d="M18 5 h4 M20 3 v6" stroke="#c9a96e" stroke-width="1.4"/></svg>`;
-  const EGGS = [['#ff9eb5', '#e5484d'], ['#9fd3ff', '#3b7dd8'], ['#ffd36e', '#e08b1a'], ['#a8e6a1', '#3fa66b'], ['#c9a0ff', '#7d4bd6']];
-  function decoFor(id, i, c) {
-    if (id === 'halloween') return i % 2 ? ['pk', PUMPKIN] : ['tr web', WEB];
-    if (id === 'christmas' || id === 'new_year') return ['tl', WREATH];
-    if (id === 'easter') return i % 3 === 2 ? ['lt', PASKA] : ['lt', EGG(...EGGS[i % EGGS.length])];
-    if (id === 'valentine') return ['hb', GHEART];
-    return ['em', ['✨', '🎁', '🥂'][i % 3]];
-  }
-  function decorate(id) {
-    const th = THEMES[id];
-    if (th.snowy) {
-      document.querySelectorAll(CARDS).forEach(c => {
-        if (c.querySelector(':scope > .th-snow')) return;
-        const sn = document.createElement('span'); sn.className = 'th-snow'; c.appendChild(sn);
-      });
-      document.querySelectorAll('.m-card .m-body').forEach(bd => {
-        if (bd.querySelector(':scope > .th-cgar')) return;
-        const g = document.createElement('span'); g.className = 'th-cgar'; g.innerHTML = '<i></i>'.repeat(9); bd.prepend(g);
-      });
-      document.querySelectorAll('.ab-img-wrap').forEach(w => {
-        if (w.querySelector(':scope > .th-pine')) return;
-        const g = document.createElement('div'); g.className = 'th-pine'; g.innerHTML = PINE; w.appendChild(g);
-      });
+  // draws one figure centred at (cx, cy); S = half its height in px; rx/ry = tilt from the mouse
+  function drawObj(g, O, cx, cy, S, t, rx, ry, al, dir) {
+    if (O.flat) return O.flat(g, cx, cy, S, t, al);
+    const ang = (O.spin ? t * O.spin * dir : Math.sin(t * .45) * O.sway) + ry, ca = Math.cos(ang), sa = Math.sin(ang), cb = Math.cos(rx), sb = Math.sin(rx);
+    let sc = S;
+    if (O.beat) { const b = (t * 1.05) % 1; sc *= 1 + .07 * Math.exp(-((b - .1) ** 2) / .003) + .045 * Math.exp(-((b - .3) ** 2) / .003); }
+    const F = 3.4, base = Math.max(1, S * .03);
+    const proj = (x, y, z) => { const x1 = x * ca - z * sa, z1 = x * sa + z * ca, y2 = y * cb - z1 * sb, z2 = y * sb + z1 * cb, k = F / (F + z2); return [cx + x1 * sc * k, cy + y2 * sc * k, z2, k]; };
+    if (O.hang) {  // the thread up to the top of the scene
+      const [hx, hy] = proj(0, O.hang, 0); g.globalAlpha = al * .5; g.strokeStyle = '#c9a96e'; g.lineWidth = 1; g.beginPath(); g.moveTo(hx, 0); g.lineTo(hx, hy); g.stroke();
     }
-    document.querySelectorAll(CARDS).forEach((c, i) => {
-      if (c.querySelector(':scope > .th-deco')) return;
-      const [cls, html] = decoFor(id, i, c), d = document.createElement('span');
-      d.className = 'th-deco ' + cls; d.innerHTML = html; c.appendChild(d);
+    if (O.core) { const f = .75 + .25 * Math.sin(t * 9) * Math.sin(t * 5.3); g.globalAlpha = al * .55 * f; const r = sc * .9; g.drawImage(soft(O.core), cx - r, cy - r, r * 2, r * 2); }
+    for (const p of O.pts) {
+      const [px, py, z, k] = proj(p.x, p.y, p.z);
+      let r = p.s * k * base; if (p.tw != null) r *= .55 + .55 * Math.sin(t * 3 + p.tw);
+      if (r <= .2) continue;
+      g.globalAlpha = al * (.18 + .42 * (1 - (z + 1) / 2));
+      g.drawImage(glow(p.c), px - r * 2, py - r * 2, r * 4, r * 4);
+    }
+    if (O.star != null) {  // a shining star on top of the tree
+      const [sx, sy] = proj(0, O.star, 0), r = S * .13 * (1 + .08 * Math.sin(t * 4));
+      g.globalAlpha = al * .8; g.drawImage(glow('#ffe9a0'), sx - r * 3, sy - r * 3, r * 6, r * 6);
+      g.save(); g.translate(sx, sy); g.rotate(Math.sin(t) * .15); g.fillStyle = '#fff3c4'; g.globalAlpha = al; g.beginPath();
+      for (let i = 0; i < 10; i++) { const rr = i % 2 ? r * .42 : r, a = i / 10 * TAU - Math.PI / 2; g.lineTo(Math.cos(a) * rr, Math.sin(a) * rr); }
+      g.fill(); g.restore();
+    }
+  }
+
+  // ── the scene at the top of the page (hero on the home page, a band behind the heading elsewhere) ──
+  const KICK = [];
+  let mx = 0, my = 0;
+  addEventListener('pointermove', e => { mx = e.clientX / innerWidth * 2 - 1; my = e.clientY / innerHeight * 2 - 1; }, {passive: true});
+  function scene(host, th, hero) {
+    const cv = document.createElement('canvas'); cv.className = 'th-scene' + (hero ? '' : ' band');
+    if (!hero) { if (getComputedStyle(host).position === 'static') host.style.position = 'relative'; host.style.isolation = 'isolate'; }
+    host.prepend(cv);
+    const g = cv.getContext('2d');
+    const objs = th.objs.map((k, i) => OBJ[k](prng(31 + i * 17)));
+    let W = 0, H = 0, dpr = 1, lay = [], bok = [], parts = [], fw = [], nextFw = 0, sx = 0, sy = 0;
+    const has = a => th.atm.includes(a);
+    function layout() {
+      if (hero) {
+        const hr = host.getBoundingClientRect(), lb = host.querySelector('.logo-block'), r = lb && lb.getBoundingClientRect();
+        const side = r ? r.left - hr.left : 0, cy = r ? r.top - hr.top + r.height / 2 : H / 2, S = Math.min(H * .3, side * .4, 240);
+        lay = S >= 80 ? [{o: objs[0], x: side / 2, y: cy, S, a: 1, dir: -1}, {o: objs[1], x: W - side / 2, y: cy, S, a: 1, dir: 1}]
+                      : [{o: objs[1], x: W / 2, y: H * .47, S: Math.min(W * .42, H * .27), a: .3, dir: 1}];
+      } else {
+        const S = Math.min(118, W * .075);
+        lay = W >= 1100 ? [{o: objs[0], x: W * .1, y: 250, S, a: .9, dir: -1}, {o: objs[1], x: W * .9, y: 250, S, a: .9, dir: 1}] : [];
+      }
+    }
+    function seed() {
+      const R = Math.random, area = W * H;
+      bok = Array.from({length: 9}, (_, i) => ({x: R() * W, y: R() * H, r: rnd(50, 150), z: rnd(.2, 1), c: th.bulbs[i % 4], a: rnd(.05, .12), vx: rnd(-6, 6), vy: rnd(-4, 4)}));
+      parts = [];
+      const n = k => Math.round(Math.min(k * area / 1e6, k * 1.6));
+      if (has('snow')) for (let i = 0; i < n(110); i++) parts.push({k: 'snow', x: R() * W, y: R() * H, z: rnd(.25, 1), ph: R() * TAU});
+      if (has('embers')) for (let i = 0; i < n(55); i++) parts.push({k: 'ember', x: R() * W, y: R() * H, z: rnd(.3, 1), ph: R() * TAU, c: ['#ff8a1f', '#ffb347', '#ff5a1f'][i % 3]});
+      if (has('fog')) for (let i = 0; i < 5; i++) parts.push({k: 'fog', x: R() * W, y: H * rnd(.45, 1), z: rnd(.5, 1), c: ['#6a2fa8', '#3a1d5c', '#8e4bd6'][i % 3]});
+      if (has('hearts')) for (let i = 0; i < n(32); i++) parts.push({k: 'heart', x: R() * W, y: R() * H, z: rnd(.3, 1), ph: R() * TAU, c: ['#ff5d8f', '#ff9eb5', '#e5484d', '#ffd1dc'][i % 4]});
+      if (has('petals')) for (let i = 0; i < n(40); i++) parts.push({k: 'petal', x: R() * W, y: R() * H, z: rnd(.35, 1), ph: R() * TAU, rot: R() * TAU, c: ['#ffb3c7', '#ffd36e', '#ffffff', '#c7f0c0'][i % 4]});
+    }
+    function resize() {
+      dpr = Math.min(1.5, devicePixelRatio || 1); W = host.clientWidth; H = hero ? host.clientHeight : Math.min(480, host.clientHeight);
+      cv.width = W * dpr; cv.height = H * dpr; cv.style.height = H + 'px'; layout(); seed();
+    }
+    function boom() {
+      const x = rnd(.08, .92) * W, y = rnd(.12, .42) * H, c1 = th.bulbs[Math.floor(rnd(0, 4))], c2 = ['#ff6f91', '#9fd3ff', '#f5d67a'][Math.floor(rnd(0, 3))];
+      for (let i = 0, n = 70; i < n; i++) { const a = i / n * TAU + rnd(-.05, .05), v = rnd(50, 150) * (i % 2 ? 1 : .7); fw.push({x, y, vx: Math.cos(a) * v, vy: Math.sin(a) * v, l: rnd(1.2, 1.9), L: 1.9, c: i % 3 ? c1 : c2}); }
+    }
+    function frame(t, dt) {
+      g.setTransform(dpr, 0, 0, dpr, 0, 0); g.clearRect(0, 0, W, H);
+      sx += (mx - sx) * .04; sy += (my - sy) * .04;
+      g.globalCompositeOperation = 'lighter';
+      for (const b of bok) {  // soft out-of-focus lights
+        b.x = (b.x + b.vx * dt + W + 300) % (W + 300) ; b.y += b.vy * dt; if (b.y < -150 || b.y > H + 150) b.vy *= -1;
+        g.globalAlpha = b.a; const x = b.x - 150 - sx * 30 * b.z, y = b.y - sy * 20 * b.z;
+        g.drawImage(soft(b.c), x - b.r, y - b.r, b.r * 2, b.r * 2);
+      }
+      for (const p of parts) {
+        if (p.k === 'fog') {
+          p.x += (12 * p.z) * dt; if (p.x > W + 300) p.x = -300;
+          g.globalAlpha = .1; const r = W * .32 * p.z; g.drawImage(soft(p.c), p.x - r, p.y - r * .5, r * 2, r);
+        } else if (p.k === 'snow') {
+          p.y += (16 + 46 * p.z) * dt; p.x += Math.sin(t * .8 + p.ph) * 12 * p.z * dt; if (p.y > H + 6) { p.y = -6; p.x = Math.random() * W; }
+          const r = 1.2 + 3.2 * p.z; g.globalAlpha = .25 + .55 * p.z; g.drawImage(glow('#dfefff'), p.x - sx * 14 * p.z - r, p.y - r, r * 2, r * 2);
+        } else if (p.k === 'ember') {
+          p.y -= (14 + 40 * p.z) * dt; p.x += Math.sin(t * 1.3 + p.ph) * 18 * p.z * dt; if (p.y < -8) { p.y = H + 8; p.x = Math.random() * W; }
+          const r = 1 + 2.6 * p.z; g.globalAlpha = (.35 + .5 * p.z) * (.6 + .4 * Math.sin(t * 7 + p.ph)); g.drawImage(glow(p.c), p.x - r * 2, p.y - r * 2, r * 4, r * 4);
+        } else if (p.k === 'heart') {
+          p.y -= (12 + 30 * p.z) * dt; p.x += Math.sin(t + p.ph) * 14 * p.z * dt; if (p.y < -20) { p.y = H + 20; p.x = Math.random() * W; }
+          const r = 5 + 9 * p.z; g.globalAlpha = .18 + .45 * p.z; g.drawImage(heartSpr(p.c), p.x - sx * 12 * p.z - r, p.y - r, r * 2, r * 2);
+        } else if (p.k === 'petal') {
+          p.y += (14 + 34 * p.z) * dt; p.x += (Math.sin(t * .9 + p.ph) * 22 + 10) * p.z * dt; p.rot += dt * (.6 + p.z); if (p.y > H + 16) { p.y = -16; p.x = Math.random() * W; }
+          const r = 5 + 8 * p.z; g.globalCompositeOperation = 'source-over'; g.globalAlpha = .3 + .5 * p.z;
+          g.save(); g.translate(p.x - sx * 12 * p.z, p.y); g.rotate(p.rot); g.scale(1, Math.cos(t * 2 + p.ph)); g.drawImage(petalSpr(p.c), -r, -r, r * 2, r * 2); g.restore();
+          g.globalCompositeOperation = 'lighter';
+        }
+      }
+      for (const o of lay) drawObj(g, o.o, o.x + sx * 10, o.y + sy * 6, o.S, t + o.dir, .12 + sy * .22, sx * .55, o.a, o.dir);
+      if (has('fireworks') && dt) {
+        if (t > nextFw) { boom(); nextFw = t + rnd(1.4, 2.8); }
+        fw = fw.filter(p => (p.l -= dt) > 0);
+        for (const p of fw) {
+          p.vx *= .985; p.vy = p.vy * .985 + 55 * dt; p.x += p.vx * dt; p.y += p.vy * dt;
+          const k = p.l / p.L, r = 1.6 + 2.4 * k; g.globalAlpha = Math.min(1, k * 1.4) * (.7 + .3 * Math.sin(t * 30 + p.x));
+          g.drawImage(glow(p.c), p.x - r * 2, p.y - r * 2, r * 4, r * 4);
+        }
+      }
+      g.globalAlpha = 1; g.globalCompositeOperation = 'source-over';
+    }
+    resize();
+    let raf = 0, vis = true, tp = 0;
+    new ResizeObserver(() => { resize(); if (!raf) frame(2.4, 0); }).observe(host);
+    const running = () => vis && !document.hidden && animOn();
+    const loop = now => { raf = 0; if (!cv.isConnected) return; const dt = Math.min(.05, (now - tp) / 1000); tp = now; frame(now / 1000, dt); if (running()) raf = requestAnimationFrame(loop); };
+    const kick = () => { if (running()) { if (!raf) { tp = performance.now(); raf = requestAnimationFrame(loop); } } else if (!raf) frame(2.4, 0); };
+    new IntersectionObserver(es => { vis = es[0].isIntersecting; kick(); }).observe(cv);
+    document.addEventListener('visibilitychange', kick);
+    KICK.push(kick); kick();
+  }
+
+  // a small live figure for the greeting card
+  function mini(cv, th) {
+    const O = OBJ[th.objs[1]](prng(77)), g = cv.getContext('2d'), dpr = Math.min(2, devicePixelRatio || 1), S = 64;
+    cv.width = cv.height = S * dpr;
+    const draw = t => { g.setTransform(dpr, 0, 0, dpr, 0, 0); g.clearRect(0, 0, S, S); g.globalCompositeOperation = 'lighter'; drawObj(g, O, S / 2, S / 2 + 2, S * .38, t, .15, 0, 1, 1); g.globalAlpha = 1; g.globalCompositeOperation = 'source-over'; };
+    let on = false;
+    const loop = now => { if (!cv.isConnected) return; draw(now / 1000); if (animOn() && !document.hidden) requestAnimationFrame(loop); else on = false; };
+    const kick = () => { if (!cv.isConnected) return; if (animOn() && !document.hidden) { if (!on) { on = true; requestAnimationFrame(loop); } } else if (!on) draw(2.4); };
+    document.addEventListener('visibilitychange', kick);
+    KICK.push(kick); kick();
+  }
+
+  // ── cursor trail and click sparks over the page ──
+  function sparks(th) {
+    const cv = document.createElement('canvas'); cv.id = 'thFx'; document.body.appendChild(cv);
+    const g = cv.getContext('2d'); let P = [], raf = 0, W = 0, H = 0, dpr = 1, tp = 0, lastMove = 0;
+    const size = () => { dpr = Math.min(2, devicePixelRatio || 1); W = innerWidth; H = innerHeight; cv.width = W * dpr; cv.height = H * dpr; };
+    size(); addEventListener('resize', size);
+    const shape = th.glyph === 'heart' ? heartSpr : th.glyph === 'egg' ? petalSpr : null;
+    const loop = now => {
+      const dt = Math.min(.05, (now - tp) / 1000); tp = now;
+      g.setTransform(dpr, 0, 0, dpr, 0, 0); g.clearRect(0, 0, W, H); g.globalCompositeOperation = 'lighter';
+      P = P.filter(p => (p.l -= dt) > 0);
+      for (const p of P) {
+        p.vx *= .97; p.vy = p.vy * .97 + p.gr * dt; p.x += p.vx * dt; p.y += p.vy * dt;
+        const k = p.l / p.L, r = p.s * (.4 + .6 * k); g.globalAlpha = Math.min(1, k * 1.5);
+        g.drawImage(p.img ? p.img(p.c) : glow(p.c), p.x - r, p.y - r, r * 2, r * 2);
+      }
+      g.globalAlpha = 1;
+      raf = P.length ? requestAnimationFrame(loop) : (g.clearRect(0, 0, W, H), 0);
+    };
+    const add = (x, y, n, v, life, gr, big) => {
+      for (let i = 0; i < n; i++) {
+        const a = rnd(0, TAU), s = rnd(.3, 1) * v, fancy = shape && big && i % 3 === 0;
+        P.push({x, y, vx: Math.cos(a) * s, vy: Math.sin(a) * s - (big ? 40 : 0), l: life * rnd(.6, 1), L: life, gr, c: th.bulbs[i % 4] === '#ffffff' ? '#fff4d0' : th.bulbs[i % 4], s: fancy ? rnd(7, 11) : big ? rnd(4, 8) : rnd(3, 6), img: fancy ? shape : null});
+      }
+      if (!raf) { tp = performance.now(); raf = requestAnimationFrame(loop); }
+    };
+    if (matchMedia('(pointer:fine)').matches) addEventListener('pointermove', e => {
+      const now = performance.now(); if (!animOn() || now - lastMove < 28) return; lastMove = now; add(e.clientX, e.clientY, 1, 22, .7, -14);
+    }, {passive: true});
+    addEventListener('pointerdown', e => {
+      if (e.button !== 0 || !animOn() || e.target.closest('a,button,input,select,textarea,label,.th-card')) return;
+      add(e.clientX, e.clientY, 30, 230, 1.1, 260, true);
     });
   }
 
-  // a little burst of holiday emoji where the visitor clicks
-  function burst(th, x, y) {
-    if (calm() || QUIET) return;
-    for (let i = 0; i < 7; i++) {
-      const s = document.createElement('span'); s.className = 'th-pop'; s.textContent = th.burst[i % th.burst.length];
-      s.style.left = x + 'px'; s.style.top = y + 'px'; document.body.appendChild(s);
-      const ang = rnd(0, 6.28), dist = rnd(40, 90);
-      s.animate([{transform: 'translate(-50%,-50%) scale(.4)', opacity: 1},
-                 {transform: `translate(calc(-50% + ${Math.cos(ang) * dist}px), calc(-50% + ${Math.sin(ang) * dist - 30}px)) scale(1.1) rotate(${rnd(-60, 60)}deg)`, opacity: 0}],
-                {duration: rnd(700, 1100), easing: 'cubic-bezier(.2,.8,.3,1)'}).onfinish = () => s.remove();
-    }
+  // ── small line icons ──
+  const GLYPH = {
+    snow: '<svg viewBox="-12 -12 24 24"><g stroke="currentColor" stroke-width="1.4" fill="none" stroke-linecap="round">' + [0, 60, 120].map(a => `<path transform="rotate(${a})" d="M0-10V10M0-6.5l3-3M0-6.5l-3-3M0 6.5l3 3M0 6.5l-3 3"/>`).join('') + '</g></svg>',
+    spark: '<svg viewBox="-12 -12 24 24"><path d="M0-11Q1.6-1.6 11 0Q1.6 1.6 0 11Q-1.6 1.6-11 0Q-1.6-1.6 0-11Z" fill="currentColor"/><circle r="1.7" fill="#fff"/></svg>',
+    pumpkin: '<svg viewBox="-12 -12 24 24"><g stroke="currentColor" stroke-width="1.4" fill="none" stroke-linecap="round"><ellipse rx="10" ry="7.5" cy="2.5"/><path d="M0-5Q-5.5 2.5 0 10M0-5Q5.5 2.5 0 10M0-5Q0-8.5 3-10.5"/></g></svg>',
+    heart: '<svg viewBox="-12 -12 24 24"><path d="M0 9C-15 0-8-12 0-4.5C8-12 15 0 0 9Z" stroke="currentColor" stroke-width="1.5" fill="none" stroke-linejoin="round"/></svg>',
+    egg: '<svg viewBox="-12 -12 24 24"><g stroke="currentColor" stroke-width="1.4" fill="none" stroke-linejoin="round"><path d="M0-10.5C5.5-10.5 8.5-1 8.5 3C8.5 8 5 10.5 0 10.5C-5 10.5-8.5 8-8.5 3C-8.5-1-5.5-10.5 0-10.5Z"/><path d="M-8 1.5l2.7 2.7 2.7-2.7 2.6 2.7 2.7-2.7 2.7 2.7 2.6-2.7"/></g></svg>',
+  };
+
+  function css(th, id) {
+    const b = th.bulbs, P = PAL[id];
+    return `
+html[data-theme]{--bg0:${P.bg[0]};--bg1:${P.bg[1]};--bg2:${P.bg[2]};--bg3:${P.bg[3]};--bdr:${P.bdr}}
+html[data-theme] body{background-color:${P.bg[0]}}
+.th-scene{position:absolute;left:0;top:0;width:100%;height:100%;pointer-events:none;z-index:0}
+.th-scene.band{z-index:-1;-webkit-mask-image:linear-gradient(#000 55%,transparent);mask-image:linear-gradient(#000 55%,transparent)}
+html[data-theme] :is(${CARDS}){background-image:linear-gradient(180deg,${P.tint},transparent 45%);border-color:${P.bdr};transition:box-shadow .35s,border-color .35s,transform .25s ease-out}
+html[data-theme] :is(${CARDS}):hover{border-color:transparent;box-shadow:0 18px 40px -10px ${b[0]}55,0 0 30px -8px ${b[2]}55}
+:where(.pop-card,.rv-card,.di,.celeb-card,.step){position:relative}
+html[data-theme] .ab-stat{background:linear-gradient(135deg,${P.bg[1]},${P.bg[3]});border-color:${b[0]};box-shadow:0 10px 30px rgba(0,0,0,.55),0 0 24px -6px ${b[0]}66}
+@property --tha{syntax:'<angle>';inherits:false;initial-value:0deg}
+.th-rim{position:absolute;inset:0;border-radius:inherit;padding:1px;pointer-events:none;z-index:6;opacity:.0;transition:opacity .4s;
+  background:conic-gradient(from var(--tha),${b[0]},transparent 22%,${b[2]} 40%,transparent 60%,${b[1]} 78%,${b[0]});
+  -webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);-webkit-mask-composite:xor;mask-composite:exclude;animation:thRot 3.6s linear infinite}
+:is(${CARDS}):hover>.th-rim{opacity:1}
+.th-glare{position:absolute;inset:0;pointer-events:none;z-index:5;opacity:0;transition:opacity .3s;background:radial-gradient(380px circle at var(--mx,50%) var(--my,0%),rgba(255,255,255,.1),transparent 45%)}
+:is(${CARDS}):hover>.th-glare{opacity:1}
+.th-glyph{position:absolute;top:10px;left:10px;width:20px;height:20px;color:${b[0] === '#ffffff' ? b[1] : b[0]};z-index:6;pointer-events:none;opacity:.9;
+  filter:drop-shadow(0 0 5px currentColor) drop-shadow(0 2px 3px rgba(0,0,0,.6));animation:thGlyph 7s ease-in-out infinite}
+.th-glyph svg{display:block;width:100%;height:100%}
+:is(${CARDS}):hover>.th-glyph{animation-duration:1.6s}
+@keyframes thGlyph{0%,100%{transform:rotate(-12deg) scale(1)}50%{transform:rotate(12deg) scale(1.12)}}
+@keyframes thRot{to{--tha:360deg}}
+.th-glowbg{position:fixed;inset:0;pointer-events:none;z-index:1390;background:radial-gradient(60% 45% at 8% 0%,${th.glow[0]},transparent 70%),radial-gradient(55% 40% at 95% 5%,${th.glow[1]},transparent 70%);mix-blend-mode:screen}
+.th-garland{position:absolute;left:0;right:0;bottom:-13px;height:18px;pointer-events:none;display:flex;justify-content:space-around;overflow:hidden;z-index:1}
+.th-garland svg{position:absolute;left:0;top:0;width:100%;height:8px}
+.th-garland i{position:relative;width:7px;height:11px;border-radius:45% 45% 50% 50%;margin-top:4px;animation:thBulb 2.6s infinite ease-in-out;background:radial-gradient(circle at 35% 30%,#fff 0 14%,currentColor 45%)}
+.th-garland i::before{content:'';position:absolute;top:-3px;left:1.5px;width:4px;height:3px;background:#3a3a3a;border-radius:1px}
+.th-garland i:nth-child(odd){margin-top:6px}
+.th-garland i:nth-child(4n+1){color:${b[0]}}
+.th-garland i:nth-child(4n+2){color:${b[1]};animation-delay:.65s}
+.th-garland i:nth-child(4n+3){color:${b[2]};animation-delay:1.3s}
+.th-garland i:nth-child(4n+4){color:${b[3]};animation-delay:1.95s}
+@keyframes thBulb{0%,100%{opacity:.45;box-shadow:none}50%{opacity:1;box-shadow:0 0 10px 3px currentColor}}
+html[data-theme] .m-tab{transition:.3s}
+html[data-theme] .m-tab:hover{border-color:${b[0]}88;box-shadow:0 0 14px -4px ${b[0]}88}
+html[data-theme] .m-tab.on{box-shadow:0 0 18px -2px ${b[0]}88,inset 0 0 14px -4px ${b[0]}66;border-color:${b[0]};color:#fff}
+.nav-logo{position:relative}
+.th-logo{position:absolute;left:-12px;top:-10px;width:16px;height:16px;color:${b[0] === '#ffffff' ? b[1] : b[0]};pointer-events:none;filter:drop-shadow(0 0 5px currentColor);animation:thGlyph 5s ease-in-out infinite}
+.th-logo svg{display:block;width:100%;height:100%}
+#thFx{position:fixed;inset:0;width:100%;height:100%;pointer-events:none;z-index:1500}
+.th-ribbon{display:inline-flex;align-items:center;gap:10px;margin:0 auto 22px;padding:9px 20px;border:1px solid ${b[0]}aa;border-radius:999px;
+  background:rgba(10,10,10,.35);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);color:#f3ead9;text-decoration:none;
+  font:600 .74rem 'Raleway',sans-serif;letter-spacing:2px;text-transform:uppercase;position:relative;overflow:hidden;animation:thIn .8s ease-out;box-shadow:0 0 22px -6px ${b[0]}88}
+.th-ribbon i{display:inline-block;width:15px;height:15px;color:${b[0] === '#ffffff' ? b[1] : b[0]};filter:drop-shadow(0 0 4px currentColor)}
+.th-ribbon i svg{display:block;width:100%;height:100%}
+.th-ribbon::after{content:'';position:absolute;inset:0;background:linear-gradient(100deg,transparent 30%,rgba(255,255,255,.18) 50%,transparent 70%);transform:translateX(-100%);animation:thShine 3.5s ease-in-out infinite}
+.th-ribbon:hover{border-color:#fff}
+.th-ribbon-wrap{text-align:center;position:relative;z-index:1}
+@keyframes thShine{60%,100%{transform:translateX(100%)}}
+.th-card{position:fixed;left:18px;bottom:18px;z-index:1600;display:flex;gap:14px;align-items:center;max-width:410px;border-radius:16px;
+  background:linear-gradient(135deg,rgba(28,24,20,.72),rgba(12,12,14,.78));backdrop-filter:blur(14px) saturate(1.3);-webkit-backdrop-filter:blur(14px) saturate(1.3);
+  border:1px solid rgba(255,255,255,.1);padding:16px 40px 16px 14px;box-shadow:0 22px 60px rgba(0,0,0,.6),0 0 40px -12px ${b[0]}88,inset 0 1px 0 rgba(255,255,255,.08);
+  font-family:'Raleway',sans-serif;animation:thIn .8s cubic-bezier(.2,1.2,.4,1)}
+.th-card::before{content:'';position:absolute;inset:0;border-radius:inherit;padding:1px;pointer-events:none;background:conic-gradient(from var(--tha),${b[0]},transparent 30%,${b[2]} 50%,transparent 75%,${b[0]});
+  -webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);-webkit-mask-composite:xor;mask-composite:exclude;animation:thRot 5s linear infinite}
+.th-card canvas{width:64px;height:64px;flex:none}
+.th-card b.th-h{display:block;font:400 1.2rem 'Playfair Display',serif;color:#fbf4e6;margin-bottom:3px}
+.th-card p{font-size:.78rem;color:#c2b69f;margin:0 0 9px;line-height:1.45}
+.th-cd{font-size:.68rem;color:#a99d88;letter-spacing:1px;text-transform:uppercase;margin:0 0 10px}
+.th-cd .th-seg{display:flex;gap:6px;margin-top:5px}
+.th-cd .th-seg span{min-width:44px;padding:5px 4px 4px;border-radius:8px;text-align:center;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.08)}
+.th-cd .th-seg b{display:block;font:600 1.05rem 'Raleway',sans-serif;color:#fff;font-variant-numeric:tabular-nums;text-shadow:0 0 10px ${b[0]}}
+.th-cd .th-seg i{font-style:normal;font-size:.56rem;color:#a99d88;letter-spacing:.5px}
+.th-cd.today{font-size:.9rem;color:${b[0] === '#ffffff' ? b[1] : b[0]};text-transform:none;letter-spacing:0}
+.th-card a{display:inline-block;font-size:.68rem;letter-spacing:1.5px;text-transform:uppercase;color:#0b0b0b;background:linear-gradient(90deg,${b[0]},${b[2]});padding:8px 15px;border-radius:999px;text-decoration:none;font-weight:700;transition:.2s}
+.th-card a:hover{filter:brightness(1.15);transform:translateY(-1px)}
+.th-card .th-x{position:absolute;top:8px;right:10px;background:none;border:none;color:#8d8270;font-size:1rem;cursor:pointer;padding:4px}
+.th-card .th-x:hover{color:#fff}
+.th-fxbtn{position:fixed;right:14px;bottom:14px;z-index:1600;width:42px;height:42px;border-radius:50%;border:1px solid rgba(255,255,255,.16);display:grid;place-items:center;
+  background:rgba(15,15,15,.6);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);color:${b[0] === '#ffffff' ? b[1] : b[0]};cursor:pointer;transition:.25s;box-shadow:0 0 18px -6px currentColor}
+.th-fxbtn span{width:18px;height:18px;filter:drop-shadow(0 0 4px currentColor)}
+.th-fxbtn svg{display:block;width:100%;height:100%}
+.th-fxbtn:hover{transform:scale(1.08) rotate(12deg)}
+.th-fxbtn.off{filter:grayscale(1);opacity:.45;box-shadow:none}
+@keyframes thIn{from{opacity:0;transform:translateY(24px) scale(.96)}to{opacity:1;transform:none}}
+@media(max-width:600px){.th-card{left:10px;right:62px;bottom:10px;max-width:none;padding:12px 32px 12px 10px;gap:10px}.th-card canvas{width:48px;height:48px}.th-card b.th-h{font-size:1rem}.th-cd .th-seg span{min-width:38px}.th-glyph{width:17px;height:17px}}
+@media print{.th-glowbg,.th-garland,.th-logo,#thFx,.th-card,.th-fxbtn,.th-ribbon-wrap,.th-scene,.th-rim,.th-glare,.th-glyph{display:none}}`;
   }
 
+  // ── decorations on the cards: a running light rim, a glare that follows the mouse and a small holiday icon ──
+  function decorate(th) {
+    document.querySelectorAll(CARDS).forEach(c => {
+      if (c.querySelector(':scope > .th-rim')) return;
+      const add = (cls, html) => { const s = document.createElement('span'); s.className = cls; if (html) s.innerHTML = html; c.appendChild(s); };
+      add('th-rim'); add('th-glare'); add('th-glyph', GLYPH[th.glyph]);
+    });
+  }
+  function tilt() {
+    if (!matchMedia('(pointer:fine)').matches) return;
+    let cur = null;
+    const reset = () => { if (cur) { cur.style.transform = ''; cur = null; } };
+    addEventListener('pointermove', e => {
+      const c = e.target.closest && e.target.closest(CARDS);
+      if (c !== cur) reset();
+      if (!c) return;
+      cur = c; const r = c.getBoundingClientRect(), dx = (e.clientX - r.left) / r.width - .5, dy = (e.clientY - r.top) / r.height - .5;
+      c.style.setProperty('--mx', (dx + .5) * 100 + '%'); c.style.setProperty('--my', (dy + .5) * 100 + '%');
+      if (animOn()) c.style.transform = `perspective(900px) rotateX(${(-dy * 5).toFixed(2)}deg) rotateY(${(dx * 6).toFixed(2)}deg) translateY(-5px)`;
+    }, {passive: true});
+    document.addEventListener('pointerleave', reset);
+  }
+
+  // greeting card with a live countdown (days / hours / minutes / seconds)
   function card(id, th, banner, preview) {
     document.querySelector('.th-card')?.remove();
     const key = 'cm_th_seen_' + id + '_' + new Date().getFullYear();
     if (!preview && store(key) === '1') return;
-    const l = L(), ui = UI[l] || UI.cs, cd = countdown(th);
+    const l = L(), ui = UI[l] || UI.cs, nd = nextDate(th);
     const own = banner && (banner[l] || banner.cs);
     const el = document.createElement('div');
     el.className = 'th-card';
-    el.innerHTML = `<div class="th-ic">${th.icon}</div><div><b class="th-h">${esc(th.greet[l] || th.greet.cs)}</b><p>${esc(own || th.sub[l] || th.sub.cs)}</p>`
-      + (cd ? `<div class="th-cd">⏳ ${cd}</div>` : '')
+    el.innerHTML = `<canvas></canvas><div><b class="th-h">${esc(th.greet[l] || th.greet.cs)}</b><p>${esc(own || th.sub[l] || th.sub.cs)}</p>`
+      + (nd ? (nd.on ? `<div class="th-cd today">${esc(ui.today)}</div>` : `<div class="th-cd">${esc(th.to[l] || th.to.cs)}<div class="th-seg">${ui.u.map(u => `<span><b>0</b><i>${esc(u)}</i></span>`).join('')}</div></div>`) : '')
       + (/menu\.html$/.test(location.pathname) ? '' : `<a href="menu.html">${esc(ui.menu)} →</a>`)
       + `</div><button type="button" class="th-x" aria-label="${esc(ui.close)}">✕</button>`;
     el.querySelector('.th-x').onclick = () => { store(key, '1'); el.style.transition = '.3s'; el.style.opacity = '0'; el.style.transform = 'translateY(20px)'; setTimeout(() => el.remove(), 300); };
     document.body.appendChild(el);
+    mini(el.querySelector('canvas'), th);
+    const seg = el.querySelectorAll('.th-seg b');
+    if (seg.length) {
+      const tick = () => {
+        if (!el.isConnected) return clearInterval(iv);
+        let s = Math.max(0, Math.floor((nd.d - new Date()) / 1000));
+        [Math.floor(s / 86400), Math.floor(s / 3600) % 24, Math.floor(s / 60) % 60, s % 60].forEach((v, i) => { seg[i].textContent = i ? String(v).padStart(2, '0') : v; });
+      };
+      const iv = setInterval(tick, 1000); tick();
+    }
   }
 
   function ribbon(th) {
@@ -708,16 +522,17 @@ ${TAB_DECO()[id] ? `html[data-theme] .m-tab{position:relative}html[data-theme] .
     const hero = document.querySelector('.logo-block');
     if (!hero) return;
     const l = L(), w = document.createElement('div'); w.className = 'th-ribbon-wrap';
-    w.innerHTML = `<a class="th-ribbon" href="menu.html">${th.icon} ${esc(th.ribbon[l] || th.ribbon.cs)} <span>→</span></a>`;
+    w.innerHTML = `<a class="th-ribbon" href="menu.html"><i>${GLYPH[th.glyph]}</i>${esc(th.ribbon[l] || th.ribbon.cs)} <span>→</span></a>`;
     hero.parentNode.insertBefore(w, hero);
   }
 
   function apply(id, cfg, preview) {
     const th = THEMES[id];
     if (!th) return;
+    effects = cfg.effects !== false;
     document.documentElement.dataset.theme = id;
     const st = document.createElement('style'); st.id = 'thCss'; st.textContent = css(th, id); document.head.appendChild(st);
-    const glow = document.createElement('div'); glow.className = 'th-glow'; document.body.appendChild(glow);
+    const gl = document.createElement('div'); gl.className = 'th-glowbg'; document.body.appendChild(gl);
     const nav = document.getElementById('nav');
     if (nav) {
       const g = document.createElement('div'); g.className = 'th-garland';
@@ -725,26 +540,24 @@ ${TAB_DECO()[id] ? `html[data-theme] .m-tab{position:relative}html[data-theme] .
       g.innerHTML = `<svg viewBox="0 0 ${n * 30} 8" preserveAspectRatio="none"><path d="${Array.from({length: n}, (_, i) => `M${i * 30} 1 Q${i * 30 + 15} 7 ${i * 30 + 30} 1`).join(' ')}" stroke="rgba(255,255,255,.22)" fill="none"/></svg>` + '<i></i>'.repeat(n);
       nav.appendChild(g);
       const logo = nav.querySelector('.nav-logo');
-      if (logo) { const s = document.createElement('span'); s.className = 'th-logo'; s.textContent = th.logo; logo.appendChild(s); }
+      if (logo) { const s = document.createElement('span'); s.className = 'th-logo'; s.innerHTML = GLYPH[th.glyph]; logo.appendChild(s); }
     }
     ribbon(th);
-    decorate(id);
+    decorate(th);
     let pend = 0;
-    new MutationObserver(() => { if (!pend) pend = requestAnimationFrame(() => { pend = 0; decorate(id); }); })
+    new MutationObserver(() => { if (!pend) pend = requestAnimationFrame(() => { pend = 0; decorate(th); }); })
       .observe(document.body, {childList: true, subtree: true});
-    if (cfg.effects !== false) {
-      startFx(th);
-      const b = document.createElement('button'); b.type = 'button'; b.className = 'th-fxbtn';
-      b.textContent = th.fx === 'snow' ? '❄️' : th.fx[0];
-      const upd = () => { const off = store('cm_fx_off') === '1'; b.classList.toggle('off', off); b.title = (UI[L()] || UI.cs).fx + (off ? ' ✕' : ' ✓'); };
-      b.onclick = () => { const off = store('cm_fx_off') !== '1'; store('cm_fx_off', off ? '1' : '0'); off ? stopFx() : startFx(th); upd(); };
-      upd(); document.body.appendChild(b);
-      // a short storm whenever a menu section is picked
-      document.addEventListener('click', e => { if (e.target.closest('.m-tab')) storm(2500); });
-      document.addEventListener('pointerdown', e => {
-        if (e.button !== 0 || e.target.closest('a,button,input,select,textarea,label,.th-card')) return;
-        burst(th, e.clientX, e.clientY);
-      });
+    tilt();
+    if (!QUIET) {
+      const host = document.getElementById('hero') || document.querySelector('main section, body > section');
+      if (host) scene(host, th, host.id === 'hero');
+      sparks(th);
+      if (effects) {
+        const b = document.createElement('button'); b.type = 'button'; b.className = 'th-fxbtn'; b.innerHTML = `<span>${GLYPH[th.glyph]}</span>`;
+        const upd = () => { const off = store('cm_fx_off') === '1'; b.classList.toggle('off', off); b.title = (UI[L()] || UI.cs).fx + (off ? ' ✕' : ' ✓'); };
+        b.onclick = () => { store('cm_fx_off', store('cm_fx_off') === '1' ? '0' : '1'); upd(); KICK.forEach(k => k()); };
+        upd(); document.body.appendChild(b);
+      }
     }
     card(id, th, cfg.banner, preview);
     // language buttons re-render the texts in the new language
