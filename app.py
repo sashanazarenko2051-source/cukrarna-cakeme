@@ -1539,7 +1539,7 @@ async def api_bday_test(req: Request):
     return {'ok': True}
 
 # ── Delivery/pickup slots ─────────────────────────────────────────────────────
-# Customers pick a day within the next `days_ahead` days (2 months) and a time
+# Customers pick a day up to the end of next year (or within `days_ahead` days) and a time
 # interval with free capacity. Capacity is counted from existing orders, so no
 # separate bookings table is needed. Closed days older than 2 months are dropped.
 import datetime as _dt
@@ -1551,7 +1551,7 @@ except Exception:
 
 _SLOT_DEFAULT = {
     'enabled': True,
-    'days_ahead': 60,       # how far ahead customers can book (2 months)
+    'days_ahead': 0,        # how far ahead customers can book; 0 = to the end of next year
     'min_lead_days': 1,     # earliest day: tomorrow
     'weekdays': [0, 1, 2, 3, 4, 5, 6],  # Mon=0 … Sun=6
     'times': ['09:00-11:00', '11:00-13:00', '13:00-15:00', '15:00-17:00', '17:00-20:00'],
@@ -1574,7 +1574,8 @@ def _clean_slot_cfg(raw):
     raw = raw if isinstance(raw, dict) else {}
     num = lambda v, lo, hi, dflt: max(lo, min(hi, _lead_int(v))) if _lead_int(v) is not None else dflt
     cfg['enabled'] = bool(raw.get('enabled', cfg['enabled']))
-    cfg['days_ahead'] = num(raw.get('days_ahead'), 1, 180, cfg['days_ahead'])
+    cfg['days_ahead'] = num(raw.get('days_ahead'), 0, 800, cfg['days_ahead'])
+    cfg['ahead_v2'] = True
     cfg['min_lead_days'] = num(raw.get('min_lead_days'), 0, 60, cfg['min_lead_days'])
     cfg['per_slot'] = num(raw.get('per_slot'), 1, 500, cfg['per_slot'])
     cfg['per_day'] = num(raw.get('per_day'), 1, 2000, cfg['per_day'])
@@ -1594,7 +1595,14 @@ def _clean_slot_cfg(raw):
 
 def _slot_cfg(conn):
     row = conn.execute("SELECT value FROM settings WHERE key='slot_config'").fetchone()
-    return _clean_slot_cfg(_json.loads(row[0]) if row and row[0] else {})
+    raw = _json.loads(row[0]) if row and row[0] else {}
+    if isinstance(raw, dict) and not raw.get('ahead_v2'):
+        raw['days_ahead'] = 0  # saved before the yearly window: the old 2-month default
+    return _clean_slot_cfg(raw)
+
+def _last_day(today, days_ahead=0):
+    """Last bookable day: today + days_ahead, or 31 Dec of next year when days_ahead is 0."""
+    return today + _dt.timedelta(days=days_ahead) if days_ahead else _dt.date(today.year + 1, 12, 31)
 
 def _slot_counts(conn, start, end):
     """Orders per (date, time) and per date between start and end (ISO dates).
@@ -1614,10 +1622,10 @@ def _slot_counts(conn, start, end):
     return by_slot, by_day
 
 def _slot_days(conn, cfg):
-    """Bookable days from the earliest allowed date up to days_ahead, with free places."""
+    """Bookable days from the earliest allowed date up to the last one, with free places."""
     today = _today()
     first = today + _dt.timedelta(days=cfg['min_lead_days'])
-    last = today + _dt.timedelta(days=cfg['days_ahead'])
+    last = _last_day(today, cfg['days_ahead'])
     by_slot, by_day = _slot_counts(conn, first.isoformat(), last.isoformat())
     now_hm = _dt.datetime.now(_TZ).strftime('%H:%M')
     days, d = [], first
@@ -1643,7 +1651,7 @@ def _slot_days(conn, cfg):
         d += _dt.timedelta(days=1)
     return days
 
-# Table bookings (eat in, in advance): any day up to 2 months ahead, opening hours only.
+# Table bookings (eat in, in advance): any day up to the end of next year, opening hours only.
 # They don't use the cake slots and don't take their places.
 DINE_FROM, DINE_TO, DINE_STEP = '11:00', '18:00', 30
 
@@ -1663,7 +1671,7 @@ def _check_dine(date, tm, cfg=None):
     except ValueError:
         return 'slot_unavailable'
     today = _today()
-    if day < today or day > today + _dt.timedelta(days=62):
+    if day < today or day > _last_day(today):
         return 'slot_unavailable'
     if tm not in _dine_times():
         return 'slot_full'
