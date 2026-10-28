@@ -2100,6 +2100,10 @@ _TRAFFIC_UTM = {'ig': 'instagram', 'insta': 'instagram', 'fb': 'facebook', 'tg':
                 'sklik': 'seznam', 'adwords': 'google', 'twitter': 'x', 'meta': 'facebook', 'qr': 'qr', 'qrcode': 'qr', 'qr_code': 'qr',
                 'email': 'email', 'mail': 'email', 'newsletter': 'email', 'gmb': 'google_maps', 'gbp': 'google_maps',
                 'google_business': 'google_maps', 'googlemaps': 'google_maps', 'maps': 'google_maps', 'mapy': 'mapy'}
+# in-app browsers often send no Referer, but they name themselves in the User-Agent
+_TRAFFIC_UA = [('musical_ly', 'tiktok'), ('bytedancewebview', 'tiktok'), ('tiktok', 'tiktok'), ('instagram', 'instagram'),
+               ('fban/', 'facebook'), ('fbav/', 'facebook'), ('fb_iab', 'facebook'), ('snapchat', 'snapchat'),
+               ('linkedinapp', 'linkedin'), ('pinterest', 'pinterest'), ('telegram', 'telegram'), ('whatsapp', 'whatsapp')]
 _TRAFFIC_MAX_KEYS = 80  # per day, so made-up utm_source values cannot bloat the stats
 
 def _traffic_host(host):
@@ -2136,7 +2140,9 @@ def _traffic_source(req):
         # Meta adds fbclid on Instagram too; the referer tells which app it was
         return ('instagram' if 'instagram' in host else 'facebook') + ('_ads' if paid else '')
     if not ref:
-        return 'direct'
+        ua = (req.headers.get('user-agent') or '').lower()
+        app = next((v for k, v in _TRAFFIC_UA if k in ua), None)
+        return (app + ('_ads' if paid else '')) if app else 'direct'
     if u.scheme == 'android-app':
         pkg = re.sub(r'[^a-z0-9_.]', '', (u.netloc or '').lower())[:50]
         src = next((v for k, v in _TRAFFIC_APPS if pkg.startswith(k)), None) or ('app:' + pkg if pkg else 'other')
