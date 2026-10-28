@@ -1127,6 +1127,67 @@ def api_builder_img(fid: str):
     return Response(base64.b64decode(m.group(2)), media_type=m.group(1),
                     headers={'Cache-Control': 'public, max-age=31536000, immutable'})
 
+# ── Seasonal look (New Year, Christmas, Halloween, …) ─────────────────────────
+# The admin picks a theme, or "auto" which follows the calendar below; theme.js on the
+# public pages draws the decorations. banner = own greeting text per language (optional).
+_THEME_IDS = ('new_year', 'christmas', 'halloween', 'valentine', 'easter')
+_THEME_DEFAULT = {'mode': 'off', 'effects': True, 'banner': {'cs': '', 'uk': '', 'en': ''}}
+
+def _easter_sunday(y):
+    a, b, c = y % 19, y // 100, y % 100
+    d, e = b // 4, b % 4
+    g = (8 * b + 13) // 25
+    h = (19 * a + b - d - g + 15) % 30
+    i, k = c // 4, c % 4
+    l = (32 + 2 * e + 2 * i - h - k) % 7
+    m = (a + 11 * h + 22 * l) // 451
+    return _dt.date(y, (h + l - 7 * m + 114) // 31, (h + l - 7 * m + 114) % 31 + 1)
+
+def _auto_theme(day):
+    """The theme "auto" mode shows on this day ('' = none)."""
+    md = (day.month, day.day)
+    if (12, 27) <= md or md <= (1, 7):
+        return 'new_year'
+    if (12, 1) <= md <= (12, 26):
+        return 'christmas'
+    if (10, 20) <= md <= (10, 31):
+        return 'halloween'
+    if (2, 7) <= md <= (2, 14):
+        return 'valentine'
+    e = _easter_sunday(day.year)
+    if e - _dt.timedelta(days=10) <= day <= e + _dt.timedelta(days=1):
+        return 'easter'
+    return ''
+
+def _clean_theme(raw):
+    raw = raw if isinstance(raw, dict) else {}
+    mode = raw.get('mode') if raw.get('mode') in ('off', 'auto') + _THEME_IDS else 'off'
+    ban = raw.get('banner') if isinstance(raw.get('banner'), dict) else {}
+    return {'mode': mode, 'effects': raw.get('effects') is not False,
+            'banner': {l: str(ban.get(l) or '').strip()[:200] for l in ('cs', 'uk', 'en')}}
+
+def _theme_cfg(conn):
+    row = conn.execute("SELECT value FROM settings WHERE key='site_theme'").fetchone()
+    return _clean_theme(_json.loads(row[0]) if row and row[0] else _THEME_DEFAULT)
+
+@app.get('/api/theme')
+def api_theme_get():
+    with _get_pool().connection() as conn:
+        cfg = _theme_cfg(conn)
+    theme = _auto_theme(_today()) if cfg['mode'] == 'auto' else ('' if cfg['mode'] == 'off' else cfg['mode'])
+    return JSONResponse({**cfg, 'theme': theme}, headers={'Cache-Control': 'no-store'})
+
+@app.post('/api/theme')
+async def api_theme_set(req: Request):
+    d = await req.json()
+    if not _verify_token(d.get('token')):
+        raise HTTPException(401, 'Unauthorized')
+    cfg = _clean_theme(d.get('config'))
+    with _get_pool().connection() as conn:
+        conn.execute("INSERT INTO settings(key,value) VALUES('site_theme',%s) ON CONFLICT(key) DO UPDATE SET value=EXCLUDED.value",
+                     (_json.dumps(cfg),))
+    return {'ok': True, 'config': cfg}
+
 # ── Reviews ───────────────────────────────────────────────────────────────────
 # Customers leave stars (1–5), text and an optional photo. New reviews wait for the
 # admin to publish them; stars and text can't be edited by anyone, and the rating is
