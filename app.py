@@ -2069,25 +2069,46 @@ def api_pageviews():
 # host. Moving between the site's own pages is not a new visit and is not counted.
 # Paid clicks get an "_ads" suffix (google_ads, facebook_ads, …): ad click ids that only
 # ads add (gclid, ttclid, …) or utm_medium=cpc/paid.
-_TRAFFIC_HOSTS = [('instagram', 'instagram'), ('facebook', 'facebook'), ('fb.com', 'facebook'), ('fb.me', 'facebook'),
+# checked in order: AI assistants, e-mail and maps first (their hosts would otherwise match google./seznam)
+_TRAFFIC_HOSTS = [('chatgpt', 'chatgpt'), ('openai.com', 'chatgpt'), ('perplexity', 'perplexity'), ('gemini.google', 'gemini'),
+                  ('bard.google', 'gemini'), ('copilot.microsoft', 'copilot'), ('claude.ai', 'claude'),
+                  ('mail.google', 'email'), ('outlook.', 'email'), ('mail.yahoo', 'email'), ('email.seznam', 'email'), ('post.cz', 'email'),
+                  ('webmail', 'email'), ('mail.', 'email'),
+                  ('maps.google', 'google_maps'), ('maps.app.goo.gl', 'google_maps'), ('goo.gl', 'google_maps'), ('mapy.', 'mapy'),
+                  ('instagram', 'instagram'), ('facebook', 'facebook'), ('fb.com', 'facebook'), ('fb.me', 'facebook'),
                   ('messenger', 'facebook'), ('tiktok', 'tiktok'), ('t.me', 'telegram'), ('telegram', 'telegram'),
-                  ('whatsapp', 'whatsapp'), ('wa.me', 'whatsapp'), ('wolt', 'wolt'), ('youtube', 'youtube'),
-                  ('google.', 'google'), ('seznam', 'seznam'), ('mapy.', 'seznam'), ('bing.', 'search'),
-                  ('duckduckgo', 'search'), ('yahoo.', 'search'), ('yandex', 'search'), ('firmy.cz', 'seznam'),
+                  ('whatsapp', 'whatsapp'), ('wa.me', 'whatsapp'), ('wolt', 'wolt'), ('foodora', 'foodora'), ('bolt.eu', 'bolt'),
+                  ('youtube', 'youtube'), ('youtu.be', 'youtube'), ('tripadvisor', 'tripadvisor'),
+                  ('google.', 'google'), ('seznam', 'seznam'), ('firmy.cz', 'seznam'), ('bing.', 'bing'),
+                  ('duckduckgo', 'search'), ('yahoo.', 'search'), ('yandex', 'search'), ('ecosia', 'search'), ('brave.com', 'search'),
                   ('pinterest', 'pinterest'), ('linkedin', 'linkedin'), ('lnkd.in', 'linkedin'), ('twitter', 'x'),
-                  ('threads.', 'threads'), ('viber', 'viber'), ('reddit', 'reddit')]
-_TRAFFIC_EXACT = {'x.com': 'x', 't.co': 'x', 'bing.com': 'bing', 'www.bing.com': 'bing'}
+                  ('threads.', 'threads'), ('viber', 'viber'), ('reddit', 'reddit'), ('discord', 'discord'), ('snapchat', 'snapchat')]
+_TRAFFIC_EXACT = {'x.com': 'x', 't.co': 'x'}
+# Android apps send "android-app://<package>" as the referer
+_TRAFFIC_APPS = [('com.google.android.gm', 'email'), ('com.microsoft.office.outlook', 'email'), ('cz.seznam.email', 'email'),
+                 ('com.google.android.apps.maps', 'google_maps'), ('cz.seznam.mapy', 'mapy'), ('cz.seznam', 'seznam'),
+                 ('com.google.android.googlequicksearchbox', 'google'), ('com.google.android.youtube', 'youtube'),
+                 ('com.instagram', 'instagram'), ('com.facebook', 'facebook'), ('org.telegram', 'telegram'), ('com.whatsapp', 'whatsapp'),
+                 ('com.viber', 'viber'), ('com.zhiliaoapp.musically', 'tiktok'), ('com.ss.android', 'tiktok'), ('com.openai', 'chatgpt'),
+                 ('com.linkedin', 'linkedin'), ('com.pinterest', 'pinterest'), ('com.twitter', 'x'), ('com.reddit', 'reddit'),
+                 ('com.discord', 'discord'), ('com.snapchat', 'snapchat'), ('com.wolt', 'wolt')]
 _TRAFFIC_PAID_MEDIUM = {'cpc', 'ppc', 'paid', 'paidsocial', 'paid_social', 'paid-social', 'ads', 'ad', 'cpm', 'sponsored', 'display'}
 # click ids added only by ad networks (fbclid is not here: Facebook adds it to ordinary shared links too)
 _TRAFFIC_AD_IDS = [('gclid', 'google'), ('gbraid', 'google'), ('wbraid', 'google'), ('gad_source', 'google'),
                    ('ttclid', 'tiktok'), ('sznclid', 'seznam'), ('msclkid', 'bing'), ('twclid', 'x')]
 _TRAFFIC_UTM = {'ig': 'instagram', 'insta': 'instagram', 'fb': 'facebook', 'tg': 'telegram', 'wa': 'whatsapp', 'tt': 'tiktok',
-                'sklik': 'seznam', 'adwords': 'google', 'twitter': 'x', 'meta': 'facebook'}
+                'sklik': 'seznam', 'adwords': 'google', 'twitter': 'x', 'meta': 'facebook', 'qr': 'qr', 'qrcode': 'qr', 'qr_code': 'qr',
+                'email': 'email', 'mail': 'email', 'newsletter': 'email', 'gmb': 'google_maps', 'gbp': 'google_maps',
+                'google_business': 'google_maps', 'googlemaps': 'google_maps', 'maps': 'google_maps', 'mapy': 'mapy'}
+_TRAFFIC_MAX_KEYS = 80  # per day, so made-up utm_source values cannot bloat the stats
 
 def _traffic_host(host):
+    """A known name for a site, or "w:<site>" so every other site still gets its own line."""
+    host = re.sub(r'^www\d?\.', '', host)
     if host in _TRAFFIC_EXACT:
         return _TRAFFIC_EXACT[host]
-    return next((v for k, v in _TRAFFIC_HOSTS if k in host), None)
+    known = next((v for k, v in _TRAFFIC_HOSTS if k in host), None)
+    return known or ('w:' + host[:50] if host else 'other')
 
 def _traffic_source(req):
     if req is None:
@@ -2095,14 +2116,18 @@ def _traffic_source(req):
     q = req.query_params
     from urllib.parse import urlparse
     ref = req.headers.get('referer') or ''
-    host = (urlparse(ref).hostname or '').lower() if ref else ''
+    u = urlparse(ref) if ref else None
+    host = (u.hostname or '').lower() if u else ''
     own = (req.headers.get('host') or '').split(':')[0].lower()
     medium = (q.get('utm_medium') or '').lower().strip()
     paid = medium in _TRAFFIC_PAID_MEDIUM
-    utm = re.sub(r'[^a-z0-9_-]', '', (q.get('utm_source') or '').lower())[:20]
+    utm = re.sub(r'[^a-z0-9_.-]', '', (q.get('utm_source') or '').lower())[:50].strip('.')
     if utm:
-        utm = _TRAFFIC_UTM.get(utm, utm)
-        src = _TRAFFIC_EXACT.get(utm) or next((v for k, v in _TRAFFIC_HOSTS if k.rstrip('.') in utm), utm)
+        if '.' in utm:  # utm_source=chatgpt.com, =example.cz …
+            src = _traffic_host(utm)
+        else:
+            utm = _TRAFFIC_UTM.get(utm, utm)
+            src = next((v for k, v in _TRAFFIC_HOSTS if '.' not in k and k in utm), utm)
         return src + '_ads' if paid and not src.endswith('_ads') else src
     ad = next((v for k, v in _TRAFFIC_AD_IDS if q.get(k)), None)
     if ad:
@@ -2112,9 +2137,13 @@ def _traffic_source(req):
         return ('instagram' if 'instagram' in host else 'facebook') + ('_ads' if paid else '')
     if not ref:
         return 'direct'
+    if u.scheme == 'android-app':
+        pkg = re.sub(r'[^a-z0-9_.]', '', (u.netloc or '').lower())[:50]
+        src = next((v for k, v in _TRAFFIC_APPS if pkg.startswith(k)), None) or ('app:' + pkg if pkg else 'other')
+        return src + '_ads' if paid else src
     if not host or host == own:
         return None
-    src = _traffic_host(host) or 'other'
+    src = _traffic_host(host)
     return src + '_ads' if paid else src
 
 def _inc_pageviews(req=None):
@@ -2140,6 +2169,8 @@ def _inc_pageviews(req=None):
                 row = conn.execute("SELECT value FROM settings WHERE key='traffic_daily'").fetchone()
                 tr = _json.loads(row[0]) if row and row[0] else {}
                 day = tr.setdefault(today, {})
+                if src not in day and len(day) >= _TRAFFIC_MAX_KEYS:
+                    src = 'other'
                 day[src] = day.get(src, 0) + 1
                 tr = {k: v for k, v in tr.items() if time.mktime(time.strptime(k, '%Y-%m-%d')) >= cutoff}
                 conn.execute(
