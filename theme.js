@@ -113,7 +113,8 @@ html[data-theme] .m-tab:hover::before{animation:thShake .5s}
 @keyframes thShake{25%{transform:translateX(-2px)}75%{transform:translateX(2px)}}
 html[data-theme] .m-body{position:relative}
 .th-cgar{position:absolute;left:0;right:0;top:-7px;height:14px;display:flex;justify-content:space-around;pointer-events:none;z-index:4}
-.th-cgar::before{content:'';position:absolute;left:0;right:0;top:3px;height:1px;background:rgba(255,255,255,.25)}
+.th-cgar::before{content:'';position:absolute;left:-2px;right:-2px;top:-1px;height:9px;border-radius:5px;background:radial-gradient(circle at 3px 4px,#3fa66b 1.6px,transparent 2px) 0 0/7px 9px,repeating-linear-gradient(65deg,#1f6b3c 0 2px,#2f8a4f 2px 4px,#16502d 4px 5px),repeating-linear-gradient(-65deg,transparent 0 3px,rgba(63,166,107,.7) 3px 4px);box-shadow:0 2px 4px rgba(0,0,0,.5)}
+.th-cgar i{position:relative;z-index:1}
 .th-cgar i{width:6px;height:9px;border-radius:45% 45% 50% 50%;margin-top:3px;animation:thGlow 2.2s infinite ease-in-out}
 .th-cgar i:nth-child(odd){margin-top:5px}
 .th-cgar i:nth-child(4n+1){background:${b[0]};color:${b[0]}}
@@ -146,8 +147,10 @@ html[data-theme] :is(${CARDS}):hover{border-color:${b[0]};box-shadow:0 0 0 1px $
 :where(.pop-card,.rv-card,.di,.celeb-card){position:relative}
 html[data-theme] .ab-stat{background:linear-gradient(135deg,${P.bg[1]},${P.bg[3]});border-color:${b[0]};box-shadow:0 10px 30px rgba(0,0,0,.55)}
 .th-deco{position:absolute;z-index:3;pointer-events:none;line-height:0}
-.th-deco.tr{top:0;right:0}.th-deco.tl{top:-4px;left:-4px}.th-deco.lt{top:8px;left:8px;filter:drop-shadow(0 4px 6px rgba(0,0,0,.55));animation:thWob 4s ease-in-out infinite}
+.th-deco.tr{top:0;right:0}.th-deco.tl{top:5px;left:5px;z-index:6;filter:drop-shadow(0 4px 6px rgba(0,0,0,.6));animation:thWob 5s ease-in-out infinite}.th-deco.lt{top:8px;left:8px;filter:drop-shadow(0 4px 6px rgba(0,0,0,.55));animation:thWob 4s ease-in-out infinite}
 .th-deco svg{display:block}
+.th-deco.tl svg{width:58px;height:58px}
+@media(max-width:600px){.th-deco.tl svg{width:44px;height:44px}}
 .th-deco.em{font-size:1.35rem;line-height:1;top:8px;right:10px;filter:drop-shadow(0 3px 5px rgba(0,0,0,.55));animation:thWob 4s ease-in-out infinite}
 :is(${CARDS}):hover .th-deco.em{animation-duration:1.2s}
 .th-deco.web{opacity:.75}
@@ -384,7 +387,7 @@ html[data-theme] .ab-stat{background:linear-gradient(135deg,${P.bg[1]},${P.bg[3]
   const EGGS = [['#ff9eb5', '#e5484d'], ['#9fd3ff', '#3b7dd8'], ['#ffd36e', '#e08b1a'], ['#a8e6a1', '#3fa66b'], ['#c9a0ff', '#7d4bd6']];
   function decoFor(id, i, c) {
     if (id === 'halloween') return i % 3 === 2 ? ['em', '🎃'] : ['tr web', WEB];
-    if (id === 'christmas' || (id === 'new_year' && c.classList.contains('rv-card'))) return i % 3 === 1 && id === 'christmas' ? ['em', '🎁'] : ['tl', WREATH];
+    if (id === 'christmas' || id === 'new_year') return ['tl', WREATH];
     if (id === 'easter') return i % 3 === 2 ? ['lt', PASKA] : ['lt', EGG(...EGGS[i % EGGS.length])];
     if (id === 'valentine') return ['em', ['💝', '💖', '💘'][i % 3]];
     return ['em', ['✨', '🎁', '🥂'][i % 3]];
