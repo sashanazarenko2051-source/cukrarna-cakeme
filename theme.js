@@ -353,6 +353,10 @@ html[data-theme] .ab-stat{background:linear-gradient(135deg,${P.bg[1]},${P.bg[3]
 .th-sleigh{animation:thBob 1.1s ease-in-out infinite alternate}
 .th-arm{transform-box:fill-box;transform-origin:100% 100%;animation:thWave .45s ease-in-out infinite alternate}
 .th-vis.flying .th-arm{animation-duration:1.4s}
+.th-vis.stand .th-lf{animation:thStomp .42s ease-in-out infinite alternate}
+.th-vis.stand .th-lb{animation:thStomp .42s ease-in-out infinite alternate-reverse}
+.th-vis.stand .th-rd{animation:thBob .84s ease-in-out infinite alternate}
+.th-vis.stand .th-sleigh{animation:none}
 .th-nose{animation:thGlow2 1s infinite}
 .th-cape{transform-box:fill-box;transform-origin:0 50%;animation:thCape .5s ease-in-out infinite alternate}
 .th-bristle{transform-box:fill-box;transform-origin:0 50%;animation:thCape .3s ease-in-out infinite alternate}
@@ -373,6 +377,7 @@ html[data-theme] .ab-stat{background:linear-gradient(135deg,${P.bg[1]},${P.bg[3]
 .th-deco.pk{top:8px;left:10px;filter:drop-shadow(0 0 10px rgba(255,140,30,.55)) drop-shadow(0 4px 6px rgba(0,0,0,.6));animation:thWob 4s ease-in-out infinite}
 .th-deco.hb{top:8px;left:10px;filter:drop-shadow(0 4px 8px rgba(238,47,95,.5));animation:thBeat 1.3s ease-in-out infinite}
 @keyframes thBob{from{transform:translateY(0)}to{transform:translateY(-3px)}}
+@keyframes thStomp{0%,40%{transform:none}100%{transform:translateY(-3.5px) rotate(-16deg)}}
 @keyframes thLeg{from{transform:rotate(28deg)}to{transform:rotate(-24deg)}}
 @keyframes thWave{from{transform:rotate(-22deg)}to{transform:rotate(16deg)}}
 @keyframes thGlow2{0%,100%{opacity:.5}50%{opacity:1}}
@@ -549,22 +554,26 @@ ${TAB_DECO()[id] ? `html[data-theme] .m-tab{position:relative}html[data-theme] .
         const W = innerWidth, lr = logo.getBoundingClientRect(), nb = nav.getBoundingClientRect().bottom;
         const tx = Math.min(lr.right + 14, W - w - 10), ty = V.move === 'float' ? Math.max(nb - h * .55, 46) : Math.max(nb + 6, lr.bottom - h * .25);
         const IN = V.move === 'hop' ? 5200 : 4200, STAY = 4300, OUT = 2600, t0 = performance.now();
-        let lastSpark = 0;
+        let lastSpark = 0, tl = 0;
         const ease = k => 1 - Math.pow(1 - k, 3);
         const step = t => {
           if (!el.isConnected) return;
           const e = t - t0;
           let x, y, rot = 0, sx = 1, sy = 1, moving = true;
+          // stays by the logo while the page is at the top; leaves once the visitor scrolls down
+          if (!tl && e >= IN + STAY && (scrollY > 60 || document.hidden)) tl = t;
           if (e < IN) {
             const k = e / IN, q = ease(k);
             if (V.move === 'float') { x = W - w * .3 + (tx - W + w * .3) * q; y = innerHeight * .6 + (ty - innerHeight * .6) * q + Math.sin(k * 6) * 10 * (1 - q); }
             else if (V.move === 'hop') { x = W + 10 + (tx - W - 10) * k; const ph = (k * 7) % 1; y = ty - Math.sin(ph * Math.PI) * 34 * (1 - k * .4); sy = ph < .08 || ph > .92 ? .9 : 1.04; sx = 2 - sy; }
             else { x = W + 20 + (tx - W - 20) * q; y = ty - 60 * (1 - q) + Math.sin(k * 8) * 14 * (1 - q); rot = -6 * (1 - q); }
-          } else if (e < IN + STAY) {
-            moving = false; x = tx; y = ty + Math.sin(e / 320) * (V.move === 'hop' ? 1 : 3);
-            el.classList.remove('flying'); el.classList.add('talk');
-          } else if (e < IN + STAY + OUT) {
-            const k = (e - IN - STAY) / OUT; el.classList.remove('talk'); el.classList.add('flying');
+          } else if (!tl) {
+            const s = e - IN;  // the greeting bubble: first 4.5 s, then again for 4 s every 15 s
+            moving = false; x = tx; y = ty + Math.sin(e / 320) * (V.move === 'float' ? 3 : 1);
+            el.classList.remove('flying'); el.classList.add('stand');
+            el.classList.toggle('talk', s < 4500 || s % 15000 > 11000);
+          } else if (t - tl < OUT) {
+            const k = (t - tl) / OUT; el.classList.remove('talk', 'stand'); el.classList.add('flying');
             if (V.move === 'float') { x = tx + Math.sin(k * 5) * 12; y = ty - k * k * (ty + h + 60); }
             else if (V.move === 'hop') { x = tx - k * (tx + w + 30); const ph = (k * 5) % 1; y = ty - Math.sin(ph * Math.PI) * 30; }
             else { x = tx - k * k * (tx + w + 40); y = ty - k * k * (ty + h + 40); rot = 10 * k; }
