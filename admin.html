@@ -381,7 +381,10 @@ body{font-family:'Raleway',sans-serif;background:var(--bg0);color:var(--tx0)}
 .th-tile:hover{border-color:var(--gold-d);transform:translateY(-2px)}
 .th-tile.on{border-color:var(--gold);box-shadow:0 0 0 1px var(--gold) inset;background:rgba(201,169,110,.1)}
 .th-tile.on::after{content:'✓';position:absolute;top:6px;right:9px;color:var(--gold);font-weight:700}
-.th-tile .th-em{font-size:2.3rem;line-height:1.1}
+.th-tile .th-em{font-size:2.5rem;line-height:1.1;filter:drop-shadow(0 6px 10px rgba(0,0,0,.5));transition:transform .3s}
+.th-tile:hover .th-em{animation:thTileBob .9s ease-in-out infinite}
+@keyframes thTileBob{0%,100%{transform:translateY(0) rotate(-6deg)}50%{transform:translateY(-6px) rotate(6deg)}}
+.th-tile.on .th-em{transform:scale(1.12)}
 .th-tile b{font-size:.86rem;font-weight:600}
 .th-tile small{font-size:.68rem;color:var(--tx2);min-height:1.2em}
 .th-tile .th-bulbs{display:flex;gap:5px;margin:2px 0}
@@ -1556,7 +1559,7 @@ async function loadTheme(){
 }
 function renderTheme(){
   const c = thCfg;
-  document.getElementById('thGrid').innerHTML = TH_LIST.map(x=>`<div class="th-tile${c.mode===x.id?' on':''}" data-th="${x.id}" role="button" tabindex="0">
+  document.getElementById('thGrid').innerHTML = TH_LIST.map(x=>`<div class="th-tile${c.mode===x.id?' on':''}" data-th="${x.id}" role="button" tabindex="0"${x.bulbs ? ` style="background:radial-gradient(120% 80% at 50% 0%,${x.bulbs[0]}2e,transparent 62%),radial-gradient(90% 70% at 100% 100%,${x.bulbs[2]}24,transparent 60%),var(--bg3)"` : ''}>
       <span class="th-em">${x.em}</span><b>${esc(t(x.k))}</b>
       ${x.bulbs ? `<span class="th-bulbs">${x.bulbs.map(b=>`<i style="background:${b}"></i>`).join('')}</span>` : ''}
       <small>${x.d ? esc(t(x.d)) : ''}</small>
