@@ -132,6 +132,39 @@ async def _startup():
             _get_pool()
         except Exception as e:
             print('DB startup error:', e)
+        if STRIPE_SECRET_KEY:
+            threading.Thread(target=_backfill_stripe_contacts, daemon=True).start()
+
+def _backfill_stripe_contacts():
+    """Paid online orders saved without an e-mail and phone (both are optional for
+    pickup) get the ones the customer typed on Stripe's payment page."""
+    try:
+        with _get_pool().connection() as conn:
+            ids = {r[0] for r in conn.execute(
+                "SELECT id FROM orders WHERE status='paid' AND payment='online'"
+                " AND COALESCE(email,'')='' AND COALESCE(phone,'')=''").fetchall()}
+        if not ids:
+            return
+        since = int(time.time()) - 60 * 86400
+        for session in _stripe.checkout.Session.list(limit=100, created={'gte': since}).auto_paging_iter():
+            try:
+                oid = _lead_int(session['metadata']['order_id'])
+            except (KeyError, TypeError):
+                continue
+            if oid not in ids:
+                continue
+            email, phone = _stripe_contact(session)
+            if email or phone:
+                with _get_pool().connection() as conn:
+                    conn.execute(
+                        "UPDATE orders SET email=CASE WHEN COALESCE(email,'')='' THEN %s ELSE email END,"
+                        " phone=CASE WHEN COALESCE(phone,'')='' THEN %s ELSE phone END WHERE id=%s",
+                        (email, phone, oid))
+            ids.discard(oid)
+            if not ids:
+                break
+    except Exception as e:
+        print('Stripe contact backfill:', e)
 
 # ── Security headers ──────────────────────────────────────────────────────────
 @app.middleware('http')
@@ -1990,6 +2023,8 @@ async def api_create_checkout(req: Request):
             success_url=f'{base}/success?session_id={{CHECKOUT_SESSION_ID}}&order_id={order_id}',
             cancel_url=f'{base}/cancel?order_id={order_id}',
             metadata={'order_id': str(order_id)},
+            phone_number_collection={'enabled': True},
+            **({'customer_email': order['email']} if order.get('email') else {}),
         )
     except Exception:
         with _get_pool().connection() as conn:
@@ -2008,20 +2043,36 @@ async def api_verify_payment(session_id: str, order_id: int, bg: BackgroundTasks
         raise HTTPException(400, 'Invalid session')
     if (session.payment_status == 'paid'
             and str(session.metadata.get('order_id')) == str(order_id)):
-        _mark_paid(order_id, bg)
+        _mark_paid(order_id, bg, _stripe_contact(session))
         return {'paid': True}
     return {'paid': False}
 
-def _mark_paid(order_id, bg):
+def _stripe_contact(session):
+    """(email, phone) the customer typed on Stripe's payment page; works for the
+    library's StripeObject and for the webhook's plain JSON."""
+    def get(obj, key):
+        try:
+            return obj[key] or ''
+        except (KeyError, TypeError, AttributeError):
+            return ''
+    cd = get(session, 'customer_details')
+    return str(get(cd, 'email')).strip()[:120], str(get(cd, 'phone')).strip()[:40]
+
+def _mark_paid(order_id, bg, contact=('', '')):
     """pending_payment -> paid and notify. Runs once per order, whichever comes
-    first: the customer's return to /success or Stripe's webhook."""
+    first: the customer's return to /success or Stripe's webhook. The e-mail and
+    phone from Stripe fill in what the customer left empty on the site."""
+    email, phone = contact
     with _get_pool().connection() as conn:
         with conn.cursor(row_factory=dict_row) as cur:
             cur.execute(
-                'UPDATE orders SET status=%s WHERE id=%s AND status=%s'
+                "UPDATE orders SET status=%s,"
+                " email=CASE WHEN COALESCE(email,'')='' THEN %s ELSE email END,"
+                " phone=CASE WHEN COALESCE(phone,'')='' THEN %s ELSE phone END"
+                ' WHERE id=%s AND status=%s'
                 ' RETURNING id,ts,name,phone,address,ord AS "order",'
                 'payment,order_type,delivery_date,delivery_time,email',
-                ('paid', order_id, 'pending_payment')
+                ('paid', email, phone, order_id, 'pending_payment')
             )
             row = cur.fetchone()
     if row:
@@ -2053,7 +2104,7 @@ async def api_stripe_webhook(req: Request, bg: BackgroundTasks):
         session = event['data']['object']
         order_id = _lead_int((session.get('metadata') or {}).get('order_id'))
         if order_id and session.get('payment_status') == 'paid':
-            _mark_paid(order_id, bg)
+            _mark_paid(order_id, bg, _stripe_contact(session))
     return {'received': True}
 
 # ── /api/pageviews ────────────────────────────────────────────────────────────
