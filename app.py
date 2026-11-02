@@ -2209,6 +2209,19 @@ def _refund_auth(token):
     if not STRIPE_SECRET_KEY:
         raise HTTPException(503, {'error': 'Stripe not configured'})
 
+@app.get('/api/order/{order_id}/refunds')
+def api_refunds(order_id: int, token: str = ''):
+    """The order's refunds with the ARN, the number the customer's bank uses to find
+    a refund (Stripe gets it from the card network a day or a few after the refund)."""
+    _refund_auth(token)
+    out = []
+    for r in _stripe.Refund.list(payment_intent=_order_pi(order_id), limit=100).auto_paging_iter():
+        card = _sget(_sget(r, 'destination_details'), 'card')
+        out.append({'amount': int(_sget(r, 'amount') or 0) // 100, 'created': int(_sget(r, 'created') or 0),
+                    'status': str(_sget(r, 'status')), 'arn': str(_sget(card, 'reference')),
+                    'arn_status': str(_sget(card, 'reference_status'))})
+    return sorted(out, key=lambda x: x['created'])
+
 @app.get('/api/order/{order_id}/refund')
 def api_refund_info(order_id: int, token: str = ''):
     _refund_auth(token)

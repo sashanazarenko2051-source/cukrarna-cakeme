@@ -133,6 +133,15 @@ body{font-family:'Raleway',sans-serif;background:var(--bg0);color:var(--tx0)}
 .oc-stripe .k{color:var(--tx2);font-size:.66rem;letter-spacing:1px;text-transform:uppercase}
 .oc-stripe .amt{color:#5ab88a;font-weight:700}
 .oc-stripe a{color:var(--gold)}
+.oc-rfl{grid-column:1/-1;display:grid;grid-template-columns:auto 1fr;gap:6px 18px;align-items:start;border-top:1px solid var(--bdr);padding-top:8px;margin-top:2px}
+.rfl-list{display:flex;flex-direction:column;gap:6px;min-width:0}
+.rfl-row{display:flex;flex-wrap:wrap;align-items:baseline;gap:4px 12px}
+.rfl-row b{color:#e0a070;font-weight:700;font-variant-numeric:tabular-nums}
+.rfl-arn{display:inline-flex;flex-wrap:wrap;align-items:center;gap:6px;font-size:.78rem;color:var(--tx1)}
+.rfl-arn code{font:600 .82rem ui-monospace,Consolas,monospace;color:var(--tx0);background:var(--bg2);padding:2px 6px;border:1px solid var(--bdr);user-select:all;word-break:break-all}
+.rfl-copy{background:none;border:1px solid var(--bdr);color:var(--tx1);padding:2px 8px;font:.68rem 'Raleway',sans-serif;cursor:pointer}
+.rfl-copy:hover{border-color:var(--gold);color:var(--gold)}
+.rfl-wait{font-size:.76rem;color:var(--tx2)}
 .oc-pi-load{background:none;border:1px dashed #635bff;color:#9c96ff;padding:6px 12px;font:.72rem 'Raleway',sans-serif;cursor:pointer;margin-top:4px}
 .oc-pi-load:hover{background:rgba(99,91,255,.1)}
 .rf-modal{position:fixed;inset:0;z-index:950;background:rgba(0,0,0,.66);display:flex;align-items:center;justify-content:center;padding:16px;animation:rfIn .18s ease-out}
@@ -1237,7 +1246,7 @@ const TA = {
     adm_f_date:'Datum a čas doručení',
     adm_f_order:'Objednávka', adm_f_payment:'Platba', 
     adm_s_new:'Nová', adm_s_progress:'Přijata', adm_s_done:'Hotovo', adm_s_paid:'✓ Zaplaceno 50%', adm_s_pending:'⏳ Čeká na platbu',
-    adm_btn_new:'Nová', adm_btn_progress:'Přijata', adm_btn_done:'✓ Hotovo', adm_btn_delete:'✕ Smazat', adm_refund_btn:'↩ Vrátit peníze', adm_rf_title:'Vrácení peněz', adm_rf_loading:'Ověřuji platbu ve Stripe…', adm_rf_paid:'Zaplaceno', adm_rf_done:'Už vráceno', adm_rf_left:'Lze vrátit', adm_rf_amount:'Kolik vrátit', adm_rf_all:'Vše', adm_rf_half:'Polovinu', adm_rf_reason:'Důvod', adm_rf_r_requested_by_customer:'Zákazník požádal', adm_rf_r_cancelled:'Objednávka zrušena', adm_rf_r_not_available:'Není skladem', adm_rf_r_duplicate:'Dvojí platba', adm_rf_r_other:'Jiný důvod', adm_rf_note:'Peníze se vrátí na stejnou kartu, obvykle do 5–10 dnů. Stripe pošle zákazníkovi e-mail.', adm_rf_go:'Vrátit {n} Kč', adm_rf_going:'Vracím…', adm_rf_ok_title:'Vráceno {n} Kč', adm_rf_ok_text:'Peníze jsou na cestě na kartu zákazníka a obvykle dorazí do 5–10 dnů. Stripe mu pošle potvrzení e-mailem.', adm_rf_close:'Zavřít', adm_rf_cancel:'Zrušit', adm_pi_paid:'Zaplaceno {n} Kč', adm_pi_load:'↻ Načíst platbu ze Stripe', adm_pi_holder:'Držitel karty', adm_pi_exp:'platí do {d}', adm_refunded:'↩ Vráceno {n} Kč', adm_refund_err:'Vrácení se nepodařilo: {e}', adm_refund_none:'Není co vracet — platba už je vrácená celá.', adm_refund_bad:'Zadejte částku od 1 do {max} Kč.',
+    adm_btn_new:'Nová', adm_btn_progress:'Přijata', adm_btn_done:'✓ Hotovo', adm_btn_delete:'✕ Smazat', adm_refund_btn:'↩ Vrátit peníze', adm_arn_title:'Vrácení', adm_arn_loading:'Načítám ze Stripe…', adm_arn_err:'Nepodařilo se načíst ze Stripe.', adm_arn_copy:'Kopírovat', adm_arn_copied:'Zkopírováno', adm_arn_pending:'Číslo ARN pro banku zákazníka bude obvykle za 1–3 dny.', adm_arn_none:'Banka číslo ARN neposkytla — zákazník ať se obrátí na svou banku s datem a částkou.', adm_arn_st_ok:'odesláno', adm_arn_st_pending:'zpracovává se', adm_arn_st_failed:'nepodařilo se', adm_arn_st_canceled:'zrušeno', adm_rf_title:'Vrácení peněz', adm_rf_loading:'Ověřuji platbu ve Stripe…', adm_rf_paid:'Zaplaceno', adm_rf_done:'Už vráceno', adm_rf_left:'Lze vrátit', adm_rf_amount:'Kolik vrátit', adm_rf_all:'Vše', adm_rf_half:'Polovinu', adm_rf_reason:'Důvod', adm_rf_r_requested_by_customer:'Zákazník požádal', adm_rf_r_cancelled:'Objednávka zrušena', adm_rf_r_not_available:'Není skladem', adm_rf_r_duplicate:'Dvojí platba', adm_rf_r_other:'Jiný důvod', adm_rf_note:'Peníze se vrátí na stejnou kartu, obvykle do 5–10 dnů. Stripe pošle zákazníkovi e-mail.', adm_rf_go:'Vrátit {n} Kč', adm_rf_going:'Vracím…', adm_rf_ok_title:'Vráceno {n} Kč', adm_rf_ok_text:'Peníze jsou na cestě na kartu zákazníka a obvykle dorazí do 5–10 dnů. Stripe mu pošle potvrzení e-mailem.', adm_rf_close:'Zavřít', adm_rf_cancel:'Zrušit', adm_pi_paid:'Zaplaceno {n} Kč', adm_pi_load:'↻ Načíst platbu ze Stripe', adm_pi_holder:'Držitel karty', adm_pi_exp:'platí do {d}', adm_refunded:'↩ Vráceno {n} Kč', adm_refund_err:'Vrácení se nepodařilo: {e}', adm_refund_none:'Není co vracet — platba už je vrácená celá.', adm_refund_bad:'Zadejte částku od 1 do {max} Kč.',
     adm_count:'{n} objednávek',
     adm_all_items_title:'Všechny položky menu',
     adm_edit_title:'Upravit položku', adm_save_btn:'✓ Uložit změny',
@@ -1308,7 +1317,7 @@ const TA = {
     adm_f_date:'Delivery Date & Time',
     adm_f_order:'Order', adm_f_payment:'Payment', 
     adm_s_new:'New', adm_s_progress:'In progress', adm_s_done:'Done', adm_s_paid:'✓ Paid 50%', adm_s_pending:'⏳ Awaiting payment',
-    adm_btn_new:'New', adm_btn_progress:'In progress', adm_btn_done:'✓ Done', adm_btn_delete:'✕ Delete', adm_refund_btn:'↩ Refund', adm_rf_title:'Refund', adm_rf_loading:'Checking the payment in Stripe…', adm_rf_paid:'Paid', adm_rf_done:'Refunded', adm_rf_left:'Can refund', adm_rf_amount:'How much to refund', adm_rf_all:'All', adm_rf_half:'Half', adm_rf_reason:'Reason', adm_rf_r_requested_by_customer:'Customer asked', adm_rf_r_cancelled:'Order cancelled', adm_rf_r_not_available:'Out of stock', adm_rf_r_duplicate:'Paid twice', adm_rf_r_other:'Other reason', adm_rf_note:'The money goes back to the same card, usually within 5–10 days. Stripe e-mails the customer.', adm_rf_go:'Refund {n} CZK', adm_rf_going:'Refunding…', adm_rf_ok_title:'Refunded {n} CZK', adm_rf_ok_text:'The money is on its way to the customer’s card and usually arrives within 5–10 days. Stripe sends them a confirmation e-mail.', adm_rf_close:'Close', adm_rf_cancel:'Cancel', adm_pi_paid:'Paid {n} CZK', adm_pi_load:'↻ Load the payment from Stripe', adm_pi_holder:'Cardholder', adm_pi_exp:'valid to {d}', adm_refunded:'↩ Refunded {n} CZK', adm_refund_err:'Refund failed: {e}', adm_refund_none:'Nothing left to refund — the payment is already refunded in full.', adm_refund_bad:'Enter an amount from 1 to {max} CZK.',
+    adm_btn_new:'New', adm_btn_progress:'In progress', adm_btn_done:'✓ Done', adm_btn_delete:'✕ Delete', adm_refund_btn:'↩ Refund', adm_arn_title:'Refunds', adm_arn_loading:'Loading from Stripe…', adm_arn_err:'Could not load from Stripe.', adm_arn_copy:'Copy', adm_arn_copied:'Copied', adm_arn_pending:'The ARN for the customer’s bank usually appears within 1–3 days.', adm_arn_none:'The bank gave no ARN — the customer can ask their bank with the date and amount.', adm_arn_st_ok:'sent', adm_arn_st_pending:'processing', adm_arn_st_failed:'failed', adm_arn_st_canceled:'cancelled', adm_rf_title:'Refund', adm_rf_loading:'Checking the payment in Stripe…', adm_rf_paid:'Paid', adm_rf_done:'Refunded', adm_rf_left:'Can refund', adm_rf_amount:'How much to refund', adm_rf_all:'All', adm_rf_half:'Half', adm_rf_reason:'Reason', adm_rf_r_requested_by_customer:'Customer asked', adm_rf_r_cancelled:'Order cancelled', adm_rf_r_not_available:'Out of stock', adm_rf_r_duplicate:'Paid twice', adm_rf_r_other:'Other reason', adm_rf_note:'The money goes back to the same card, usually within 5–10 days. Stripe e-mails the customer.', adm_rf_go:'Refund {n} CZK', adm_rf_going:'Refunding…', adm_rf_ok_title:'Refunded {n} CZK', adm_rf_ok_text:'The money is on its way to the customer’s card and usually arrives within 5–10 days. Stripe sends them a confirmation e-mail.', adm_rf_close:'Close', adm_rf_cancel:'Cancel', adm_pi_paid:'Paid {n} CZK', adm_pi_load:'↻ Load the payment from Stripe', adm_pi_holder:'Cardholder', adm_pi_exp:'valid to {d}', adm_refunded:'↩ Refunded {n} CZK', adm_refund_err:'Refund failed: {e}', adm_refund_none:'Nothing left to refund — the payment is already refunded in full.', adm_refund_bad:'Enter an amount from 1 to {max} CZK.',
     adm_count:'{n} orders',
     adm_all_items_title:'All menu items',
     adm_edit_title:'Edit item', adm_save_btn:'✓ Save changes',
@@ -1381,7 +1390,7 @@ const TA = {
     adm_f_date:'Дата і час доставки',
     adm_f_order:'Замовлення', adm_f_payment:'Оплата', 
     adm_s_new:'Нове', adm_s_progress:'Прийняте', adm_s_done:'Готово', adm_s_paid:'✓ Оплачено 50%', adm_s_pending:'⏳ Очікує оплати',
-    adm_btn_new:'Нове', adm_btn_progress:'Прийняте', adm_btn_done:'✓ Готово', adm_btn_delete:'✕ Видалити', adm_refund_btn:'↩ Повернути кошти', adm_rf_title:'Повернення коштів', adm_rf_loading:'Перевіряю оплату у Stripe…', adm_rf_paid:'Сплачено', adm_rf_done:'Уже повернуто', adm_rf_left:'Можна повернути', adm_rf_amount:'Скільки повернути', adm_rf_all:'Усе', adm_rf_half:'Половину', adm_rf_reason:'Причина', adm_rf_r_requested_by_customer:'Покупець попросив', adm_rf_r_cancelled:'Замовлення скасовано', adm_rf_r_not_available:'Немає в наявності', adm_rf_r_duplicate:'Подвійна оплата', adm_rf_r_other:'Інша причина', adm_rf_note:'Гроші повернуться на ту саму картку, зазвичай за 5–10 днів. Stripe надішле покупцю лист.', adm_rf_go:'Повернути {n} Kč', adm_rf_going:'Повертаю…', adm_rf_ok_title:'Повернуто {n} Kč', adm_rf_ok_text:'Гроші вже йдуть на картку покупця і зазвичай надходять за 5–10 днів. Stripe надішле йому підтвердження листом.', adm_rf_close:'Закрити', adm_rf_cancel:'Скасувати', adm_pi_paid:'Сплачено {n} Kč', adm_pi_load:'↻ Завантажити оплату зі Stripe', adm_pi_holder:'Власник картки', adm_pi_exp:'дійсна до {d}', adm_refunded:'↩ Повернуто {n} Kč', adm_refund_err:'Не вдалося повернути: {e}', adm_refund_none:'Нічого повертати — оплату вже повернуто повністю.', adm_refund_bad:'Введіть суму від 1 до {max} Kč.',
+    adm_btn_new:'Нове', adm_btn_progress:'Прийняте', adm_btn_done:'✓ Готово', adm_btn_delete:'✕ Видалити', adm_refund_btn:'↩ Повернути кошти', adm_arn_title:'Повернення', adm_arn_loading:'Завантажую зі Stripe…', adm_arn_err:'Не вдалося завантажити зі Stripe.', adm_arn_copy:'Копіювати', adm_arn_copied:'Скопійовано', adm_arn_pending:'Номер ARN для банку покупця зазвичай з’являється за 1–3 дні.', adm_arn_none:'Банк не надав номер ARN — хай покупець звернеться у свій банк із датою та сумою.', adm_arn_st_ok:'надіслано', adm_arn_st_pending:'обробляється', adm_arn_st_failed:'не вдалося', adm_arn_st_canceled:'скасовано', adm_rf_title:'Повернення коштів', adm_rf_loading:'Перевіряю оплату у Stripe…', adm_rf_paid:'Сплачено', adm_rf_done:'Уже повернуто', adm_rf_left:'Можна повернути', adm_rf_amount:'Скільки повернути', adm_rf_all:'Усе', adm_rf_half:'Половину', adm_rf_reason:'Причина', adm_rf_r_requested_by_customer:'Покупець попросив', adm_rf_r_cancelled:'Замовлення скасовано', adm_rf_r_not_available:'Немає в наявності', adm_rf_r_duplicate:'Подвійна оплата', adm_rf_r_other:'Інша причина', adm_rf_note:'Гроші повернуться на ту саму картку, зазвичай за 5–10 днів. Stripe надішле покупцю лист.', adm_rf_go:'Повернути {n} Kč', adm_rf_going:'Повертаю…', adm_rf_ok_title:'Повернуто {n} Kč', adm_rf_ok_text:'Гроші вже йдуть на картку покупця і зазвичай надходять за 5–10 днів. Stripe надішле йому підтвердження листом.', adm_rf_close:'Закрити', adm_rf_cancel:'Скасувати', adm_pi_paid:'Сплачено {n} Kč', adm_pi_load:'↻ Завантажити оплату зі Stripe', adm_pi_holder:'Власник картки', adm_pi_exp:'дійсна до {d}', adm_refunded:'↩ Повернуто {n} Kč', adm_refund_err:'Не вдалося повернути: {e}', adm_refund_none:'Нічого повертати — оплату вже повернуто повністю.', adm_refund_bad:'Введіть суму від 1 до {max} Kč.',
     adm_count:'Замовлень: {n}',
     adm_all_items_title:'Усі позиції меню',
     adm_edit_title:'Редагувати позицію', adm_save_btn:'✓ Зберегти зміни',
@@ -1756,7 +1765,42 @@ function payInfoHtml(o){
       ${row(t('adm_pi_holder'), esc(p.holder))}
       ${row('E-mail', p.email ? `<a href="mailto:${esc(p.email)}">${esc(p.email)}</a>` : '')}
       ${row(t('adm_f_phone'), p.phone ? `<a href="tel:${esc(p.phone)}">${esc(p.phone)}</a>` : '')}
+      ${o.refunded ? `<div class="oc-rfl" id="rfl-${o.id}">${refundsHtml(o.id)}</div>` : ''}
     </div></div>`;
+}
+// Refunds of an order with the ARN (the number the customer's bank uses to trace a refund)
+const _rfl = {};  // order id -> {at, list | err}
+function refundsHtml(id){
+  const c = _rfl[id];
+  if(!c) return `<span class="k">${t('adm_arn_title')}</span><span class="rfl-wait">${t('adm_arn_loading')}</span>`;
+  if(c.err) return `<span class="k">${t('adm_arn_title')}</span><span class="rfl-wait">${esc(c.err)} <button type="button" class="rfl-copy" onclick="loadRefunds(${id}, true)">↻</button></span>`;
+  const st = {succeeded: t('adm_arn_st_ok'), pending: t('adm_arn_st_pending'), failed: t('adm_arn_st_failed'), canceled: t('adm_arn_st_canceled')};
+  return `<span class="k">${t('adm_arn_title')}</span><div class="rfl-list">` + c.list.map(r=>{
+    const when = new Date(r.created*1000).toLocaleString(SCH_LOCALE[adminLang]||'cs-CZ', {day:'2-digit', month:'2-digit', year:'numeric', hour:'2-digit', minute:'2-digit'});
+    const arn = r.arn
+      ? `<span class="rfl-arn">ARN <code>${esc(r.arn)}</code> <button type="button" class="rfl-copy" onclick="copyArn(this, '${esc(r.arn)}')">${t('adm_arn_copy')}</button></span>`
+      : `<span class="rfl-wait">${t(r.arn_status === 'unavailable' ? 'adm_arn_none' : 'adm_arn_pending')}</span>`;
+    return `<div class="rfl-row"><b>↩ ${r.amount} Kč</b><small>${esc(when)} · ${esc(st[r.status] || r.status)}</small>${arn}</div>`;
+  }).join('') + '</div>';
+}
+async function loadRefunds(id, force){
+  const c = _rfl[id];
+  if(c && !force && Date.now() - c.at < 10*60*1000) return;  // asked Stripe less than 10 minutes ago
+  _rfl[id] = {at: Date.now(), list: [], loading: true};
+  try{
+    const r = await fetch(`/api/order/${id}/refunds?token=${encodeURIComponent(sessionStorage.getItem('cm_token')||'')}`);
+    const j = await r.json().catch(()=>({}));
+    if(!r.ok) throw new Error(j.error || r.status);
+    _rfl[id] = {at: Date.now(), list: j};
+  }catch(e){ _rfl[id] = {at: Date.now(), err: t('adm_arn_err')}; }
+  const box = document.getElementById('rfl-' + id);
+  if(box) box.innerHTML = refundsHtml(id);
+}
+function copyArn(btn, v){
+  const done = ()=>{ btn.textContent = '✓ ' + t('adm_arn_copied'); setTimeout(()=>{ btn.textContent = t('adm_arn_copy'); }, 1600); };
+  (navigator.clipboard ? navigator.clipboard.writeText(v) : Promise.reject()).then(done).catch(()=>{
+    const r = document.createRange(); r.selectNodeContents(btn.previousElementSibling); const sel = getSelection(); sel.removeAllRanges(); sel.addRange(r);
+  });
 }
 async function loadPayInfo(id, btn){
   btn.disabled = true;
@@ -1846,7 +1890,7 @@ async function rfSend(){
     if(r.status === 401){ rfClose(); handleExpired(); return; }
     const j = await r.json().catch(()=>({}));
     if(!r.ok) throw new Error(j.error === 'amount' ? t('adm_refund_bad', {max: j.max}) : (j.error || r.status));
-    Object.assign(rf, {state: 'ok', sent: n, done: true});
+    Object.assign(rf, {state: 'ok', sent: n, done: true}); delete _rfl[rf.id];
     const o = (ordersCache||[]).find(x=>x.id===rf.id); if(o) o.refunded = j.refunded;
   }catch(e){ Object.assign(rf, {state: 'ready', err: t('adm_refund_err', {e: e.message})}); }
   rfRender();
@@ -1981,6 +2025,7 @@ async function renderOrders(){
       </div>
     </div>
   `).join('');
+  list.filter(o=>o.refunded && o.payment==='online').forEach(o=>loadRefunds(o.id));
 }
 
 /* ── Menu helpers ── */
