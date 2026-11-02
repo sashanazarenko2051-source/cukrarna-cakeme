@@ -126,6 +126,15 @@ body{font-family:'Raleway',sans-serif;background:var(--bg0);color:var(--tx0)}
 .btn-del{margin-left:auto!important;border-color:transparent!important}
 .btn-refund{border-color:rgba(214,120,72,.5)!important;color:#e0a070!important}
 .btn-refund:hover{border-color:#e0a070!important;background:rgba(224,160,112,.08)!important}
+.oc-stripe{display:grid;grid-template-columns:auto 1fr;gap:6px 18px;align-items:center;background:var(--bg3);border:1px solid var(--bdr);border-left:3px solid #635bff;padding:12px 14px;margin-top:4px;font-size:.84rem;color:var(--tx0)}
+.oc-stripe .card{grid-column:1/-1;display:flex;flex-wrap:wrap;align-items:baseline;gap:6px 12px}
+.oc-stripe .card b{font:700 .95rem 'Raleway',sans-serif;letter-spacing:.5px;font-variant-numeric:tabular-nums}
+.oc-stripe small{color:var(--tx2);font-size:.72rem}
+.oc-stripe .k{color:var(--tx2);font-size:.66rem;letter-spacing:1px;text-transform:uppercase}
+.oc-stripe .amt{color:#5ab88a;font-weight:700}
+.oc-stripe a{color:var(--gold)}
+.oc-pi-load{background:none;border:1px dashed #635bff;color:#9c96ff;padding:6px 12px;font:.72rem 'Raleway',sans-serif;cursor:pointer;margin-top:4px}
+.oc-pi-load:hover{background:rgba(99,91,255,.1)}
 .badge-refund{background:rgba(224,160,112,.15);color:#e0a070;margin-left:6px}
 .btn-del:hover{border-color:#e08080!important;color:#e08080!important}
 .no-orders{text-align:center;color:var(--tx2);padding:56px;font-size:.88rem}
@@ -1182,7 +1191,7 @@ const TA = {
     adm_f_date:'Datum a čas doručení',
     adm_f_order:'Objednávka', adm_f_payment:'Platba', 
     adm_s_new:'Nová', adm_s_progress:'Přijata', adm_s_done:'Hotovo', adm_s_paid:'✓ Zaplaceno 50%', adm_s_pending:'⏳ Čeká na platbu',
-    adm_btn_new:'Nová', adm_btn_progress:'Přijata', adm_btn_done:'✓ Hotovo', adm_btn_delete:'✕ Smazat', adm_refund_btn:'↩ Vrátit peníze', adm_refunded:'↩ Vráceno {n} Kč', adm_refund_ask:'Kolik vrátit zákazníkovi na kartu (Kč)?\nZaplaceno: {paid} Kč · už vráceno: {done} Kč · lze vrátit nejvýš {max} Kč.', adm_refund_ok:'Vráceno {n} Kč. Na kartu zákazníka peníze obvykle dorazí do 5–10 dnů.', adm_refund_err:'Vrácení se nepodařilo: {e}', adm_refund_none:'Není co vracet — platba už je vrácená celá.', adm_refund_bad:'Zadejte částku od 1 do {max} Kč.',
+    adm_btn_new:'Nová', adm_btn_progress:'Přijata', adm_btn_done:'✓ Hotovo', adm_btn_delete:'✕ Smazat', adm_refund_btn:'↩ Vrátit peníze', adm_pi_paid:'Zaplaceno {n} Kč', adm_pi_load:'↻ Načíst platbu ze Stripe', adm_pi_holder:'Držitel karty', adm_pi_exp:'platí do {d}', adm_refunded:'↩ Vráceno {n} Kč', adm_refund_ask:'Kolik vrátit zákazníkovi na kartu (Kč)?\nZaplaceno: {paid} Kč · už vráceno: {done} Kč · lze vrátit nejvýš {max} Kč.', adm_refund_ok:'Vráceno {n} Kč. Na kartu zákazníka peníze obvykle dorazí do 5–10 dnů.', adm_refund_err:'Vrácení se nepodařilo: {e}', adm_refund_none:'Není co vracet — platba už je vrácená celá.', adm_refund_bad:'Zadejte částku od 1 do {max} Kč.',
     adm_count:'{n} objednávek',
     adm_all_items_title:'Všechny položky menu',
     adm_edit_title:'Upravit položku', adm_save_btn:'✓ Uložit změny',
@@ -1253,7 +1262,7 @@ const TA = {
     adm_f_date:'Delivery Date & Time',
     adm_f_order:'Order', adm_f_payment:'Payment', 
     adm_s_new:'New', adm_s_progress:'In progress', adm_s_done:'Done', adm_s_paid:'✓ Paid 50%', adm_s_pending:'⏳ Awaiting payment',
-    adm_btn_new:'New', adm_btn_progress:'In progress', adm_btn_done:'✓ Done', adm_btn_delete:'✕ Delete', adm_refund_btn:'↩ Refund', adm_refunded:'↩ Refunded {n} CZK', adm_refund_ask:'How much to refund to the customer’s card (CZK)?\nPaid: {paid} CZK · already refunded: {done} CZK · up to {max} CZK.', adm_refund_ok:'Refunded {n} CZK. The money usually reaches the customer’s card within 5–10 days.', adm_refund_err:'Refund failed: {e}', adm_refund_none:'Nothing left to refund — the payment is already refunded in full.', adm_refund_bad:'Enter an amount from 1 to {max} CZK.',
+    adm_btn_new:'New', adm_btn_progress:'In progress', adm_btn_done:'✓ Done', adm_btn_delete:'✕ Delete', adm_refund_btn:'↩ Refund', adm_pi_paid:'Paid {n} CZK', adm_pi_load:'↻ Load the payment from Stripe', adm_pi_holder:'Cardholder', adm_pi_exp:'valid to {d}', adm_refunded:'↩ Refunded {n} CZK', adm_refund_ask:'How much to refund to the customer’s card (CZK)?\nPaid: {paid} CZK · already refunded: {done} CZK · up to {max} CZK.', adm_refund_ok:'Refunded {n} CZK. The money usually reaches the customer’s card within 5–10 days.', adm_refund_err:'Refund failed: {e}', adm_refund_none:'Nothing left to refund — the payment is already refunded in full.', adm_refund_bad:'Enter an amount from 1 to {max} CZK.',
     adm_count:'{n} orders',
     adm_all_items_title:'All menu items',
     adm_edit_title:'Edit item', adm_save_btn:'✓ Save changes',
@@ -1326,7 +1335,7 @@ const TA = {
     adm_f_date:'Дата і час доставки',
     adm_f_order:'Замовлення', adm_f_payment:'Оплата', 
     adm_s_new:'Нове', adm_s_progress:'Прийняте', adm_s_done:'Готово', adm_s_paid:'✓ Оплачено 50%', adm_s_pending:'⏳ Очікує оплати',
-    adm_btn_new:'Нове', adm_btn_progress:'Прийняте', adm_btn_done:'✓ Готово', adm_btn_delete:'✕ Видалити', adm_refund_btn:'↩ Повернути кошти', adm_refunded:'↩ Повернуто {n} Kč', adm_refund_ask:'Скільки повернути покупцю на картку (Kč)?\nОплачено: {paid} Kč · уже повернуто: {done} Kč · можна повернути до {max} Kč.', adm_refund_ok:'Повернуто {n} Kč. На картку покупця гроші зазвичай надходять за 5–10 днів.', adm_refund_err:'Не вдалося повернути: {e}', adm_refund_none:'Нічого повертати — оплату вже повернуто повністю.', adm_refund_bad:'Введіть суму від 1 до {max} Kč.',
+    adm_btn_new:'Нове', adm_btn_progress:'Прийняте', adm_btn_done:'✓ Готово', adm_btn_delete:'✕ Видалити', adm_refund_btn:'↩ Повернути кошти', adm_pi_paid:'Сплачено {n} Kč', adm_pi_load:'↻ Завантажити оплату зі Stripe', adm_pi_holder:'Власник картки', adm_pi_exp:'дійсна до {d}', adm_refunded:'↩ Повернуто {n} Kč', adm_refund_ask:'Скільки повернути покупцю на картку (Kč)?\nОплачено: {paid} Kč · уже повернуто: {done} Kč · можна повернути до {max} Kč.', adm_refund_ok:'Повернуто {n} Kč. На картку покупця гроші зазвичай надходять за 5–10 днів.', adm_refund_err:'Не вдалося повернути: {e}', adm_refund_none:'Нічого повертати — оплату вже повернуто повністю.', adm_refund_bad:'Введіть суму від 1 до {max} Kč.',
     adm_count:'Замовлень: {n}',
     adm_all_items_title:'Усі позиції меню',
     adm_edit_title:'Редагувати позицію', adm_save_btn:'✓ Зберегти зміни',
@@ -1684,6 +1693,37 @@ async function deleteOrder(id){
   renderOrders();
 }
 
+// Payment details from Stripe: card, cardholder, contacts, amount actually paid
+function payInfoHtml(o){
+  if(o.payment !== 'online' || o.status === 'pending_payment') return '';
+  let p = null;
+  try{ p = o.pay_info ? JSON.parse(o.pay_info) : null; }catch{}
+  const head = `<span class="oc-lbl">💳 Stripe</span>`;
+  if(!p) return `<div class="oc-field full">${head}<button type="button" class="oc-pi-load" onclick="loadPayInfo(${o.id}, this)">${t('adm_pi_load')}</button></div>`;
+  const wallet = {apple_pay:'Apple Pay', google_pay:'Google Pay', link:'Link'}[p.wallet] || '';
+  const when = p.paid_at ? new Date(p.paid_at*1000).toLocaleString(SCH_LOCALE[adminLang]||'cs-CZ', {day:'2-digit', month:'2-digit', year:'numeric', hour:'2-digit', minute:'2-digit'}) : '';
+  const row = (k, v) => v ? `<span class="k">${k}</span><span>${v}</span>` : '';
+  return `<div class="oc-field full">${head}<div class="oc-stripe">
+      <div class="card"><b>${esc(p.brand || '—')} •••• ${esc(p.last4 || '????')}</b>
+        <small>${[p.exp ? t('adm_pi_exp', {d: p.exp}) : '', p.country, wallet].filter(Boolean).map(esc).join(' · ')}</small>
+        <span class="amt">✓ ${t('adm_pi_paid', {n: p.amount})}</span>${when ? `<small>${esc(when)}</small>` : ''}</div>
+      ${row(t('adm_pi_holder'), esc(p.holder))}
+      ${row('E-mail', p.email ? `<a href="mailto:${esc(p.email)}">${esc(p.email)}</a>` : '')}
+      ${row(t('adm_f_phone'), p.phone ? `<a href="tel:${esc(p.phone)}">${esc(p.phone)}</a>` : '')}
+    </div></div>`;
+}
+async function loadPayInfo(id, btn){
+  btn.disabled = true;
+  try{
+    const r = await fetch(`/api/order/${id}/pay-info?token=${encodeURIComponent(sessionStorage.getItem('cm_token')||'')}`);
+    if(r.status === 401){ handleExpired(); return; }
+    const j = await r.json().catch(()=>({}));
+    if(!r.ok) throw new Error(j.error || r.status);
+    const o = (ordersCache||[]).find(x=>x.id===id); if(o) o.pay_info = JSON.stringify(j);
+  }catch(e){ alert(t('adm_refund_err', {e: e.message}).replace(/^[^:]+/, 'Stripe')); btn.disabled = false; return; }
+  renderOrders();
+}
+
 // Refund an online payment back to the customer's card (any amount up to what was paid)
 async function refundOrder(id){
   const tok = sessionStorage.getItem('cm_token')||'';
@@ -1827,6 +1867,7 @@ async function renderOrders(){
         ${o.address?`<div class="oc-field full"><span class="oc-lbl">${t('adm_f_address')}</span><span class="oc-val">${addrHtml(o.address)}</span></div>`:''}
         <div class="oc-field full"><span class="oc-lbl">${t('adm_f_order')}</span>${orderItemsHtml(o.order)}</div>
         ${o.has_attachment?`<div class="oc-field full"><span class="oc-lbl">📎 ${t('adm_f_attachment')}</span><a href="/api/order-img/${o.id}?token=${encodeURIComponent(sessionStorage.getItem('cm_token')||'')}" target="_blank"><img src="/api/order-img/${o.id}?token=${encodeURIComponent(sessionStorage.getItem('cm_token')||'')}" alt="" style="max-width:220px;max-height:220px;border:1px solid var(--bdr);margin-top:4px"></a></div>`:''}
+        ${payInfoHtml(o)}
         <div class="oc-field"><span class="oc-lbl">${t('adm_f_payment')}</span><span class="oc-val">${esc(payLbl(o.payment))}${orderTotal(o.order)?` <span style="color:var(--gold);font-family:'Playfair Display',serif;font-size:1.05rem">&nbsp;${esc(orderTotal(o.order))}</span>`:''}</span></div>
       </div>
       <div class="oc-actions">

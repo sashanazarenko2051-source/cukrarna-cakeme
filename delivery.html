@@ -435,11 +435,11 @@ input[type="date"]::-webkit-calendar-picker-indicator:hover{opacity:1}
         </div>
         <div class="ord-field">
           <label data-k="f_phone">Telefon</label>
-          <input type="tel" name="phone" id="phoneInput">
+          <input type="tel" name="phone" id="phoneInput" required autocomplete="tel" inputmode="tel" placeholder="+420 777 123 456">
         </div>
         <div class="ord-field full">
           <label data-k="f_email">E-mail</label>
-          <input type="email" name="email" id="emailInput" maxlength="254" autocomplete="email">
+          <input type="email" name="email" id="emailInput" maxlength="254" autocomplete="email" required>
         </div>
         <div class="ord-field full" id="tableField" style="display:none">
           <label data-k="f_table">Číslo stolu</label>
@@ -663,7 +663,7 @@ cs:{ira:'Irina',misha:'Michail',nav_home:'Domů',nav_menu:'Menu',nav_about:'O n�
   i1t:'Doba doručení',i1d:'minut po objednávce',
   i2t:'Cena doručení',i2v:'Praha 150 Kč',i2d:'mimo Prahu do 15 km · 250 Kč',i2e:'nad 15 km · dle dohody',
   oc_ttl:'Objednejte nyní',oc_sub:'Vyplňte formulář — potvrdíme do 15 minut',
-  map_btn:'🗺️ Vybrat na mapě',map_hide:'Skrýt mapu',map_me:'📍 Moje poloha',map_hint:'Klikněte na mapu nebo posuňte značku — adresa se doplní sama.',map_geo_err:'Polohu se nepodařilo zjistit — povolte přístup k poloze nebo vyberte místo na mapě.',addr_ph:'Ulice a číslo domu, město',f_email:'E-mail',f_email_ph:'nepovinné',f_email_bad:'Zkontrolujte e-mail — nebo pole nechte prázdné.',f_name:'Jméno',f_phone:'Telefon',f_phone_opt:'nepovinné',f_addr:'Adresa doručení',
+  map_btn:'🗺️ Vybrat na mapě',map_hide:'Skrýt mapu',map_me:'📍 Moje poloha',map_hint:'Klikněte na mapu nebo posuňte značku — adresa se doplní sama.',map_geo_err:'Polohu se nepodařilo zjistit — povolte přístup k poloze nebo vyberte místo na mapě.',addr_ph:'Ulice a číslo domu, město',f_email:'E-mail',f_email_ph:'např. jana@seznam.cz',f_email_bad:'Zadejte platný e-mail — bez něj objednávku nelze odeslat.',f_phone_bad:'Zadejte telefonní číslo (aspoň 9 číslic) — bez něj objednávku nelze odeslat.',f_name:'Jméno',f_phone:'Telefon',f_addr:'Adresa doručení',
   f_date:'Datum doručení / převzetí',f_time:'Čas doručení / převzetí',f_date_note:'Objednávky na dorty přijímáme nejméně 24 hodin předem · pracovní hodiny 09:00–20:00',
   f_pay_dep_cash:'50 % hotově',f_pay_dep_card:'50 % kartou',f_pay_dep_note:'50% záloha při objednávce',
   f_cart:'Vaše objednávka',cart_total:'Celkem',cart_empty_del:'Košík je prázdný — přidejte zboží z menu',go_menu:'Přejít na menu',
@@ -681,7 +681,7 @@ en:{ira:'Irina',misha:'Mikhail',nav_home:'Home',nav_menu:'Menu',nav_about:'About
   i1t:'Delivery Time',i1d:'minutes after ordering',
   i2t:'Delivery Price',i2v:'Prague 150 Kč',i2d:'outside Prague up to 15 km · 250 Kč',i2e:'over 15 km · by arrangement',
   oc_ttl:'Order Now',oc_sub:'Fill in the form — we\'ll confirm within 15 minutes',
-  map_btn:'🗺️ Pick on the map',map_hide:'Hide the map',map_me:'📍 My location',map_hint:'Click the map or drag the pin — the address fills in by itself.',map_geo_err:'Could not get your location — allow location access or pick the place on the map.',addr_ph:'Street and house number, city',f_email:'E-mail',f_email_ph:'optional',f_email_bad:'Please check the e-mail — or leave the field empty.',f_name:'Name',f_phone:'Phone',f_phone_opt:'optional',f_addr:'Delivery Address',
+  map_btn:'🗺️ Pick on the map',map_hide:'Hide the map',map_me:'📍 My location',map_hint:'Click the map or drag the pin — the address fills in by itself.',map_geo_err:'Could not get your location — allow location access or pick the place on the map.',addr_ph:'Street and house number, city',f_email:'E-mail',f_email_ph:'e.g. jana@gmail.com',f_email_bad:'Enter a valid e-mail — the order can’t be sent without it.',f_phone_bad:'Enter your phone number (at least 9 digits) — the order can’t be sent without it.',f_name:'Name',f_phone:'Phone',f_addr:'Delivery Address',
   f_date:'Delivery / Pickup Date',f_time:'Delivery / Pickup Time',f_date_note:'Cake orders require at least 24 hours notice · working hours 09:00–20:00',
   f_pay_dep_cash:'50% cash',f_pay_dep_card:'50% card',f_pay_dep_note:'50% prepayment upon ordering',
   f_cart:'Your Order',cart_total:'Total',cart_empty_del:'Cart is empty — add items from the menu',go_menu:'Go to Menu',
@@ -699,7 +699,7 @@ uk:{ira:'Ірина',misha:'Михайло',nav_home:'Головна',nav_menu:'
   i1t:'Час доставки',i1d:'хвилин після замовлення',
   i2t:'Вартість доставки',i2v:'Прага 150 Kč',i2d:'за межами Праги до 15 км · 250 Kč',i2e:'понад 15 км · за домовленістю',
   oc_ttl:'Замовте зараз',oc_sub:'Заповніть форму — ми підтвердимо протягом 15 хвилин',
-  map_btn:'🗺️ Обрати на карті',map_hide:'Сховати карту',map_me:'📍 Моє місцезнаходження',map_hint:'Натисніть на карту або перетягніть мітку — адреса підставиться сама.',map_geo_err:'Не вдалося визначити місцезнаходження — дозвольте доступ до геолокації або оберіть місце на карті.',addr_ph:'Вулиця й номер будинку, місто',f_email:'E-mail',f_email_ph:'необов’язково',f_email_bad:'Перевірте e-mail — або залиште поле порожнім.',f_name:'Ім’я',f_phone:'Телефон',f_phone_opt:'необов’язково',f_addr:'Адреса доставки',
+  map_btn:'🗺️ Обрати на карті',map_hide:'Сховати карту',map_me:'📍 Моє місцезнаходження',map_hint:'Натисніть на карту або перетягніть мітку — адреса підставиться сама.',map_geo_err:'Не вдалося визначити місцезнаходження — дозвольте доступ до геолокації або оберіть місце на карті.',addr_ph:'Вулиця й номер будинку, місто',f_email:'E-mail',f_email_ph:'напр. olena@gmail.com',f_email_bad:'Вкажіть правильний e-mail — без нього замовлення не відправиться.',f_phone_bad:'Вкажіть номер телефону (щонайменше 9 цифр) — без нього замовлення не відправиться.',f_name:'Ім’я',f_phone:'Телефон',f_addr:'Адреса доставки',
   f_date:'Дата доставки / отримання',f_time:'Час доставки / отримання',f_date_note:'Замовлення тортів приймаємо щонайменше за 24 години · робочі години 09:00–20:00',
   f_pay_dep_cash:'50 % готівкою',f_pay_dep_card:'50 % карткою',f_pay_dep_note:'Передоплата 50 % при замовленні',
   f_cart:'Ваше замовлення',cart_total:'Разом',cart_empty_del:'Кошик порожній — додайте товари з меню',go_menu:'Перейти до меню',
@@ -722,8 +722,7 @@ function applyLang(){
   try{ if(dineWhen==='later') renderDine(); }catch{}
   try{ addrMapTexts(); }catch{}
   const pi=document.getElementById('phoneInput');
-  if(pi){const isDelivery=orderType()==='delivery';pi.placeholder=isDelivery?'':t('f_phone_opt');pi.required=isDelivery;
-    document.getElementById('orderTypeInput').value=t('ot_'+orderType());}
+  if(pi) document.getElementById('orderTypeInput').value=t('ot_'+orderType());
   updatePaymentLabels();
   renderCartDel();
   setTimeout(()=>{document.querySelectorAll('[data-k]').forEach(el=>{const val=t(el.dataset.k);if(val)el.textContent=val;});},100);
@@ -833,6 +832,8 @@ function orderErrText(status,j){
   if(j.error==='outside_window') return t('f_err_window').replace('{a}',fmt(j.from)).replace('{b}',fmt(j.to));
   if(j.error==='sold_out') return t('f_err_soldout')+' '+j.items.map(n=>`${n} (${(j.left||{})[n]??0})`).join(', ');
   if(j.error==='prepay_required') return t('f_pay_builder');
+  if(j.error==='phone_required') return t('f_phone_bad');
+  if(j.error==='email_required') return t('f_email_bad');
   return t('f_err');
 }
 function setOrderType(btn){
@@ -850,9 +851,6 @@ function setOrderType(btn){
   const af=document.getElementById('addrField');
   af.style.display=isDelivery?'':'none';
   af.querySelector('input').required=isDelivery;
-  const pi=document.getElementById('phoneInput');
-  pi.required=isDelivery;
-  pi.placeholder=isDelivery?'':t('f_phone_opt');
   document.getElementById('tableField').style.display=dineIn?'':'none';
   document.getElementById('instoreNote').style.display=isDelivery?'none':'block';
   document.getElementById('deliveryInfoBlock').style.display=isDelivery?'':'none';
@@ -924,8 +922,15 @@ document.getElementById('orderForm').addEventListener('submit',async function(e)
     document.getElementById('slotField').scrollIntoView({behavior:'smooth',block:'center'});
     return;
   }
+  const ph=this.querySelector('[name="phone"]').value;
+  if(ph.replace(/\D/g,'').length<9){
+    msg.className='ord-msg err'; msg.style.cssText=''; msg.textContent=t('f_phone_bad');
+    btn.disabled=false; btn.textContent=orig;
+    document.getElementById('phoneInput').focus();
+    return;
+  }
   const em=document.getElementById('emailInput').value.trim();
-  if(em&&!/^[^@\s]+@[^@\s]+\.[^@\s]{2,}$/.test(em)){
+  if(!/^[^@\s]+@[^@\s]+\.[A-Za-z]{2,}$/.test(em)){
     msg.className='ord-msg err'; msg.style.cssText=''; msg.textContent=t('f_email_bad');
     btn.disabled=false; btn.textContent=orig;
     document.getElementById('emailInput').focus();

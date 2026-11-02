@@ -90,6 +90,8 @@ def _init_tables():
         # online payments: Stripe's PaymentIntent (for refunds) and how much was refunded, in Kč
         conn.execute("ALTER TABLE orders ADD COLUMN IF NOT EXISTS stripe_pi TEXT DEFAULT ''")
         conn.execute("ALTER TABLE orders ADD COLUMN IF NOT EXISTS refunded INTEGER DEFAULT 0")
+        # what Stripe knows about the payment (card, cardholder, contacts, amount), JSON
+        conn.execute("ALTER TABLE orders ADD COLUMN IF NOT EXISTS pay_info TEXT DEFAULT ''")
         conn.execute("""
             CREATE TABLE IF NOT EXISTS menu_items (
                 id BIGINT PRIMARY KEY, data JSONB NOT NULL
@@ -139,13 +141,13 @@ async def _startup():
             threading.Thread(target=_backfill_stripe_contacts, daemon=True).start()
 
 def _backfill_stripe_contacts():
-    """Paid online orders saved without an e-mail and phone (both are optional for
-    pickup) get the ones the customer typed on Stripe's payment page."""
+    """Paid online orders that miss the customer's contacts (both are optional for
+    pickup) or the payment details get them from Stripe's checkout sessions."""
     try:
         with _get_pool().connection() as conn:
             ids = {r[0] for r in conn.execute(
-                "SELECT id FROM orders WHERE status='paid' AND payment='online'"
-                " AND COALESCE(email,'')='' AND COALESCE(phone,'')=''").fetchall()}
+                "SELECT id FROM orders WHERE status<>'pending_payment' AND payment='online'"
+                " AND (COALESCE(pay_info,'')='' OR (COALESCE(email,'')='' AND COALESCE(phone,'')=''))").fetchall()}
         if not ids:
             return
         since = int(time.time()) - 60 * 86400
@@ -154,20 +156,23 @@ def _backfill_stripe_contacts():
                 oid = _lead_int(session['metadata']['order_id'])
             except (KeyError, TypeError):
                 continue
-            if oid not in ids:
+            if oid not in ids or _sget(session, 'payment_status') != 'paid':
                 continue
             email, phone = _stripe_contact(session)
-            if email or phone:
-                with _get_pool().connection() as conn:
-                    conn.execute(
-                        "UPDATE orders SET email=CASE WHEN COALESCE(email,'')='' THEN %s ELSE email END,"
-                        " phone=CASE WHEN COALESCE(phone,'')='' THEN %s ELSE phone END WHERE id=%s",
-                        (email, phone, oid))
+            pi = _session_pi(session)
+            with _get_pool().connection() as conn:
+                conn.execute(
+                    "UPDATE orders SET email=CASE WHEN COALESCE(email,'')='' THEN %s ELSE email END,"
+                    " phone=CASE WHEN COALESCE(phone,'')='' THEN %s ELSE phone END,"
+                    " stripe_pi=CASE WHEN COALESCE(stripe_pi,'')='' THEN %s ELSE stripe_pi END WHERE id=%s",
+                    (email, phone, pi, oid))
+            if pi:
+                _save_pay_info(oid, pi, session)
             ids.discard(oid)
             if not ids:
                 break
     except Exception as e:
-        print('Stripe contact backfill:', e)
+        print('Stripe backfill:', e)
 
 # ── Security headers ──────────────────────────────────────────────────────────
 @app.middleware('http')
@@ -1830,9 +1835,18 @@ _ORDER_LIMITS = {'name': 120, 'phone': 40, 'email': 254, 'address': 400, 'order'
                  'order_type': 40, 'delivery_date': 20, 'delivery_time': 20}
 
 def _order_email(d):
-    """Optional contact e-mail from the order form ('' when missing or not an address)."""
+    """Contact e-mail from the order form ('' when missing or not an address)."""
     v = str(d.get('email') or '').strip()[:254]
     return v if _EMAIL_RE.match(v) else ''
+
+def _contact_err(d):
+    """Every order needs a phone (at least 9 digits) and a valid e-mail, so the
+    customer can always be reached. None when both are fine."""
+    if len(re.sub(r'\D', '', str(d.get('phone') or ''))) < 9:
+        return {'error': 'phone_required'}
+    if not _order_email(d):
+        return {'error': 'email_required'}
+    return None
 
 def _clip_order(order):
     for k, limit in _ORDER_LIMITS.items():
@@ -1861,6 +1875,8 @@ def _insert_order(conn, order):
 @app.post('/api/order')
 async def api_order(req: Request, bg: BackgroundTasks):
     d = await req.json()
+    if err := _contact_err(d):
+        raise HTTPException(400, err)
     order = {
         'id':            int(time.time() * 1000),
         'ts':            time.strftime('%Y-%m-%dT%H:%M:%SZ', time.gmtime()),
@@ -1922,7 +1938,7 @@ async def api_orders(req: Request):
                 'SELECT id,ts,name,phone,address,ord AS "order",'
                 "payment,order_type,delivery_date,delivery_time,status,"
                 "COALESCE(attachment,'') <> '' AS has_attachment, COALESCE(email,'') AS email,"
-                " COALESCE(refunded,0) AS refunded FROM orders ORDER BY id DESC"
+                " COALESCE(refunded,0) AS refunded, COALESCE(pay_info,'') AS pay_info FROM orders ORDER BY id DESC"
             )
             rows = cur.fetchall()
     return rows
@@ -1966,6 +1982,8 @@ async def api_create_checkout(req: Request):
     if not STRIPE_SECRET_KEY:
         raise HTTPException(503, 'Stripe not configured')
     d = await req.json()
+    if err := _contact_err(d):
+        raise HTTPException(400, err)
     # The amount comes from server prices, never from the browser's total_czk
     with _get_pool().connection() as conn:
         lines, total_czk, unknown = _price_cart(conn, d.get('cart'))
@@ -2047,7 +2065,7 @@ async def api_verify_payment(session_id: str, order_id: int, bg: BackgroundTasks
         raise HTTPException(400, 'Invalid session')
     if (session.payment_status == 'paid'
             and str(session.metadata.get('order_id')) == str(order_id)):
-        _mark_paid(order_id, bg, _stripe_contact(session), _session_pi(session))
+        _mark_paid(order_id, bg, _stripe_contact(session), _session_pi(session), session)
         return {'paid': True}
     return {'paid': False}
 
@@ -2064,11 +2082,44 @@ def _sget(obj, key):
     except (KeyError, TypeError, AttributeError):
         return ''
 
+_CARD_BRANDS = {'visa': 'Visa', 'mastercard': 'Mastercard', 'amex': 'American Express', 'maestro': 'Maestro',
+                'discover': 'Discover', 'diners': 'Diners Club', 'jcb': 'JCB', 'unionpay': 'UnionPay'}
+
+def _pay_info(pi_id, session=None):
+    """Card (brand, last 4 digits, expiry, country, Apple/Google Pay), the cardholder,
+    e-mail and phone as typed on Stripe's page, and the amount actually paid."""
+    pi = _stripe.PaymentIntent.retrieve(pi_id, expand=['latest_charge'])
+    ch = _sget(pi, 'latest_charge')
+    if isinstance(ch, str):
+        ch = _stripe.Charge.retrieve(ch)
+    card = _sget(_sget(ch, 'payment_method_details'), 'card')
+    bd, cd = _sget(ch, 'billing_details'), _sget(session, 'customer_details') if session else ''
+    m, y = _sget(card, 'exp_month'), _sget(card, 'exp_year')
+    brand = str(_sget(card, 'brand'))
+    return {'brand': _CARD_BRANDS.get(brand, brand.title()), 'last4': str(_sget(card, 'last4')),
+            'exp': f'{int(m):02d}/{int(y) % 100:02d}' if m and y else '', 'country': str(_sget(card, 'country')),
+            'wallet': str(_sget(_sget(card, 'wallet'), 'type')),
+            'holder': str(_sget(bd, 'name') or _sget(cd, 'name'))[:80],
+            'email': str(_sget(cd, 'email') or _sget(bd, 'email') or _sget(ch, 'receipt_email'))[:120],
+            'phone': str(_sget(cd, 'phone') or _sget(bd, 'phone'))[:40],
+            'amount': int(_sget(pi, 'amount_received') or 0) // 100, 'currency': str(_sget(pi, 'currency')).upper(),
+            'paid_at': int(_sget(ch, 'created') or 0)}
+
+def _save_pay_info(order_id, pi_id, session=None):
+    try:
+        info = _pay_info(pi_id, session)
+        with _get_pool().connection() as conn:
+            conn.execute('UPDATE orders SET pay_info=%s WHERE id=%s', (json.dumps(info, ensure_ascii=False), order_id))
+        return info
+    except Exception as e:
+        print('Stripe pay info:', e)
+        return None
+
 def _session_pi(session):
     pi = _sget(session, 'payment_intent')
     return pi if isinstance(pi, str) else _sget(pi, 'id')
 
-def _mark_paid(order_id, bg, contact=('', ''), pi=''):
+def _mark_paid(order_id, bg, contact=('', ''), pi='', session=None):
     """pending_payment -> paid and notify. Runs once per order, whichever comes
     first: the customer's return to /success or Stripe's webhook. The e-mail and
     phone from Stripe fill in what the customer left empty on the site."""
@@ -2085,6 +2136,8 @@ def _mark_paid(order_id, bg, contact=('', ''), pi=''):
                 ('paid', email, phone, pi or '', order_id, 'pending_payment')
             )
             row = cur.fetchone()
+    if pi:
+        bg.add_task(_save_pay_info, order_id, pi, session)
     if row:
         bg.add_task(_send_ntfy, row)
         bg.add_task(_send_telegram, row)
@@ -2114,7 +2167,7 @@ async def api_stripe_webhook(req: Request, bg: BackgroundTasks):
         session = event['data']['object']
         order_id = _lead_int((session.get('metadata') or {}).get('order_id'))
         if order_id and session.get('payment_status') == 'paid':
-            _mark_paid(order_id, bg, _stripe_contact(session), _session_pi(session))
+            _mark_paid(order_id, bg, _stripe_contact(session), _session_pi(session), session)
     return {'received': True}
 
 # ── Refunds (admin) ───────────────────────────────────────────────────────────
@@ -2161,6 +2214,14 @@ def api_refund_info(order_id: int, token: str = ''):
     _refund_auth(token)
     paid, done = _pi_amounts(_order_pi(order_id))
     return {'paid': paid // 100, 'refunded': done // 100, 'max': (paid - done) // 100}
+
+@app.get('/api/order/{order_id}/pay-info')
+def api_pay_info(order_id: int, token: str = ''):
+    _refund_auth(token)
+    info = _save_pay_info(order_id, _order_pi(order_id))
+    if not info:
+        raise HTTPException(502, {'error': 'Stripe did not answer'})
+    return info
 
 @app.post('/api/order/{order_id}/refund')
 async def api_refund(order_id: int, req: Request, bg: BackgroundTasks):
