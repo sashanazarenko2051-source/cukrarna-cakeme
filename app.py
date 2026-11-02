@@ -87,6 +87,9 @@ def _init_tables():
         # Example picture uploaded with a custom cake from the builder (data: URI)
         conn.execute("ALTER TABLE orders ADD COLUMN IF NOT EXISTS attachment TEXT DEFAULT ''")
         conn.execute("ALTER TABLE orders ADD COLUMN IF NOT EXISTS email TEXT DEFAULT ''")
+        # online payments: Stripe's PaymentIntent (for refunds) and how much was refunded, in Kč
+        conn.execute("ALTER TABLE orders ADD COLUMN IF NOT EXISTS stripe_pi TEXT DEFAULT ''")
+        conn.execute("ALTER TABLE orders ADD COLUMN IF NOT EXISTS refunded INTEGER DEFAULT 0")
         conn.execute("""
             CREATE TABLE IF NOT EXISTS menu_items (
                 id BIGINT PRIMARY KEY, data JSONB NOT NULL
@@ -1918,7 +1921,8 @@ async def api_orders(req: Request):
             cur.execute(
                 'SELECT id,ts,name,phone,address,ord AS "order",'
                 "payment,order_type,delivery_date,delivery_time,status,"
-                "COALESCE(attachment,'') <> '' AS has_attachment, COALESCE(email,'') AS email FROM orders ORDER BY id DESC"
+                "COALESCE(attachment,'') <> '' AS has_attachment, COALESCE(email,'') AS email,"
+                " COALESCE(refunded,0) AS refunded FROM orders ORDER BY id DESC"
             )
             rows = cur.fetchall()
     return rows
@@ -2043,22 +2047,28 @@ async def api_verify_payment(session_id: str, order_id: int, bg: BackgroundTasks
         raise HTTPException(400, 'Invalid session')
     if (session.payment_status == 'paid'
             and str(session.metadata.get('order_id')) == str(order_id)):
-        _mark_paid(order_id, bg, _stripe_contact(session))
+        _mark_paid(order_id, bg, _stripe_contact(session), _session_pi(session))
         return {'paid': True}
     return {'paid': False}
 
 def _stripe_contact(session):
     """(email, phone) the customer typed on Stripe's payment page; works for the
     library's StripeObject and for the webhook's plain JSON."""
-    def get(obj, key):
-        try:
-            return obj[key] or ''
-        except (KeyError, TypeError, AttributeError):
-            return ''
-    cd = get(session, 'customer_details')
-    return str(get(cd, 'email')).strip()[:120], str(get(cd, 'phone')).strip()[:40]
+    cd = _sget(session, 'customer_details')
+    return str(_sget(cd, 'email')).strip()[:120], str(_sget(cd, 'phone')).strip()[:40]
 
-def _mark_paid(order_id, bg, contact=('', '')):
+def _sget(obj, key):
+    """obj[key] or '' for a StripeObject or the webhook's plain JSON."""
+    try:
+        return obj[key] or ''
+    except (KeyError, TypeError, AttributeError):
+        return ''
+
+def _session_pi(session):
+    pi = _sget(session, 'payment_intent')
+    return pi if isinstance(pi, str) else _sget(pi, 'id')
+
+def _mark_paid(order_id, bg, contact=('', ''), pi=''):
     """pending_payment -> paid and notify. Runs once per order, whichever comes
     first: the customer's return to /success or Stripe's webhook. The e-mail and
     phone from Stripe fill in what the customer left empty on the site."""
@@ -2068,11 +2078,11 @@ def _mark_paid(order_id, bg, contact=('', '')):
             cur.execute(
                 "UPDATE orders SET status=%s,"
                 " email=CASE WHEN COALESCE(email,'')='' THEN %s ELSE email END,"
-                " phone=CASE WHEN COALESCE(phone,'')='' THEN %s ELSE phone END"
+                " phone=CASE WHEN COALESCE(phone,'')='' THEN %s ELSE phone END, stripe_pi=%s"
                 ' WHERE id=%s AND status=%s'
                 ' RETURNING id,ts,name,phone,address,ord AS "order",'
                 'payment,order_type,delivery_date,delivery_time,email',
-                ('paid', email, phone, order_id, 'pending_payment')
+                ('paid', email, phone, pi or '', order_id, 'pending_payment')
             )
             row = cur.fetchone()
     if row:
@@ -2104,8 +2114,78 @@ async def api_stripe_webhook(req: Request, bg: BackgroundTasks):
         session = event['data']['object']
         order_id = _lead_int((session.get('metadata') or {}).get('order_id'))
         if order_id and session.get('payment_status') == 'paid':
-            _mark_paid(order_id, bg, _stripe_contact(session))
+            _mark_paid(order_id, bg, _stripe_contact(session), _session_pi(session))
     return {'received': True}
+
+# ── Refunds (admin) ───────────────────────────────────────────────────────────
+# The money goes back to the customer's card through Stripe; any amount up to what was paid.
+def _order_pi(order_id):
+    """Stripe PaymentIntent of a paid online order. Older orders did not keep it:
+    then it is found among Stripe's checkout sessions by the order id and saved."""
+    with _get_pool().connection() as conn:
+        row = conn.execute("SELECT COALESCE(stripe_pi,''), payment, status FROM orders WHERE id=%s", (order_id,)).fetchone()
+    if not row:
+        raise HTTPException(404, {'error': 'Order not found'})
+    if row[1] != 'online' or row[2] == 'pending_payment':
+        raise HTTPException(400, {'error': 'The order was not paid online'})
+    if row[0]:
+        return row[0]
+    since = int(order_id / 1000) - 86400  # the order id is its creation time in ms
+    for session in _stripe.checkout.Session.list(limit=100, created={'gte': since}).auto_paging_iter():
+        try:
+            oid = _lead_int(session['metadata']['order_id'])
+        except (KeyError, TypeError):
+            continue
+        if oid == order_id and _sget(session, 'payment_status') == 'paid' and _session_pi(session):
+            pi = _session_pi(session)
+            with _get_pool().connection() as conn:
+                conn.execute('UPDATE orders SET stripe_pi=%s WHERE id=%s', (pi, order_id))
+            return pi
+    raise HTTPException(404, {'error': 'Payment not found in Stripe'})
+
+def _pi_amounts(pi):
+    """(paid, already refunded) in hellers."""
+    paid = int(_sget(_stripe.PaymentIntent.retrieve(pi), 'amount_received') or 0)
+    done = sum(int(_sget(r, 'amount') or 0) for r in _stripe.Refund.list(payment_intent=pi, limit=100).auto_paging_iter()
+               if _sget(r, 'status') in ('succeeded', 'pending', 'requires_action'))
+    return paid, done
+
+def _refund_auth(token):
+    if not _verify_token(token):
+        raise HTTPException(401, 'Unauthorized')
+    if not STRIPE_SECRET_KEY:
+        raise HTTPException(503, {'error': 'Stripe not configured'})
+
+@app.get('/api/order/{order_id}/refund')
+def api_refund_info(order_id: int, token: str = ''):
+    _refund_auth(token)
+    paid, done = _pi_amounts(_order_pi(order_id))
+    return {'paid': paid // 100, 'refunded': done // 100, 'max': (paid - done) // 100}
+
+@app.post('/api/order/{order_id}/refund')
+async def api_refund(order_id: int, req: Request, bg: BackgroundTasks):
+    d = await req.json()
+    _refund_auth(d.get('token'))
+    pi = _order_pi(order_id)
+    paid, done = _pi_amounts(pi)
+    try:
+        amount = int(d.get('amount_czk')) * 100
+    except (TypeError, ValueError):
+        amount = 0
+    if amount < 100 or amount > paid - done:
+        raise HTTPException(400, {'error': 'amount', 'max': (paid - done) // 100})
+    try:
+        # the key makes a double click one refund, not two
+        _stripe.Refund.create(payment_intent=pi, amount=amount, idempotency_key=f'cakeme-refund-{order_id}-{done}-{amount}')
+    except Exception as e:
+        raise HTTPException(502, {'error': str(getattr(e, 'user_message', None) or e)[:200]})
+    total = (done + amount) // 100
+    with _get_pool().connection() as conn:
+        row = conn.execute('UPDATE orders SET refunded=%s WHERE id=%s RETURNING name', (total, order_id)).fetchone()
+    bg.add_task(_tg_send, '\n'.join([f'↩ ПОВЕРНЕННЯ КОШТІВ', f"👤 {(row[0] if row else '') or '—'}",
+                                      f'💸 {amount // 100} Kč' + (f' (усього повернуто {total} Kč)' if total != amount // 100 else ''),
+                                      f'🔗 {SITE_URL}/admin.html']), 'refund')
+    return {'refunded': total, 'max': (paid - done - amount) // 100}
 
 # ── /api/pageviews ────────────────────────────────────────────────────────────
 @app.get('/api/pageviews')

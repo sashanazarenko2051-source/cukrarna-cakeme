@@ -124,6 +124,9 @@ body{font-family:'Raleway',sans-serif;background:var(--bg0);color:var(--tx0)}
 .oc-actions button:hover{border-color:var(--gold);color:var(--gold)}
 .btn-done:hover{border-color:#88cc88!important;color:#88cc88!important}
 .btn-del{margin-left:auto!important;border-color:transparent!important}
+.btn-refund{border-color:rgba(214,120,72,.5)!important;color:#e0a070!important}
+.btn-refund:hover{border-color:#e0a070!important;background:rgba(224,160,112,.08)!important}
+.badge-refund{background:rgba(224,160,112,.15);color:#e0a070;margin-left:6px}
 .btn-del:hover{border-color:#e08080!important;color:#e08080!important}
 .no-orders{text-align:center;color:var(--tx2);padding:56px;font-size:.88rem}
 
@@ -1179,7 +1182,7 @@ const TA = {
     adm_f_date:'Datum a čas doručení',
     adm_f_order:'Objednávka', adm_f_payment:'Platba', 
     adm_s_new:'Nová', adm_s_progress:'Přijata', adm_s_done:'Hotovo', adm_s_paid:'✓ Zaplaceno 50%', adm_s_pending:'⏳ Čeká na platbu',
-    adm_btn_new:'Nová', adm_btn_progress:'Přijata', adm_btn_done:'✓ Hotovo', adm_btn_delete:'✕ Smazat',
+    adm_btn_new:'Nová', adm_btn_progress:'Přijata', adm_btn_done:'✓ Hotovo', adm_btn_delete:'✕ Smazat', adm_refund_btn:'↩ Vrátit peníze', adm_refunded:'↩ Vráceno {n} Kč', adm_refund_ask:'Kolik vrátit zákazníkovi na kartu (Kč)?\nZaplaceno: {paid} Kč · už vráceno: {done} Kč · lze vrátit nejvýš {max} Kč.', adm_refund_ok:'Vráceno {n} Kč. Na kartu zákazníka peníze obvykle dorazí do 5–10 dnů.', adm_refund_err:'Vrácení se nepodařilo: {e}', adm_refund_none:'Není co vracet — platba už je vrácená celá.', adm_refund_bad:'Zadejte částku od 1 do {max} Kč.',
     adm_count:'{n} objednávek',
     adm_all_items_title:'Všechny položky menu',
     adm_edit_title:'Upravit položku', adm_save_btn:'✓ Uložit změny',
@@ -1250,7 +1253,7 @@ const TA = {
     adm_f_date:'Delivery Date & Time',
     adm_f_order:'Order', adm_f_payment:'Payment', 
     adm_s_new:'New', adm_s_progress:'In progress', adm_s_done:'Done', adm_s_paid:'✓ Paid 50%', adm_s_pending:'⏳ Awaiting payment',
-    adm_btn_new:'New', adm_btn_progress:'In progress', adm_btn_done:'✓ Done', adm_btn_delete:'✕ Delete',
+    adm_btn_new:'New', adm_btn_progress:'In progress', adm_btn_done:'✓ Done', adm_btn_delete:'✕ Delete', adm_refund_btn:'↩ Refund', adm_refunded:'↩ Refunded {n} CZK', adm_refund_ask:'How much to refund to the customer’s card (CZK)?\nPaid: {paid} CZK · already refunded: {done} CZK · up to {max} CZK.', adm_refund_ok:'Refunded {n} CZK. The money usually reaches the customer’s card within 5–10 days.', adm_refund_err:'Refund failed: {e}', adm_refund_none:'Nothing left to refund — the payment is already refunded in full.', adm_refund_bad:'Enter an amount from 1 to {max} CZK.',
     adm_count:'{n} orders',
     adm_all_items_title:'All menu items',
     adm_edit_title:'Edit item', adm_save_btn:'✓ Save changes',
@@ -1323,7 +1326,7 @@ const TA = {
     adm_f_date:'Дата і час доставки',
     adm_f_order:'Замовлення', adm_f_payment:'Оплата', 
     adm_s_new:'Нове', adm_s_progress:'Прийняте', adm_s_done:'Готово', adm_s_paid:'✓ Оплачено 50%', adm_s_pending:'⏳ Очікує оплати',
-    adm_btn_new:'Нове', adm_btn_progress:'Прийняте', adm_btn_done:'✓ Готово', adm_btn_delete:'✕ Видалити',
+    adm_btn_new:'Нове', adm_btn_progress:'Прийняте', adm_btn_done:'✓ Готово', adm_btn_delete:'✕ Видалити', adm_refund_btn:'↩ Повернути кошти', adm_refunded:'↩ Повернуто {n} Kč', adm_refund_ask:'Скільки повернути покупцю на картку (Kč)?\nОплачено: {paid} Kč · уже повернуто: {done} Kč · можна повернути до {max} Kč.', adm_refund_ok:'Повернуто {n} Kč. На картку покупця гроші зазвичай надходять за 5–10 днів.', adm_refund_err:'Не вдалося повернути: {e}', adm_refund_none:'Нічого повертати — оплату вже повернуто повністю.', adm_refund_bad:'Введіть суму від 1 до {max} Kč.',
     adm_count:'Замовлень: {n}',
     adm_all_items_title:'Усі позиції меню',
     adm_edit_title:'Редагувати позицію', adm_save_btn:'✓ Зберегти зміни',
@@ -1681,6 +1684,33 @@ async function deleteOrder(id){
   renderOrders();
 }
 
+// Refund an online payment back to the customer's card (any amount up to what was paid)
+async function refundOrder(id){
+  const tok = sessionStorage.getItem('cm_token')||'';
+  const why = (j, r) => (j && (j.error || (j.detail && (j.detail.error || j.detail)))) || r.status;
+  let info;
+  try{
+    const r = await fetch(`/api/order/${id}/refund?token=${encodeURIComponent(tok)}`);
+    if(r.status === 401){ handleExpired(); return; }
+    info = await r.json().catch(()=>({}));
+    if(!r.ok) throw new Error(why(info, r));
+  }catch(e){ alert(t('adm_refund_err', {e: e.message})); return; }
+  if(!(info.max >= 1)){ alert(t('adm_refund_none')); return; }
+  const v = prompt(t('adm_refund_ask', {paid: info.paid, done: info.refunded, max: info.max}), info.max);
+  if(v === null) return;
+  const n = parseInt(String(v).replace(/[\s,.]|Kč/gi, ''), 10);
+  if(!(n >= 1 && n <= info.max)){ alert(t('adm_refund_bad', {max: info.max})); return; }
+  try{
+    const r = await fetch(`/api/order/${id}/refund`, {method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({token: tok, amount_czk: n})});
+    if(r.status === 401){ handleExpired(); return; }
+    const j = await r.json().catch(()=>({}));
+    if(!r.ok) throw new Error(why(j, r));
+    alert(t('adm_refund_ok', {n}));
+  }catch(e){ alert(t('adm_refund_err', {e: e.message})); }
+  renderOrders();
+}
+
 /* ── Orders render ── */
 function fmtTime(ts){
   const d = new Date(ts);
@@ -1787,7 +1817,7 @@ async function renderOrders(){
           <div class="oc-time">${fmtTime(o.ts)}</div>
           ${o.order_type?`<div class="oc-type">${esc(otLbl(o))}</div>`:''}
         </div>
-        <span class="oc-status-badge badge-${o.status}">${statusLbl(o.status)}</span>
+        <span><span class="oc-status-badge badge-${o.status}">${statusLbl(o.status)}</span>${o.refunded ? `<span class="oc-status-badge badge-refund">${t('adm_refunded', {n: o.refunded})}</span>` : ''}</span>
       </div>
       <div class="oc-body">
         <div class="oc-field"><span class="oc-lbl">${t('adm_f_name')}</span><span class="oc-val">${esc(o.name)}</span></div>
@@ -1803,6 +1833,7 @@ async function renderOrders(){
         ${o.status!=='new'         ?`<button onclick="setStatus(${o.id},'new')">${t('adm_btn_new')}</button>`:''}
         ${o.status!=='in_progress' ?`<button onclick="setStatus(${o.id},'in_progress')">${t('adm_btn_progress')}</button>`:''}
         ${o.status!=='done'        ?`<button class="btn-done" onclick="setStatus(${o.id},'done')">${t('adm_btn_done')}</button>`:''}
+        ${o.payment==='online' && o.status!=='pending_payment' ? `<button class="btn-refund" onclick="refundOrder(${o.id})">${t('adm_refund_btn')}</button>` : ''}
         <button class="btn-del" onclick="deleteOrder(${o.id})">${t('adm_btn_delete')}</button>
       </div>
     </div>
