@@ -2223,6 +2223,9 @@ def api_pay_info(order_id: int, token: str = ''):
         raise HTTPException(502, {'error': 'Stripe did not answer'})
     return info
 
+_REFUND_WHY = {'requested_by_customer': 'Покупець попросив', 'cancelled': 'Замовлення скасовано', 'duplicate': 'Подвійна оплата',
+               'not_available': 'Немає в наявності', 'other': 'Інша причина'}
+
 @app.post('/api/order/{order_id}/refund')
 async def api_refund(order_id: int, req: Request, bg: BackgroundTasks):
     d = await req.json()
@@ -2235,9 +2238,12 @@ async def api_refund(order_id: int, req: Request, bg: BackgroundTasks):
         amount = 0
     if amount < 100 or amount > paid - done:
         raise HTTPException(400, {'error': 'amount', 'max': (paid - done) // 100})
+    reason = str(d.get('reason') or '')[:30]
     try:
         # the key makes a double click one refund, not two
-        _stripe.Refund.create(payment_intent=pi, amount=amount, idempotency_key=f'cakeme-refund-{order_id}-{done}-{amount}')
+        _stripe.Refund.create(payment_intent=pi, amount=amount, idempotency_key=f'cakeme-refund-{order_id}-{done}-{amount}',
+                              **({'reason': reason} if reason in ('requested_by_customer', 'duplicate') else {}),
+                              metadata={'order_id': str(order_id), 'why': reason or 'other'})
     except Exception as e:
         raise HTTPException(502, {'error': str(getattr(e, 'user_message', None) or e)[:200]})
     total = (done + amount) // 100
@@ -2245,6 +2251,7 @@ async def api_refund(order_id: int, req: Request, bg: BackgroundTasks):
         row = conn.execute('UPDATE orders SET refunded=%s WHERE id=%s RETURNING name', (total, order_id)).fetchone()
     bg.add_task(_tg_send, '\n'.join([f'↩ ПОВЕРНЕННЯ КОШТІВ', f"👤 {(row[0] if row else '') or '—'}",
                                       f'💸 {amount // 100} Kč' + (f' (усього повернуто {total} Kč)' if total != amount // 100 else ''),
+                                      *([f"📝 {_REFUND_WHY[reason]}"] if reason in _REFUND_WHY else []),
                                       f'🔗 {SITE_URL}/admin.html']), 'refund')
     return {'refunded': total, 'max': (paid - done - amount) // 100}
 
