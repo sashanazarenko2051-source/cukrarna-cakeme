@@ -139,6 +139,8 @@ async def _startup():
             print('DB startup error:', e)
         if STRIPE_SECRET_KEY:
             threading.Thread(target=_backfill_stripe_contacts, daemon=True).start()
+        threading.Thread(target=_ticker, daemon=True).start()
+        _maybe_hosting_reminder()
 
 def _backfill_stripe_contacts():
     """Paid online orders that miss the customer's contacts (both are optional for
@@ -193,6 +195,7 @@ async def _sec(req: Request, call_next):
         # visitors never get a new page with an old builder.js / reviews.js
         resp.headers['Cache-Control'] = 'no-cache, must-revalidate'
     _maybe_send_birthdays()  # once a day, on whatever request comes first
+    _maybe_hosting_reminder()  # once a month
     return resp
 
 @app.exception_handler(HTTPException)
@@ -1540,6 +1543,56 @@ def _maybe_send_birthdays():
         finally:
             _bday_lock.release()
     threading.Thread(target=run, daemon=True).start()
+
+# ── Monthly Telegram reminder to pay for the hosting ─────────────────────────
+# Sent on the 1st (or on the first request / check after it, if the site was asleep),
+# once a month for all workers. The very first run only says the reminder is on.
+_host_checked = {'month': ''}
+_MONTHS_GEN = ['січня', 'лютого', 'березня', 'квітня', 'травня', 'червня', 'липня', 'серпня', 'вересня', 'жовтня', 'листопада', 'грудня']
+
+def _hosting_text(today, first_run=False):
+    if first_run:
+        nxt = _dt.date(today.year + (today.month == 12), today.month % 12 + 1, 1)
+        return '\n'.join(['✅ Нагадування про оплату хостингу увімкнено',
+                          f'Наступне прийде 1 {_MONTHS_GEN[nxt.month - 1]}, і далі щомісяця 1-го числа.',
+                          '🔗 https://dashboard.render.com/billing'])
+    return '\n'.join(['💳 НАГАДУВАННЯ: ОПЛАТА ХОСТИНГУ', '━━━━━━━━━━━━',
+                      f'1 {_MONTHS_GEN[today.month - 1]} — час оплатити хостинг сайту (Render).',
+                      'Без оплати сайт і замовлення можуть перестати працювати.',
+                      '🔗 https://dashboard.render.com/billing', f'🌐 {SITE_URL}'])
+
+def _maybe_hosting_reminder():
+    today = _today()
+    month = today.strftime('%Y-%m')
+    if _host_checked['month'] == month or not DATABASE_URL:
+        return
+    _host_checked['month'] = month
+    def run():
+        try:
+            with _get_pool().connection() as conn:
+                had = conn.execute("SELECT value FROM settings WHERE key='hosting_reminded'").fetchone()
+                # only the worker whose write changes the month sends it
+                row = conn.execute(
+                    "INSERT INTO settings(key,value) VALUES('hosting_reminded',%s) ON CONFLICT(key) DO UPDATE"
+                    " SET value=EXCLUDED.value WHERE settings.value IS DISTINCT FROM EXCLUDED.value RETURNING key",
+                    (month,)).fetchone()
+            if row:
+                _tg_send(_hosting_text(today, first_run=not had), 'hosting')
+        except Exception as e:
+            _host_checked['month'] = ''  # try again later
+            import sys
+            print(f'[HOSTING] {e}', file=sys.stderr)
+    threading.Thread(target=run, daemon=True).start()
+
+def _ticker():
+    """Checks the daily and monthly jobs every half hour even when nobody visits the site."""
+    while True:
+        time.sleep(1800)
+        try:
+            _maybe_hosting_reminder()
+            _maybe_send_birthdays()
+        except Exception:
+            pass
 
 @app.get('/api/bday/status')
 def api_bday_status():
