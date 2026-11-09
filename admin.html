@@ -3186,7 +3186,7 @@ async function renderAnalytics(){
 
   // Pageviews for period
   try{
-    const r = await fetch('/api/pageviews');
+    const r = await fetch('/api/pageviews?token=' + encodeURIComponent(sessionStorage.getItem('cm_token')||''));
     if(r.ok){
       const {daily, sources} = await r.json();
       window._anSources = sources || {};

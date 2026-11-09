@@ -10,7 +10,7 @@ from fastapi.responses import FileResponse, JSONResponse, Response
 app = FastAPI(docs_url=None, redoc_url=None)
 
 DATABASE_URL        = os.environ.get('DATABASE_URL', '')
-ADMIN_PASS          = os.environ.get('ADMIN_PASS', 'Tort@Praha51')
+ADMIN_PASS          = os.environ.get('ADMIN_PASS', '')  # only from the host's env; no default in the public code
 # Without the env var the key is kept in the DB (see _init_tables), so admin
 # sessions survive restarts and redeploys instead of expiring each time.
 SECRET_KEY          = os.environ.get('SECRET_KEY', '') or secrets.token_hex(32)
@@ -39,7 +39,17 @@ def _verify_token(tok):
     return False
 
 def _get_ip(req: Request) -> str:
-    return req.headers.get('X-Forwarded-For', req.client.host or '').split(',')[0].strip()
+    """Visitor's IP for rate limits. The left part of X-Forwarded-For is whatever the client sent,
+    so take the right-most public address (added by the hosting proxy)."""
+    import ipaddress
+    hops = [h.strip() for h in req.headers.get('X-Forwarded-For', '').split(',') if h.strip()]
+    for h in reversed(hops):
+        try:
+            if ipaddress.ip_address(h).is_global:
+                return h
+        except ValueError:
+            continue
+    return (req.client.host if req.client else '') or (hops[-1] if hops else '')
 
 # ── DB pool ───────────────────────────────────────────────────────────────────
 def _get_pool() -> ConnectionPool:
@@ -185,6 +195,8 @@ async def _sec(req: Request, call_next):
         'X-Content-Type-Options': 'nosniff',
         'X-XSS-Protection':       '1; mode=block',
         'Referrer-Policy':        'strict-origin-when-cross-origin',
+        'Strict-Transport-Security': 'max-age=31536000; includeSubDomains',  # only HTTPS after the first visit
+        'Permissions-Policy':     'camera=(), microphone=(), geolocation=(self), payment=(self)',
     })
     if req.url.path.startswith(('/api/menu-img/', '/api/review-img/', '/api/builder-img/')):
         pass  # set by the endpoint: long-lived, the URL changes when the photo does
@@ -217,6 +229,8 @@ async def api_auth(req: Request):
         del _fail_log[ip]
     if len(attempts) >= 5:
         raise HTTPException(429, 'Too many attempts. Try again in 15 minutes.')
+    if len(ADMIN_PASS) < 8:
+        raise HTTPException(503, 'Admin password is not set: add ADMIN_PASS (8+ characters) in the hosting settings')
     if hmac.compare_digest(str(d.get('pass') or ''), ADMIN_PASS):
         return {'token': _make_token()}
     attempts.append(now)
@@ -2323,7 +2337,9 @@ async def api_refund(order_id: int, req: Request, bg: BackgroundTasks):
 
 # ── /api/pageviews ────────────────────────────────────────────────────────────
 @app.get('/api/pageviews')
-def api_pageviews():
+def api_pageviews(token: str = ''):
+    if not _verify_token(token):
+        raise HTTPException(401, 'Unauthorized')
     with _get_pool().connection() as conn:
         row = conn.execute("SELECT value FROM settings WHERE key='pageviews_daily'").fetchone()
         src = conn.execute("SELECT value FROM settings WHERE key='traffic_daily'").fetchone()
