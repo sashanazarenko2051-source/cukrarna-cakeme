@@ -856,7 +856,7 @@ function setOrderType(btn){
   document.getElementById('deliveryInfoBlock').style.display=isDelivery?'':'none';
   updatePaymentLabels();
 }
-function getCart(){return JSON.parse(localStorage.getItem('cakeme_cart')||'[]');}
+function getCart(){try{const c=JSON.parse(localStorage.getItem('cakeme_cart')||'[]');return Array.isArray(c)?c:[];}catch(e){return [];}}
 function saveCart(c){localStorage.setItem('cakeme_cart',JSON.stringify(c));}
 
 function changeQtyDel(id,delta){

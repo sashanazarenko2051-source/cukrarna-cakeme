@@ -692,7 +692,7 @@ function addReadMore(root){
   });
 }
 
-function getCart(){return JSON.parse(localStorage.getItem('cakeme_cart')||'[]');}
+function getCart(){try{const c=JSON.parse(localStorage.getItem('cakeme_cart')||'[]');return Array.isArray(c)?c:[];}catch(e){return [];}}
 function saveCart(c){localStorage.setItem('cakeme_cart',JSON.stringify(c));}
 
 function addToCart(gi){

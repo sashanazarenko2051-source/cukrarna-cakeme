@@ -2465,7 +2465,7 @@ def _inc_pageviews(req=None):
                     " ON CONFLICT(key) DO UPDATE SET value=EXCLUDED.value",
                     (_json.dumps(tr),)
                 )
-    except:
+    except Exception:
         pass
 
 # ── Static files ──────────────────────────────────────────────────────────────
@@ -2492,6 +2492,15 @@ def _cancel():
 # Only website assets are served; anything else in the app folder (code, __pycache__,
 # config files) stays private even if it isn't listed in _BLOCKED.
 _STATIC_EXT = {'.html', '.js', '.css', '.svg', '.webp', '.png', '.jpg', '.jpeg', '.gif', '.ico', '.woff', '.woff2'}
+
+# robots.txt / sitemap.xml for search engines - served by name only (other .txt/.xml files stay private)
+@app.get('/robots.txt')
+def _robots():
+    return FileResponse('robots.txt', media_type='text/plain')
+
+@app.get('/sitemap.xml')
+def _sitemap():
+    return FileResponse('sitemap.xml', media_type='application/xml')
 
 @app.get('/{path:path}')
 def _static(path: str, req: Request):
