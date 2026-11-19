@@ -626,6 +626,11 @@ body{font-family:'Raleway',sans-serif;background:var(--bg0);color:var(--tx0)}
 .lay-saved{font-size:.7rem;color:#8fcc8f;opacity:0;transition:opacity .3s;margin-left:10px;font-family:'Raleway',sans-serif;letter-spacing:.5px}
 .lay-saved.on{opacity:1}
 /* ── Tablet ── */
+/* 8 tabs don't fit on a tablet: tighter tabs, the tab row scrolls itself instead of the whole page */
+@media(max-width:1280px){
+  .adm-main-nav{overflow-x:auto}
+  .amn{padding:14px 12px;letter-spacing:1px;white-space:nowrap;gap:6px}
+}
 @media(max-width:860px){
   .menu-admin-body{grid-template-columns:1fr;padding:20px}
   .mai-grid{grid-template-columns:1fr}

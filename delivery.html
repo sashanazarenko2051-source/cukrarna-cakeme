@@ -430,15 +430,15 @@ input[type="date"]::-webkit-calendar-picker-indicator:hover{opacity:1}
           <div class="instore-note" id="instoreNote">📍 Kodanská 649/20, Praha 10 · Po–Ne 09:00–20:00</div>
         </div>
         <div class="ord-field">
-          <label data-k="f_name">Jméno</label>
-          <input type="text" name="name" required>
+          <label data-k="f_name" for="nameInput">Jméno</label>
+          <input type="text" name="name" id="nameInput" required autocomplete="name">
         </div>
         <div class="ord-field">
-          <label data-k="f_phone">Telefon</label>
+          <label data-k="f_phone" for="phoneInput">Telefon</label>
           <input type="tel" name="phone" id="phoneInput" required autocomplete="tel" inputmode="tel" placeholder="+420 777 123 456">
         </div>
         <div class="ord-field full">
-          <label data-k="f_email">E-mail</label>
+          <label data-k="f_email" for="emailInput">E-mail</label>
           <input type="email" name="email" id="emailInput" maxlength="254" autocomplete="email" required>
         </div>
         <div class="ord-field full" id="tableField" style="display:none">
@@ -466,7 +466,7 @@ input[type="date"]::-webkit-calendar-picker-indicator:hover{opacity:1}
           <div class="pay-dep-note" id="payDepNote"></div>
         </div>
         <div class="ord-field full" id="addrField">
-          <label data-k="f_addr">Adresa doručení</label>
+          <label data-k="f_addr" for="addrInput">Adresa doručení</label>
           <div class="addr-wrap"><input type="text" name="address" id="addrInput" autocomplete="street-address"><div class="addr-sug" id="addrSug"></div></div>
           <div class="addr-tools">
             <button type="button" class="addr-btn" id="addrMapBtn">🗺️ Vybrat na mapě</button>
@@ -479,11 +479,11 @@ input[type="date"]::-webkit-calendar-picker-indicator:hover{opacity:1}
           </div>
         </div>
         <div class="ord-field" id="dateField">
-          <label data-k="f_date">Datum doručení / převzetí</label>
+          <label data-k="f_date" for="deliveryDate">Datum doručení / převzetí</label>
           <input type="date" name="delivery_date" id="deliveryDate" required>
         </div>
         <div class="ord-field" id="timeField">
-          <label data-k="f_time">Čas doručení / převzetí</label>
+          <label data-k="f_time" for="deliveryTime">Čas doručení / převzetí</label>
           <input type="time" name="delivery_time" id="deliveryTime" required min="09:00" max="20:00">
         </div>
         <div class="ord-field full" style="margin-top:-10px" id="dateNoteField">
